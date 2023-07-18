@@ -1,12 +1,15 @@
 // app은 기본 express() 인스턴스 생성.
 const express = require("express");
 const app = express();
-const port = 3000;
+const port = 4000;
 
-// cors에러 처리.
-// default는 모든 origin에 대해 허용 -> { origin:'*' } 파라미터 생략 가능.
+// cors에러 처리: default는 모든 origin에 대해 허용 -> { origin:'*' } 파라미터 생략 가능.
 // const cors = require("cors");
 // app.use(cors({ origin: "*" }));
+
+// BodyParser 추가. post, put 요청의 req.body 구문 해석 기능 제공.
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 // 라우팅 모듈을 가져와 app.use() 시킬 수 있다.
 const pathRouter = require("./router/path");
