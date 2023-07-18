@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cors 에러 확인용 페이지</title>
+</head>
+<body>
+    <div id="container">
+        <label>동물 이름을 영어로 입력하세요</label>
+        <input id="name" value="">
+        <button onclick="submitHandler()">submit</button>
+    </div>
+    <h1 id="board">동물 울음소리</h1>
+</body>
+<script>
+    const submitHandler = () => {
+        const name = document.querySelector('#name').value;
+        fetch(`http://localhost:3000/path/sound/${name}`)
+        .then((res)=>res.json())
+        .then((data)=>{
+            document.querySelector('#board').innerHTML = data.sound;
+        })
+    }
+</script>
+</html>
