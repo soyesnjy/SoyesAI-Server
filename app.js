@@ -5,8 +5,8 @@ const port = 3000;
 
 // cors에러 처리.
 // default는 모든 origin에 대해 허용 -> { origin:'*' } 파라미터 생략 가능.
-const cors = require("cors");
-app.use(cors({ origin: "*" }));
+// const cors = require("cors");
+// app.use(cors({ origin: "*" }));
 
 // 라우팅 모듈을 가져와 app.use() 시킬 수 있다.
 const pathRouter = require("./router/path");
