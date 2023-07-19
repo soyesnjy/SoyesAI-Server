@@ -43,7 +43,7 @@ const pathController = {
   },
 };
 
-const errHandler = {
+const errController = {
   logErrors: (err, req, res, next) => {
     console.error(err.stack);
     // next(err)은 오류 처리 핸들러를 제외한 나머지 모든 핸들러를 건너뛴다.
@@ -78,5 +78,5 @@ const errHandler = {
 
 module.exports = {
   pathController,
-  errHandler,
+  errController,
 };

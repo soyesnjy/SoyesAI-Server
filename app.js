@@ -24,10 +24,10 @@ const errorRouter = require("./router/error");
 app.use("/error", errorRouter);
 
 // 에러 처리는 일반적인 미들웨어 함수와 동일하게 적용 가능하다.
-const { errHandler } = require("./controller/index");
-app.use(errHandler.logErrors);
-app.use(errHandler.clientErrorHandler);
-app.use(errHandler.univErrorHandler);
+const { errController } = require("./controller/index");
+app.use(errController.logErrors);
+app.use(errController.clientErrorHandler);
+app.use(errController.univErrorHandler);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
