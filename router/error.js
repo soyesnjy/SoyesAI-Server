@@ -11,7 +11,7 @@ router.get("/:flag", function fail(req, res, next) {
     } else if (req.params.flag === "next") {
       next("route");
     } else {
-      throw new Error("Error!!"); // 에러 발생 후 catch 문으로 이동
+      throw new Error("Error!!!"); // 에러 발생 후 catch 문으로 이동
     }
   } catch (err) {
     next(err); // 모든 라우터를 건너뛰고 오류 처리 함수로 이동
