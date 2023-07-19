@@ -4,21 +4,30 @@ const app = express();
 const port = 4000;
 
 // cors에러 처리: default는 모든 origin에 대해 허용 -> { origin:'*' } 파라미터 생략 가능.
-// const cors = require("cors");
-// app.use(cors({ origin: "*" }));
+const cors = require("cors");
+app.use(cors({ origin: "*" }));
 
 // BodyParser 추가. post, put 요청의 req.body 구문 해석 기능 제공.
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+app.get("/", (req, res) => {
+  res.send({ text: "Hello World!" });
+});
+
 // 라우팅 모듈을 가져와 app.use() 시킬 수 있다.
 const pathRouter = require("./router/path");
 app.use("/path", pathRouter);
 
-app.get("/", (req, res) => {
-  // send: json 형식으로 변환 후 전송
-  res.send({ text: "Hello World!" });
-});
+// error 경로 라우팅
+const errorRouter = require("./router/error");
+app.use("/error", errorRouter);
+
+// 에러 처리는 일반적인 미들웨어 함수와 동일하게 적용 가능하다.
+const { errHandler } = require("./controller/index");
+app.use(errHandler.logErrors);
+app.use(errHandler.clientErrorHandler);
+app.use(errHandler.univErrorHandler);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

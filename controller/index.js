@@ -43,6 +43,28 @@ const pathController = {
   },
 };
 
+const errHandler = {
+  logErrors: (err, req, res, next) => {
+    console.error(err.stack);
+    // next(err)은 오류 처리 핸들러를 제외한 나머지 모든 핸들러를 건너뛴다.
+    // 단, next('route')는 예외.
+    next(err);
+  },
+  clientErrorHandler: (err, req, res, next) => {
+    // req.xhr: 요청이 ajax 호출로 시작되었다면 true를 반환.
+    if (req.xhr) {
+      res.status(500).send({ error: "Something failed!" });
+    } else {
+      next(err);
+    }
+  },
+  univErrorHandler: (err, req, res, next) => {
+    res.status(500);
+    res.render("error", { error: err });
+  },
+};
+
 module.exports = {
   pathController,
+  errHandler,
 };
