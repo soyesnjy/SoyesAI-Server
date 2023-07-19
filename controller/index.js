@@ -62,6 +62,18 @@ const errHandler = {
     res.status(500);
     res.render("error", { error: err });
   },
+  // controller 콜백함수를 받아 try,catch 문으로 next(err)를 실행하는 함수를 반환하는 메서드
+  nextErrHandler: (controller) => (req, res, next) => {
+    try {
+      controller(req, res, next);
+    } catch (err) {
+      next(err); // 모든 라우터를 건너뛰고 오류 처리 함수로 이동
+    }
+  },
+  // 에러 메세지 반환 메서드
+  errMessageHandler: (err, req, res, next) => {
+    res.status(400).json(err.message); // 발생된 에러 메세지 반환
+  },
 };
 
 module.exports = {
