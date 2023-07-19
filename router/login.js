@@ -4,23 +4,6 @@ const router = express.Router();
 const { loginController } = require("../controller/index");
 const { loginHandler } = loginController;
 
-const users = [
-  {
-    id: "njy95",
-    pwd: "qwer1234",
-  },
-  {
-    id: "njy96",
-    pwd: "qwer1234",
-  },
-  {
-    id: "njy97",
-    pwd: "qwer1234",
-  },
-];
-
-// const { pathController } = require("../controller/index");
-
 router.get("/", loginHandler("get"));
 
 router.post("/", loginHandler("post"));
