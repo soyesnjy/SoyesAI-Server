@@ -76,7 +76,20 @@ const errController = {
   },
 };
 
+const { users } = require("../DB/database");
+const loginController = {
+  loginHandler: (method) => (req, res) => {
+    const { id, pwd } = method === "get" ? req.query : req.body;
+    if (users.find((user) => user.id === id && user.pwd === pwd)) {
+      res.json("Login Success");
+    } else {
+      res.json("Login Fail");
+    }
+  },
+};
+
 module.exports = {
   pathController,
   errController,
+  loginController,
 };

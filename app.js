@@ -23,6 +23,10 @@ app.use("/path", pathRouter);
 const errorRouter = require("./router/error");
 app.use("/error", errorRouter);
 
+// login 경로 라우팅
+const loginRouter = require("./router/login");
+app.use("/login", loginRouter);
+
 // 에러 처리는 일반적인 미들웨어 함수와 동일하게 적용 가능하다.
 const { errController } = require("./controller/index");
 app.use(errController.logErrors);
