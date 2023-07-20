@@ -7,17 +7,18 @@ const path = require("path");
 const server = http.createServer(app);
 const socketIO = require("socket.io");
 const io = socketIO(server, {
+  // 소켓 cors 처리
   cors: {
-    // path를 제외한 host 이름만 적어야 함.
+    // path를 제외한 host만 적어야 함.
     origin: "http://127.0.0.1:5500",
-    methods: ["GET", "POST"],
   },
 });
 
 io.on("connection", (socket) => {
   console.log("연결 완료");
-  socket.on("msg", (msg) => {
-    socket.emit("msg", "server: " + msg);
+
+  socket.on("msg", (data) => {
+    io.emit("msg", data);
   });
 });
 

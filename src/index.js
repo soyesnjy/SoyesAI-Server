@@ -41,14 +41,34 @@ const loginHandler = () => {
     });
 };
 
+// 소켓 연결
 const socket = io(END_POINT);
-console.log(socket);
 
+// 소켓 서버 메시지 receive
+socket.on("msg", (data) => {
+  const { nickname, msg, time } = data;
+  const wrapper = document.querySelector(".wrapper");
+  const $chatting = document.createElement("div");
+  // 다른 사용자의 메시지일 경우 색상 변경
+  const myName = document.querySelector("#nickname").value;
+  if (nickname !== myName) $chatting.style.color = "red";
+
+  $chatting.innerText = `${nickname}: ${msg} (${time})`;
+  wrapper.appendChild($chatting);
+});
+
+// 소켓 서버 메시지 send
 const msgHandler = () => {
   const msg = document.querySelector("#chat").value;
-  socket.emit("msg", msg);
+  if (msg) {
+    const nickname = document.querySelector("#nickname").value;
+    const date = new Date();
+    const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+    socket.emit("msg", {
+      nickname,
+      msg,
+      time,
+    });
+    document.querySelector("#chat").value = "";
+  }
 };
-
-socket.on("msg", (msg) => {
-  document.querySelector("#board4").innerHTML = msg;
-});
