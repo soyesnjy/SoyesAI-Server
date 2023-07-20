@@ -1,5 +1,5 @@
 "use strict";
-const END_POINT = "http://localhost:4000";
+const END_POINT = "http://localhost:4001";
 
 const submitHandler = () => {
   const name = document.querySelector("#name").value;
@@ -64,11 +64,13 @@ const msgHandler = () => {
     const nickname = document.querySelector("#nickname").value;
     const date = new Date();
     const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+
     socket.emit("msg", {
       nickname,
       msg,
       time,
     });
+
     document.querySelector("#chat").value = "";
   }
 };

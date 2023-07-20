@@ -1,30 +1,10 @@
 // app은 기본 express() 인스턴스 생성.
 const express = require("express");
-const http = require("http");
-
 const app = express();
-const path = require("path");
-const server = http.createServer(app);
-const socketIO = require("socket.io");
-const io = socketIO(server, {
-  // 소켓 cors 처리
-  cors: {
-    // path를 제외한 host만 적어야 함.
-    origin: "http://127.0.0.1:5500",
-  },
-});
-
-io.on("connection", (socket) => {
-  console.log("연결 완료");
-
-  socket.on("msg", (data) => {
-    io.emit("msg", data);
-  });
-});
-
 const port = 4000;
 
 // 서버 실행과 동시에 html 실행 + path 경로 추가
+const path = require("path");
 app.use(express.static(path.join(__dirname, "src")));
 
 // cors에러 처리: default는 모든 origin에 대해 허용 -> { origin:'*' } 파라미터 생략 가능.
@@ -51,12 +31,16 @@ app.use("/error", errorRouter);
 const loginRouter = require("./router/login");
 app.use("/login", loginRouter);
 
+// 채팅 웹소켓 서버 라우팅
+const chatRouter = require("./router/chat");
+app.use(chatRouter);
+
 // 에러 처리는 일반적인 미들웨어 함수와 동일하게 적용 가능하다.
 const { errController } = require("./controller/index");
 app.use(errController.logErrors);
 app.use(errController.clientErrorHandler);
 app.use(errController.univErrorHandler);
 
-server.listen(port, () => {
+app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
