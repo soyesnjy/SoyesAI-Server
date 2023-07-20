@@ -1,7 +1,30 @@
 // app은 기본 express() 인스턴스 생성.
 const express = require("express");
+const http = require("http");
+
 const app = express();
+const path = require("path");
+const server = http.createServer(app);
+const socketIO = require("socket.io");
+const io = socketIO(server, {
+  cors: {
+    // path를 제외한 host 이름만 적어야 함.
+    origin: "http://127.0.0.1:5500",
+    methods: ["GET", "POST"],
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("연결 완료");
+  socket.on("msg", (msg) => {
+    socket.emit("msg", "server: " + msg);
+  });
+});
+
 const port = 4000;
+
+// 서버 실행과 동시에 html 실행 + path 경로 추가
+app.use(express.static(path.join(__dirname, "src")));
 
 // cors에러 처리: default는 모든 origin에 대해 허용 -> { origin:'*' } 파라미터 생략 가능.
 const cors = require("cors");
@@ -33,6 +56,6 @@ app.use(errController.logErrors);
 app.use(errController.clientErrorHandler);
 app.use(errController.univErrorHandler);
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });

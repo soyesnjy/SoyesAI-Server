@@ -1,3 +1,6 @@
+"use strict";
+const END_POINT = "http://localhost:4000";
+
 const submitHandler = () => {
   const name = document.querySelector("#name").value;
   fetch(`http://localhost:4000/path/sound/${name}`)
@@ -37,3 +40,15 @@ const loginHandler = () => {
       document.querySelector("#board3").innerHTML = data;
     });
 };
+
+const socket = io(END_POINT);
+console.log(socket);
+
+const msgHandler = () => {
+  const msg = document.querySelector("#chat").value;
+  socket.emit("msg", msg);
+};
+
+socket.on("msg", (msg) => {
+  document.querySelector("#board4").innerHTML = msg;
+});

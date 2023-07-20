@@ -30,6 +30,15 @@
         <button onclick="loginHandler()">login</button>
     </div>
     <h1 id="board3">로그인 여부</h1>
+
+    <div id="container">
+        <h4>Login 정보를 입력하세요</h4>
+        <label>채팅</label>
+        <input id='chat' value=""/>
+        <button onclick="msgHandler()">전송</button>
+    </div>
+    <h1 id="board4">전송 내용</h1>
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.js" integrity="sha512-Z6C1p1NIexPj5MsVUunW4pg7uMX6/TT3CUVldmjXx2kpip1eZcrAnxIusDxyFIikyM9A61zOVNgvLr/TGudOQg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="./index.js"></script>
 </html>
