@@ -4,6 +4,7 @@ const app = express();
 const port = 4000;
 
 // 서버 실행과 동시에 html 실행 + path 경로 추가
+// 서버와 동일한 url을 브라우저에 입력하면 src 폴더 내부의 html 파일 실행.
 const path = require("path");
 app.use(express.static(path.join(__dirname, "src")));
 
@@ -19,7 +20,8 @@ app.get("/", (req, res) => {
   res.send({ text: "Hello World!" });
 });
 
-// 라우팅 모듈을 가져와 app.use() 시킬 수 있다.
+// 라우팅 모듈을 가져와 app.use() 시킬 수 있다
+// path 경로 라우팅
 const pathRouter = require("./router/path");
 app.use("/path", pathRouter);
 

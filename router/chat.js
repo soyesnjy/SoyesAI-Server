@@ -6,7 +6,7 @@ const server = http.createServer(router);
 const socketIO = require("socket.io");
 const port = 4001;
 const io = socketIO(server, {
-  // 소켓 cors 처리
+  // 소켓 서버 cors 처리. 소켓 서버도 서버이므로 따로 cors 처리를 해야함.
   cors: { origin: "*" },
 });
 // 소켓 연결 이벤트. 연결 발생 시 콜백 실행
