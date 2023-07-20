@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cors 에러 확인용 페이지</title>
+</head>
+<body>
+    <div id="container">
+        <label>동물 이름을 영어로 입력하세요</label>
+        <input id="name" value="">
+        <button onclick="submitHandler()">submit</button>
+    </div>
+    <h1 id="board">동물 울음소리</h1>
+
+    <div id="container">
+        <h4>버튼을 누르세요</h4>
+        <button onclick="errorHandler('cur')">Current</button>
+        <button onclick="errorHandler('next')">Next</button>
+        <button onclick="errorHandler('err')">Error</button>
+    </div>
+    <h1 id="board2">에러 메세지</h1>
+
+    <div id="container">
+        <h4>Login 정보를 입력하세요</h4>
+        <label>id</label>
+        <input id='id' value=""/>
+        <label>pwd</label>
+        <input id='pwd' value="" type="password"/>
+        <button onclick="loginHandler()">login</button>
+    </div>
+    <h1 id="board3">로그인 여부</h1>
+</body>
+<script src="./index.js"></script>
+</html>
