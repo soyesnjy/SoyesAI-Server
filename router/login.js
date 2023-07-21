@@ -12,7 +12,7 @@ const vaildateCookies = (req, res, next) => {
   if ("login" in cookies) {
     if (cookies.login === "true") {
       res.json("Cookie Login Success");
-    } else next();
+    }
   } else next();
 };
 

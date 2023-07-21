@@ -82,8 +82,14 @@ const loginController = {
     const { id, pwd } = method === "get" ? req.query : req.body;
 
     if (users.find((user) => user.id === id && user.pwd === pwd)) {
-      // 로그인 성공 시 쿠키 관련 설정 추가
-      res.cookie("login", "true", { httpOnly: true });
+      // 로그인 성공 시 쿠키 관련 설정 추가. 도메인은 자동으로 현재 서버와 동일하게 적용.
+      res.cookie("login", "true", {
+        maxAge: 10000, // 쿠키 유효기간
+        path: "/", // 서버 라우팅 시 세부 경로
+        httpOnly: true, // JS의 쿠키 접근 가능 여부 결정
+        secure: true, // sameSite를 none으로 설정하려면 필수
+        sameSite: "none", // 이 친구 바꾸니까 됨
+      });
       res.json("Login Success");
     } else {
       res.json("Login Fail");
