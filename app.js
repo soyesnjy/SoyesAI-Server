@@ -16,11 +16,10 @@ const cors = require("cors");
 app.use(
   cors({
     origin: ["http://127.0.0.1:5500", "http://localhost:4000"],
-    methods: ["GET", "POST", "OPTION"],
+    methods: ["GET", "POST", "OPTION", "PUT", "PATCH"],
     credentials: true,
   })
 );
-app.set("trust proxy", 1);
 
 // BodyParser 추가. post, put 요청의 req.body 구문 해석 기능 제공.
 app.use(express.json());

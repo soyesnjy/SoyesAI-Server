@@ -29,11 +29,27 @@ const loginHandler = () => {
     headers: {
       "Content-Type": "application/json",
     },
+    // 쿠키 관련 속성
     credentials: "include",
     body: JSON.stringify({
       id,
       pwd,
     }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data);
+      document.querySelector("#board3").innerHTML = data;
+    });
+};
+
+const logoutHandler = () => {
+  fetch(`http://localhost:4000/login/logout`, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
   })
     .then((res) => res.json())
     .then((data) => {
