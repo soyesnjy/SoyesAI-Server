@@ -76,6 +76,7 @@ const errController = {
   },
 };
 
+const session = require("express-session");
 const { users } = require("../DB/database");
 const loginController = {
   loginHandler: (method) => (req, res) => {
@@ -102,6 +103,47 @@ const loginController = {
       secure: true,
       sameSite: "none",
     });
+    res.json("LogOut Success");
+  },
+
+  sessionLoginHandler: (req, res) => {
+    const { id, pwd } = req.body;
+
+    if (users.find((user) => user.id === id && user.pwd === pwd)) {
+      // 로그인 성공 시 세션 아이디 추가
+      req.session.sessionId = id;
+      req.session.cookie.maxAge = 10000;
+      req.session.save(() => {
+        console.log(req.session.sessionId);
+        res.json("Login Success");
+      });
+    } else {
+      res.json("Login Fail");
+    }
+  },
+  // 쿠키 유효성 검사
+  vaildateCookies: (req, res, next) => {
+    const { cookies } = req;
+
+    if ("login" in cookies) {
+      if (cookies.login === "true") {
+        // 쿠키가 있는 동안
+        res.json("Cookie Login Success");
+      }
+    } else next();
+  },
+  // 세션 유효성 검사
+  vaildateSession: (req, res, next) => {
+    console.log(req.session.sessionId);
+    if (req.session.sessionId) {
+      // 세션이 있는 동안
+      res.json("Session Login Success");
+    } else next();
+  },
+
+  sessionLogoutHandler: (req, res) => {
+    req.session.destroy();
+    console.log(session);
     res.json("LogOut Success");
   },
 };

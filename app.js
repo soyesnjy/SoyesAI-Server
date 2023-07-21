@@ -1,5 +1,7 @@
 // app은 기본 express() 인스턴스 생성.
 const express = require("express");
+const session = require("express-session");
+
 const app = express();
 const port = 4000;
 
@@ -9,7 +11,7 @@ app.use(express.static(path.join(__dirname, "src")));
 
 // cookie-parser 추가.
 const cookieParser = require("cookie-parser");
-app.use(cookieParser());
+app.use(cookieParser("@earthworm"));
 
 // cors에러 처리. default는 모든 origin에 대해 허용 -> { origin:'*' } 파라미터 생략 가능.
 const cors = require("cors");
@@ -24,6 +26,29 @@ app.use(
 // BodyParser 추가. post, put 요청의 req.body 구문 해석 기능 제공.
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// 세션 설정 - Cross-Site 설정 불가능. (express-session 미들웨어의 한계)
+app.use(
+  session({
+    secret: "@earthworm",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      sameSite: "strict",
+      // sameSite: "none",
+      // secure: true,
+      httpOnly: true,
+
+      // 1. Cross-Site 접근을 허용하기 위해선 { sameSite: "none", secure: true } 설정이 필요.
+      // 2. express-session 미들웨어는 { secure: true }일 경우 https 에서만 작동함.
+      // 3. 도메인이 localhost일 경우도 예외없이 https에서만 작동함.
+      // 4. 현재 서버와 클라이언트 모두 http에서 작동함으로 { secure: true }를 설정할 수 없음.
+      // 5. 그렇기에 1번의 Cross-Site 접근을 허용할 수 없고 { sameSite: "strict" }으로 적용할 수 밖에 없음.
+      // 6. { sameSite: "strict" }일 경우 Same-Site 접근만 가능.
+      // 7. 현재 설정을 적용하여 localhost 도메인에서만 session이 작동함.
+    },
+  })
+);
 
 app.get("/", (req, res) => {
   res.send({ text: "Hello World!" });
