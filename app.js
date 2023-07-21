@@ -27,7 +27,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// 세션 설정 - Cross-Site 설정 불가능. (express-session 미들웨어의 한계)
+// 세션 설정 - Cross-Site 설정 불가능. (secure 이슈)
 app.use(
   session({
     secret: "@earthworm",
