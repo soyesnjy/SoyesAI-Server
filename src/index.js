@@ -22,13 +22,14 @@ const errorHandler = (flag) => {
 const loginHandler = () => {
   const id = document.querySelector("#id").value;
   const pwd = document.querySelector("#pwd").value;
-  console.log(id, pwd);
+
   fetch(`http://localhost:4000/login`, {
     method: "POST",
     // content-type을 명시하지 않으면 json 파일인지 인식하지 못함
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "include",
     body: JSON.stringify({
       id,
       pwd,

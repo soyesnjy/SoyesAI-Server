@@ -3,14 +3,24 @@ const express = require("express");
 const app = express();
 const port = 4000;
 
-// 서버 실행과 동시에 html 실행 + path 경로 추가
 // 서버와 동일한 url을 브라우저에 입력하면 src 폴더 내부의 html 파일 실행.
 const path = require("path");
 app.use(express.static(path.join(__dirname, "src")));
 
-// cors에러 처리: default는 모든 origin에 대해 허용 -> { origin:'*' } 파라미터 생략 가능.
+// cookie-parser 추가.
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
+// cors에러 처리. default는 모든 origin에 대해 허용 -> { origin:'*' } 파라미터 생략 가능.
 const cors = require("cors");
-app.use(cors({ origin: "*" }));
+app.use(
+  cors({
+    origin: ["http://127.0.0.1:5500", "http://localhost:4000"],
+    methods: "GET, POST",
+    credentials: true,
+  })
+);
+app.set("trust proxy", 1);
 
 // BodyParser 추가. post, put 요청의 req.body 구문 해석 기능 제공.
 app.use(express.json());

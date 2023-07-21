@@ -80,7 +80,10 @@ const { users } = require("../DB/database");
 const loginController = {
   loginHandler: (method) => (req, res) => {
     const { id, pwd } = method === "get" ? req.query : req.body;
+
     if (users.find((user) => user.id === id && user.pwd === pwd)) {
+      // 로그인 성공 시 쿠키 관련 설정 추가
+      res.cookie("login", "true", { httpOnly: true });
       res.json("Login Success");
     } else {
       res.json("Login Fail");
