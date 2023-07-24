@@ -3,7 +3,7 @@ const express = require("express");
 const session = require("express-session");
 
 const app = express();
-const port = 4000;
+const PORT = 4000;
 
 // 서버와 동일한 url을 브라우저에 입력하면 src 폴더 내부의 html 파일 실행.
 const path = require("path");
@@ -17,7 +17,11 @@ app.use(cookieParser("@earthworm"));
 const cors = require("cors");
 app.use(
   cors({
-    origin: ["http://127.0.0.1:5500", "http://localhost:4000"],
+    origin: [
+      "http://127.0.0.1:5500",
+      "http://localhost:4000",
+      "https://282a-59-20-34-181.ngrok-free.app",
+    ],
     methods: ["GET", "POST", "OPTION", "PUT", "PATCH"],
     credentials: true,
   })
@@ -34,21 +38,19 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      sameSite: "strict",
-      // sameSite: "none",
-      // secure: true,
+      sameSite: "none",
+      secure: true,
       httpOnly: true,
-
-      // 1. Cross-Site 접근을 허용하기 위해선 { sameSite: "none", secure: true } 설정이 필요.
-      // 2. express-session 미들웨어는 { secure: true }일 경우 https 에서만 작동함.
-      // 3. 도메인이 localhost일 경우도 예외없이 https에서만 작동함.
-      // 4. 현재 서버와 클라이언트 모두 http에서 작동함으로 { secure: true }를 설정할 수 없음.
-      // 5. 그렇기에 1번의 Cross-Site 접근을 허용할 수 없고 { sameSite: "strict" }으로 적용할 수 밖에 없음.
-      // 6. { sameSite: "strict" }일 경우 Same-Site 접근만 가능.
-      // 7. 현재 설정을 적용하여 localhost 도메인에서만 session이 작동함.
     },
   })
 );
+// 1. Cross-Site 접근을 허용하기 위해선 { sameSite: "none", secure: true } 설정이 필요.
+// 2. express-session 미들웨어는 { secure: true }일 경우 https 에서만 작동함.
+// 3. 도메인이 localhost일 경우도 예외없이 https에서만 작동함.
+// 4. 현재 서버와 클라이언트 모두 http에서 작동함으로 { secure: true }를 설정할 수 없음.
+// 5. 그렇기에 1번의 Cross-Site 접근을 허용할 수 없고 { sameSite: "strict" }으로 적용할 수 밖에 없음.
+// 6. { sameSite: "strict" }일 경우 Same-Site 접근만 가능.
+// 7. 현재 설정을 적용하여 localhost 도메인에서만 session이 작동함.
 
 app.get("/", (req, res) => {
   res.send({ text: "Hello World!" });
@@ -77,6 +79,22 @@ app.use(errController.logErrors);
 app.use(errController.clientErrorHandler);
 app.use(errController.univErrorHandler);
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+app.listen(PORT, () => console.log(`🚀 HTTP Server is starting on ${PORT}`));
+
+// const https = require("https");
+// let server;
+// if (fs.existsSync("./key.pem") && fs.existsSync("./cert.pem")) {
+//   const privateKey = fs.readFileSync(__dirname + "/key.pem", "utf8");
+//   const certificate = fs.readFileSync(__dirname + "/cert.pem", "utf8");
+//   const credentials = {
+//     key: privateKey,
+//     cert: certificate,
+//   };
+
+//   server = https.createServer(credentials, app);
+//   server.listen(PORT, () =>
+//     console.log(`🚀 HTTPS Server is starting on ${PORT}`)
+//   );
+// } else {
+//   app.listen(PORT, () => console.log(`🚀 HTTP Server is starting on ${PORT}`));
+// }

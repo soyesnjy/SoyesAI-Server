@@ -1,9 +1,15 @@
 "use strict";
+const SERVER_URL = "https://c2d4-59-20-34-181.ngrok-free.app";
 const END_POINT = "http://localhost:4001";
 
 const submitHandler = () => {
   const name = document.querySelector("#name").value;
-  fetch(`http://localhost:4000/path/sound/${name}`)
+  fetch(`${SERVER_URL}/path/sound/${name}`, {
+    headers: {
+      "Content-Type": `application/json`,
+      "ngrok-skip-browser-warning": "69420",
+    },
+  })
     .then((res) => res.json())
     .then((data) => {
       document.querySelector("#board").innerHTML = data.sound;
@@ -11,7 +17,12 @@ const submitHandler = () => {
 };
 
 const errorHandler = (flag) => {
-  fetch(`http://localhost:4000/error/${flag}`)
+  fetch(`${SERVER_URL}/error/${flag}`, {
+    headers: {
+      "Content-Type": `application/json`,
+      "ngrok-skip-browser-warning": "69420",
+    },
+  })
     .then((res) => res.json())
     .then((data) => {
       console.log(data);
@@ -23,12 +34,13 @@ const loginHandler = () => {
   const id = document.querySelector("#id").value;
   const pwd = document.querySelector("#pwd").value;
 
-  fetch(`http://localhost:4000/login`, {
+  fetch(`${SERVER_URL}/login`, {
     method: "POST",
     // content-type을 명시하지 않으면 json 파일인지 인식하지 못함
     headers: {
       "Content-Type": "application/json",
       // Authorization: document.cookies.accessToken,
+      "ngrok-skip-browser-warning": "69420",
     },
     // 쿠키 관련 속성
     credentials: "include",
@@ -45,11 +57,12 @@ const loginHandler = () => {
 };
 
 const logoutHandler = () => {
-  fetch(`http://localhost:4000/login/logout`, {
+  fetch(`${SERVER_URL}/login/logout`, {
     method: "GET",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "69420",
     },
   })
     .then((res) => res.json())

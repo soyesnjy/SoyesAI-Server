@@ -149,7 +149,6 @@ const loginController = {
     if (accessToken) {
       const decoded = verifyToken("access", accessToken);
       if (users.find((user) => user.id === decoded.id)) {
-        console.log(decoded);
         res.json("AccessToken Login Success");
       }
       // refreshToken만 있는 경우
@@ -170,7 +169,6 @@ const loginController = {
     const { id, pwd } = req.body;
 
     if (users.find((user) => user.id === id && user.pwd === pwd)) {
-      console.log(process.env.REFRESH_SECRET);
       // 로그인 성공 토큰 추가
       const token = generateToken({ id, email: `${id}@naver.com` });
       // accessToken 세션에 추가
