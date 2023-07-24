@@ -80,17 +80,16 @@ const { users } = require("../DB/database");
 const loginController = {
   // 쿠키 유효성 검사
   vaildateCookies: (req, res, next) => {
-    const { cookies } = req;
-
-    if ("login" in cookies) {
-      if (cookies.login === "true") {
+    const { login } = req.cookies;
+    if (login) {
+      if (req.cookies.login === "true") {
         res.json("Cookie Login Success");
       }
     } else next();
   },
   // 쿠키 로그인
-  CookieLoginHandler: (method) => (req, res) => {
-    const { id, pwd } = method === "get" ? req.query : req.body;
+  CookieLoginHandler: (req, res) => {
+    const { id, pwd } = req.body;
 
     if (users.find((user) => user.id === id && user.pwd === pwd)) {
       // 로그인 성공 시 쿠키 관련 설정 추가. 도메인은 자동으로 현재 서버와 동일하게 적용.
