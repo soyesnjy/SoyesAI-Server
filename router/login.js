@@ -4,12 +4,15 @@ const router = express.Router();
 const { errController } = require("../controller/index");
 const { loginController } = require("../controller/index");
 const {
+  // 쿠키
   vaildateCookies,
   CookieLoginHandler,
   CookieLogoutHandler,
+  // 세션
   vaildateSession,
   sessionLoginHandler,
   sessionLogoutHandler,
+  // 토큰
   vaildateToken,
   tokenLoginHandler,
   tokenLogoutHandler,

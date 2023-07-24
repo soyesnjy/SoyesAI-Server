@@ -141,7 +141,6 @@ const loginController = {
     req.session.destroy();
     res.json("Session LogOut Success");
   },
-
   // 토큰 유효성 검사
   vaildateToken: (req, res, next) => {
     const accessToken = req.session.accessToken;
@@ -150,13 +149,18 @@ const loginController = {
     if (accessToken) {
       const decoded = verifyToken("access", accessToken);
       if (users.find((user) => user.id === decoded.id)) {
+        console.log(decoded);
         res.json("AccessToken Login Success");
       }
       // refreshToken만 있는 경우
     } else if (refreshToken) {
       const decoded = verifyToken("refresh", refreshToken);
       if (users.find((user) => user.id === decoded.id)) {
-        req.session.accessToken = accessToken;
+        // accessToken 생성 후 세션에 저장
+        req.session.accessToken = generateToken({
+          id: decoded.id,
+          email: `${decoded.id}@naver.com`,
+        }).accessToken;
         res.json("RefreshToken Login Success");
       }
     } else next();
@@ -166,8 +170,9 @@ const loginController = {
     const { id, pwd } = req.body;
 
     if (users.find((user) => user.id === id && user.pwd === pwd)) {
+      console.log(process.env.REFRESH_SECRET);
       // 로그인 성공 토큰 추가
-      const token = generateToken({ id, pwd });
+      const token = generateToken({ id, email: `${id}@naver.com` });
       // accessToken 세션에 추가
       req.session.accessToken = token.accessToken;
       // refreshToken 쿠키에 추가
