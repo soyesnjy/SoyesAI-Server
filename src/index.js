@@ -28,6 +28,7 @@ const loginHandler = () => {
     // content-type을 명시하지 않으면 json 파일인지 인식하지 못함
     headers: {
       "Content-Type": "application/json",
+      // Authorization: document.cookies.accessToken,
     },
     // 쿠키 관련 속성
     credentials: "include",

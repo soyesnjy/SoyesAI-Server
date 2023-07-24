@@ -77,6 +77,7 @@ const errController = {
 };
 
 const { users } = require("../DB/database");
+const { generateToken, verifyToken } = require("../controller/tokenFnc");
 const loginController = {
   // 쿠키 유효성 검사
   vaildateCookies: (req, res, next) => {
@@ -112,7 +113,7 @@ const loginController = {
       secure: true,
       sameSite: "none",
     });
-    res.json("LogOut Success");
+    res.json("Cookie LogOut Success");
   },
   // 세션 유효성 검사
   vaildateSession: (req, res, next) => {
@@ -129,7 +130,6 @@ const loginController = {
       req.session.sessionId = id;
       req.session.cookie.maxAge = 10000;
       req.session.save(() => {
-        console.log(req.session.sessionId);
         res.json("Login Success");
       });
     } else {
@@ -139,7 +139,60 @@ const loginController = {
   // 세션 로그아웃
   sessionLogoutHandler: (req, res) => {
     req.session.destroy();
-    res.json("LogOut Success");
+    res.json("Session LogOut Success");
+  },
+
+  // 토큰 유효성 검사
+  vaildateToken: (req, res, next) => {
+    const accessToken = req.session.accessToken;
+    const refreshToken = req.cookies.refreshToken;
+    // accessToken이 있는 경우
+    if (accessToken) {
+      const decoded = verifyToken("access", accessToken);
+      if (users.find((user) => user.id === decoded.id)) {
+        res.json("AccessToken Login Success");
+      }
+      // refreshToken만 있는 경우
+    } else if (refreshToken) {
+      const decoded = verifyToken("refresh", refreshToken);
+      if (users.find((user) => user.id === decoded.id)) {
+        req.session.accessToken = accessToken;
+        res.json("RefreshToken Login Success");
+      }
+    } else next();
+  },
+  // 토큰 로그인
+  tokenLoginHandler: (req, res) => {
+    const { id, pwd } = req.body;
+
+    if (users.find((user) => user.id === id && user.pwd === pwd)) {
+      // 로그인 성공 토큰 추가
+      const token = generateToken({ id, pwd });
+      // accessToken 세션에 추가
+      req.session.accessToken = token.accessToken;
+      // refreshToken 쿠키에 추가
+      res.cookie("refreshToken", token.refreshToken, {
+        path: "/", // 서버 라우팅 시 세부 경로
+        httpOnly: true, // JS의 쿠키 접근 가능 여부 결정
+        secure: true, // sameSite를 none으로 설정하려면 필수
+        sameSite: "none", // none으로 설정해야 cross-site 처리가 가능.
+      });
+      req.session.save(() => {
+        res.json("Login Success");
+      });
+    } else {
+      res.json("Login Fail");
+    }
+  },
+  // 토큰 로그아웃
+  tokenLogoutHandler: (req, res) => {
+    req.session.destroy();
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    res.json("Token LogOut Success");
   },
 };
 

@@ -1,6 +1,7 @@
 // router이므로 express.Router() 인스턴스 생성
 const express = require("express");
 const router = express.Router();
+const { errController } = require("../controller/index");
 const { loginController } = require("../controller/index");
 const {
   vaildateCookies,
@@ -9,15 +10,25 @@ const {
   vaildateSession,
   sessionLoginHandler,
   sessionLogoutHandler,
+  vaildateToken,
+  tokenLoginHandler,
+  tokenLogoutHandler,
 } = loginController;
 
-// post 요청 처리. body 데이터 처리.
+// 쿠키
 // router.post("/", vaildateCookies, CookieLoginHandler);
-router.post("/", vaildateSession, sessionLoginHandler);
-
-// get + /logout 요청 처리. login 쿠키 및 세션을 삭제시킨다.
 // router.get("/logout", CookieLogoutHandler);
-router.get("/logout", sessionLogoutHandler);
+
+// 세션
+// router.post("/", vaildateSession, sessionLoginHandler);
+// router.get("/logout", sessionLogoutHandler);
+
+// 토큰
+router.post("/", vaildateToken, tokenLoginHandler);
+router.get("/logout", tokenLogoutHandler);
+
+// 에러 메세지 처리
+router.use(errController.errMessageHandler);
 
 // public 모듈화 - require(router/path)을 통해 인스턴스 생성 가능.
 module.exports = router;
