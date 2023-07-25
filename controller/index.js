@@ -189,7 +189,10 @@ const loginController = {
   },
   // 토큰 로그아웃
   tokenLogoutHandler: (req, res) => {
+    // 세션 삭제
     req.session.destroy();
+
+    // 쿠키 삭제
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: true,
