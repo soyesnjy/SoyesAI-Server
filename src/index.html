@@ -67,6 +67,22 @@
         <button onclick="msgHandler2()">전송</button>
     </div>
     <h1 id="board5">개인 채팅방</h1>
+
+    <div id="container">
+        <div>
+            <label>방 이름</label>
+            <input id='roomName' value=""/>
+            <button onclick="createRoomHander()">방 만들기</button>
+        </div>
+        <div class="roomContainer">
+            
+        </div>
+        <div class="chatContainer">
+            
+        </div>
+        
+    </div>
+    <h1 id="board5">그룹 채팅방</h1>
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.js" integrity="sha512-Z6C1p1NIexPj5MsVUunW4pg7uMX6/TT3CUVldmjXx2kpip1eZcrAnxIusDxyFIikyM9A61zOVNgvLr/TGudOQg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="./index.js"></script>

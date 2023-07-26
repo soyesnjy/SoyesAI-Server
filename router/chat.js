@@ -10,6 +10,7 @@ const io = socketIO(server, {
   cors: { origin: "*" },
 });
 const login_ids = {}; // { clientId : socketId }
+const rooms = {}; // { roomId : 방장id }
 // 소켓 연결 이벤트. 연결 발생 시 콜백 실행
 io.on("connection", (socket) => {
   console.log("연결 완료");
@@ -25,6 +26,52 @@ io.on("connection", (socket) => {
     // 현재 접속한 클라이언트의 id에 해당하는 socketId를 삭제
     delete login_ids[data.id];
     console.log(login_ids);
+  });
+
+  socket.on("createRoom", (data) => {
+    console.log(data); // data = { roomId, leaderId }
+    const { roomId, leaderId } = data;
+    if (!leaderId) {
+      console.log("Login 해주세요");
+    }
+    // 방을 만든 적이 없는 경우
+    else if (!Object.values(rooms).find((id) => id === leaderId)) {
+      socket.join(roomId); // 방 생성
+      rooms[roomId] = leaderId;
+
+      io.emit("room", rooms);
+    } else console.log("이미 방을 만든 사람입니다");
+  });
+
+  socket.on("deleteRoom", (data) => {
+    console.log(data); // data = { roomId, leaderId }
+    const { roomId, leaderId } = data;
+
+    // 방장인 경우
+    if (rooms[roomId] === leaderId) {
+      socket.leave(roomId); // 방 생성
+      delete rooms[roomId]; // 방 삭제
+
+      io.to(data.roomId).leaveAll;
+      io.emit("room", rooms);
+    } else console.log("방장이 아니라 삭제 불가");
+  });
+
+  socket.on("joinRoom", (data) => {
+    console.log(data); // data = { roomId }
+    const { roomId } = data;
+
+    socket.join(roomId);
+    socket.emit("joinRoom", data);
+  });
+
+  socket.on("leaveRoom", (data) => {
+    console.log(data);
+
+    const { roomId } = data;
+
+    socket.leave(roomId);
+    socket.emit("leaveRoom", data);
   });
 
   socket.on("msg", (data) => {
@@ -44,10 +91,11 @@ io.on("connection", (socket) => {
     }
   });
 
-  // socket.on("groupeMsg", (data) => {
-  //   // 그룹 메세지 전송
-  //   console.log(data);
-  // });
+  socket.on("groupMsg", (data) => {
+    // 그룹 메세지 전송
+    console.log(data); // data = { roomId, nickname, date, msg}
+    io.to(data.roomId).emit("groupMsg", data);
+  });
 });
 
 // 소켓 서버 실행. (app.js의 app과 다른 서버이므로 따로 실행해야한다)

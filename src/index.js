@@ -110,6 +110,66 @@ socket.on("privateMsg", (data) => {
   wrapper.appendChild($chatting);
 });
 
+socket.on("groupMsg", (data) => {
+  const { roomId, nickname, msg, time } = data;
+  const wrapper = document.querySelector(".wrapper3");
+  const $chatting = document.createElement("div");
+  if (nickname !== login_id) $chatting.style.color = "red";
+
+  $chatting.innerText = `${nickname}: ${msg} (${time})`;
+
+  wrapper.appendChild($chatting);
+});
+
+socket.on("room", (data) => {
+  // room 이벤트 => 방이 갱신될 때 발생
+  const roomContainer = document.querySelector(".roomContainer");
+  roomContainer.innerHTML = "";
+  for (let key of Object.keys(data)) {
+    const $room = document.createElement("div");
+    const $deleteBtn = document.createElement("button");
+    $room.innerText = `${key}`;
+    $deleteBtn.innerText = "방 삭제";
+
+    $room.addEventListener("click", () => {
+      socket.emit("joinRoom", { roomId: key });
+    });
+
+    $deleteBtn.addEventListener("click", () => {
+      socket.emit("deleteRoom", { roomId: key, leaderId: data[key] });
+    });
+    $room.appendChild($deleteBtn);
+    roomContainer.appendChild($room);
+  }
+});
+
+socket.on("joinRoom", (data) => {
+  const { roomId } = data;
+  const chatContainer = document.querySelector(".chatContainer");
+
+  chatContainer.innerHTML = `
+    <h4>채팅 내용을 입력하세요</h4>
+    <div>
+        <h4 id='roomName2'>${roomId}</h4>
+    </div>
+    <div class="wrapper3">
+    </div>
+    <div>
+        <label>채팅</label>
+        <input id='chat3' value=""/>
+    </div>
+    <button onclick="msgHandler3()">전송</button>
+    <button onclick="leaveRoomHander('${roomId}')">나가기</button>
+  `;
+});
+
+socket.on("leaveRoom", (data) => {
+  const { roomId } = data;
+  const chatContainer = document.querySelector(".chatContainer");
+
+  chatContainer.innerHTML = ``;
+});
+
 // 메시지 send 핸들러.
 const msgHandler = () => {
   const msg = document.querySelector("#chat").value;
@@ -152,4 +212,39 @@ const msgHandler2 = () => {
     // 채팅 메시지 input 초기화
     document.querySelector("#chat2").value = "";
   }
+};
+
+const msgHandler3 = () => {
+  const msg = document.querySelector("#chat3").value;
+  // 채팅 메시지가 있을 경우만 실행
+  if (msg) {
+    const roomId = document.querySelector("#roomName2").textContent;
+    const date = new Date();
+    const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+
+    // 소켓 서버에 msg 트리거 발생 및 데이터 전달.
+    socket.emit("groupMsg", {
+      roomId,
+      nickname: login_id ? login_id : "ㅇㅇ",
+      msg,
+      time,
+    });
+    // 채팅 메시지 input 초기화
+    document.querySelector("#chat3").value = "";
+  }
+};
+
+const createRoomHander = () => {
+  // 방 생성 핸들러
+  const roomId = document.querySelector("#roomName").value;
+  if (!login_id) alert("Login 하세요");
+  else {
+    socket.emit("createRoom", { roomId, leaderId: login_id });
+    socket.emit("joinRoom", { roomId });
+  }
+};
+
+const leaveRoomHander = (roomId) => {
+  // 방 나가기 핸들러
+  socket.emit("leaveRoom", { roomId });
 };
