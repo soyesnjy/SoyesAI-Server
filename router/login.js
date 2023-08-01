@@ -27,7 +27,7 @@ const {
 // router.get("/logout", sessionLogoutHandler);
 
 // 토큰
-router.post("/", vaildateToken, tokenLoginHandler);
+router.post("/", tokenLoginHandler);
 router.get("/logout", tokenLogoutHandler);
 
 // 에러 메세지 처리

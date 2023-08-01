@@ -131,13 +131,16 @@ socket.on("room", (data) => {
     $room.innerText = `${key}`;
     $deleteBtn.innerText = "방 삭제";
 
-    $room.addEventListener("click", () => {
+    $room.addEventListener("click", (e) => {
+      e.stopPropagation()
       socket.emit("joinRoom", { roomId: key });
     });
 
-    $deleteBtn.addEventListener("click", () => {
-      socket.emit("deleteRoom", { roomId: key, leaderId: data[key] });
+    $deleteBtn.addEventListener("click", (e) => {
+      e.stopPropagation()
+      socket.emit("deleteRoom", { roomId: key, leaderId: login_id });
     });
+    
     $room.appendChild($deleteBtn);
     roomContainer.appendChild($room);
   }
@@ -150,7 +153,7 @@ socket.on("joinRoom", (data) => {
   chatContainer.innerHTML = `
     <h4>채팅 내용을 입력하세요</h4>
     <div>
-        <h4 id='roomName2'>${roomId}</h4>
+      <h3 id='roomName2'>RoomName - ${roomId}</h3>
     </div>
     <div class="wrapper3">
     </div>
@@ -158,7 +161,7 @@ socket.on("joinRoom", (data) => {
         <label>채팅</label>
         <input id='chat3' value=""/>
     </div>
-    <button onclick="msgHandler3()">전송</button>
+    <button onclick="msgHandler3('${roomId}')">전송</button>
     <button onclick="leaveRoomHander('${roomId}')">나가기</button>
   `;
 });
@@ -170,7 +173,7 @@ socket.on("leaveRoom", (data) => {
   chatContainer.innerHTML = ``;
 });
 
-// 메시지 send 핸들러.
+// 메시지 핸들러.
 const msgHandler = () => {
   const msg = document.querySelector("#chat").value;
   // 채팅 메시지가 있을 경우만 실행
@@ -191,7 +194,6 @@ const msgHandler = () => {
   }
 };
 
-// 메시지 send 핸들러.
 const msgHandler2 = () => {
   const msg = document.querySelector("#chat2").value;
   // 채팅 메시지가 있을 경우만 실행
@@ -214,11 +216,10 @@ const msgHandler2 = () => {
   }
 };
 
-const msgHandler3 = () => {
+const msgHandler3 = (roomId) => {
   const msg = document.querySelector("#chat3").value;
   // 채팅 메시지가 있을 경우만 실행
   if (msg) {
-    const roomId = document.querySelector("#roomName2").textContent;
     const date = new Date();
     const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 

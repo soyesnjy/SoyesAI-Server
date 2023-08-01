@@ -171,33 +171,36 @@ const loginController = {
     if (users.find((user) => user.id === id && user.pwd === pwd)) {
       // 로그인 성공 토큰 추가
       const token = generateToken({ id, email: `${id}@naver.com` });
-      // accessToken 세션에 추가
-      req.session.accessToken = token.accessToken;
-      // refreshToken 쿠키에 추가
-      res.cookie("refreshToken", token.refreshToken, {
-        path: "/", // 서버 라우팅 시 세부 경로
-        httpOnly: true, // JS의 쿠키 접근 가능 여부 결정
-        secure: true, // sameSite를 none으로 설정하려면 필수
-        sameSite: "none", // none으로 설정해야 cross-site 처리가 가능.
-      });
-      req.session.save(() => {
-        res.json("Login Success");
-      });
+
+      // // accessToken 세션에 추가
+      // req.session.accessToken = token.accessToken;
+      // // refreshToken 쿠키에 추가
+      // res.cookie("refreshToken", token.refreshToken, {
+      //   path: "/", // 서버 라우팅 시 세부 경로
+      //   httpOnly: true, // JS의 쿠키 접근 가능 여부 결정
+      //   secure: true, // sameSite를 none으로 설정하려면 필수
+      //   sameSite: "none", // none으로 설정해야 cross-site 처리가 가능.
+      // });
+      // req.session.save(() => {
+      //   res.json("Login Success");
+      // });
+      res.json("Login Success");
+      
     } else {
       res.json("Login Fail");
     }
   },
   // 토큰 로그아웃
   tokenLogoutHandler: (req, res) => {
-    // 세션 삭제
-    req.session.destroy();
+    // // 세션 삭제
+    // req.session.destroy();
 
-    // 쿠키 삭제
-    res.clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
+    // // 쿠키 삭제
+    // res.clearCookie("refreshToken", {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "none",
+    // });
     res.json("Token LogOut Success");
   },
 };
