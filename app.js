@@ -1,7 +1,7 @@
 // app은 기본 express() 인스턴스 생성.
 const express = require("express");
 const session = require("express-session");
-
+// 윈도우에서 잘 동작하나요?
 const app = express();
 const PORT = 4000;
 
