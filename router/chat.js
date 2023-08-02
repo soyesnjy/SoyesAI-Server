@@ -30,7 +30,7 @@ io.on("connection", (socket) => {
     delete login_ids[data.id];
     console.log(login_ids);
   });
-
+  // room 생성
   socket.on("createRoom", (data) => {
     console.log("createRoom", data); // data = { roomId, leaderId }
     const { roomId, leaderId } = data;
@@ -45,7 +45,7 @@ io.on("connection", (socket) => {
       io.emit("room", rooms);
     } else console.log("이미 방을 만든 사람입니다");
   });
-
+  // room 삭제
   socket.on("deleteRoom", (data) => {
     console.log("deleteRoom", data); // data = { roomId, leaderId }
     const { roomId, leaderId } = data;
@@ -60,8 +60,7 @@ io.on("connection", (socket) => {
       io.emit("room", rooms);
     } else console.log("방장이 아니라 삭제 불가");
   });
-
-  // 채팅방 참가 
+  // room 참가 
   socket.on("joinRoom", (data) => {
     console.log("joinRoom", data); // data = { roomId }
     const { roomId } = data;
@@ -69,7 +68,7 @@ io.on("connection", (socket) => {
     socket.join(roomId);
     socket.emit("joinRoom", data);
   });
-
+  // room 나가기
   socket.on("leaveRoom", (data) => {
     console.log("leaveRoom", data);
 
@@ -78,13 +77,12 @@ io.on("connection", (socket) => {
     socket.leave(roomId);
     socket.emit("leaveRoom", data);
   });
-
+  // 전체 메세지 처리
   socket.on("msg", (data) => {
     // 소켓에 연결된 모든 client에게 msg 트리거를 발생시키고 data를 전달.
-    console.log(data);
     io.emit("msg", data);
   });
-
+  // 1:1 메세지 처리
   socket.on("privateMsg", (data) => {
     // 1:1 메세지 전송
     const receiverSocketId = login_ids[data.receiverId];
@@ -95,7 +93,7 @@ io.on("connection", (socket) => {
     }
     socket.emit("privateMsg", data); // 나한테 보내기
   });
-
+  // room 메세지 처리
   socket.on("groupMsg", (data) => {
     // 그룹 메세지 전송
     console.log('groupMsg', data); // data = { roomId, nickname, date, msg}
