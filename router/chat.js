@@ -22,6 +22,7 @@ io.on("connection", (socket) => {
     // 현재 접속한 클라이언트의 id와 해당 소켓의 id를 저장
     login_ids[data.id] = socket.id;
     socket.login_id = data.id;
+    console.log(login_ids);
   }); 
   // logout 이벤트
   socket.on("logout", (data) => {
@@ -31,7 +32,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("createRoom", (data) => {
-    console.log('createRoom', data); // data = { roomId, leaderId }
+    console.log("createRoom", data); // data = { roomId, leaderId }
     const { roomId, leaderId } = data;
     if (!leaderId) {
       console.log("Login 해주세요");
@@ -46,7 +47,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("deleteRoom", (data) => {
-    console.log('deleteRoom', data); // data = { roomId, leaderId }
+    console.log("deleteRoom", data); // data = { roomId, leaderId }
     const { roomId, leaderId } = data;
 
     // 방장인 경우
@@ -62,7 +63,7 @@ io.on("connection", (socket) => {
 
   // 채팅방 참가 
   socket.on("joinRoom", (data) => {
-    console.log('joinRoom', data); // data = { roomId }
+    console.log("joinRoom", data); // data = { roomId }
     const { roomId } = data;
 
     socket.join(roomId);
@@ -70,7 +71,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("leaveRoom", (data) => {
-    console.log('leaveRoom', data);
+    console.log("leaveRoom", data);
 
     const { roomId } = data;
 
@@ -88,11 +89,11 @@ io.on("connection", (socket) => {
     // 1:1 메세지 전송
     const receiverSocketId = login_ids[data.receiverId];
     if (receiverSocketId) {
-      socket.emit("privateMsg", data); // 나한테 보내기
       io.to(receiverSocketId).emit("privateMsg", data); // 상대에게 보내기
     } else {
       console.log("Null ReceiverId");
     }
+    socket.emit("privateMsg", data); // 나한테 보내기
   });
 
   socket.on("groupMsg", (data) => {
