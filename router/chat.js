@@ -23,7 +23,7 @@ io.on("connection", (socket) => {
     login_ids[data.id] = socket.id;
     socket.login_id = data.id;
     console.log(login_ids);
-  }); 
+  });
   // logout 이벤트
   socket.on("logout", (data) => {
     // 현재 접속한 클라이언트의 id에 해당하는 socketId를 삭제
@@ -38,7 +38,7 @@ io.on("connection", (socket) => {
       console.log("Login 해주세요");
     }
     // 방을 만든 적이 없는 경우
-    else if (!Ojbect.values(rooms).find((id) => id === leaderId)) {
+    else if (!Object.values(rooms).find((id) => id === leaderId)) {
       socket.join(roomId); // 방 생성
       rooms[roomId] = leaderId;
 
@@ -60,7 +60,7 @@ io.on("connection", (socket) => {
       io.emit("room", rooms);
     } else console.log("방장이 아니라 삭제 불가");
   });
-  // room 참가 
+  // room 참가
   socket.on("joinRoom", (data) => {
     console.log("joinRoom", data); // data = { roomId }
     const { roomId } = data;
@@ -96,7 +96,7 @@ io.on("connection", (socket) => {
   // room 메세지 처리
   socket.on("groupMsg", (data) => {
     // 그룹 메세지 전송
-    console.log('groupMsg', data); // data = { roomId, nickname, date, msg}
+    console.log("groupMsg", data); // data = { roomId, nickname, date, msg}
     io.to(data.roomId).emit("groupMsg", data);
   });
 });

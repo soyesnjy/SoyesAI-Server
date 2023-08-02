@@ -177,9 +177,12 @@ const loginController = {
     // MySQL DB 연동
     connection.query(
       `SELECT * FROM member WHERE (member_id = '${id}' AND member_password = '${pwd}')`,
-      (error, rows) => {
+      (error, rows, fields) => {
         if (error) throw error;
+        // rows : 배열 형식으로 저장된 행 데이터
+        // fields: 열(속성) 데이터
         console.log(rows);
+
         if (rows.length) {
           // 토큰을 활용한 쿠키, 세션
           // const token = generateToken({ id, email: `${id}@naver.com` });
