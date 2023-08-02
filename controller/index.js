@@ -77,6 +77,16 @@ const errController = {
 };
 
 const { users } = require("../DB/database");
+// MySQL 접근
+const mysql = require('mysql');
+const connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : '796926',
+  database : 'soyes_db'
+});
+connection.connect();
+
 const { generateToken, verifyToken } = require("../controller/tokenFnc");
 const loginController = {
   // 쿠키 유효성 검사
@@ -168,27 +178,29 @@ const loginController = {
   tokenLoginHandler: (req, res) => {
     const { id, pwd } = req.body;
 
-    if (users.find((user) => user.id === id && user.pwd === pwd)) {
-      // 로그인 성공 토큰 추가
-      const token = generateToken({ id, email: `${id}@naver.com` });
-
-      // // accessToken 세션에 추가
-      // req.session.accessToken = token.accessToken;
-      // // refreshToken 쿠키에 추가
-      // res.cookie("refreshToken", token.refreshToken, {
-      //   path: "/", // 서버 라우팅 시 세부 경로
-      //   httpOnly: true, // JS의 쿠키 접근 가능 여부 결정
-      //   secure: true, // sameSite를 none으로 설정하려면 필수
-      //   sameSite: "none", // none으로 설정해야 cross-site 처리가 가능.
-      // });
-      // req.session.save(() => {
-      //   res.json("Login Success");
-      // });
-      res.json("Login Success");
-      
-    } else {
-      res.json("Login Fail");
-    }
+    connection.query(`SELECT * FROM member WHERE (member_id = '${id}' AND member_password = '${pwd}')`, (error, rows) => {
+      if (error) throw error;
+      console.log(rows)
+      if(rows.length){
+  
+        // const token = generateToken({ id, email: `${id}@naver.com` });
+        // // accessToken 세션에 추가
+        // req.session.accessToken = token.accessToken;
+        // // refreshToken 쿠키에 추가
+        // res.cookie("refreshToken", token.refreshToken, {
+        //   path: "/", // 서버 라우팅 시 세부 경로
+        //   httpOnly: true, // JS의 쿠키 접근 가능 여부 결정
+        //   secure: true, // sameSite를 none으로 설정하려면 필수
+        //   sameSite: "none", // none으로 설정해야 cross-site 처리가 `가능.
+        // });
+        // req.session.save(() => {
+        //   res.json("Login Success");
+        // });
+        
+        res.json("Login Success");
+      }
+      else res.json("Login Fail");
+    }); 
   },
   // 토큰 로그아웃
   tokenLogoutHandler: (req, res) => {
@@ -204,6 +216,8 @@ const loginController = {
     res.json("Token LogOut Success");
   },
 };
+
+// connection.end();
 
 module.exports = {
   pathController,

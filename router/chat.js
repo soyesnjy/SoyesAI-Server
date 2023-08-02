@@ -9,8 +9,11 @@ const io = socketIO(server, {
   // 소켓 서버 cors 처리. 소켓 서버도 서버이므로 따로 cors 처리를 해야함.
   cors: { origin: "*" },
 });
+
+// 로그인 관련 정보 저장
 const login_ids = {}; // { clientId : socketId }
 const rooms = {}; // { roomId : 방장id }
+
 // 소켓 연결 이벤트. 연결 발생 시 콜백 실행
 io.on("connection", (socket) => {
   console.log("연결 완료");
@@ -19,7 +22,6 @@ io.on("connection", (socket) => {
     // 현재 접속한 클라이언트의 id와 해당 소켓의 id를 저장
     login_ids[data.id] = socket.id;
     socket.login_id = data.id;
-    console.log(login_ids);
   }); 
   // logout 이벤트
   socket.on("logout", (data) => {
@@ -35,7 +37,7 @@ io.on("connection", (socket) => {
       console.log("Login 해주세요");
     }
     // 방을 만든 적이 없는 경우
-    else if (!Object.values(rooms).find((id) => id === leaderId)) {
+    else if (!Ojbect.values(rooms).find((id) => id === leaderId)) {
       socket.join(roomId); // 방 생성
       rooms[roomId] = leaderId;
 
@@ -58,6 +60,7 @@ io.on("connection", (socket) => {
     } else console.log("방장이 아니라 삭제 불가");
   });
 
+  // 채팅방 참가 
   socket.on("joinRoom", (data) => {
     console.log('joinRoom', data); // data = { roomId }
     const { roomId } = data;
@@ -94,7 +97,7 @@ io.on("connection", (socket) => {
 
   socket.on("groupMsg", (data) => {
     // 그룹 메세지 전송
-    console.log(data); // data = { roomId, nickname, date, msg}
+    console.log('groupMsg', data); // data = { roomId, nickname, date, msg}
     io.to(data.roomId).emit("groupMsg", data);
   });
 });
