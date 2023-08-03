@@ -12,11 +12,18 @@ const io = socketIO(server, {
 
 // 로그인 관련 정보 저장
 const login_ids = {}; // { clientId : socketId }
-const rooms = {}; // { roomId : 방장id }
+let rooms = {
+  "1번방": { roomId: "1번방", leader: "leader01", count: 0 },
+  "2번방": { roomId: "2번방", leader: "leader02", count: 0 },
+  "3번방": { roomId: "3번방", leader: "leader03", count: 0 },
+  "4번방": { roomId: "4번방", leader: "leader04", count: 0 },
+  "5번방": { roomId: "5번방", leader: "leader05", count: 0 },
+};
 
 // 소켓 연결 이벤트. 연결 발생 시 콜백 실행
 io.on("connection", (socket) => {
   console.log("연결 완료");
+  io.emit("room2", rooms);
   // login 이벤트
   socket.on("login", (data) => {
     // 현재 접속한 클라이언트의 id와 해당 소켓의 id를 저장
@@ -40,7 +47,7 @@ io.on("connection", (socket) => {
     // 방을 만든 적이 없는 경우
     else if (!Object.values(rooms).find((id) => id === leaderId)) {
       socket.join(roomId); // 방 생성
-      rooms[roomId] = leaderId;
+      rooms[roomId] = { leader: leaderId, count: 1 };
 
       io.emit("room", rooms);
       socket.emit("joinRoom", data);
@@ -52,7 +59,7 @@ io.on("connection", (socket) => {
     const { roomId, leaderId } = data;
 
     // 방장인 경우
-    if (rooms[roomId] === leaderId) {
+    if (rooms[roomId].leader === leaderId) {
       socket.leave(roomId); // 방 떠나기
       delete rooms[roomId]; // 방 삭제
 
@@ -63,20 +70,32 @@ io.on("connection", (socket) => {
   });
   // room 참가
   socket.on("joinRoom", (data) => {
-    console.log("joinRoom", data); // data = { roomId }
-    const { roomId } = data;
+    const { roomId, count } = data;
+    rooms[roomId].count = count;
+    console.log(socket.size);
+    if (rooms[roomId].count < 2) {
+      rooms[roomId].count++;
 
-    socket.join(roomId);
-    socket.emit("joinRoom", data);
+      console.log("joinRoom", rooms[roomId]);
+
+      socket.join(roomId);
+      socket.emit("joinRoom", data);
+      io.emit("room2", rooms);
+    } else socket.emit("rejectJoinRoom");
   });
   // room 나가기
   socket.on("leaveRoom", (data) => {
-    console.log("leaveRoom", data);
+    const { roomId, count } = data;
+    rooms[roomId].count = count; // room 인원 수 갱신
+    if (rooms[roomId].count >= 0) {
+      rooms[roomId].count--;
 
-    const { roomId } = data;
+      console.log("leaveRoom", rooms[roomId]);
 
-    socket.leave(roomId);
-    socket.emit("leaveRoom", data);
+      socket.leave(roomId);
+      socket.emit("leaveRoom");
+      io.emit("room2", rooms);
+    }
   });
   // 전체 메세지 처리
   socket.on("msg", (data) => {
@@ -102,7 +121,20 @@ io.on("connection", (socket) => {
   });
   // 새로고침 처리
   socket.on("fixRoom", () => {
-    io.emit("room", rooms);
+    rooms = {
+      "1번방": { roomId: "1번방", leader: "leader01", count: 0 },
+      "2번방": { roomId: "2번방", leader: "leader02", count: 0 },
+      "3번방": { roomId: "3번방", leader: "leader03", count: 0 },
+      "4번방": { roomId: "4번방", leader: "leader04", count: 0 },
+      "5번방": { roomId: "5번방", leader: "leader05", count: 0 },
+    };
+    Object.values(rooms).forEach((room) => {
+      const { roomId } = room;
+      socket.leave(roomId);
+    });
+    socket.emit("leaveRoom");
+    console.log(rooms);
+    io.emit("room2", rooms);
   });
 });
 
