@@ -17,6 +17,7 @@
         background-color: #007bff;
         color: white;
         padding: 1rem;
+        cursor: pointer;
       }
       .chat-container {
         max-width: 600px;
@@ -30,25 +31,26 @@
         overflow-y: scroll;
         border: 1px solid #ddd;
         padding: 10px;
-        width: 100%;
         display: flex;
         flex-direction: column;
       }
+      .chattingDiv {
+        display: flex;
+        justify-content: left;
+      }
       .message {
         margin-bottom: 10px;
-        width: fit-content;
+        width: 250px;
       }
       .user-message {
         background-color: #e0f2f1;
         padding: 5px 10px;
         border-radius: 5px;
-        justify-content: right;
       }
       .other-message {
         background-color: #f0f0f0;
         padding: 5px 10px;
         border-radius: 5px;
-        justify-content: left;
       }
       .input-box {
         display: flex;

@@ -200,15 +200,24 @@ socket.on("groupMsg", (data) => {
   const { roomId, nickname, msg, time } = data;
   console.log(data.size);
   const wrapper = document.querySelector(".chat-box");
+
+  const $chattingDiv = document.createElement("div");
+  $chattingDiv.classList.add("chattingDiv");
+
   const $chatting = document.createElement("div");
   $chatting.classList.add("message");
 
-  if (nickname !== login_id) $chatting.classList.add("other-message");
-  else $chatting.classList.add("user-message");
+  if (nickname !== login_id) {
+    $chatting.classList.add("other-message");
+    $chattingDiv.style.justifyContent = "left";
+  } else {
+    $chatting.classList.add("user-message");
+    $chattingDiv.style.justifyContent = "right";
+  }
 
   $chatting.innerText = `${nickname}: ${msg} (${time})`;
-
-  wrapper.appendChild($chatting);
+  $chattingDiv.appendChild($chatting);
+  wrapper.appendChild($chattingDiv);
 });
 
 socket.on("room", (data) => {
@@ -273,7 +282,7 @@ socket.on("joinRoom", (data) => {
   chatContainer.innerHTML = `
     <div class="chat-container">
       <div class="chat-box" id="chatBox">
-        <h3 id='roomName2'>RoomName - ${roomId}</h3>
+        <h3 id='roomName2'>${roomId}</h3>
       </div>
       <div class="input-box">
         <input
