@@ -251,7 +251,7 @@ socket.on("room2", (data) => {
 
     const $room = document.createElement("div");
     $room.className = "room";
-    $room.innerText = `${roomId}`;
+    $room.innerText = `${roomId} (${count}/2)`;
 
     $room.addEventListener("click", (e) => {
       e.stopPropagation();

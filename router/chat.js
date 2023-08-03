@@ -10,6 +10,12 @@ const io = socketIO(server, {
   cors: { origin: "*" },
 });
 
+// DB 호출
+const mysql = require("mysql");
+const { dbconfig } = require("../DB/database");
+const connection = mysql.createConnection(dbconfig);
+connection.connect();
+
 // 로그인 관련 정보 저장
 const login_ids = {}; // { clientId : socketId }
 let rooms = {
@@ -115,9 +121,23 @@ io.on("connection", (socket) => {
   });
   // room 메세지 처리
   socket.on("groupMsg", (data) => {
-    // 그룹 메세지 전송
     console.log("groupMsg", data); // data = { roomId, nickname, date, msg}
+
+    const { roomId, nickname, date, msg } = data;
+
+    // 그룹 채팅 전송
     io.to(data.roomId).compress(true).emit("groupMsg", data);
+
+    // 그룹 채팅 DB에 저장
+    connection.query(
+      `INSERT INTO chatting VALUES (NULL, '${
+        nickname !== "ㅇㅇ" ? nickname : "NULL"
+      }', '${msg}', '2023-08-03', '${roomId}')`,
+      (error) => {
+        if (error) throw console.log(error.message);
+        console.log("DB 저장 성공");
+      }
+    );
   });
   // 새로고침 처리
   socket.on("fixRoom", () => {
