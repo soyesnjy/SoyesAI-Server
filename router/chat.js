@@ -43,7 +43,8 @@ io.on("connection", (socket) => {
       rooms[roomId] = leaderId;
 
       io.emit("room", rooms);
-    } else console.log("이미 방을 만든 사람입니다");
+      socket.emit("joinRoom", data);
+    } else socket.emit("rejectCreateRoom");
   });
   // room 삭제
   socket.on("deleteRoom", (data) => {
@@ -58,7 +59,7 @@ io.on("connection", (socket) => {
       io.to(data.roomId).leaveAll;
       io.emit("leaveRoom", data);
       io.emit("room", rooms);
-    } else console.log("방장이 아니라 삭제 불가");
+    } else socket.emit("rejectDeleteRoom");
   });
   // room 참가
   socket.on("joinRoom", (data) => {
@@ -97,7 +98,11 @@ io.on("connection", (socket) => {
   socket.on("groupMsg", (data) => {
     // 그룹 메세지 전송
     console.log("groupMsg", data); // data = { roomId, nickname, date, msg}
-    io.to(data.roomId).emit("groupMsg", data);
+    io.to(data.roomId).compress(true).emit("groupMsg", data);
+  });
+  // 새로고침 처리
+  socket.on("fixRoom", () => {
+    io.emit("room", rooms);
   });
 });
 

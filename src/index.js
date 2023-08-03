@@ -112,6 +112,7 @@ socket.on("privateMsg", (data) => {
 
 socket.on("groupMsg", (data) => {
   const { roomId, nickname, msg, time } = data;
+  console.log(data.size);
   const wrapper = document.querySelector(".wrapper3");
   const $chatting = document.createElement("div");
   if (nickname !== login_id) $chatting.style.color = "red";
@@ -132,15 +133,15 @@ socket.on("room", (data) => {
     $deleteBtn.innerText = "방 삭제";
 
     $room.addEventListener("click", (e) => {
-      e.stopPropagation()
+      e.stopPropagation();
       socket.emit("joinRoom", { roomId: key });
     });
 
     $deleteBtn.addEventListener("click", (e) => {
-      e.stopPropagation()
+      e.stopPropagation();
       socket.emit("deleteRoom", { roomId: key, leaderId: login_id });
     });
-    
+
     $room.appendChild($deleteBtn);
     roomContainer.appendChild($room);
   }
@@ -171,6 +172,14 @@ socket.on("leaveRoom", (data) => {
   const chatContainer = document.querySelector(".chatContainer");
 
   chatContainer.innerHTML = ``;
+});
+
+socket.on("rejectCreateRoom", () => {
+  alert("이미 방을 만든 유저입니다");
+});
+
+socket.on("rejectDeleteRoom", () => {
+  alert("방장만 삭제 가능합니다");
 });
 
 // 메시지 핸들러.
@@ -241,11 +250,16 @@ const createRoomHander = () => {
   if (!login_id) alert("Login 하세요");
   else {
     socket.emit("createRoom", { roomId, leaderId: login_id });
-    socket.emit("joinRoom", { roomId });
+    // socket.emit("joinRoom", { roomId });
   }
 };
 
 const leaveRoomHander = (roomId) => {
   // 방 나가기 핸들러
   socket.emit("leaveRoom", { roomId });
+};
+
+const fixHander = () => {
+  // 새로고침 핸들러
+  socket.emit("fixRoom");
 };

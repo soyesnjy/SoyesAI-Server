@@ -181,7 +181,11 @@ const loginController = {
         if (error) throw error;
         // rows : 배열 형식으로 저장된 행 데이터
         // fields: 열(속성) 데이터
-        console.log(rows);
+
+        // rows는 테이블의 데이터를 배열 형식 저장
+        // 즉, 배열 메서드를 통해 접근 가능
+        // 아래는 테이블 데이터의 member_name에 접근
+        console.log(rows.filter((el) => el.member_id === id)[0].member_phone);
 
         if (rows.length) {
           // 토큰을 활용한 쿠키, 세션

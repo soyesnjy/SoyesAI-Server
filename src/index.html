@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cors 에러 확인용 페이지</title>
-</head>
-<body>
+  </head>
+  <body>
     <!-- <div id="container">
         <label>동물 이름을 영어로 입력하세요</label>
         <input id="name" value="">
@@ -22,67 +22,65 @@
     <h1 id="board2">에러 메세지</h1> -->
 
     <div id="container">
-        <h3>Login 정보를 입력하세요</h3>
-        <label>id</label>
-        <input id='id' value=""/>
-        <label>pwd</label>
-        <input id='pwd' value="" type="password"/>
-        <button onclick="loginHandler()">Login</button>
-        <button onclick="logoutHandler()">LogOut</button>
+      <h3>Login 정보를 입력하세요</h3>
+      <label>id</label>
+      <input id="id" value="" />
+      <label>pwd</label>
+      <input id="pwd" value="" type="password" />
+      <button onclick="loginHandler()">Login</button>
+      <button onclick="logoutHandler()">LogOut</button>
     </div>
     <h1 id="board3"></h1>
 
     <div id="container">
-        <h1 id="board4">전체 채팅방</h1>
-        <div>
-            <label>닉네임</label>
-            <input id='nickname' value=""/>
-        </div>
-        <div class="wrapper">
-        </div>
-        <div>
-            <label>채팅</label>
-            <input id='chat' value=""/>
-        </div>
-        <button onclick="msgHandler()">전송</button>
+      <h1 id="board4">전체 채팅방</h1>
+      <div>
+        <label>닉네임</label>
+        <input id="nickname" value="" />
+      </div>
+      <div class="wrapper"></div>
+      <div>
+        <label>채팅</label>
+        <input id="chat" value="" />
+      </div>
+      <button onclick="msgHandler()">전송</button>
     </div>
 
     <div id="container">
-        <h1 id="board5">1:1 채팅방</h1>
-        <div>
-            <label>받는 사람</label>
-            <input id='receiver' value=""/>
-        </div>
-        <div>
-            <label>닉네임</label>
-            <input id='nickname2' value=""/>
-        </div>
-        <div class="wrapper2">
-        </div>
-        <div>
-            <label>채팅</label>
-            <input id='chat2' value=""/>
-        </div>
-        <button onclick="msgHandler2()">전송</button>
+      <h1 id="board5">1:1 채팅방</h1>
+      <div>
+        <label>받는 사람</label>
+        <input id="receiver" value="" />
+      </div>
+      <div>
+        <label>닉네임</label>
+        <input id="nickname2" value="" />
+      </div>
+      <div class="wrapper2"></div>
+      <div>
+        <label>채팅</label>
+        <input id="chat2" value="" />
+      </div>
+      <button onclick="msgHandler2()">전송</button>
     </div>
 
     <div id="container">
-        <h1 id="board5">그룹 채팅방</h1>
-        <div>
-            <label>방 이름</label>
-            <input id='roomName' value=""/>
-            <button onclick="createRoomHander()">방 만들기</button>
-        </div>
-        <div class="roomContainer">
-            
-        </div>
-        <div class="chatContainer">
-            
-        </div>
-        
+      <h1 id="board5">그룹 채팅방</h1>
+      <div>
+        <label>방 이름</label>
+        <input id="roomName" value="" />
+        <button onclick="createRoomHander()">방 만들기</button>
+        <button onclick="fixHander()">방 새로고침</button>
+      </div>
+      <div class="roomContainer"></div>
+      <div class="chatContainer"></div>
     </div>
-    
-</body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.js" integrity="sha512-Z6C1p1NIexPj5MsVUunW4pg7uMX6/TT3CUVldmjXx2kpip1eZcrAnxIusDxyFIikyM9A61zOVNgvLr/TGudOQg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="./index.js"></script>
+  </body>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.js"
+    integrity="sha512-Z6C1p1NIexPj5MsVUunW4pg7uMX6/TT3CUVldmjXx2kpip1eZcrAnxIusDxyFIikyM9A61zOVNgvLr/TGudOQg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+  <script src="./index.js"></script>
 </html>
