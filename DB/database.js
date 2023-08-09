@@ -14,13 +14,13 @@ const users = [
 ];
 
 const dbconfig = {
-  host     : 'localhost',
-  user     : 'root',
-  password : '796926',
-  database : 'soyes_db'
-}
+  host: "soyesdb.cbxvnkrdwevn.ap-northeast-2.rds.amazonaws.com",
+  user: "admin",
+  password: "soyesdeveloper1!",
+  database: "soyesdb",
+};
 
 module.exports = {
   users,
-  dbconfig
+  dbconfig,
 };
