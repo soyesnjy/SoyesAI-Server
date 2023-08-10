@@ -146,7 +146,7 @@ const msgHandler3 = (roomId) => {
     document.querySelector("#messageInput").value = "";
   }
 };
-// 그룹 채팅 엔터키 핸들러
+
 const msgKeyHandler3 = (e, roomId) => {
   const msg = document.querySelector("#messageInput").value;
   // 채팅 메시지가 있을 경우만 실행

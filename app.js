@@ -71,6 +71,10 @@ app.use("/login", loginRouter);
 const chatRouter = require("./router/chat");
 app.use(chatRouter);
 
+// 유니티 채팅 웹소켓 서버 라우팅
+const unityChatRouter = require("./router/unityChat");
+app.use(unityChatRouter);
+
 // 에러 처리는 일반적인 미들웨어 함수와 동일하게 적용 가능하다.
 const { errController } = require("./controller/index");
 app.use(errController.logErrors);
