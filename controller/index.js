@@ -77,10 +77,10 @@ const errController = {
 };
 
 // MySQL 접근
-// const mysql = require("mysql");
-// const { dbconfig } = require("../DB/database");
-// const connection = mysql.createConnection(dbconfig);
-// connection.connect();
+const mysql = require("mysql");
+const { dbconfig } = require("../DB/database");
+const connection = mysql.createConnection(dbconfig);
+connection.connect();
 // connection.end(); // 언제쓰지?
 const { users } = require("../DB/database");
 
@@ -177,7 +177,7 @@ const loginController = {
 
     // MySQL DB 연동
     connection.query(
-      `SELECT * FROM member WHERE (member_id = '${id}' AND member_password = '${pwd}')`,
+      `SELECT * FROM user WHERE (user_uid = '${id}' AND user_pwd = '${pwd}')`,
       (error, rows, fields) => {
         if (error) throw error;
         // rows : 배열 형식으로 저장된 행 데이터
@@ -186,7 +186,7 @@ const loginController = {
         // rows는 테이블의 데이터를 배열 형식 저장
         // 즉, 배열 메서드를 통해 접근 가능
         // 아래는 테이블 데이터의 member_name에 접근
-        console.log(rows.filter((el) => el.member_id === id)[0].member_phone);
+        // console.log(rows.filter((el) => el.member_id === id)[0].member_phone);
 
         if (rows.length) {
           // 토큰을 활용한 쿠키, 세션
