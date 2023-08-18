@@ -174,7 +174,7 @@ const loginController = {
   // 토큰 로그인
   tokenLoginHandler: (req, res) => {
     const { id, pwd } = req.body;
-
+    console.log(id, pwd);
     // MySQL DB 연동
     connection.query(
       `SELECT * FROM user WHERE (user_uid = '${id}' AND user_pwd = '${pwd}')`,
@@ -204,7 +204,7 @@ const loginController = {
           //   res.json("Login Success");
           // });
           res.json("Login Success");
-        } else res.json("Login Fail");
+        } else res.json("Login fail");
       }
     );
 

@@ -106,8 +106,18 @@ io.on("connection", (socket) => {
   });
   // 전체 메세지 처리
   socket.on("msg", (data) => {
+    const { id, date, msg } = data;
     // 소켓에 연결된 모든 client에게 msg 트리거를 발생시키고 data를 전달.
-    io.emit("msg", data);
+    io.emit("msg", JSON.parse(data));
+
+    connection.query(
+      `INSERT INTO Unity_chatting VALUES (NULL, '${
+        id !== "ㅇㅇ" ? id : "NULL"
+      }', '${msg}', '${date}')`,
+      (error) => {
+        if (error) throw console.log(error.message);
+      }
+    );
   });
   // 1:1 메세지 처리
   socket.on("privateMsg", (data) => {
