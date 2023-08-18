@@ -106,7 +106,7 @@ io.on("connection", (socket) => {
   });
   // 전체 메세지 처리
   socket.on("msg", (data) => {
-    const { id, date, msg } = data;
+    const { id, date, msg } = JSON.parse(data);
     // 소켓에 연결된 모든 client에게 msg 트리거를 발생시키고 data를 전달.
     io.emit("msg", JSON.parse(data));
 
