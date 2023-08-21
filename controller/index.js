@@ -227,6 +227,21 @@ const loginController = {
 
     res.json("Token LogOut Success");
   },
+  // 유저 정보 전달 (user_uid, user_name)
+  getUserHandler: (req, res) => {
+    connection.query(`SELECT * FROM user`, (error, rows, fields) => {
+      if (error) throw error;
+
+      if (rows.length) {
+        const data = rows.map((row) => {
+          const { user_uid, user_name } = row;
+          return { user_uid, user_name };
+        });
+
+        res.json(data);
+      } else res.json("NonUser");
+    });
+  },
 };
 
 module.exports = {

@@ -16,6 +16,8 @@ const {
   vaildateToken,
   tokenLoginHandler,
   tokenLogoutHandler,
+  // 유저 정보
+  getUserHandler,
 } = loginController;
 
 // 쿠키
@@ -30,6 +32,8 @@ const {
 router.post("/", tokenLoginHandler);
 router.get("/logout", tokenLogoutHandler);
 
+// 유저 정보 반환
+router.get("/getUser", getUserHandler);
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);
 
