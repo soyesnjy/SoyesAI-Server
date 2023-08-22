@@ -238,7 +238,7 @@ const loginController = {
           return { user_uid, user_name };
         });
 
-        res.json(data);
+        res.json({ data });
       } else res.json("NonUser");
     });
   },
