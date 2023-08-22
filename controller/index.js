@@ -203,8 +203,8 @@ const loginController = {
           // req.session.save(() => {
           //   res.json("Login Success");
           // });
-          res.json("Login Success");
-        } else res.json("Login fail");
+          res.json({ data: "Login Success" });
+        } else res.json({ data: "Login fail" });
       }
     );
 
