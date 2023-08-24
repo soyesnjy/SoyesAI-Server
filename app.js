@@ -18,7 +18,11 @@ app.use(cookieParser("@earthworm"));
 const cors = require("cors");
 app.use(
   cors({
-    origin: ["http://127.0.0.1:5500", "http://localhost:4000"],
+    origin: [
+      "http://127.0.0.1:5500",
+      "http://localhost:4000",
+      "http://localhost:3000",
+    ],
     methods: ["GET", "POST", "OPTION"],
     credentials: true,
   })
