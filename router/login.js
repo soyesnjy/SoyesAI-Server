@@ -18,6 +18,7 @@ const {
   tokenLogoutHandler,
   // 유저 정보
   getUserHandler,
+  postUserHandler,
 } = loginController;
 
 // 쿠키
@@ -34,6 +35,9 @@ router.get("/logout", tokenLogoutHandler);
 
 // 유저 정보 반환
 router.get("/getUser", getUserHandler);
+// 조건부 유저 정보 반환
+router.post("/postUser", postUserHandler);
+
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);
 

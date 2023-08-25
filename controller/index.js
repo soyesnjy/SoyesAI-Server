@@ -230,7 +230,7 @@ const loginController = {
   // 유저 정보 전달 (user_uid, user_name)
   getUserHandler: (req, res) => {
     connection.query(`SELECT * FROM user`, (error, rows, fields) => {
-      if (error) throw error;
+      if (error) console.log(error);
 
       if (rows.length) {
         const data = rows.map((row) => {
@@ -241,6 +241,27 @@ const loginController = {
         res.json({ data });
       } else res.json("NonUser");
     });
+  },
+  // 조건부 유저 정보 전달
+  postUserHandler: (req, res) => {
+    const { vrNum } = req.body;
+    connection.query(
+      `SELECT * FROM user WHERE user_vr_number = '${
+        vrNum ? vrNum : "FJWUAJ21JFYG2AS8"
+      }'`,
+      (error, rows, fields) => {
+        if (error) console.log(error);
+
+        if (rows.length) {
+          const data = rows.map((row) => {
+            const { user_uid, user_name } = row;
+            return { user_uid, user_name };
+          });
+
+          res.json({ data });
+        } else res.json("NonUser");
+      }
+    );
   },
 };
 
