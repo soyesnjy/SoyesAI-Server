@@ -265,8 +265,26 @@ const loginController = {
   },
 };
 
+const signupController = {
+  dupleCheckHandler: (req, res) => {
+    const { id } = req.body;
+    console.log(id);
+    // MySQL DB 연동
+    connection.query(
+      `SELECT * FROM user WHERE (user_uid = '${id}')`,
+      (error, rows, fields) => {
+        if (error) throw error;
+        if (rows.length) {
+          res.json({ data: "Fail" });
+        } else res.json({ data: "Success" });
+      }
+    );
+  },
+};
+
 module.exports = {
   pathController,
   errController,
   loginController,
+  signupController,
 };

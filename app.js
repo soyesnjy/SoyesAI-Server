@@ -71,6 +71,10 @@ app.use("/error", errorRouter);
 const loginRouter = require("./router/login");
 app.use("/login", loginRouter);
 
+// signup 경로 라우팅
+const signupRouter = require("./router/signup");
+app.use("/signup", signupRouter);
+
 // 채팅 웹소켓 서버 라우팅
 const chatRouter = require("./router/chat");
 app.use(chatRouter);
