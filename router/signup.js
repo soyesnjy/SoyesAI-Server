@@ -3,9 +3,10 @@ const express = require("express");
 const router = express.Router();
 const { errController } = require("../controller/index");
 const { signupController } = require("../controller/index");
-const { dupleCheckHandler } = signupController;
+const { dupleCheckHandler, signupHandler } = signupController;
 
-// 토큰
+router.post("/", signupHandler);
+
 router.post("/duplecheck", dupleCheckHandler);
 
 // 에러 메세지 처리

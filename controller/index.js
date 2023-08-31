@@ -280,6 +280,19 @@ const signupController = {
       }
     );
   },
+  signupHandler: (req, res) => {
+    const { id, pwd, name, age, email, vrNum } = req.body;
+    // 서버측 2중 보안
+    if (!id || !pwd || !vrNum) res.json({ data: "Fail" });
+    // MySQL DB 연동
+    connection.query(
+      `INSERT INTO user VALUES (null, '${id}', '${pwd}', '${name}', '${email}', '${age}', null, '${vrNum}')`,
+      (error) => {
+        if (error) throw error;
+        res.json({ data: "Success" });
+      }
+    );
+  },
 };
 
 module.exports = {
