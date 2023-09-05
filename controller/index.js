@@ -246,16 +246,16 @@ const loginController = {
   postUserHandler: (req, res) => {
     const { vrNum } = req.body;
     connection.query(
-      `SELECT * FROM user WHERE user_vr_number = '${
-        vrNum ? vrNum : "FJWUAJ21JFYG2AS8"
-      }'`,
+      `select * from teacher 
+      inner join user on teacher.vr_number = user.user_vr_number 
+      where teacher.vr_number = '${vrNum ? vrNum : "FJWUAJ21JFYG2AS8"}'`,
       (error, rows, fields) => {
         if (error) console.log(error);
 
         if (rows.length) {
           const data = rows.map((row) => {
-            const { user_uid, user_name } = row;
-            return { user_uid, user_name };
+            const { user_number, user_name } = row;
+            return { user_number, user_name };
           });
 
           res.json({ data });
