@@ -177,7 +177,7 @@ const loginController = {
     console.log(id, pwd);
     // MySQL DB 연동
     connection.query(
-      `SELECT * FROM user WHERE (user_uid = '${id}' AND user_pwd = '${pwd}')`,
+      `SELECT * FROM teacher WHERE (teacher_uid = '${id}' AND teacher_pwd = '${pwd}')`,
       (error, rows, fields) => {
         if (error) throw error;
         // rows : 배열 형식으로 저장된 행 데이터
