@@ -83,10 +83,10 @@ app.use(chatRouter);
 // app.use(unityChatRouter);
 
 // 에러 처리는 일반적인 미들웨어 함수와 동일하게 적용 가능하다.
-const { errController } = require("./controller/index");
-app.use(errController.logErrors);
-app.use(errController.clientErrorHandler);
-app.use(errController.univErrorHandler);
+// const { errController } = require("./controller/index");
+// app.use(errController.logErrors);
+// app.use(errController.clientErrorHandler);
+// app.use(errController.univErrorHandler);
 
 // app.listen(PORT, () => console.log(`🚀 HTTP Server is starting on ${PORT}`));
 
