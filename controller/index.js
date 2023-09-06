@@ -286,18 +286,30 @@ const loginController = {
 
 const signupController = {
   dupleCheckHandler: (req, res) => {
-    const { id } = req.body;
-    console.log(id);
+    const { id, vrNum, type } = req.body;
+
     // MySQL DB 연동
-    connection.query(
-      `SELECT * FROM teacher WHERE (teacher_uid = '${id}')`,
-      (error, rows, fields) => {
-        if (error) console.log(error);
-        if (rows.length) {
-          res.json({ data: "Fail" });
-        } else res.json({ data: "Success" });
-      }
-    );
+    if (type === "id") {
+      connection.query(
+        `SELECT * FROM teacher WHERE (teacher_uid = '${id}')`,
+        (error, rows, fields) => {
+          if (error) console.log(error);
+          if (rows.length) {
+            res.json({ data: "Fail" });
+          } else res.json({ data: "Success" });
+        }
+      );
+    } else {
+      connection.query(
+        `SELECT * FROM teacher WHERE (vr_number = '${vrNum}')`,
+        (error, rows, fields) => {
+          if (error) console.log(error);
+          if (rows.length) {
+            res.json({ data: "Fail" });
+          } else res.json({ data: "Success" });
+        }
+      );
+    }
   },
   signupHandler: (req, res) => {
     const { id, pwd, name, age, email, vrNum } = req.body;
