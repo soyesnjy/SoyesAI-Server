@@ -1,7 +1,6 @@
 // app은 기본 express() 인스턴스 생성.
 const express = require("express");
 const session = require("express-session");
-// MySQL 인스턴스 생성
 
 const app = express();
 const PORT = 4000;
@@ -9,10 +8,6 @@ const PORT = 4000;
 // 서버와 동일한 url을 브라우저에 입력하면 src 폴더 내부의 html 파일 실행.
 const path = require("path");
 app.use(express.static(path.join(__dirname, "src")));
-
-// cookie-parser 추가.
-const cookieParser = require("cookie-parser");
-app.use(cookieParser("@earthworm"));
 
 // cors에러 처리. default는 모든 origin에 대해 허용 -> { origin:'*' } 파라미터 생략 가능.
 const cors = require("cors");
@@ -31,6 +26,10 @@ app.use(
 // BodyParser 추가. post, put 요청의 req.body 구문 해석 기능 제공.
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// cookie-parser 추가.
+const cookieParser = require("cookie-parser");
+app.use(cookieParser("@earthworm"));
 
 // 세션 설정 - Cross-Site 설정 불가능. (secure 이슈)
 app.use(
