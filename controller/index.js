@@ -290,9 +290,9 @@ const signupController = {
     console.log(id);
     // MySQL DB 연동
     connection.query(
-      `SELECT * FROM user WHERE (user_uid = '${id}')`,
+      `SELECT * FROM teacher WHERE (teacher_uid = '${id}')`,
       (error, rows, fields) => {
-        if (error) throw error;
+        if (error) console.log(error);
         if (rows.length) {
           res.json({ data: "Fail" });
         } else res.json({ data: "Success" });
@@ -305,10 +305,10 @@ const signupController = {
     if (!id || !pwd || !vrNum) res.json({ data: "Fail" });
     // MySQL DB 연동
     connection.query(
-      `INSERT INTO user VALUES (null, '${id}', '${pwd}', '${name}', '${email}', '${age}', null, '${vrNum}')`,
+      `INSERT INTO teacher VALUES ('${vrNum}', '${id}', '${pwd}')`,
       (error) => {
-        if (error) throw error;
-        res.json({ data: "Success" });
+        if (error) console.log(error);
+        else res.json({ data: "Success" });
       }
     );
   },
