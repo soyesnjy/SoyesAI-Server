@@ -88,22 +88,23 @@ app.use(errController.logErrors);
 app.use(errController.clientErrorHandler);
 app.use(errController.univErrorHandler);
 
-app.listen(PORT, () => console.log(`🚀 HTTP Server is starting on ${PORT}`));
+// app.listen(PORT, () => console.log(`🚀 HTTP Server is starting on ${PORT}`));
 
-// const https = require("https");
-// let server;
-// if (fs.existsSync("./key.pem") && fs.existsSync("./cert.pem")) {
-//   const privateKey = fs.readFileSync(__dirname + "/key.pem", "utf8");
-//   const certificate = fs.readFileSync(__dirname + "/cert.pem", "utf8");
-//   const credentials = {
-//     key: privateKey,
-//     cert: certificate,
-//   };
+const https = require("https");
+const fs = require("fs");
+let server;
+if (fs.existsSync("./key.pem") && fs.existsSync("./cert.pem")) {
+  const privateKey = fs.readFileSync(__dirname + "/key.pem", "utf8");
+  const certificate = fs.readFileSync(__dirname + "/cert.pem", "utf8");
+  const credentials = {
+    key: privateKey,
+    cert: certificate,
+  };
 
-//   server = https.createServer(credentials, app);
-//   server.listen(PORT, () =>
-//     console.log(`🚀 HTTPS Server is starting on ${PORT}`)
-//   );
-// } else {
-//   app.listen(PORT, () => console.log(`🚀 HTTP Server is starting on ${PORT}`));
-// }
+  server = https.createServer(credentials, app);
+  server.listen(PORT, () =>
+    console.log(`🚀 HTTPS Server is starting on ${PORT}`)
+  );
+} else {
+  app.listen(PORT, () => console.log(`🚀 HTTP Server is starting on ${PORT}`));
+}
