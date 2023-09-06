@@ -18,6 +18,7 @@ const {
   tokenLogoutHandler,
   // 유저 정보
   getUserHandler,
+  postTeacherHandler,
   postUserHandler,
 } = loginController;
 
@@ -35,6 +36,8 @@ router.get("/logout", tokenLogoutHandler);
 
 // 유저 정보 반환
 router.get("/getUser", getUserHandler);
+// 조건부 선생 정보 반환
+router.post("/postTeacher", postTeacherHandler);
 // 조건부 유저 정보 반환
 router.post("/postUser", postUserHandler);
 

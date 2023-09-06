@@ -242,8 +242,8 @@ const loginController = {
       } else res.json("NonUser");
     });
   },
-  // 조건부 유저 정보 전달
-  postUserHandler: (req, res) => {
+  // 조건부 선생 정보 전달
+  postTeacherHandler: (req, res) => {
     const { vrNum } = req.body;
     connection.query(
       `select * from teacher 
@@ -256,6 +256,25 @@ const loginController = {
           const data = rows.map((row) => {
             const { user_number, user_name } = row;
             return { user_number, user_name };
+          });
+
+          res.json({ data });
+        } else res.json("NonUser");
+      }
+    );
+  },
+  // 조건부 유저 정보 전달
+  postUserHandler: (req, res) => {
+    const { user_number } = req.body;
+    connection.query(
+      `select * from user where user.user_number = '${user_number}'`,
+      (error, rows, fields) => {
+        if (error) console.log(error);
+
+        if (rows.length) {
+          const data = rows.map((row) => {
+            const { user_age } = row;
+            return { user_age };
           });
 
           res.json({ data });
