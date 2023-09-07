@@ -227,15 +227,21 @@ const loginController = {
 
     res.json("Token LogOut Success");
   },
-  // 유저 정보 전달 (user_uid, user_name)
+  // 유저 정보 전달. 모든 학생 정보 출력
   getUserHandler: (req, res) => {
     connection.query(`SELECT * FROM user`, (error, rows, fields) => {
       if (error) console.log(error);
 
       if (rows.length) {
         const data = rows.map((row) => {
-          const { user_uid, user_name } = row;
-          return { user_uid, user_name };
+          const { user_name, user_number } = row;
+          return { user_name, user_number };
+        });
+        // 오름차순 정렬
+        data.sort((a, b) => {
+          if (a.user_name < b.user_name) return -1;
+          else if (a.user_name > b.user_name) return 1;
+          else return 0;
         });
 
         res.json({ data });
@@ -243,7 +249,7 @@ const loginController = {
     });
   },
   // 조건부 선생 정보 전달
-  postTeacherHandler: (req, res) => {
+  postUsersHandler: (req, res) => {
     const { vrNum } = req.body;
     console.log("postTeacher Request => vrNum: " + vrNum);
     connection.query(
@@ -280,6 +286,26 @@ const loginController = {
             return { user_age };
           });
 
+          res.json({ data });
+        } else res.json("NonUser");
+      }
+    );
+  },
+  // 조건부 선생 정보 전달 (vr_number)
+  postTeacherHandler: (req, res) => {
+    const { teacher_uid } = req.body;
+    console.log("postTeacher Request => teacher_uid: " + teacher_uid);
+
+    connection.query(
+      `select * from teacher where teacher.teacher_uid = '${teacher_uid}'`,
+      (error, rows, fields) => {
+        if (error) console.log(error);
+
+        if (rows.length) {
+          const data = rows.map((row) => {
+            const { vr_number } = row;
+            return { vr_number };
+          });
           res.json({ data });
         } else res.json("NonUser");
       }
