@@ -179,7 +179,7 @@ const loginController = {
     connection.query(
       `SELECT * FROM teacher WHERE (teacher_uid = '${id}' AND teacher_pwd = '${pwd}')`,
       (error, rows, fields) => {
-        if (error) throw error;
+        if (error) console.log(error);
         // rows : 배열 형식으로 저장된 행 데이터
         // fields: 열(속성) 데이터
 
@@ -245,10 +245,11 @@ const loginController = {
   // 조건부 선생 정보 전달
   postTeacherHandler: (req, res) => {
     const { vrNum } = req.body;
+    console.log("postTeacher Request => vrNum: " + vrNum);
     connection.query(
       `select * from teacher 
       inner join user on teacher.vr_number = user.user_vr_number 
-      where teacher.vr_number = '${vrNum ? vrNum : "FJWUAJ21JFYG2AS8"}'`,
+      where teacher.vr_number = '${vrNum}'`,
       (error, rows, fields) => {
         if (error) console.log(error);
 
@@ -266,6 +267,8 @@ const loginController = {
   // 조건부 유저 정보 전달
   postUserHandler: (req, res) => {
     const { user_number } = req.body;
+    console.log("postUser Request => user_number: " + user_number);
+
     connection.query(
       `select * from user where user.user_number = '${user_number}'`,
       (error, rows, fields) => {
