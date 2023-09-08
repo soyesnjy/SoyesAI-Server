@@ -355,9 +355,309 @@ const signupController = {
   },
 };
 
+const emotinalBehaviorController = {
+  putEmotinalResultHandler: (req, res) => {
+    const {
+      uid,
+      gradeType,
+      lastDate,
+      levelResult,
+      typeSchoolMaladjustment,
+      typePeerRelationshipProblems,
+      typeFamilyRelations,
+      typeOverallMood,
+      typeAnxious,
+      typeDepressed,
+      typePhysicalSymptoms,
+      typeAttention,
+      typeHyperactivity,
+      typeAngerAggression,
+      typeSelfAwareness,
+    } = req.body;
+    // 해당 uid의 검사 결과가 있는지 확인
+    connection.query(
+      `select * from emotinalBehavior where uid = '${uid}'`,
+      (error, rows, fields) => {
+        if (error) console.log(error);
+        // 결과가 있는 경우 Update
+        if (rows.length) {
+          const updateData = {
+            gradeType,
+            lastDate,
+            levelResult,
+            typeSchoolMaladjustment,
+            typePeerRelationshipProblems,
+            typeFamilyRelations,
+            typeOverallMood,
+            typeAnxious,
+            typeDepressed,
+            typePhysicalSymptoms,
+            typeAttention,
+            typeHyperactivity,
+            typeAngerAggression,
+            typeSelfAwareness,
+          };
+          const keys = Object.keys(updateData);
+
+          connection.query(
+            `UPDATE emotinalBehavior SET ${keys
+              .map((key) => {
+                return `${key}='${updateData[key]}'`;
+              })
+              .join(", ")} WHERE uid='${uid}'`,
+            (error) => {
+              if (error) console.log(error);
+              else res.json({ data: "Success" });
+            }
+          );
+        }
+        // 결과가 없는 경우 Insert
+        else {
+          const insertData = [
+            uid,
+            gradeType,
+            lastDate,
+            levelResult,
+            typeSchoolMaladjustment,
+            typePeerRelationshipProblems,
+            typeFamilyRelations,
+            typeOverallMood,
+            typeAnxious,
+            typeDepressed,
+            typePhysicalSymptoms,
+            typeAttention,
+            typeHyperactivity,
+            typeAngerAggression,
+            typeSelfAwareness,
+          ];
+          connection.query(
+            `INSERT INTO emotinalBehavior VALUES (${insertData
+              .map((value) => `'${value}'`)
+              .join(", ")})`,
+            (error) => {
+              if (error) console.log(error);
+              else res.json({ data: "Success" });
+            }
+          );
+        }
+      }
+    );
+  },
+  postEmotinalResultHandler: (req, res) => {
+    const { uid } = req.body;
+
+    connection.query(
+      `select * from emotinalBehavior where uid = '${uid}'`,
+      (error, rows, fields) => {
+        if (error) console.log(error);
+
+        if (rows.length) {
+          const data = rows.map((row) => row);
+          res.json({ data });
+        } else res.json("NonUser");
+      }
+    );
+  },
+};
+
+const personalityController = {
+  putPersonalResultHandler: (req, res) => {
+    const {
+      uid,
+      gradeType,
+      tendencyCP,
+      tendencyER,
+      tendencyOF,
+      tendencySI,
+      indexSI,
+      indexCP,
+      indexER,
+      indexOF,
+    } = req.body;
+
+    // 해당 uid의 검사 결과가 있는지 확인
+    connection.query(
+      `select * from personality where uid = '${uid}'`,
+      (error, rows, fields) => {
+        if (error) console.log(error);
+        // 결과가 있는 경우 Update
+        if (rows.length) {
+          const updateData = {
+            uid,
+            gradeType,
+            tendencyCP,
+            tendencyER,
+            tendencyOF,
+            tendencySI,
+            lastDate: new Date().toISOString().slice(0, 19).replace("T", " "),
+            indexSI,
+            indexCP,
+            indexER,
+            indexOF,
+          };
+          const keys = Object.keys(updateData);
+
+          connection.query(
+            `UPDATE personality SET ${keys
+              .map((key) => {
+                return `${key}='${updateData[key]}'`;
+              })
+              .join(", ")} WHERE uid='${uid}'`,
+            (error) => {
+              if (error) console.log(error);
+              else res.json({ data: "Success" });
+            }
+          );
+        }
+        // 결과가 없는 경우 Insert
+        else {
+          const insertData = [
+            uid,
+            gradeType,
+            tendencyCP,
+            tendencyER,
+            tendencyOF,
+            tendencySI,
+            new Date().toISOString().slice(0, 19).replace("T", " "),
+            indexSI,
+            indexCP,
+            indexER,
+            indexOF,
+          ];
+          connection.query(
+            `INSERT INTO personality VALUES (${insertData
+              .map((value) => `'${value}'`)
+              .join(", ")})`,
+            (error) => {
+              if (error) console.log(error);
+              else res.json({ data: "Success" });
+            }
+          );
+        }
+      }
+    );
+  },
+  postPersonalResultHandler: (req, res) => {
+    const { uid } = req.body;
+
+    connection.query(
+      `select * from personality where uid = '${uid}'`,
+      (error, rows, fields) => {
+        if (error) console.log(error);
+
+        if (rows.length) {
+          const data = rows.map((row) => row);
+          res.json({ data });
+        } else res.json("NonUser");
+      }
+    );
+  },
+};
+
+const careerController = {
+  putCareerResultHandler: (req, res) => {
+    const {
+      uid,
+      gradeType,
+      interest1st,
+      interest2nd,
+      interest3rd,
+      lastDate,
+      typeA,
+      typeC,
+      typeE,
+      typeI,
+      typeR,
+      typeS,
+    } = req.body;
+
+    // 해당 uid의 검사 결과가 있는지 확인
+    connection.query(
+      `select * from career where uid = '${uid}'`,
+      (error, rows, fields) => {
+        if (error) console.log(error);
+        // 결과가 있는 경우 Update
+        if (rows.length) {
+          const updateData = {
+            uid,
+            gradeType,
+            interest1st,
+            interest2nd,
+            interest3rd,
+            lastDate: new Date().toISOString().slice(0, 19).replace("T", " "),
+            typeA,
+            typeC,
+            typeE,
+            typeI,
+            typeR,
+            typeS,
+          };
+          const keys = Object.keys(updateData);
+
+          connection.query(
+            `UPDATE career SET ${keys
+              .map((key) => {
+                return `${key}='${updateData[key]}'`;
+              })
+              .join(", ")} WHERE uid='${uid}'`,
+            (error) => {
+              if (error) console.log(error);
+              else res.json({ data: "Success" });
+            }
+          );
+        }
+        // 결과가 없는 경우 Insert
+        else {
+          const insertData = [
+            uid,
+            gradeType,
+            interest1st,
+            interest2nd,
+            interest3rd,
+            new Date().toISOString().slice(0, 19).replace("T", " "),
+            typeA,
+            typeC,
+            typeE,
+            typeI,
+            typeR,
+            typeS,
+          ];
+          connection.query(
+            `INSERT INTO career VALUES (${insertData
+              .map((value) => `'${value}'`)
+              .join(", ")})`,
+            (error) => {
+              if (error) console.log(error);
+              else res.json({ data: "Success" });
+            }
+          );
+        }
+      }
+    );
+  },
+  postCareerResultHandler: (req, res) => {
+    const { uid } = req.body;
+
+    connection.query(
+      `select * from career where uid = '${uid}'`,
+      (error, rows, fields) => {
+        if (error) console.log(error);
+
+        if (rows.length) {
+          const data = rows.map((row) => row);
+          res.json({ data });
+        } else res.json("NonUser");
+      }
+    );
+  },
+};
+
 module.exports = {
   pathController,
   errController,
   loginController,
   signupController,
+  emotinalBehaviorController,
+  personalityController,
+  careerController,
 };
