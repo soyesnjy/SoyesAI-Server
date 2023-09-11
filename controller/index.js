@@ -360,7 +360,6 @@ const emotinalBehaviorController = {
     const {
       uid,
       gradeType,
-      lastDate,
       levelResult,
       typeSchoolMaladjustment,
       typePeerRelationshipProblems,
@@ -383,7 +382,7 @@ const emotinalBehaviorController = {
         if (rows.length) {
           const updateData = {
             gradeType,
-            lastDate,
+            lastDate: new Date().toISOString().slice(0, 19).replace("T", " "),
             levelResult,
             typeSchoolMaladjustment,
             typePeerRelationshipProblems,
@@ -416,7 +415,7 @@ const emotinalBehaviorController = {
           const insertData = [
             uid,
             gradeType,
-            lastDate,
+            new Date().toISOString().slice(0, 19).replace("T", " "),
             levelResult,
             typeSchoolMaladjustment,
             typePeerRelationshipProblems,
