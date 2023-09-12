@@ -554,12 +554,6 @@ const personalityController = {
             data[0].tendencyOF +
             data[0].tendencySI;
 
-          // 필요없는 key 삭제
-          delete data[0].tendencyCP;
-          delete data[0].tendencyER;
-          delete data[0].tendencyOF;
-          delete data[0].tendencySI;
-
           // 합친 유형 삽입
           data[0].tendencyType = tendencyType;
 
