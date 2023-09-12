@@ -355,6 +355,7 @@ const signupController = {
   },
 };
 
+// 검사 관련 핸들러
 const emotinalBehaviorController = {
   putEmotinalResultHandler: (req, res) => {
     const {
@@ -546,6 +547,22 @@ const personalityController = {
 
         if (rows.length) {
           const data = rows.map((row) => row);
+          // 유형 합치기
+          const tendencyType =
+            data[0].tendencyCP +
+            data[0].tendencyER +
+            data[0].tendencyOF +
+            data[0].tendencySI;
+
+          // 필요없는 key 삭제
+          delete data[0].tendencyCP;
+          delete data[0].tendencyER;
+          delete data[0].tendencyOF;
+          delete data[0].tendencySI;
+
+          // 합친 유형 삽입
+          data[0].tendencyType = tendencyType;
+
           res.json({ data });
         } else res.json("NonUser");
       }
