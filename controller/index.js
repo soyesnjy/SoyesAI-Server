@@ -348,8 +348,10 @@ const signupController = {
     connection.query(
       `INSERT INTO teacher VALUES ('${vrNum}', '${id}', '${pwd}')`,
       (error) => {
-        if (error) console.log(error);
-        else res.json({ data: "Success" });
+        if (error) {
+          console.log(error);
+          res.json({ data: "Fail" });
+        } else res.json({ data: "Success" });
       }
     );
   },
