@@ -10,6 +10,7 @@ wss.on("connection", function connection(ws) {
   console.log("Unity 연결 완료");
 
   ws.on("message", (data) => {
+    console.log(data.toString());
     ws.send(data.toString());
   });
 });
