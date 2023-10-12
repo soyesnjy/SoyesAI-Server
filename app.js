@@ -80,8 +80,8 @@ const chatRouter = require("./router/chat");
 app.use(chatRouter);
 
 // 유니티 채팅 웹소켓 서버 라우팅
-// const unityChatRouter = require("./router/unityChat");
-// app.use(unityChatRouter);
+const unityChatRouter = require("./router/unityChat");
+app.use(unityChatRouter);
 
 // test 경로 라우팅
 const testRouter = require("./router/test");
