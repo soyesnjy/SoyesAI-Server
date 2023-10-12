@@ -11,7 +11,13 @@ wss.on("connection", function connection(ws) {
 
   ws.on("message", (data) => {
     console.log(data.toString());
-    ws.send(data.toString());
+
+    // 연결된 전체 웹소켓에 메세지 전달
+    wss.clients.forEach((client) => {
+      client.send(data.toString());
+    });
+
+    // ws.send(data.toString());
   });
 });
 
