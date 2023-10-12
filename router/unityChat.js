@@ -10,7 +10,7 @@ wss.on("connection", function connection(ws) {
   console.log("Unity 연결 완료");
 
   ws.on("message", (data) => {
-    console.log(data);
+    console.log(data.toString());
 
     // 연결된 전체 웹소켓에 메세지 전달
     wss.clients.forEach((client) => {
