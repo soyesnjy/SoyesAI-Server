@@ -14,7 +14,9 @@ wss.on("connection", function connection(ws) {
 
     // 연결된 전체 웹소켓에 메세지 전달
     wss.clients.forEach((client) => {
-      client.send(data.toString());
+      if (client !== ws) {
+        client.send(data.toString());
+      }
     });
 
     // ws.send(data.toString());
