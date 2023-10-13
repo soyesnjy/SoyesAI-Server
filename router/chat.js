@@ -122,7 +122,7 @@ io.on("connection", (socket) => {
   // Broadcast 메세지 처리 (본인 제외하고 전달)
   socket.on("broadMsg", (data) => {
     const { id, date, msg } = JSON.parse(data);
-    socket.broadcast.emit("broadMsg", JSON.parse(data));
+    socket.broadcast.emit("broadMsg", data);
 
     // DB 연결 잠시 멈춤
     // connection.query(
