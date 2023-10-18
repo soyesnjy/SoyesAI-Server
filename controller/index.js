@@ -551,10 +551,10 @@ const personalityController = {
           const data = rows.map((row) => row);
           // 유형 합치기
           const tendencyType =
-            data[0].tendencyCP +
-            data[0].tendencyER +
+            data[0].tendencySI +
             data[0].tendencyOF +
-            data[0].tendencySI;
+            data[0].tendencyCP +
+            data[0].tendencyER;
 
           // 합친 유형 삽입
           data[0].tendencyType = tendencyType;
