@@ -670,8 +670,12 @@ const { RtcTokenBuilder, RtcRole } = require("agora-access-token");
 const agoraTokenController = {
   agoraTokenHandler: (req, res) => {
     const { uid, channelName } = req.body;
+    console.log("uid: " + uid);
+    console.log("channelName: " + channelName);
+
     const APP_ID = "c7389fb8096e4187b4e7abef5cb9e6e2";
     const APP_CERTIFICATE = "b0f0e0a1646b415ca1eaaa7625800c63";
+
     const role = RtcRole.PUBLISHER;
     let expireTime = 3600;
 
@@ -693,6 +697,7 @@ const agoraTokenController = {
       privllegeExpireTime
     );
 
+    console.log("token: " + token);
     return res.json({ token });
   },
 };
