@@ -670,25 +670,33 @@ const { RtcTokenBuilder, RtcRole } = require("agora-access-token");
 const agoraTokenController = {
   agoraTokenHandler: (req, res) => {
     const { uid, channelName } = req.body;
+    // 고정 상담방 채널명
+    const chNameArr = ["test1", "test2"];
+
     console.log("uid: " + uid);
     console.log("channelName: " + channelName);
+
+    // channelName은 5개 고정. 없는 채널명이 들어올 경우 non channel 반환
+    if (chNameArr.indexOf(channelName) === -1)
+      return res.status(500).json({ error: "Non Channel_Name" });
 
     connection.query(
       `SELECT * FROM consulting_channel WHERE channelName = '${channelName}'`,
       (error, rows, fields) => {
         if (error) {
           console.log(error);
-          res.status(500).json({ error: "channel is required" });
+          return res.status(400).json({ error: "channel is required" });
         }
         // 채널에 맞는 토큰이 있고 만료시간이 지나지 않은 경우
         if (
           rows[0].token &&
           Math.floor(Date.now() / 1000) < rows[0].expireTime
         ) {
-          res.json({ token: rows[0].token });
+          return res.json({ token: rows[0].token });
         }
         // 채널에 맞는 토큰이 없거나 만료시간이 지난 경우
         else {
+          // 토큰 생성 후 DB에 저장하고 토큰 값 반환
           const APP_ID = "c7389fb8096e4187b4e7abef5cb9e6e2";
           const APP_CERTIFICATE = "b0f0e0a1646b415ca1eaaa7625800c63";
 
@@ -703,7 +711,6 @@ const agoraTokenController = {
             "no-store",
             "must-revalidate"
           );
-
           res.header("Pragma", "no-cache");
           res.header("Expires", "-1");
 
@@ -730,8 +737,8 @@ const agoraTokenController = {
             (error) => {
               if (error) {
                 console.log(error);
-                res.json({ data: "Fail" });
-              } else res.json({ token });
+                return res.json({ data: "Fail" });
+              } else return res.json({ token });
             }
           );
         }
