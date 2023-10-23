@@ -673,41 +673,70 @@ const agoraTokenController = {
     console.log("uid: " + uid);
     console.log("channelName: " + channelName);
 
-    const APP_ID = "c7389fb8096e4187b4e7abef5cb9e6e2";
-    const APP_CERTIFICATE = "b0f0e0a1646b415ca1eaaa7625800c63";
+    connection.query(
+      `SELECT * FROM consulting_channel WHERE channelName = '${channelName}'`,
+      (error, rows, fields) => {
+        if (error) {
+          console.log(error);
+          res.status(500).json({ error: "channel is required" });
+        }
+        // 채널에 맞는 토큰이 있고 만료시간이 지나지 않은 경우
+        if (
+          rows[0].token &&
+          Math.floor(Date.now() / 1000) < rows[0].expireTime
+        ) {
+          res.json({ token: rows[0].token });
+        }
+        // 채널에 맞는 토큰이 없거나 만료시간이 지난 경우
+        else {
+          const APP_ID = "c7389fb8096e4187b4e7abef5cb9e6e2";
+          const APP_CERTIFICATE = "b0f0e0a1646b415ca1eaaa7625800c63";
 
-    const role = RtcRole.PUBLISHER;
-    let expireTime = 3600;
+          const role = RtcRole.PUBLISHER;
+          let expireTime = 3600 * 23;
 
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
-      "Cache-Control",
-      "private",
-      "no-cache",
-      "no-store",
-      "must-revalidate"
+          res.header("Access-Control-Allow-Origin", "*");
+          res.header(
+            "Cache-Control",
+            "private",
+            "no-cache",
+            "no-store",
+            "must-revalidate"
+          );
+
+          res.header("Pragma", "no-cache");
+          res.header("Expires", "-1");
+
+          if (!channelName)
+            return res.status(500).json({ error: "channel is required" });
+
+          expireTime = parseInt(expireTime, 10);
+          const currentTime = Math.floor(Date.now() / 1000);
+          const privllegeExpireTime = currentTime + expireTime;
+
+          const token = RtcTokenBuilder.buildTokenWithUid(
+            APP_ID,
+            APP_CERTIFICATE,
+            channelName,
+            uid,
+            role,
+            privllegeExpireTime
+          );
+          console.log("ExpireTime: " + privllegeExpireTime);
+          console.log("token: " + token);
+          // DB에 삽입
+          connection.query(
+            `UPDATE consulting_channel SET token = '${token}', expireTime = '${privllegeExpireTime}' WHERE channelName = '${channelName}'`,
+            (error) => {
+              if (error) {
+                console.log(error);
+                res.json({ data: "Fail" });
+              } else res.json({ token });
+            }
+          );
+        }
+      }
     );
-    res.header("Expires", "-1");
-    res.header("Pragma", "no-cache");
-
-    if (!channelName)
-      return res.status(500).json({ error: "channel is required" });
-
-    expireTime = parseInt(expireTime, 10);
-    const currentTime = Math.floor(Date.now() / 1000);
-    const privllegeExpireTime = currentTime + expireTime;
-
-    const token = RtcTokenBuilder.buildTokenWithUid(
-      APP_ID,
-      APP_CERTIFICATE,
-      channelName,
-      uid,
-      role,
-      privllegeExpireTime
-    );
-
-    console.log("token: " + token);
-    return res.json({ token });
   },
 };
 
