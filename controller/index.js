@@ -680,6 +680,15 @@ const agoraTokenController = {
     let expireTime = 3600;
 
     res.header("Access-Control-Allow-Origin", "*");
+    res.header(
+      "Cache-Control",
+      "private",
+      "no-cache",
+      "no-store",
+      "must-revalidate"
+    );
+    res.header("Expires", "-1");
+    res.header("Pragma", "no-cache");
 
     if (!channelName)
       return res.status(500).json({ error: "channel is required" });

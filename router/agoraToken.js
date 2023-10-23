@@ -20,7 +20,8 @@ const nocache = (req, res, next) => {
 };
 
 // agoraToken 사전 헤더 처리
-router.post("/", nocache);
+// router.post("/", nocache);
+
 // agoraToken 발급 처리
 router.post("/", agoraTokenHandler);
 
