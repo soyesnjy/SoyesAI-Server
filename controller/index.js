@@ -664,6 +664,39 @@ const careerController = {
   },
 };
 
+// agora token 관련 핸들러
+const { RtcTokenBuilder, RtcRole } = require("agora-access-token");
+
+const agoraTokenController = {
+  agoraTokenHandler: (req, res) => {
+    const { uid, channelName } = req.body;
+    const APP_ID = "c7389fb8096e4187b4e7abef5cb9e6e2";
+    const APP_CERTIFICATE = "b0f0e0a1646b415ca1eaaa7625800c63";
+    const role = RtcRole.PUBLISHER;
+    let expireTime = 3600;
+
+    res.header("Access-Control-Allow-Origin", "*");
+
+    if (!channelName)
+      return res.status(500).json({ error: "channel is required" });
+
+    expireTime = parseInt(expireTime, 10);
+    const currentTime = Math.floor(Date.now() / 1000);
+    const privllegeExpireTime = currentTime + expireTime;
+
+    const token = RtcTokenBuilder.buildTokenWithUid(
+      APP_ID,
+      APP_CERTIFICATE,
+      channelName,
+      uid,
+      role,
+      privllegeExpireTime
+    );
+
+    return res.json({ token });
+  },
+};
+
 module.exports = {
   pathController,
   errController,
@@ -672,4 +705,5 @@ module.exports = {
   emotinalBehaviorController,
   personalityController,
   careerController,
+  agoraTokenController,
 };

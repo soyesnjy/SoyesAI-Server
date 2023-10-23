@@ -87,6 +87,10 @@ app.use(unityChatRouter);
 const testRouter = require("./router/test");
 app.use("/test", testRouter);
 
+// agoraToken 경로 라우팅
+const agoraTokenRouter = require("./router/agoraToken");
+app.use("/agoraToken", agoraTokenRouter);
+
 // 에러 처리는 일반적인 미들웨어 함수와 동일하게 적용 가능하다.
 // const { errController } = require("./controller/index");
 // app.use(errController.logErrors);
