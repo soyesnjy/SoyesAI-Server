@@ -28,7 +28,7 @@ let rooms = {
 
 // 소켓 연결 이벤트. 연결 발생 시 콜백 실행
 io.on("connection", (socket) => {
-  console.log("연결 완료");
+  console.log("연결 완료 => ", socket);
   // 고정 룸 5개 생성
   io.emit("room2", rooms);
   // login 이벤트
