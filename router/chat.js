@@ -125,7 +125,9 @@ io.on("connection", (socket) => {
 
     console.log("client Send => ", data);
 
-    socket.broadcast.emit("broadMsg", data);
+    // socket.broadcast.emit("broadMsg", data);
+
+    socket.emit("broadMsg", data);
 
     // DB 연결 잠시 멈춤
     // connection.query(
