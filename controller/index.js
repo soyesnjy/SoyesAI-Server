@@ -671,7 +671,7 @@ const agoraTokenController = {
   agoraTokenHandler: (req, res) => {
     const { uid, channelName } = req.body;
     // 고정 상담방 채널명
-    const chNameArr = ["test1", "test2"];
+    const chNameArr = ["Room1", "Room2", "Room3", "Room4", "Room5"];
 
     console.log("uid: " + uid);
     console.log("channelName: " + channelName);
