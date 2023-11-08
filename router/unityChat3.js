@@ -2,12 +2,12 @@ const express = require("express");
 const router = express.Router();
 
 const WebSocket = require("ws");
-const port = 4002;
+const port = 4004;
 
 const wss = new WebSocket.Server({ port });
 
 wss.on("connection", function connection(ws) {
-  console.log("Tips Chat1 연결 완료");
+  console.log("Tips Chat3 연결 완료");
 
   ws.on("message", (data) => {
     console.log(data.toString());
@@ -24,7 +24,7 @@ wss.on("connection", function connection(ws) {
 });
 
 wss.on("listening", () => {
-  console.log(`Tips Web Socket server 1 listening on port ${port}`);
+  console.log(`Tips Web Socket server 3 listening on port ${port}`);
 });
 
 module.exports = router;
