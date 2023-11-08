@@ -714,6 +714,7 @@ const agoraTokenController = {
           res.header("Pragma", "no-cache");
           res.header("Expires", "-1");
 
+          // 채널 이름이 없으면 return. 즉, 서버 개발자가 DB에 채널 이름을 따로 넣어주아야함
           if (!channelName)
             return res.status(500).json({ error: "channel is required" });
 
