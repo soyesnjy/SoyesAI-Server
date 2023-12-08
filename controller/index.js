@@ -751,7 +751,7 @@ const agoraTokenController = {
 const OpenAI = require("openai");
 
 const openai = new OpenAI({
-  apiKey: "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", // process.env.API_TOKEN,
+  apiKey: process.env.API_TOKEN,
 });
 
 const openAIController = {
