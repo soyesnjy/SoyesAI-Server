@@ -14,7 +14,7 @@ const cors = require("cors");
 app.use(
   cors({
     origin: [
-      "http://127.0.0.1:5500",
+      "http://127.0.0.1:54954",
       "http://localhost:4000",
       "http://localhost:3000",
       "http://soyes.toy.com.s3-website.ap-northeast-2.amazonaws.com",
@@ -106,6 +106,10 @@ app.use("/test", testRouter);
 // agoraToken 경로 라우팅
 const agoraTokenRouter = require("./router/agoraToken");
 app.use("/agoraToken", agoraTokenRouter);
+
+// openAI 경로 라우팅
+const openAIRouter = require("./router/openAI");
+app.use("/openAI", openAIRouter);
 
 // 에러 처리는 일반적인 미들웨어 함수와 동일하게 적용 가능하다.
 // const { errController } = require("./controller/index");

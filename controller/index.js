@@ -748,6 +748,37 @@ const agoraTokenController = {
   },
 };
 
+// const { Configuration, OpenAIApi } = require("openai");
+
+// const config = new Configuration({
+//   apiKey: process.env.API_TOKEN,
+// });
+
+// const openai = new OpenAIApi(config);
+
+const OpenAI = require("openai");
+const openai = new OpenAI({
+  apiKey: process.env.API_TOKEN,
+});
+
+const openAIController = {
+  postOpenAIChattingNew: async (req, res) => {
+    const response = await openai.chat.completions.create({
+      messages: [{ role: "user", content: req.body.message }],
+      model: "gpt-3.5-turbo",
+    });
+
+    // console.log(response.choices[0]);
+
+    try {
+      const message = { message: response.choices[0].message.content };
+      res.send(message);
+    } catch (err) {
+      res.send(err);
+    }
+  },
+};
+
 module.exports = {
   pathController,
   errController,
@@ -757,4 +788,5 @@ module.exports = {
   personalityController,
   careerController,
   agoraTokenController,
+  openAIController,
 };
