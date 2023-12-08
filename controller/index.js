@@ -757,6 +757,8 @@ const agoraTokenController = {
 // const openai = new OpenAIApi(config);
 
 const OpenAI = require("openai");
+console.log(process.env.API_TOKEN);
+
 const openai = new OpenAI({
   apiKey: process.env.API_TOKEN,
 });
