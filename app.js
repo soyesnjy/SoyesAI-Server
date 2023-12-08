@@ -118,6 +118,7 @@ app.use("/agoraToken", agoraTokenRouter);
 const https = require("https");
 const fs = require("fs");
 let server;
+// https 보안 파일이 있을 경우
 if (fs.existsSync("./key.pem") && fs.existsSync("./cert.pem")) {
   const privateKey = fs.readFileSync(__dirname + "/key.pem", "utf8");
   const certificate = fs.readFileSync(__dirname + "/cert.pem", "utf8");
@@ -130,6 +131,8 @@ if (fs.existsSync("./key.pem") && fs.existsSync("./cert.pem")) {
   server.listen(PORT, () =>
     console.log(`🚀 HTTPS Server is starting on ${PORT}`)
   );
-} else {
+}
+// https 보안 파일이 없을 경우
+else {
   app.listen(PORT, () => console.log(`🚀 HTTP Server is starting on ${PORT}`));
 }

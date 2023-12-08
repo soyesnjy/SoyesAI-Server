@@ -6,6 +6,7 @@ const { agoraTokenController } = require("../controller/index");
 
 const { agoraTokenHandler } = agoraTokenController;
 
+// 사전 헤더 처리 함수
 const nocache = (req, res, next) => {
   res.header(
     "Cache-Control",
@@ -19,7 +20,7 @@ const nocache = (req, res, next) => {
   next();
 };
 
-// agoraToken 사전 헤더 처리
+// agoraToken 사전 헤더 처리 (안써도 작동하길래 안 넣음)
 // router.post("/", nocache);
 
 // agoraToken 발급 처리
