@@ -758,7 +758,7 @@ const openAIController = {
   postOpenAIChattingNew: async (req, res) => {
     const response = await openai.chat.completions.create({
       messages: [{ role: "user", content: req.body.message }],
-      model: "gpt-3.5-turbo",
+      model: "ft:gpt-3.5-turbo-1106:personal::8UQytKPc",
     });
 
     // console.log(response.choices[0]);

@@ -14,7 +14,7 @@ const cors = require("cors");
 app.use(
   cors({
     origin: [
-      "http://127.0.0.1:54954",
+      "http://127.0.0.1:54067",
       "http://localhost:4000",
       "http://localhost:3000",
       "http://soyes.toy.com.s3-website.ap-northeast-2.amazonaws.com",
