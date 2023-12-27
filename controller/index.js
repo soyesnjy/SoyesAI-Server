@@ -756,8 +756,13 @@ const openai = new OpenAI({
 
 const openAIController = {
   postOpenAIChattingNew: async (req, res) => {
+    const { messageArr } = req.body;
+    // console.log(messageArr);
     const response = await openai.chat.completions.create({
-      messages: [{ role: "user", content: req.body.message }],
+      messages: [
+        { role: "system", content: "you are a child counselor." },
+        ...messageArr,
+      ],
       model: "ft:gpt-3.5-turbo-1106:personal::8UpMkie8",
     });
 
