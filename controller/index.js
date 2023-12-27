@@ -760,10 +760,14 @@ const openAIController = {
     // console.log(messageArr);
     const response = await openai.chat.completions.create({
       messages: [
-        { role: "system", content: "you are a child counselor." },
+        {
+          role: "system",
+          content:
+            "you are a child counselor. your name is Soyes. You should reply within 100 characters if possible.",
+        },
         ...messageArr,
       ],
-      model: "ft:gpt-3.5-turbo-1106:personal::8UpMkie8",
+      model: "gpt-4-0613",
     });
 
     // console.log(response.choices[0]);
