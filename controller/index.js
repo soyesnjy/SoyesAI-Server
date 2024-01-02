@@ -758,6 +758,13 @@ const openAIController = {
   postOpenAIChattingNew: async (req, res) => {
     const { messageArr } = req.body;
     console.log(messageArr);
+    console.log(typeof messageArr);
+
+    // messageArr가 문자열일 경우 json 파싱
+    if (typeof messageArr === "string") {
+      messageArr = JSON.parse(messageArr);
+    }
+
     const response = await openai.chat.completions.create({
       messages: [
         {
