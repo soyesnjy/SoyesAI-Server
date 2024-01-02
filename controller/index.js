@@ -757,7 +757,7 @@ const openai = new OpenAI({
 const openAIController = {
   postOpenAIChattingNew: async (req, res) => {
     const { messageArr } = req.body;
-    // console.log(messageArr);
+    console.log(messageArr);
     const response = await openai.chat.completions.create({
       messages: [
         {
