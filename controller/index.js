@@ -785,7 +785,7 @@ const openAIController = {
       const message = { message: response.choices[0].message.content };
       res.json(message);
     } catch (err) {
-      console.error(err);
+      console.error(err.error);
       res.json(err);
     }
   },
@@ -801,24 +801,25 @@ const openAIController = {
       parseMessageArr = JSON.parse(messageArr);
     } else parseMessageArr = [...messageArr];
 
-    const response = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content:
-            "너는 감정 판별사야. 앞으로 입력되는 유저 메세지를 긍정/부정/중립 3가지 상태 중 하나로 판단해줘. 대답은 반드시 긍정,부정,중립 3개 중 하나로만 해줘.",
-        },
-        ...parseMessageArr,
-      ],
-      model: "gpt-3.5-turbo",
-    });
-
-    // console.log(response.choices[0]);
-
     try {
+      const response = await openai.chat.completions.create({
+        messages: [
+          {
+            role: "system",
+            content:
+              "너는 감정 판별사야. 앞으로 입력되는 유저 메세지를 긍정/부정/중립 3가지 상태 중 하나로 판단해줘. 대답은 반드시 긍정,부정,중립 3개 중 하나로만 해줘.",
+          },
+          ...parseMessageArr,
+        ],
+        model: "gpt-3.5-turbo",
+      });
+
+      // console.log(response.choices[0]);
+
       const message = { message: response.choices[0].message.content };
       res.send(message);
     } catch (err) {
+      // console.error(err.error);
       res.send(err);
     }
   },
