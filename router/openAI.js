@@ -4,13 +4,14 @@ const router = express.Router();
 const { errController } = require("../controller/index");
 const { openAIController } = require("../controller/index");
 
-const { postOpenAIChattingNew } = openAIController;
+const { postOpenAIChattingNew, postOpenAIEmotionAnalyze } = openAIController;
 
 router.get("/", (req, res) => {
   res.send("Welcome to the Coding Nexus API");
 });
 
 router.post("/message", postOpenAIChattingNew);
+router.post("/emotion", postOpenAIEmotionAnalyze);
 
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);

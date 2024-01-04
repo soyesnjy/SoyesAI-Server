@@ -14,19 +14,19 @@ const { putPersonalResultHandler, postPersonalResultHandler } =
   personalityController;
 const { putCareerResultHandler, postCareerResultHandler } = careerController;
 
-// Emotinal 결과 삽입(수정)
+// Emotinal 결과 삽입(PUT)
 router.post("/putEmotinalResult", putEmotinalResultHandler);
-// Emotinal 결과 확인
+// Emotinal 결과 확인 (SELETE)
 router.post("/postEmotinalResult", postEmotinalResultHandler);
 
-// Personal 결과 삽입(수정)
+// Personal 결과 삽입(PUT)
 router.post("/putPersonalResult", putPersonalResultHandler);
-// Personal 결과 확인
+// Personal 결과 확인 (SELETE)
 router.post("/postPersonalResult", postPersonalResultHandler);
 
-// Career 결과 삽입(수정)
+// Career 결과 삽입(PUT)
 router.post("/putCareerResult", putCareerResultHandler);
-// Career 결과 확인
+// Career 결과 확인 (SELETE)
 router.post("/postCareerResult", postCareerResultHandler);
 
 // 에러 메세지 처리

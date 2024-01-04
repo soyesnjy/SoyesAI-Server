@@ -757,8 +757,8 @@ const openai = new OpenAI({
 const openAIController = {
   postOpenAIChattingNew: async (req, res) => {
     const { messageArr } = req.body;
-    console.log(messageArr);
-    console.log(typeof messageArr);
+    //console.log(messageArr);
+    //console.log(typeof messageArr);
 
     let parseMessageArr;
 
@@ -777,6 +777,39 @@ const openAIController = {
         ...parseMessageArr,
       ],
       model: "gpt-4-0613",
+    });
+
+    // console.log(response.choices[0]);
+
+    try {
+      const message = { message: response.choices[0].message.content };
+      res.send(message);
+    } catch (err) {
+      res.send(err);
+    }
+  },
+  postOpenAIEmotionAnalyze: async (req, res) => {
+    const { messageArr } = req.body;
+    console.log(messageArr);
+    //console.log(typeof messageArr);
+
+    let parseMessageArr;
+
+    // messageArr가 문자열일 경우 json 파싱
+    if (typeof messageArr === "string") {
+      parseMessageArr = JSON.parse(messageArr);
+    } else parseMessageArr = [...messageArr];
+
+    const response = await openai.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content:
+            "너는 감정 판별사야. 앞으로 입력되는 유저 메세지를 긍정/부정/중립 3가지 상태 중 하나로 판단해줘. 대답은 반드시 긍정,부정,중립 3개 중 하나로만 해줘.",
+        },
+        ...parseMessageArr,
+      ],
+      model: "gpt-3.5-turbo",
     });
 
     // console.log(response.choices[0]);
