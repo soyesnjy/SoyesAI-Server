@@ -776,7 +776,7 @@ const openAIController = {
         },
         ...parseMessageArr,
       ],
-      model: "gpt-4-0613",
+      model: "gpt-3.5-turbo", // gpt-4-0613
     });
 
     // console.log(response.choices[0]);
