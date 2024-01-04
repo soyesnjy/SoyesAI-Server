@@ -790,7 +790,7 @@ const openAIController = {
   },
   postOpenAIEmotionAnalyze: async (req, res) => {
     const { messageArr } = req.body;
-    console.log(messageArr);
+    //console.log(messageArr);
     //console.log(typeof messageArr);
 
     let parseMessageArr;
