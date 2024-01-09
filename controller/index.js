@@ -778,7 +778,7 @@ const openAIController = {
           },
           ...parseMessageArr,
         ],
-        model: "ft:gpt-3.5-turbo-1106:personal::8UpMkie8", // gpt-3.5-turbo, gpt-4-0613
+        model: "ft:gpt-3.5-turbo-1106:personal::8f03oYHL", // gpt-3.5-turbo, gpt-4-0613
       });
 
       // console.log(response.choices[0]);
