@@ -757,8 +757,8 @@ const openai = new OpenAI({
 const openAIController = {
   postOpenAIChattingNew: async (req, res) => {
     const { messageArr } = req.body;
-    console.log(req.body);
-    console.log(messageArr);
+    //console.log(req.body);
+    //console.log(messageArr);
     //console.log(typeof messageArr);
 
     let parseMessageArr;
@@ -778,7 +778,7 @@ const openAIController = {
           },
           ...parseMessageArr,
         ],
-        model: "ft:gpt-3.5-turbo-1106:personal::8f03oYHL", // gpt-3.5-turbo, gpt-4-0613
+        model: "ft:gpt-3.5-turbo-1106:personal::8fHlMzxb", // gpt-3.5-turbo, gpt-4-0613
       });
 
       // console.log(response.choices[0]);
