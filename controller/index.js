@@ -779,7 +779,7 @@ const openAIController = {
           },
           ...parseMessageArr,
         ],
-        model: "gpt-4-0613", // gpt-3.5-turbo, gpt-4-0613, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-3.5-turbo", // gpt-3.5-turbo, gpt-4-0613, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
       // console.log(response.choices[0]);
