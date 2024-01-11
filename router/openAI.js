@@ -7,7 +7,7 @@ const { openAIController } = require("../controller/index");
 const {
   postOpenAIChattingNew,
   postOpenAIEmotionAnalyze,
-  postOpenAITestResultConsulting,
+  postOpenAIEmotionTestResultConsulting,
 } = openAIController;
 
 router.get("/", (req, res) => {
@@ -16,7 +16,7 @@ router.get("/", (req, res) => {
 
 router.post("/message", postOpenAIChattingNew);
 router.post("/emotion", postOpenAIEmotionAnalyze);
-router.post("/consulting", postOpenAITestResultConsulting);
+router.post("/consulting", postOpenAIEmotionTestResultConsulting);
 
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);

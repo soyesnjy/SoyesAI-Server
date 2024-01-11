@@ -829,9 +829,9 @@ const openAIController = {
       res.send(err);
     }
   },
-  postOpenAITestResultConsulting: async (req, res) => {
+  postOpenAIEmotionTestResultConsulting: async (req, res) => {
     const { messageArr } = req.body;
-    //console.log(messageArr);
+    // console.log("anxiety_depression");
     //console.log(typeof messageArr);
 
     let parseMessageArr;
@@ -876,7 +876,7 @@ const openAIController = {
           {
             role: "system",
             content: `
-              anxiety_depression:90, 
+              anxiety_depression:10, 
               withdrawal_depression:50,
               physical_symptoms: 60,
               social_immaturity: 20,
