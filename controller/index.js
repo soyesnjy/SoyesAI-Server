@@ -779,9 +779,9 @@ const openAIController = {
           },
           ...parseMessageArr,
         ],
-        model: "gpt-3.5-turbo", // gpt-4-1106-preview, gpt-3.5-turbo, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-3.5-turbo-1106", // gpt-4-1106-preview, gpt-3.5-turbo-1106, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
-
+      // gpt-4-1106-preview 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
       // console.log(response.choices[0]);
 
       const message = { message: response.choices[0].message.content };
