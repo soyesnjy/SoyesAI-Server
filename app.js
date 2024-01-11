@@ -15,7 +15,7 @@ app.use(
   cors({
     origin: [
       "http://d1rq5xi9hzhyrc.cloudfront.net",
-      "http://127.0.0.1:55103",
+      "http://127.0.0.1:54491",
       "http://localhost:4000",
       "http://localhost:3000",
       "http://soyes.chatbot.s3-website.ap-northeast-2.amazonaws.com",

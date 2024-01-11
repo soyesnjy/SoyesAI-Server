@@ -783,7 +783,7 @@ const openAIController = {
           },
           ...parseMessageArr,
         ],
-        model: "gpt-3.5-turbo-1106", // gpt-4-1106-preview, gpt-3.5-turbo-1106, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-4-1106-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
       // gpt-4-1106-preview 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
       // console.log(response.choices[0]);
@@ -818,6 +818,80 @@ const openAIController = {
           ...parseMessageArr,
         ],
         model: "gpt-3.5-turbo-1106",
+      });
+
+      // console.log(response.choices[0]);
+
+      const message = { message: response.choices[0].message.content };
+      res.send(message);
+    } catch (err) {
+      // console.error(err.error);
+      res.send(err);
+    }
+  },
+  postOpenAITestResultConsulting: async (req, res) => {
+    const { messageArr } = req.body;
+    //console.log(messageArr);
+    //console.log(typeof messageArr);
+
+    let parseMessageArr;
+
+    // messageArr가 문자열일 경우 json 파싱
+    if (typeof messageArr === "string") {
+      parseMessageArr = JSON.parse(messageArr);
+    } else parseMessageArr = [...messageArr];
+
+    try {
+      const response = await openai.chat.completions.create({
+        messages: [
+          {
+            role: "system",
+            content:
+              "너의 이름은 소예. 소예는 아동 심리 상담사입니다. 소예는 한국어를 사용하는 아동을 대상으로 하면서, 그들의 언어와 문화에 맞춘 지원과 지도를 제공합니다. 소예는 간단한 방식으로, 초등학교 저학년 아동들과 소통할 때 반말을 사용합니다. 아이들의 질문에 대한 답변은 모두 한국어로 이루어지고, 아이들이 쉽게 이해하고 소통할 수 있는 언어를 사용할 것입니다. 답변은 반드시 100글자 이내로 합니다.",
+          },
+          {
+            role: "system",
+            content: "지금부터 심리 검사 척도에대해 설명할거야.",
+          },
+          {
+            role: "system",
+            content: `
+            anxiety_depression: 아동기에 흔히 보일 수 있는 우울증과 불안장애를 반영하며, 자신감이 낮고 지나치게 걱정이 많다거나 불안 및 공포를 느끼는 정도를 측정합니다.
+            withdrawal_depression: 이 영역에서 문제를 보이는 아동은 수줍음이 많고 혼자 있기를 좋아하며, 말을 하지 않으려 하고 소극적인 태도를 보이는 경우가 많습니다.
+            physical_symptoms: 특정한 의학적 원인 없이 두통, 복통, 구토 등과 같은 신체증상들을 호소하는 정도를 반영합니다.
+            social_immaturity: 제 나이에 비해 어리게 행동하거나 너무 어른들에게 의지하고 매달리는 성향으로 미성숙하고 비사교적인 측면을 반영합니다.
+            thinking_problem: 어떤 특정한 행동이나 생각을 지나치게 반복하는 것과 같은 강박적인 사고와 행동, 환청이나 환시와 같이 실제로는 존재하지 않는 현상을 보거나 소리를 듣는 등의 비현실적이고기이한 사고 및 행동들과 관련이 있는데, 점수가 높을 경우 실제로 어떤 어려움이 반영된것인지 심화평가를 할 필요가 있습니다.
+            attention_problem: 산만하고 어떤 일에 오래 주의를 기울이지 못하며, 가만히 앉아있지 못하고 지나치게 많이 움직이는 아동은 주의력 문제의 가능성을 의심해볼 만합니다.
+            violation_rules: 거짓말을 한다거나 가출, 도벽 등 아동 및 청소년기에 보일 수 있는 행동일탈의 정도를 측정하는 척도입니다.
+            attack_action: 말다툼을 한다거나 남을 괴롭히고 못살게 구는 등 공격적인 성향과 싸움, 반항행동을 평가하는 영역입니다.
+            other_problem: 위에 제시된 요인 외에 아동 및 청소년기에 나타날 수 있는 기타 다양한 부적응 행동들을포함합니다.
+            internalizing_problems: 불안/우울, 위축/우울, 신체증상 등 세가지 영역의 문제행동 점수의 합입니다. 소극적이고사회적으로 위축되어 있으며, 감정을 과잉통제하는 경향을 보일 수 있습니다.
+            externalizing_problems: 규칙위반과 공격행동 두 가지 영역의 문제행동 점수의 합입니다. 타인에게 피해를 주거나공격적인 행동을 보일 수 있고, 행동통제가 어려울 수도 있습니다.`,
+          },
+          {
+            role: "system",
+            content:
+              "각 척도는 key:value, 형식으로 0점에서 100점 사이의 점수를 입력받을거야. 점수가 높을수록 위험군에 속해. 각 점수를 바탕으로 해당 아동의 심리 상담에 반영해줘",
+          },
+          {
+            role: "system",
+            content: `
+              anxiety_depression:90, 
+              withdrawal_depression:50,
+              physical_symptoms: 60,
+              social_immaturity: 20,
+              thinking_problem: 16
+              attention_problem: 28
+              violation_rules:87
+              attack_action: 21
+              other_problem: 64
+              internalizing_problems: 15
+              externalizing_problems: 75
+              `,
+          },
+          ...parseMessageArr,
+        ],
+        model: "gpt-4-1106-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106
       });
 
       // console.log(response.choices[0]);
