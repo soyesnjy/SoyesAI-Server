@@ -903,7 +903,8 @@ const openAIController = {
     }
   },
   postOpenAIPsychologicalAnalysis: async (req, res) => {
-    const { ebtData } = req.body;
+    const { EBTData } = req.body;
+    const { ebtData } = EBTData;
     //console.log(req.body);
     //console.log(messageArr);
     //console.log(typeof messageArr);
@@ -914,7 +915,6 @@ const openAIController = {
     // if (typeof ebtData === "string") {
     //   parseMessageArr = JSON.parse(ebtData);
     // } else parseMessageArr = [...ebtData];
-    console.log(req.body);
     console.log(ebtData);
 
     // try {
