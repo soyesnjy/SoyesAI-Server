@@ -904,7 +904,8 @@ const openAIController = {
   },
   postOpenAIPsychologicalAnalysis: async (req, res) => {
     const { EBTData } = req.body;
-    const { ebtData } = EBTData;
+    const data = JSON.parse(EBTData);
+    const { ebtData } = data;
     //console.log(req.body);
     //console.log(messageArr);
     //console.log(typeof messageArr);
