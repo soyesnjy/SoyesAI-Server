@@ -940,6 +940,9 @@ const openAIController = {
       // console.log(response.choices[0]);
 
       const message = { message: response.choices[0].message.content };
+
+      console.log(message);
+
       res.json(message);
     } catch (err) {
       console.error(err.error);
