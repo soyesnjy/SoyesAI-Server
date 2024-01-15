@@ -902,6 +902,49 @@ const openAIController = {
   },
 };
 
+const nodemailer = require("nodemailer");
+
+const mailController = {
+  postSendMail: async (req, res) => {
+    const { uid } = req.body;
+
+    let yourMailAddr = ""; // 받는 사람 메일주소
+    // uid를 사용하여 DB에 접근 후 받는사람 메일 주소를 받아오는 코드 작성 예정
+    yourMailAddr = "soyesnjy@gmail.com";
+
+    const myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
+    const myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail", // 사용할 이메일 서비스
+      // host: "smtp.gmail.com",
+      // port: 587,
+      // secure: false,
+      auth: {
+        user: myMailAddr, // 보내는 이메일 주소
+        pass: myMailPwd, // 이메일 비밀번호
+      },
+    });
+
+    const mailOptions = {
+      from: myMailAddr,
+      to: yourMailAddr,
+      subject: "Test Subject",
+      text: "제곧내",
+    };
+
+    try {
+      transporter.sendMail(mailOptions, function (error, info) {
+        console.log(`Email sent: to ${yourMailAddr} from ${myMailAddr}`);
+        res.json("Mail Send Success!");
+      });
+    } catch (err) {
+      console.error(err.error);
+      res.json("Mail Send Fail!");
+    }
+  },
+};
+
 module.exports = {
   pathController,
   errController,
@@ -912,4 +955,5 @@ module.exports = {
   careerController,
   agoraTokenController,
   openAIController,
+  mailController,
 };
