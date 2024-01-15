@@ -905,7 +905,27 @@ const openAIController = {
   postOpenAIPsychologicalAnalysis: async (req, res) => {
     const { EBTData } = req.body;
     let data;
+    // 메일 관련 세팅 시작
+    let yourMailAddr = ""; // 받는 사람 메일주소
+    // uid를 사용하여 DB에 접근 후 받는사람 메일 주소를 받아오는 코드 작성 예정
+    yourMailAddr = "soyesnjy@gmail.com";
 
+    const myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
+    const myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail", // 사용할 이메일 서비스
+      // host: "smtp.gmail.com",
+      // port: 587,
+      // secure: false,
+      auth: {
+        user: myMailAddr, // 보내는 이메일 주소
+        pass: myMailPwd, // 이메일 비밀번호
+      },
+    });
+    // 메일 관련 세팅 끝
+
+    // 파싱
     if (typeof EBTData === "string") {
       data = JSON.parse(EBTData);
     } else data = EBTData;
@@ -938,16 +958,32 @@ const openAIController = {
               "앞선 대화를 기반으로 학교에 대한 아동의 심리 상태를 분석해줘",
           },
         ],
-        model: "gpt-4-1106-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-3.5-turbo-1106", // gpt-4-1106-preview, gpt-3.5-turbo-1106, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
       // gpt-4-1106-preview 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
       // console.log(response.choices[0]);
 
       const message = { message: response.choices[0].message.content };
 
-      console.log(message);
+      // 메일 제목 및 내용 + 보내는/받는사람
+      const mailOptions = {
+        from: myMailAddr,
+        to: yourMailAddr,
+        subject: "안녕하세요 AI 상담 분석 결과입니다",
+        text: message.message,
+      };
 
-      res.json(message);
+      try {
+        transporter.sendMail(mailOptions, function (error, info) {
+          console.log(`Email sent: to ${yourMailAddr} from ${myMailAddr}`);
+          res.json("Mail Send Success!");
+        });
+      } catch (err) {
+        console.error(err.error);
+        res.json("Mail Send Fail!");
+      }
+
+      // res.json(message);
     } catch (err) {
       console.error(err.error);
       res.json(err);
