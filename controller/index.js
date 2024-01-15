@@ -914,7 +914,7 @@ const openAIController = {
     // if (typeof ebtData === "string") {
     //   parseMessageArr = JSON.parse(ebtData);
     // } else parseMessageArr = [...ebtData];
-
+    console.log(req.body);
     console.log(ebtData);
 
     // try {
