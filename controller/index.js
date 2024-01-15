@@ -966,7 +966,14 @@ const openAIController = {
         from: myMailAddr,
         to: yourMailAddr,
         subject: "안녕하세요 AI 상담 분석 결과입니다",
-        text: message.message,
+        text: `
+        안녕하세요? 소예키즈 AI 상담사입니다.
+        귀하의 상담 내용에 대한 AI 분석 결과를 안내드립니다.
+
+        ${message.message}
+
+        이상입니다. 감사합니다!
+        `,
       };
 
       // 메일 전송
