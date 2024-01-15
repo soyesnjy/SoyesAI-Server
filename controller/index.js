@@ -947,10 +947,6 @@ const openAIController = {
               소예는 심리 전문가스러운 말투를 사용합니다.
               `,
           },
-          {
-            role: "system",
-            content: "이모티콘은 절대로 사용하지마",
-          },
           ...parseMessageArr,
           {
             role: "user",
