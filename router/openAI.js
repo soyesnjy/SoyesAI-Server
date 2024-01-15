@@ -8,6 +8,7 @@ const {
   postOpenAIChattingNew,
   postOpenAIEmotionAnalyze,
   postOpenAIEmotionTestResultConsulting,
+  postOpenAIPsychologicalAnalysis,
 } = openAIController;
 
 router.get("/", (req, res) => {
@@ -17,6 +18,7 @@ router.get("/", (req, res) => {
 router.post("/message", postOpenAIChattingNew);
 router.post("/emotion", postOpenAIEmotionAnalyze);
 router.post("/consulting", postOpenAIEmotionTestResultConsulting);
+router.post("/analysis", postOpenAIPsychologicalAnalysis);
 
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);
