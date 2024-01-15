@@ -911,11 +911,11 @@ const openAIController = {
     let parseMessageArr;
 
     // messageArr가 문자열일 경우 json 파싱
-    if (typeof ebtData === "string") {
-      parseMessageArr = JSON.parse(ebtData);
-    } else parseMessageArr = [...ebtData];
+    // if (typeof ebtData === "string") {
+    //   parseMessageArr = JSON.parse(ebtData);
+    // } else parseMessageArr = [...ebtData];
 
-    console.log(parseMessageArr);
+    console.log(ebtData);
 
     // try {
     //   const response = await openai.chat.completions.create({
