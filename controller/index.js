@@ -786,7 +786,7 @@ const openAIController = {
           },
           ...parseMessageArr,
         ],
-        model: "gpt-3.5-turbo-instruct", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-3.5-turbo-1106", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
       // gpt-4-1106-preview 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
       // console.log(response.choices[0]);
@@ -954,9 +954,9 @@ const openAIController = {
         messages: [
           {
             role: "system",
-            content: `너의 이름은 소예. 
-              소예는 아동 심리 분석가입니다. 
-              소예는 주어진 문답을 분석하여 유저의 심리 상태를 파악합니다. 
+            content: `너의 이름은 소예.
+              소예는 아동 심리 분석가입니다.
+              소예는 주어진 문답을 분석하여 유저의 심리 상태를 파악합니다.
               소예는 주어진 문답으로만 심리 분석을 진행해야합니다.
               소예는 다른 정보에 대한 필요성을 어필해선 안됩니다.
               소예는 심리 전문가스러운 말투를 사용합니다.
@@ -970,12 +970,16 @@ const openAIController = {
             }에 대한 아동의 심리 상태를 분석해줘`,
           },
         ],
-        model: "gpt-3.5-turbo-instruct", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-3.5-turbo-1106", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
+      // gpt-3.5-turbo-instruct 모델은 최신 문법이 아닌 레거시 문법으로 작성해야 사용 가능
       // gpt-4-1106-preview 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
+
       // console.log(response.choices[0]);
 
       const message = { message: response.choices[0].message.content };
+
+      const analyzeMsg = message.message.split(". ").join(".\n");
 
       // 메일 제목 및 내용 + 보내는/받는사람
       const mailOptions = {
@@ -983,12 +987,12 @@ const openAIController = {
         to: yourMailAddr,
         subject: "안녕하세요 AI 상담 분석 결과입니다",
         text: `
-        안녕하세요? 소예키즈 AI 상담사입니다.
-        귀하의 상담 내용에 대한 AI 분석 결과를 안내드립니다.
+안녕하세요? 소예키즈 AI 상담사입니다.
+귀하의 상담 내용에 대한 AI 분석 결과를 안내드립니다.
 
-        ${message.message}
+${analyzeMsg}
 
-        이상입니다. 감사합니다!
+이상입니다. 감사합니다!
         `,
         // attachments : 'logo.png' // 이미지 첨부 속성
       };
