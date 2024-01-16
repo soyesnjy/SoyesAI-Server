@@ -757,6 +757,7 @@ const openai = new OpenAI({
 const nodemailer = require("nodemailer");
 
 const openAIController = {
+  // 자율 상담 AI
   postOpenAIChattingNew: async (req, res) => {
     const { messageArr } = req.body;
     //console.log(req.body);
@@ -797,6 +798,7 @@ const openAIController = {
       res.json(err);
     }
   },
+  // 감정 분석 AI
   postOpenAIEmotionAnalyze: async (req, res) => {
     const { messageArr } = req.body;
     //console.log(messageArr);
@@ -831,6 +833,7 @@ const openAIController = {
       res.send(err);
     }
   },
+  // 테스트 결과 기반 상담 AI
   postOpenAIEmotionTestResultConsulting: async (req, res) => {
     const { messageArr, testResult } = req.body;
     // console.log("anxiety_depression");
@@ -902,9 +905,10 @@ const openAIController = {
       res.send(err);
     }
   },
+  // 테스트 결과 메일 전송 API
   postOpenAIPsychologicalAnalysis: async (req, res) => {
-    const { EBTData } = req.body;
-    let data;
+    const { EBTData, type } = req.body;
+    let data, parsingType;
     // 메일 관련 세팅 시작
     let yourMailAddr = ""; // 받는 사람 메일주소
     // uid를 사용하여 DB에 접근 후 받는사람 메일 주소를 받아오는 코드 작성 예정
@@ -925,13 +929,24 @@ const openAIController = {
     });
     // 메일 관련 세팅 끝
 
+    const testType = {
+      school: "학교",
+      friendship: "교우관계",
+      default: "학교",
+    };
+
     // 파싱
     if (typeof EBTData === "string") {
       data = JSON.parse(EBTData);
     } else data = EBTData;
 
-    console.log(data.ebtData);
+    if (type) parsingType = JSON.parse(type);
 
+    // console.log(data.ebtData);
+    console.log(parsingType);
+    console.log(testType[parsingType]);
+
+    // 파싱 후 값 대입
     let parseMessageArr = [...data.ebtData];
 
     try {
@@ -950,8 +965,9 @@ const openAIController = {
           ...parseMessageArr,
           {
             role: "user",
-            content:
-              "앞선 대화를 기반으로 학교에 대한 아동의 심리 상태를 분석해줘",
+            content: `앞선 대화를 기반으로 ${
+              type ? testType[parsingType] : testType.default
+            }에 대한 아동의 심리 상태를 분석해줘`,
           },
         ],
         model: "gpt-3.5-turbo-1106", // gpt-4-1106-preview, gpt-3.5-turbo-1106, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
@@ -974,6 +990,7 @@ const openAIController = {
 
         이상입니다. 감사합니다!
         `,
+        // attachments : 'logo.png' // 이미지 첨부 속성
       };
 
       // 메일 전송
