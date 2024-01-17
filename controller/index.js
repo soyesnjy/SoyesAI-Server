@@ -1012,8 +1012,8 @@ ${analyzeMsg}
         res.json("Mail Send Fail!");
       }
 
-      // 메일 내역 저장.
-      // 회원가입 시, 테이블에 해당 계정 default row가 생성된다고 가정. (update문을 사용하는 이유)
+      // 메일 내역 DB 저장
+      // 회원가입 시, 테이블에 해당 계정 default row가 생성된다고 가정. (update query를 사용하는 이유)
       const table = "soyes_ai_test";
       const attribute = { pKey: "uid", attr1: "chat", attr2: "date" };
       const dummyUid = "njy95"; // 추후 입력값 uid로 대체 예정
@@ -1026,13 +1026,25 @@ ${analyzeMsg}
 
       // UPDATE query & value
       const query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr2} = ? WHERE ${attribute.pKey} = ?`;
-      const data = [JSON.stringify({ ...mailOptions, date }), date, dummyUid];
+      const value = [JSON.stringify({ ...mailOptions, date }), date, dummyUid];
 
       // 분석 기록 DB 저장
-      connection_AI.query(query, data, (error, rows, fields) => {
+      connection_AI.query(query, value, (error, rows, fields) => {
         if (error) console.log(error);
         else console.log("DB Save Success!");
       });
+
+      // SELECT TEST
+      // const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${dummyUid}'`;
+      // connection_AI.query(select_query, (error, rows, fields) => {
+      //   if (error) console.log(error);
+      //   else {
+      //     // row 값 콘솔에 찍어보기
+      //     console.log(rows[0][attribute.pKey]);
+      //     console.log(JSON.parse(rows[0][attribute.attr1])); // json parsing 필수
+      //     console.log(rows[0][attribute.attr2]);
+      //   }
+      // });
 
       // res.json(message);
     } catch (err) {
