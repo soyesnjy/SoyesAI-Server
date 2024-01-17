@@ -20,7 +20,15 @@ const dbconfig = {
   database: "soyesdb",
 };
 
+const dbconfig_ai = {
+  host: "soyesdb.cbxvnkrdwevn.ap-northeast-2.rds.amazonaws.com",
+  user: "admin",
+  password: "soyesdeveloper1!",
+  database: "soyesAI",
+};
+
 module.exports = {
   users,
   dbconfig,
+  dbconfig_ai,
 };

@@ -78,9 +78,13 @@ const errController = {
 
 // MySQL 접근
 const mysql = require("mysql");
-const { dbconfig } = require("../DB/database");
+const { dbconfig, dbconfig_ai } = require("../DB/database");
+// Tips DB 연결
 const connection = mysql.createConnection(dbconfig);
 connection.connect();
+// AI DB 연결
+const connection_AI = mysql.createConnection(dbconfig_ai);
+connection_AI.connect();
 // connection.end(); // 언제쓰지?
 const { users } = require("../DB/database");
 
@@ -985,7 +989,7 @@ const openAIController = {
       const mailOptions = {
         from: myMailAddr,
         to: yourMailAddr,
-        subject: "안녕하세요 AI 상담 분석 결과입니다",
+        subject: "정서행동 검사 AI 상담 분석 결과입니다",
         text: `
 안녕하세요? 소예키즈 AI 상담사입니다.
 귀하의 상담 내용에 대한 AI 분석 결과를 안내드립니다.
@@ -1007,6 +1011,28 @@ ${analyzeMsg}
         console.error(err.error);
         res.json("Mail Send Fail!");
       }
+
+      // 메일 내역 저장.
+      // 회원가입 시, 테이블에 해당 계정 default row가 생성된다고 가정. (update문을 사용하는 이유)
+      const table = "soyes_ai_test";
+      const attribute = { pKey: "uid", attr1: "chat", attr2: "date" };
+      const dummyUid = "njy95"; // 추후 입력값 uid로 대체 예정
+      // 오늘 날짜 변환
+      const dateObj = new Date();
+      const year = dateObj.getFullYear();
+      const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+      const day = ("0" + dateObj.getDate()).slice(-2);
+      const date = `${year}-${month}-${day}`;
+
+      // UPDATE query & value
+      const query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr2} = ? WHERE ${attribute.pKey} = ?`;
+      const data = [JSON.stringify({ ...mailOptions, date }), date, dummyUid];
+
+      // 분석 기록 DB 저장
+      connection_AI.query(query, data, (error, rows, fields) => {
+        if (error) console.log(error);
+        else console.log("DB Save Success!");
+      });
 
       // res.json(message);
     } catch (err) {
