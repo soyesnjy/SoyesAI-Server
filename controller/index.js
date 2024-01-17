@@ -911,8 +911,10 @@ const openAIController = {
   },
   // 테스트 결과 메일 전송 API
   postOpenAIPsychologicalAnalysis: async (req, res) => {
-    const { EBTData, type } = req.body;
+    const { EBTData, type, uid } = req.body;
     let data, parsingType;
+    const pUid = uid ? JSON.parse(uid) : "njy95"; // 추후 입력값 uid로 대체 예정
+    // console.log(pUid);
     // 메일 관련 세팅 시작
     let yourMailAddr = ""; // 받는 사람 메일주소
     // uid를 사용하여 DB에 접근 후 받는사람 메일 주소를 받아오는 코드 작성 예정
@@ -947,13 +949,14 @@ const openAIController = {
     if (type) parsingType = JSON.parse(type);
 
     // console.log(data.ebtData);
-    console.log(parsingType);
-    console.log(testType[parsingType]);
+    // console.log(parsingType);
+    // console.log(testType[parsingType]);
 
     // 파싱 후 값 대입
     let parseMessageArr = [...data.ebtData];
 
     try {
+      // AI 분석
       const response = await openai.chat.completions.create({
         messages: [
           {
@@ -982,10 +985,10 @@ const openAIController = {
       // console.log(response.choices[0]);
 
       const message = { message: response.choices[0].message.content };
-
+      // AI 분석 내용 보기좋게 정리
       const analyzeMsg = message.message.split(". ").join(".\n");
 
-      // 메일 제목 및 내용 + 보내는/받는사람
+      // 메일 제목 및 내용 + 보내는사람 + 받는사람
       const mailOptions = {
         from: myMailAddr,
         to: yourMailAddr,
@@ -1002,21 +1005,17 @@ ${analyzeMsg}
       };
 
       // 메일 전송
-      try {
-        transporter.sendMail(mailOptions, function (error, info) {
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) res.json("Mail Send Fail!");
+        else {
           console.log(`Email sent: to ${yourMailAddr} from ${myMailAddr}`);
           res.json("Mail Send Success!");
-        });
-      } catch (err) {
-        console.error(err.error);
-        res.json("Mail Send Fail!");
-      }
+        }
+      });
 
       // 메일 내역 DB 저장
-      // 회원가입 시, 테이블에 해당 계정 default row가 생성된다고 가정. (update query를 사용하는 이유)
-      const table = "soyes_ai_test";
+      const table = "soyes_ai_Analysis";
       const attribute = { pKey: "uid", attr1: "chat", attr2: "date" };
-      const dummyUid = "njy96"; // 추후 입력값 uid로 대체 예정
       // 오늘 날짜 변환
       const dateObj = new Date();
       const year = dateObj.getFullYear();
@@ -1024,32 +1023,39 @@ ${analyzeMsg}
       const day = ("0" + dateObj.getDate()).slice(-2);
       const date = `${year}-${month}-${day}`;
 
-      // 1. UPDATE TEST
-      // const update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr2} = ? WHERE ${attribute.pKey} = ?`;
-      // const update_value = [JSON.stringify({ ...mailOptions, date }), date, dummyUid];
+      /*
+      // 1. SELECT TEST (row가 있는지 없는지 검사)
+      const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${pUid}'`;
+      connection_AI.query(select_query, (error, rows, fields) => {
+        if (error) console.log(error);
+        else {
+          // row 값 콘솔에 찍어보기
+          console.log(rows[0][attribute.pKey]);
+          console.log(JSON.parse(rows[0][attribute.attr1])); // json parsing 필수
+          console.log(rows[0][attribute.attr2]);
+        }
+      });
+      */
 
-      // // 분석 기록 DB 저장
-      // connection_AI.query(update_query, update_value, (error, rows, fields) => {
-      //   if (error) console.log(error);
-      //   else console.log("DB Save Success!");
-      // });
+      // 2. UPDATE TEST (row값이 있는 경우 실행)
+      const update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr2} = ? WHERE ${attribute.pKey} = ?`;
+      const update_value = [
+        JSON.stringify({ ...mailOptions, date }),
+        date,
+        pUid,
+      ];
 
-      // 2. SELECT TEST
-      // const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${dummyUid}'`;
-      // connection_AI.query(select_query, (error, rows, fields) => {
-      //   if (error) console.log(error);
-      //   else {
-      //     // row 값 콘솔에 찍어보기
-      //     console.log(rows[0][attribute.pKey]);
-      //     console.log(JSON.parse(rows[0][attribute.attr1])); // json parsing 필수
-      //     console.log(rows[0][attribute.attr2]);
-      //   }
-      // });
+      // 분석 기록 DB 저장
+      connection_AI.query(update_query, update_value, (error, rows, fields) => {
+        if (error) console.log(error);
+        else console.log("DB Save Success!");
+      });
 
-      // 3. INSERT TEST
+      /*
+      // 3. INSERT TEST (row값이 없는 경우 실행)
       const insert_query = `INSERT INTO ${table} (${attribute.pKey}, ${attribute.attr1}, ${attribute.attr2}) VALUES (?, ?, ?)`;
       const insert_value = [
-        dummyUid,
+        pUid,
         JSON.stringify({ ...mailOptions, date }),
         date,
       ];
@@ -1058,6 +1064,7 @@ ${analyzeMsg}
         if (error) console.log(error);
         else console.log("INSERT Success");
       });
+      */
 
       // res.json(message);
     } catch (err) {
