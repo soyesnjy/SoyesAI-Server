@@ -1016,7 +1016,7 @@ ${analyzeMsg}
       // 회원가입 시, 테이블에 해당 계정 default row가 생성된다고 가정. (update query를 사용하는 이유)
       const table = "soyes_ai_test";
       const attribute = { pKey: "uid", attr1: "chat", attr2: "date" };
-      const dummyUid = "njy95"; // 추후 입력값 uid로 대체 예정
+      const dummyUid = "njy96"; // 추후 입력값 uid로 대체 예정
       // 오늘 날짜 변환
       const dateObj = new Date();
       const year = dateObj.getFullYear();
@@ -1024,17 +1024,17 @@ ${analyzeMsg}
       const day = ("0" + dateObj.getDate()).slice(-2);
       const date = `${year}-${month}-${day}`;
 
-      // UPDATE query & value
-      const query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr2} = ? WHERE ${attribute.pKey} = ?`;
-      const value = [JSON.stringify({ ...mailOptions, date }), date, dummyUid];
+      // 1. UPDATE TEST
+      // const update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr2} = ? WHERE ${attribute.pKey} = ?`;
+      // const update_value = [JSON.stringify({ ...mailOptions, date }), date, dummyUid];
 
-      // 분석 기록 DB 저장
-      connection_AI.query(query, value, (error, rows, fields) => {
-        if (error) console.log(error);
-        else console.log("DB Save Success!");
-      });
+      // // 분석 기록 DB 저장
+      // connection_AI.query(update_query, update_value, (error, rows, fields) => {
+      //   if (error) console.log(error);
+      //   else console.log("DB Save Success!");
+      // });
 
-      // SELECT TEST
+      // 2. SELECT TEST
       // const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${dummyUid}'`;
       // connection_AI.query(select_query, (error, rows, fields) => {
       //   if (error) console.log(error);
@@ -1045,6 +1045,19 @@ ${analyzeMsg}
       //     console.log(rows[0][attribute.attr2]);
       //   }
       // });
+
+      // 3. INSERT TEST
+      const insert_query = `INSERT INTO ${table} (${attribute.pKey}, ${attribute.attr1}, ${attribute.attr2}) VALUES (?, ?, ?)`;
+      const insert_value = [
+        dummyUid,
+        JSON.stringify({ ...mailOptions, date }),
+        date,
+      ];
+
+      connection_AI.query(insert_query, insert_value, (error, rows, fields) => {
+        if (error) console.log(error);
+        else console.log("INSERT Success");
+      });
 
       // res.json(message);
     } catch (err) {
