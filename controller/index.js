@@ -912,14 +912,67 @@ const openAIController = {
   // 테스트 결과 메일 전송 API
   postOpenAIPsychologicalAnalysis: async (req, res) => {
     const { EBTData, type, uid } = req.body;
-    let data, parsingType;
-    const pUid = uid ? JSON.parse(uid) : "njy95"; // 추후 입력값 uid로 대체 예정
-    // console.log(pUid);
-    // 메일 관련 세팅 시작
-    let yourMailAddr = ""; // 받는 사람 메일주소
-    // uid를 사용하여 DB에 접근 후 받는사람 메일 주소를 받아오는 코드 작성 예정
-    yourMailAddr = "soyesnjy@gmail.com";
 
+    let data,
+      parsingType,
+      pUid,
+      yourMailAddr = "";
+
+    // uid, type 전처리. 없는 경우 디폴트값 할당
+    pUid = uid ? uid : "njy95";
+    parsingType = type ? type : "default";
+
+    // 테스트 타입 객체. 추후 검사를 늘림에 따라 추가 될 예정
+    const testType = {
+      school: "학교",
+      friendship: "교우관계",
+      default: "학교",
+    };
+
+    // 메일 관련 세팅 시작
+
+    /*
+    // mysql query 메서드 동기식 작동 + DB 데이터 가져오기
+    let yourMailAddr = "";
+
+    // Promise 생성 메서드
+    function queryAsync(connection, query, parameters) {
+      return new Promise((resolve, reject) => {
+        connection.query(query, parameters, (error, results, fields) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(results);
+          }
+        });
+      });
+    }
+
+    // 프로미스 resolve 반환값 사용. (User Data return)
+    async function fetchUserData(connection, query) {
+      try {
+        let results = await queryAsync(connection, query, []);
+        // console.log(results[0]);
+        yourMailAddr = results[0].email; // Select email
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    const user_table = "soyes_ai_User";
+    const user_attr = {
+      pKey: "uid",
+      attr1: "email"
+    }
+
+    const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${pUid}'`;
+    await fetchUserData(connection_AI, select_query);
+    console.log("받는사람: " + yourMailAddr);
+    */
+
+    yourMailAddr = "soyesnjy@gmail.com"; // dummy email. 받는사람
+
+    // 보내는 사람 계정 로그인
     const myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
     const myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
 
@@ -935,22 +988,10 @@ const openAIController = {
     });
     // 메일 관련 세팅 끝
 
-    const testType = {
-      school: "학교",
-      friendship: "교우관계",
-      default: "학교",
-    };
-
-    // 파싱
+    // 파싱. Client JSON 데이터
     if (typeof EBTData === "string") {
       data = JSON.parse(EBTData);
     } else data = EBTData;
-
-    if (type) parsingType = JSON.parse(type);
-
-    // console.log(data.ebtData);
-    // console.log(parsingType);
-    // console.log(testType[parsingType]);
 
     // 파싱 후 값 대입
     let parseMessageArr = [...data.ebtData];
@@ -972,9 +1013,7 @@ const openAIController = {
           ...parseMessageArr,
           {
             role: "user",
-            content: `앞선 대화를 기반으로 ${
-              type ? testType[parsingType] : testType.default
-            }에 대한 아동의 심리 상태를 분석해줘`,
+            content: `앞선 대화를 기반으로 ${testType[parsingType]}에 대한 아동의 심리 상태를 분석해줘`,
           },
         ],
         model: "gpt-3.5-turbo-1106", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
@@ -1004,7 +1043,7 @@ ${analyzeMsg}
         // attachments : 'logo.png' // 이미지 첨부 속성
       };
 
-      // 메일 전송
+      // 메일 전송 (비동기)
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) res.json("Mail Send Fail!");
         else {
