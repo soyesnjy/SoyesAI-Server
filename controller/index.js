@@ -1045,9 +1045,12 @@ ${analyzeMsg}
 
       // 메일 전송 (비동기)
       transporter.sendMail(mailOptions, function (error, info) {
-        if (error) res.json("Mail Send Fail!");
-        else {
-          console.log(`Email sent: to ${yourMailAddr} from ${myMailAddr}`);
+        if (error) {
+          console.log("Mail Send Fail!");
+          res.json("Mail Send Fail!");
+        } else {
+          console.log("Mail Send Success!");
+          console.log(info.envelope);
           res.json("Mail Send Success!");
         }
       });
