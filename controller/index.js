@@ -1048,7 +1048,7 @@ ${analyzeMsg}
       // 분석 기록 DB 저장
       connection_AI.query(update_query, update_value, (error, rows, fields) => {
         if (error) console.log(error);
-        else console.log("DB Save Success!");
+        else console.log("AI Analysis Data DB Save Success!");
       });
 
       /*
