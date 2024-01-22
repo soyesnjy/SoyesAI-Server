@@ -1051,7 +1051,7 @@ ${analyzeMsg}
         } else {
           console.log("Mail Send Success!");
           console.log(info.envelope);
-          res.json("Mail Send Success!");
+          res.json(mailOptions.text);
         }
       });
 
@@ -1111,7 +1111,7 @@ ${analyzeMsg}
       // res.json(message);
     } catch (err) {
       console.error(err.error);
-      res.json(err);
+      res.json("Fail!");
     }
   },
 };
