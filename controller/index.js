@@ -1013,7 +1013,7 @@ const openAIController = {
           ...parseMessageArr,
           {
             role: "user",
-            content: `앞선 대화를 기반으로 ${testType[parsingType]}에 대한 아동의 심리 상태를 분석해줘`,
+            content: `앞선 대화를 기반으로 ${testType[parsingType]}에 대한 아동의 심리 상태를 분석해줘. 분석이 끝나면 문제에 대한 해결 방안을 제시해줘`,
           },
         ],
         model: "gpt-3.5-turbo-1106", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
