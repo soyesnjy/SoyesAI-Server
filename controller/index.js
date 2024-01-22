@@ -1051,7 +1051,7 @@ ${analyzeMsg}
         } else {
           console.log("Mail Send Success!");
           console.log(info.envelope);
-          res.json(mailOptions.text);
+          res.json({ message: mailOptions.text });
         }
       });
 
