@@ -837,7 +837,7 @@ const openAIController = {
       res.send(err);
     }
   },
-  // 테스트 결과 기반 상담 AI
+  // 테스트 결과 기반 상담 AI. 정서행동 검사
   postOpenAIEmotionTestResultConsulting: async (req, res) => {
     const { messageArr, testResult } = req.body;
     // console.log("anxiety_depression");
@@ -1112,6 +1112,79 @@ ${analyzeMsg}
     } catch (err) {
       console.error(err.error);
       res.json("Fail!");
+    }
+  },
+  // 테스트 결과 기반 상담 AI. 성격 검사
+  postOpenAIPersnalTestResultConsulting: async (req, res) => {
+    const { messageArr, testResult } = req.body;
+
+    let parseMessageArr,
+      parseTestResult = {};
+    // console.log(messageArr);
+
+    // messageArr가 문자열일 경우 json 파싱
+    if (typeof messageArr === "string") {
+      parseMessageArr = JSON.parse(messageArr);
+    } else parseMessageArr = [...messageArr];
+
+    if (typeof testResult === "string") {
+      parseTestResult = JSON.parse(messageArr);
+    } else if (!testResult) {
+      // default 검사 결과
+      parseTestResult.persnal = `아동은 누군가와 꼭 함께 하지 않더라도 혼자서 즐겁게 시간을 보낼 수 있습니다. 
+        먼저 나서서 리더가 되거나 다른 사람에게 도움을 주는 역할을 하는 것을 선호하지는 않습니다.
+        다만 내향적인 듯 하며 또래와 어울리는 데에 어려움을 보일 수 있습니다. 
+        타인을 위해서 불필요한 에너지 소모를 원치 않다 보니 누군가에게 도움을 주거나 단체를 위하여 역할을 분담하는 일은 잘 하지 않아 이기적인 모습으로 비칠 수 있습니다.
+        `;
+    } else parseTestResult.persnal = testResult;
+
+    // console.log(JSON.stringify(parseTestResult));
+
+    try {
+      const response = await openai.chat.completions.create({
+        temperature: 0.5,
+        messages: [
+          {
+            role: "system",
+            content: `
+            1. 맥락
+            - 나의 이름은 노지용.
+            - 너는 소예초등학교에 재학중인 9살 남학생이야.
+            - 너는 내 가장 친한 친구야
+            - 나는 너에게 고민 상담을 받고싶어해.
+            
+            2. 작업
+            - 9살의 눈높이에서 내 고민을 들어줘.
+            - 나의 성격검사 결과를 반영해서 대화를 진행해줘.
+            - 답변은 70글자 이내로 작성해줘.
+            
+            3. 페르소나
+            - 너는 평범한 9살 남자아이야
+            
+            4. 어조
+            - 냉소적인 말투를 사용해줘
+            
+            5. 답변 예시
+            - 뭐? 그게 진짜야? 나였으면 당장 그만뒀다 진짜...
+            - 아니.... 좀 너무했다 그건...
+            - ㅋㅋㅋ 진짜? 겁나 웃기넼ㅋㅋㅋ
+            
+            6. 나의 성격검사 결과
+            ${parseTestResult.persnal}
+            `,
+          },
+          ...parseMessageArr,
+        ],
+        model: "gpt-3.5-turbo-1106", // gpt-4-1106-preview, gpt-3.5-turbo-1106, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      });
+
+      // console.log(response.choices[0]);
+
+      const message = { message: response.choices[0].message.content };
+      res.send(message);
+    } catch (err) {
+      // console.error(err.error);
+      res.send(err);
     }
   },
 };
