@@ -844,7 +844,22 @@ const openAIController = {
     const { messageArr, testResult } = req.body;
     // console.log("anxiety_depression");
     //console.log(typeof messageArr);
-    let parseMessageArr, parseTestResult;
+    let parseMessageArr,
+      parseTestResult = {};
+
+    const behavioral_rating_scale = `
+anxiety_depression: 아동기에 흔히 보일 수 있는 우울증과 불안장애를 반영하며, 자신감이 낮고 지나치게 걱정이 많다거나 불안 및 공포를 느끼는 정도를 측정합니다.
+withdrawal_depression: 이 영역에서 문제를 보이는 아동은 수줍음이 많고 혼자 있기를 좋아하며, 말을 하지 않으려 하고 소극적인 태도를 보이는 경우가 많습니다.
+physical_symptoms: 특정한 의학적 원인 없이 두통, 복통, 구토 등과 같은 신체증상들을 호소하는 정도를 반영합니다.
+social_immaturity: 제 나이에 비해 어리게 행동하거나 너무 어른들에게 의지하고 매달리는 성향으로 미성숙하고 비사교적인 측면을 반영합니다.
+thinking_problem: 어떤 특정한 행동이나 생각을 지나치게 반복하는 것과 같은 강박적인 사고와 행동, 환청이나 환시와 같이 실제로는 존재하지 않는 현상을 보거나 소리를 듣는 등의 비현실적이고기이한 사고 및 행동들과 관련이 있는데, 점수가 높을 경우 실제로 어떤 어려움이 반영된것인지 심화평가를 할 필요가 있습니다.
+attention_problem: 산만하고 어떤 일에 오래 주의를 기울이지 못하며, 가만히 앉아있지 못하고 지나치게 많이 움직이는 아동은 주의력 문제의 가능성을 의심해볼 만합니다.
+violation_rules: 거짓말을 한다거나 가출, 도벽 등 아동 및 청소년기에 보일 수 있는 행동일탈의 정도를 측정하는 척도입니다.
+attack_action: 말다툼을 한다거나 남을 괴롭히고 못살게 구는 등 공격적인 성향과 싸움, 반항행동을 평가하는 영역입니다.
+other_problem: 위에 제시된 요인 외에 아동 및 청소년기에 나타날 수 있는 기타 다양한 부적응 행동들을포함합니다.
+internalizing_problems: 불안/우울, 위축/우울, 신체증상 등 세가지 영역의 문제행동 점수의 합입니다. 소극적이고사회적으로 위축되어 있으며, 감정을 과잉통제하는 경향을 보일 수 있습니다.
+externalizing_problems: 규칙위반과 공격행동 두 가지 영역의 문제행동 점수의 합입니다. 타인에게 피해를 주거나공격적인 행동을 보일 수 있고, 행동통제가 어려울 수도 있습니다.
+    `;
 
     // messageArr가 문자열일 경우 json 파싱
     if (typeof messageArr === "string") {
@@ -854,8 +869,8 @@ const openAIController = {
     if (typeof testResult === "string") {
       parseTestResult = JSON.parse(messageArr);
     } else if (!testResult) {
-      parseTestResult = {
-        anxiety_depression: 99,
+      parseTestResult.emotional_behavior = {
+        anxiety_depression: 12,
         withdrawal_depression: 50,
         physical_symptoms: 60,
         social_immaturity: 20,
@@ -867,34 +882,46 @@ const openAIController = {
         internalizing_problems: 15,
         externalizing_problems: 25,
       };
-    } else parseTestResult = testResult;
+    } else parseTestResult.emotional_behavior = testResult;
 
-    // console.log(JSON.stringify(parseTestResult));
+    // console.log(JSON.stringify(parseTestResult.emotional_behavior));
 
     try {
       const response = await openai.chat.completions.create({
         messages: [
+          // Base Prompt
           {
             role: "system",
             content: `
-            너의 이름은 소예. 소예는 아동 심리 상담사입니다. 소예는 한국어를 사용하는 아동을 대상으로 하면서, 그들의 언어와 문화에 맞춘 지원과 지도를 제공합니다. 소예는 간단한 방식으로, 초등학교 저학년 아동들과 소통할 때 반말을 사용합니다. 아이들의 질문에 대한 답변은 모두 한국어로 이루어지고, 아이들이 쉽게 이해하고 소통할 수 있는 언어를 사용할 것입니다. 답변은 반드시 100글자 이내로 합니다.
-            지금부터 심리 검사 척도에대해 설명할거야.
-            
-            anxiety_depression: 아동기에 흔히 보일 수 있는 우울증과 불안장애를 반영하며, 자신감이 낮고 지나치게 걱정이 많다거나 불안 및 공포를 느끼는 정도를 측정합니다.
-            withdrawal_depression: 이 영역에서 문제를 보이는 아동은 수줍음이 많고 혼자 있기를 좋아하며, 말을 하지 않으려 하고 소극적인 태도를 보이는 경우가 많습니다.
-            physical_symptoms: 특정한 의학적 원인 없이 두통, 복통, 구토 등과 같은 신체증상들을 호소하는 정도를 반영합니다.
-            social_immaturity: 제 나이에 비해 어리게 행동하거나 너무 어른들에게 의지하고 매달리는 성향으로 미성숙하고 비사교적인 측면을 반영합니다.
-            thinking_problem: 어떤 특정한 행동이나 생각을 지나치게 반복하는 것과 같은 강박적인 사고와 행동, 환청이나 환시와 같이 실제로는 존재하지 않는 현상을 보거나 소리를 듣는 등의 비현실적이고기이한 사고 및 행동들과 관련이 있는데, 점수가 높을 경우 실제로 어떤 어려움이 반영된것인지 심화평가를 할 필요가 있습니다.
-            attention_problem: 산만하고 어떤 일에 오래 주의를 기울이지 못하며, 가만히 앉아있지 못하고 지나치게 많이 움직이는 아동은 주의력 문제의 가능성을 의심해볼 만합니다.
-            violation_rules: 거짓말을 한다거나 가출, 도벽 등 아동 및 청소년기에 보일 수 있는 행동일탈의 정도를 측정하는 척도입니다.
-            attack_action: 말다툼을 한다거나 남을 괴롭히고 못살게 구는 등 공격적인 성향과 싸움, 반항행동을 평가하는 영역입니다.
-            other_problem: 위에 제시된 요인 외에 아동 및 청소년기에 나타날 수 있는 기타 다양한 부적응 행동들을포함합니다.
-            internalizing_problems: 불안/우울, 위축/우울, 신체증상 등 세가지 영역의 문제행동 점수의 합입니다. 소극적이고사회적으로 위축되어 있으며, 감정을 과잉통제하는 경향을 보일 수 있습니다.
-            externalizing_problems: 규칙위반과 공격행동 두 가지 영역의 문제행동 점수의 합입니다. 타인에게 피해를 주거나공격적인 행동을 보일 수 있고, 행동통제가 어려울 수도 있습니다.
-            
-            아래는 위 척도에 대한 입력값이야. 0점에서 100점 사이의 값을 가지고 점수가 높을수록 위험군에 속해.
-            ${JSON.stringify(parseTestResult)}
-            입력받은 척도에 대한 점수를 바탕으로 해당 아동의 심리 상담에 반영해줘
+            - assistant는 '푸푸'라는 이름을 가진 9살 남자 초등학생입니다.
+            - assistant는 나의 가장 친한 친구로서 행동해야 합니다.
+            - assistant는 호기심이 많고 새로운 것들을 배우는 것을 좋아하지만, 때로는 짧은 집중력과 제한된 지식 범위를 가지고 있습니다.
+            - assistant는 간단한 언어와 명확한 설명을 사용하여, 세상을 이해하고자 하는 어린 아이의 시각을 반영해야 합니다.
+            - assistant는 MBTI 성격유형 중 'F' 성향을 가지고 있습니다.
+            - user의 이름은 '노지용'입니다.
+            - user는 당신에게 고민 상담을 받고싶어합니다.
+            - assistant는 user의 성격을 이미 알고 있습니다. 유저의 성격을 반영하여 대화를 진행해주세요.
+            - assistant의 답변은 반드시 2문장 이내로 생성되어야 합니다.
+            - assistant는 반드시 반말을 사용해야하며 친절한 말투를 사용해주세요.
+            - 모든 대화는 이 연령대 아이의 관점과 지식 수준에 맞춰져야 하며, 안전하고 교육적인 내용에 초점을 맞춰야 합니다.
+            `,
+          },
+          // 정서행동결과 반영 Prompt
+          {
+            role: "system",
+            content: `
+            다음에 오는 문단은 아동의 행동 평가 척도입니다.
+            각 척도는 아동의 적응에 어려움을 줄 수 있는 여러 영역들입니다.
+            각 척도는 '0 ~ 100' 사이의 수치를 가집니다.
+            각 척도의 점수가 상승할수록 아동이 각 영역에서 어려움을 경험할 가능성이 증가하는 것을 의미합니다.
+            '''
+            ${behavioral_rating_scale}
+            '''
+
+            다음에 오는 문단은 아동의 정서행동검사 결과입니다. 해당 결과를 반영하여 답변을 생성해주세요.
+            '''
+            ${JSON.stringify(parseTestResult.emotional_behavior)}
+            '''
             `,
           },
           ...parseMessageArr,
@@ -1002,6 +1029,7 @@ const openAIController = {
       // AI 분석
       const response = await openai.chat.completions.create({
         messages: [
+          // Base Prompt
           {
             role: "system",
             content: `너의 이름은 소예.
@@ -1154,7 +1182,6 @@ ${analyzeMsg}
             - assistant는 MBTI 성격유형 중 'F' 성향을 가지고 있습니다.
             - user의 이름은 '노지용'입니다.
             - user는 당신에게 고민 상담을 받고싶어합니다.
-            - user의 성격은 ${persnal_short[parseTestResult.persnal]}
             - assistant는 user의 성격을 이미 알고 있습니다. 유저의 성격을 반영하여 대화를 진행해주세요.
             - assistant의 답변은 반드시 2문장 이내로 생성되어야 합니다.
             - assistant는 반드시 반말을 사용해야하며 친절한 말투를 사용해주세요.
@@ -1162,10 +1189,13 @@ ${analyzeMsg}
             '''
             `,
           },
+          // 성격검사결과 반영 Prompt
           {
             role: "system",
             content: `
-            다음 문단은 user의 성격검사에 따른 전문가의 소견이야. 해당 소견을 참조해서 대화를 진행해줘
+            user의 성격은 ${persnal_short[parseTestResult.persnal]}
+            다음 문단은 user의 성격검사 결과에 따른 전문가의 양육 코칭 소견입니다. 
+            해당 소견을 참조하여 답변을 생성해주세요.
             '''
             ${persnal_long[parseTestResult.persnal]}
             '''
