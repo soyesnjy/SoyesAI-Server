@@ -917,7 +917,6 @@ externalizing_problems: 규칙위반과 공격행동 두 가지 영역의 문제
             '''
             ${behavioral_rating_scale}
             '''
-
             다음에 오는 문단은 아동의 정서행동검사 결과입니다. 해당 결과를 반영하여 답변을 생성해주세요.
             '''
             ${JSON.stringify(parseTestResult.emotional_behavior)}
@@ -1161,7 +1160,7 @@ ${analyzeMsg}
       parseTestResult = JSON.parse(messageArr);
     } else if (!testResult) {
       // default 검사 결과
-      parseTestResult.persnal = "SOCE";
+      parseTestResult.persnal = "IFPE";
     } else parseTestResult.persnal = testResult;
 
     // console.log(persnal_short[parseTestResult.persnal]);
@@ -1182,7 +1181,6 @@ ${analyzeMsg}
             - assistant는 MBTI 성격유형 중 'F' 성향을 가지고 있습니다.
             - user의 이름은 '노지용'입니다.
             - user는 당신에게 고민 상담을 받고싶어합니다.
-            - assistant는 user의 성격을 이미 알고 있습니다. 유저의 성격을 반영하여 대화를 진행해주세요.
             - assistant의 답변은 반드시 2문장 이내로 생성되어야 합니다.
             - assistant는 반드시 반말을 사용해야하며 친절한 말투를 사용해주세요.
             - 모든 대화는 이 연령대 아이의 관점과 지식 수준에 맞춰져야 하며, 안전하고 교육적인 내용에 초점을 맞춰야 합니다.
@@ -1194,11 +1192,12 @@ ${analyzeMsg}
             role: "system",
             content: `
             user의 성격은 ${persnal_short[parseTestResult.persnal]}
+            assistant는 user의 성격을 이미 알고 있습니다. 유저의 성격을 반영하여 대화를 진행해주세요.
             다음 문단은 user의 성격검사 결과에 따른 전문가의 양육 코칭 소견입니다. 
-            해당 소견을 참조하여 답변을 생성해주세요.
             '''
             ${persnal_long[parseTestResult.persnal]}
             '''
+            해당 소견을 참조하여 답변을 생성해주세요.
             `,
           },
           ...parseMessageArr,
