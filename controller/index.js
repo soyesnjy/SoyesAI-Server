@@ -895,6 +895,8 @@ self_awareness:(score >= 7 === 위험), (7 > score >= 5.9 === 주의), (5.9 > sc
       self_awareness: 7,
     };
 
+    console.log(JSON.stringify(parseTestResult.emotional_behavior));
+
     // console.log(JSON.stringify(parseTestResult.emotional_behavior));
 
     try {
