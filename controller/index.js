@@ -843,8 +843,7 @@ const openAIController = {
   postOpenAIEmotionTestResultConsulting: async (req, res) => {
     const { messageArr } = req.body;
     // console.log("anxiety_depression");
-
-    console.log(messageArr);
+    // console.log(messageArr);
 
     let parseMessageArr,
       parseTestResult = {};
