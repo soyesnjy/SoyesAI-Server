@@ -843,7 +843,7 @@ const openAIController = {
   postOpenAIEmotionTestResultConsulting: async (req, res) => {
     const { messageArr } = req.body;
     // console.log("anxiety_depression");
-    // console.log(messageArr);
+    console.log(messageArr);
 
     let parseMessageArr,
       parseTestResult = {};
@@ -894,8 +894,6 @@ self_awareness:(score >= 7 === 위험), (7 > score >= 5.9 === 주의), (5.9 > sc
       aggression: 7,
       self_awareness: 7,
     };
-
-    console.log(JSON.stringify(parseTestResult.emotional_behavior));
 
     // console.log(JSON.stringify(parseTestResult.emotional_behavior));
 
