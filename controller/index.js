@@ -841,24 +841,38 @@ const openAIController = {
   },
   // 테스트 결과 기반 상담 AI. 정서행동 검사
   postOpenAIEmotionTestResultConsulting: async (req, res) => {
-    const { messageArr, testResult } = req.body;
+    const { messageArr } = req.body;
     // console.log("anxiety_depression");
     //console.log(typeof messageArr);
     let parseMessageArr,
       parseTestResult = {};
 
     const behavioral_rating_scale = `
-anxiety_depression: 아동기에 흔히 보일 수 있는 우울증과 불안장애를 반영하며, 자신감이 낮고 지나치게 걱정이 많다거나 불안 및 공포를 느끼는 정도를 측정합니다.
-withdrawal_depression: 이 영역에서 문제를 보이는 아동은 수줍음이 많고 혼자 있기를 좋아하며, 말을 하지 않으려 하고 소극적인 태도를 보이는 경우가 많습니다.
-physical_symptoms: 특정한 의학적 원인 없이 두통, 복통, 구토 등과 같은 신체증상들을 호소하는 정도를 반영합니다.
-social_immaturity: 제 나이에 비해 어리게 행동하거나 너무 어른들에게 의지하고 매달리는 성향으로 미성숙하고 비사교적인 측면을 반영합니다.
-thinking_problem: 어떤 특정한 행동이나 생각을 지나치게 반복하는 것과 같은 강박적인 사고와 행동, 환청이나 환시와 같이 실제로는 존재하지 않는 현상을 보거나 소리를 듣는 등의 비현실적이고기이한 사고 및 행동들과 관련이 있는데, 점수가 높을 경우 실제로 어떤 어려움이 반영된것인지 심화평가를 할 필요가 있습니다.
-attention_problem: 산만하고 어떤 일에 오래 주의를 기울이지 못하며, 가만히 앉아있지 못하고 지나치게 많이 움직이는 아동은 주의력 문제의 가능성을 의심해볼 만합니다.
-violation_rules: 거짓말을 한다거나 가출, 도벽 등 아동 및 청소년기에 보일 수 있는 행동일탈의 정도를 측정하는 척도입니다.
-attack_action: 말다툼을 한다거나 남을 괴롭히고 못살게 구는 등 공격적인 성향과 싸움, 반항행동을 평가하는 영역입니다.
-other_problem: 위에 제시된 요인 외에 아동 및 청소년기에 나타날 수 있는 기타 다양한 부적응 행동들을포함합니다.
-internalizing_problems: 불안/우울, 위축/우울, 신체증상 등 세가지 영역의 문제행동 점수의 합입니다. 소극적이고사회적으로 위축되어 있으며, 감정을 과잉통제하는 경향을 보일 수 있습니다.
-externalizing_problems: 규칙위반과 공격행동 두 가지 영역의 문제행동 점수의 합입니다. 타인에게 피해를 주거나공격적인 행동을 보일 수 있고, 행동통제가 어려울 수도 있습니다.
+adjust_school: 전반적인 학교생활 불만족과 담임 선생님과의 관계 문제, 학습의 어려움 등 학교생활 부적응 여부를 나타냅니다.
+peer_relationship: 어울리는 친구의 수와 관계 만족도, 또래에게 괴롭힘을 당하거나 또래와의 싸움에 자주 연루되는지 등 전반적인 또래관계 문제 여부를 나타냅니다.
+family_relationship: 가족 구성원들과의 사이, 부모님 간의 관계 갈등, 가족 구성원들이 함께 시간을 보내거나 애정을 표현하는지 등 전반적인 가족관계 문제 여부를 나타냅니다.
+overall_mood: 아동의 전반적인 기분이 어떤 지를 나타냅니다.
+unrest: 아동기에 보일 수 있는 일반적인 불안 증상을 나타내며, 특정 대상에 대한 공포, 분리불안, 걱정, 새로운 상황에 처하거나 낯선 사람과 교류할 때의 긴장감 등이 이에 해당합니다.
+depressed: 아동기에 보일 수 있는 일반적인 우울 증상을 나타내며, 우울감, 외로움, 활력 저하, 수면과 식욕의 변화 등이 이에 해당합니다.
+physical_symptoms: 아동기에 보일 수 있는 일반적인 우울 증상을 나타내며, 우울감, 외로움, 활력 저하, 수면과 식욕의 변화 등이 이에 해당합니다.
+focus: 가만히 있지 못하고 꼼지락거리거나 착석 유지를 못하고 과격하거나 위험한 행동을 하는지 여부를 나타내며, 이를 높게 보고하는 아동의 경우 주의력 결핍 및 과잉행동 문제 중 ‘과잉행동’ 문제 가능성을 의심해볼 수 있습니다.
+hyperactivity: 위에 제시된 요인 외에 아동 및 청소년기에 나타날 수 있는 기타 다양한 부적응 행동들을포함합니다.
+aggression: 자주 짜증이나 화를 표출하고 물건을 부수거나 말다툼이나 몸싸움을 하는 등 분노 및 공격성 조절 어려움을 나타냅니다.
+self_awareness: 관계, 능력, 외모 등의 중요한 자기 영역에 대한 긍정적 인식 여부를 나타냅니다.
+    `;
+
+    const behavioral_rating_standard = `
+adjust_school: (score >= 7.5 === 위험), (7.5 > score >= 6.5 === 주의), (6.5 > score === 양호)  
+peer_relationship: (score >= 9.5 === 위험), (9.5 > score >= 8.2 === 주의), (8.2 > score === 양호)
+family_relationship: (score >= 8 === 위험), (8 > score >= 7 === 주의), (7 > score === 양호)
+overall_mood: (score >= 5 === 위험), (5 > score >= 4 === 주의), (4 > score === 양호)
+unrest: (score >= 10 === 위험), (10 > score >= 9 === 주의), (9 > score === 양호)
+depressed: (score >= 10 === 위험), (10 > score >= 9 === 주의), (9 > score === 양호)
+physical_symptoms: (score >= 7 === 위험), (7 > score >= 6 === 주의), (6 > score === 양호)
+focus: (score >= 11 === 위험), (11 > score >= 9 === 주의), (9 > score === 양호)
+hyperactivity: (score >= 8 === 위험), (8 > score >= 7 === 주의), (7 > score === 양호)
+aggression:(score >= 8 === 위험), (8 > score >= 7 === 주의), (7 > score === 양호)
+self_awareness:(score >= 7 === 위험), (7 > score >= 5.9 === 주의), (5.9 > score === 양호)
     `;
 
     // messageArr가 문자열일 경우 json 파싱
@@ -866,23 +880,19 @@ externalizing_problems: 규칙위반과 공격행동 두 가지 영역의 문제
       parseMessageArr = JSON.parse(messageArr);
     } else parseMessageArr = [...messageArr];
 
-    if (typeof testResult === "string") {
-      parseTestResult = JSON.parse(messageArr);
-    } else if (!testResult) {
-      parseTestResult.emotional_behavior = {
-        anxiety_depression: 12,
-        withdrawal_depression: 50,
-        physical_symptoms: 60,
-        social_immaturity: 20,
-        thinking_problem: 16,
-        attention_problem: 28,
-        violation_rules: 87,
-        attack_action: 21,
-        other_problem: 64,
-        internalizing_problems: 15,
-        externalizing_problems: 25,
-      };
-    } else parseTestResult.emotional_behavior = testResult;
+    parseTestResult.emotional_behavior = {
+      adjust_school: 7,
+      peer_relationship: 7,
+      family_relationship: 7,
+      overall_mood: 7,
+      unrest: 7,
+      depressed: 7,
+      physical_symptoms: 7,
+      focus: 7,
+      hyperactivity: 7,
+      aggression: 7,
+      self_awareness: 7,
+    };
 
     // console.log(JSON.stringify(parseTestResult.emotional_behavior));
 
@@ -910,17 +920,21 @@ externalizing_problems: 규칙위반과 공격행동 두 가지 영역의 문제
           {
             role: "system",
             content: `
-            다음에 오는 문단은 아동의 행동 평가 척도입니다.
-            각 척도는 아동의 적응에 어려움을 줄 수 있는 여러 영역들입니다.
-            각 척도는 '0 ~ 100' 사이의 수치를 가집니다.
-            각 척도의 점수가 상승할수록 아동이 각 영역에서 어려움을 경험할 가능성이 증가하는 것을 의미합니다.
+            다음에 오는 문단은 아동의 정서행동검사의 척도에 대한 설명입니다.
             '''
             ${behavioral_rating_scale}
             '''
-            다음에 오는 문단은 아동의 정서행동검사 결과입니다. 해당 결과를 반영하여 답변을 생성해주세요.
+            다음에 오는 문단은 아동의 정서행동검사 척도에 대한 기준입니다.
+            score 값에 따라 위험/주의/경고 3가지 기준으로 나뉘어집니다.
+            '''
+            ${behavioral_rating_standard}
+            '''
+            다음에 오는 문단은 아동의 정서행동검사 결과입니다.
+            객체의 각 변수값을 score에 대입합니다.
             '''
             ${JSON.stringify(parseTestResult.emotional_behavior)}
             '''
+            해당 결과를 반영하여 답변을 생성해주세요.
             `,
           },
           ...parseMessageArr,
