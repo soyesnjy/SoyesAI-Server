@@ -843,6 +843,7 @@ const openAIController = {
   postOpenAIEmotionTestResultConsulting: async (req, res) => {
     const { messageArr } = req.body;
     // console.log("anxiety_depression");
+    console.log("consulting_emotion Path 호출");
     console.log(messageArr);
 
     let parseMessageArr,
@@ -955,7 +956,7 @@ self_awareness:(score >= 7 === 위험), (7 > score >= 5.9 === 주의), (5.9 > sc
   // 테스트 결과 메일 전송 API
   postOpenAIPsychologicalAnalysis: async (req, res) => {
     const { EBTData, type, uid } = req.body;
-
+    console.log("analysis Path 호출");
     let data,
       parsingType,
       pUid,
