@@ -766,7 +766,7 @@ const openAIController = {
   // 자율 상담 AI
   postOpenAIChattingNew: async (req, res) => {
     const { messageArr } = req.body;
-    console.log("message Path 호출");
+    console.log("자율 상담 API /message Path 호출");
     //console.log(req.body);
     //console.log(messageArr);
     //console.log(typeof messageArr);
@@ -808,7 +808,7 @@ const openAIController = {
   // 감정 분석 AI
   postOpenAIEmotionAnalyze: async (req, res) => {
     const { messageArr } = req.body;
-    console.log("emotion Path 호출");
+    console.log("감정 분석 API /emotion Path 호출");
     //console.log(messageArr);
     //console.log(typeof messageArr);
 
@@ -845,8 +845,8 @@ const openAIController = {
   postOpenAIEmotionTestResultConsulting: async (req, res) => {
     const { messageArr } = req.body;
     // console.log("anxiety_depression");
-    console.log("consulting_emotion Path 호출");
-    console.log(messageArr);
+    console.log("정서행동 검사 반영 상담 API /consulting_emotion Path 호출");
+    // console.log(messageArr);
 
     let parseMessageArr,
       parseTestResult = {};
@@ -958,7 +958,7 @@ self_awareness:(score >= 7 === 위험), (7 > score >= 5.9 === 주의), (5.9 > sc
   // 테스트 결과 메일 전송 API
   postOpenAIPsychologicalAnalysis: async (req, res) => {
     const { EBTData, type, uid } = req.body;
-    console.log("analysis Path 호출");
+    console.log("테스트 결과 메일 전송 API /analysis Path 호출");
     let data,
       parsingType,
       pUid,
@@ -1164,7 +1164,7 @@ ${analyzeMsg}
   // 테스트 결과 기반 상담 AI. 성격 검사
   postOpenAIPersnalTestResultConsulting: async (req, res) => {
     const { messageArr, testResult } = req.body;
-    console.log("consulting_persnal Path 호출");
+    console.log("성격 검사 반영 API /consulting_persnal Path 호출");
 
     let parseMessageArr,
       parseTestResult = {};
