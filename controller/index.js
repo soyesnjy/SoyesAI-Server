@@ -959,6 +959,8 @@ self_awareness:(score >= 7 === 위험), (7 > score >= 5.9 === 주의), (5.9 > sc
   postOpenAIPsychologicalAnalysis: async (req, res) => {
     const { EBTData, type, uid } = req.body;
     console.log("테스트 결과 메일 전송 API /analysis Path 호출");
+    console.log(EBTData);
+
     let data,
       parsingType,
       pUid,
@@ -1090,6 +1092,7 @@ ${analyzeMsg}
         // attachments : 'logo.png' // 이미지 첨부 속성
       };
 
+      /* 잠시 봉인
       // 메일 전송 (비동기)
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
@@ -1101,6 +1104,7 @@ ${analyzeMsg}
           res.json({ message: mailOptions.text });
         }
       });
+      */
 
       // 메일 내역 DB 저장
       const table = "soyes_ai_Analysis";
