@@ -1042,7 +1042,7 @@ self_awareness:(score >= 7 === 위험), (7 > score >= 5.9 === 주의), (5.9 > sc
     } else data = EBTData;
 
     // 파싱 후 값 대입
-    let parseMessageArr = [...data.ebtData];
+    let parseMessageArr = [...data];
 
     try {
       // AI 분석
