@@ -1101,10 +1101,12 @@ ${analyzeMsg}
         } else {
           console.log("Mail Send Success!");
           console.log(info.envelope);
-          res.json({ message: mailOptions.text });
         }
       });
       */
+
+      // client 전송
+      res.json({ message: mailOptions.text });
 
       // 메일 내역 DB 저장
       const table = "soyes_ai_Analysis";
