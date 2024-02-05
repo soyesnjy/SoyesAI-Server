@@ -760,7 +760,12 @@ const openai = new OpenAI({
 
 const nodemailer = require("nodemailer");
 // 성격 검사 결과
-const { persnal_short, persnal_long } = require("../DB/psy_test");
+const {
+  persnal_short, // 성격검사 짧은 결과
+  persnal_long, // 성격검사 양육 코칭 결과
+  behavioral_rating_scale, // 정서행동검사 척도
+  behavioral_rating_standard, // 정성행동검사 기준
+} = require("../DB/psy_test");
 
 const openAIController = {
   // 자율 상담 AI
@@ -851,37 +856,13 @@ const openAIController = {
     let parseMessageArr,
       parseTestResult = {};
 
-    const behavioral_rating_scale = `adjust_school: 전반적인 학교생활 불만족과 담임 선생님과의 관계 문제, 학습의 어려움 등 학교생활 부적응 여부를 나타냅니다.
-peer_relationship: 어울리는 친구의 수와 관계 만족도, 또래에게 괴롭힘을 당하거나 또래와의 싸움에 자주 연루되는지 등 전반적인 또래관계 문제 여부를 나타냅니다.
-family_relationship: 가족 구성원들과의 사이, 부모님 간의 관계 갈등, 가족 구성원들이 함께 시간을 보내거나 애정을 표현하는지 등 전반적인 가족관계 문제 여부를 나타냅니다.
-overall_mood: 아동의 전반적인 기분이 어떤 지를 나타냅니다.
-unrest: 아동기에 보일 수 있는 일반적인 불안 증상을 나타내며, 특정 대상에 대한 공포, 분리불안, 걱정, 새로운 상황에 처하거나 낯선 사람과 교류할 때의 긴장감 등이 이에 해당합니다.
-depressed: 아동기에 보일 수 있는 일반적인 우울 증상을 나타내며, 우울감, 외로움, 활력 저하, 수면과 식욕의 변화 등이 이에 해당합니다.
-physical_symptoms: 아동기에 보일 수 있는 일반적인 우울 증상을 나타내며, 우울감, 외로움, 활력 저하, 수면과 식욕의 변화 등이 이에 해당합니다.
-focus: 가만히 있지 못하고 꼼지락거리거나 착석 유지를 못하고 과격하거나 위험한 행동을 하는지 여부를 나타내며, 이를 높게 보고하는 아동의 경우 주의력 결핍 및 과잉행동 문제 중 ‘과잉행동’ 문제 가능성을 의심해볼 수 있습니다.
-hyperactivity: 위에 제시된 요인 외에 아동 및 청소년기에 나타날 수 있는 기타 다양한 부적응 행동들을포함합니다.
-aggression: 자주 짜증이나 화를 표출하고 물건을 부수거나 말다툼이나 몸싸움을 하는 등 분노 및 공격성 조절 어려움을 나타냅니다.
-self_awareness: 관계, 능력, 외모 등의 중요한 자기 영역에 대한 긍정적 인식 여부를 나타냅니다.`;
-
-    const behavioral_rating_standard = `adjust_school: (score >= 7.5 === 위험), (7.5 > score >= 6.5 === 주의), (6.5 > score === 양호)  
-peer_relationship: (score >= 9.5 === 위험), (9.5 > score >= 8.2 === 주의), (8.2 > score === 양호)
-family_relationship: (score >= 8 === 위험), (8 > score >= 7 === 주의), (7 > score === 양호)
-overall_mood: (score >= 5 === 위험), (5 > score >= 4 === 주의), (4 > score === 양호)
-unrest: (score >= 10 === 위험), (10 > score >= 9 === 주의), (9 > score === 양호)
-depressed: (score >= 10 === 위험), (10 > score >= 9 === 주의), (9 > score === 양호)
-physical_symptoms: (score >= 7 === 위험), (7 > score >= 6 === 주의), (6 > score === 양호)
-focus: (score >= 11 === 위험), (11 > score >= 9 === 주의), (9 > score === 양호)
-hyperactivity: (score >= 8 === 위험), (8 > score >= 7 === 주의), (7 > score === 양호)
-aggression:(score >= 8 === 위험), (8 > score >= 7 === 주의), (7 > score === 양호)
-self_awareness:(score >= 7 === 위험), (7 > score >= 5.9 === 주의), (5.9 > score === 양호)`;
-
     // messageArr가 문자열일 경우 json 파싱
     if (typeof messageArr === "string") {
       parseMessageArr = JSON.parse(messageArr);
     } else parseMessageArr = [...messageArr];
 
     parseTestResult.emotional_behavior = {
-      adjust_school: 7,
+      adjust_school: 0,
       peer_relationship: 7,
       family_relationship: 7,
       overall_mood: 7,
