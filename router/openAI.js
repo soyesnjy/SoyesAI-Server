@@ -16,7 +16,7 @@ router.get("/", (req, res) => {
   res.send("Welcome to the Coding Nexus API");
 });
 
-router.post("/message", postOpenAIPersnalTestResultConsulting); // postOpenAIChattingNew
+router.post("/message", postOpenAIChattingNew); // postOpenAIChattingNew
 router.post("/emotion", postOpenAIEmotionAnalyze);
 router.post("/consulting_emotion", postOpenAIEmotionTestResultConsulting);
 router.post("/consulting_persnal", postOpenAIPersnalTestResultConsulting);
