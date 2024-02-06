@@ -767,6 +767,8 @@ const {
   behavioral_rating_standard, // 정성행동검사 기준
 } = require("../DB/psy_test");
 
+const { base_pupu, base_soyes, base_lala } = require("../DB/base_prompt");
+
 const openAIController = {
   // 자율 상담 AI
   postOpenAIChattingNew: async (req, res) => {
@@ -862,7 +864,7 @@ const openAIController = {
     } else parseMessageArr = [...messageArr];
 
     parseTestResult.emotional_behavior = {
-      adjust_school: 0,
+      adjust_school: 7,
       peer_relationship: 7,
       family_relationship: 7,
       overall_mood: 7,
@@ -880,23 +882,8 @@ const openAIController = {
     try {
       const response = await openai.chat.completions.create({
         messages: [
-          // // Base Prompt
-          {
-            role: "system",
-            content: `
-            - assistant는 '푸푸'라는 이름을 가진 9살 남자 초등학생입니다.
-            - assistant는 나의 가장 친한 친구로서 행동해야 합니다.
-            - assistant는 호기심이 많고 새로운 것들을 배우는 것을 좋아하지만, 때로는 짧은 집중력과 제한된 지식 범위를 가지고 있습니다.
-            - assistant는 간단한 언어와 명확한 설명을 사용하여, 세상을 이해하고자 하는 어린 아이의 시각을 반영해야 합니다.
-            - assistant는 MBTI 성격유형 중 'F' 성향을 가지고 있습니다.
-            - user의 이름은 '노지용'입니다.
-            - user는 당신에게 고민 상담을 받고싶어합니다.
-            - assistant는 user의 성격을 이미 알고 있습니다. 유저의 성격을 반영하여 대화를 진행해주세요.
-            - assistant의 답변은 반드시 2문장 이내로 생성되어야 합니다.
-            - assistant는 반드시 반말을 사용해야하며 친절한 말투를 사용해주세요.
-            - 모든 대화는 이 연령대 아이의 관점과 지식 수준에 맞춰져야 하며, 안전하고 교육적인 내용에 초점을 맞춰야 합니다.
-            `,
-          },
+          // Base Prompt
+          base_lala,
           // 정서행동결과 반영 Prompt
           {
             role: "system",
