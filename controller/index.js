@@ -776,12 +776,12 @@ const openAIController = {
     console.log("자율 상담 API /message Path 호출");
     let parseMessageArr;
 
-    // messageArr가 문자열일 경우 json 파싱
-    if (typeof messageArr === "string") {
-      parseMessageArr = JSON.parse(messageArr);
-    } else parseMessageArr = [...messageArr];
-
     try {
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
+
       const response = await openai.chat.completions.create({
         messages: [base_pupu, ...parseMessageArr],
         model: "gpt-4-1106-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
@@ -804,17 +804,17 @@ const openAIController = {
   postOpenAIEmotionAnalyze: async (req, res) => {
     const { messageArr } = req.body;
     console.log("감정 분석 API /emotion Path 호출");
-    //console.log(messageArr);
+    console.log(req.body);
     //console.log(typeof messageArr);
 
     let parseMessageArr;
 
-    // messageArr가 문자열일 경우 json 파싱
-    if (typeof messageArr === "string") {
-      parseMessageArr = JSON.parse(messageArr);
-    } else parseMessageArr = [...messageArr];
-
     try {
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
+
       const response = await openai.chat.completions.create({
         messages: [
           {
