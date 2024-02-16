@@ -764,7 +764,8 @@ const {
   persnal_short, // 성격검사 짧은 결과
   persnal_long, // 성격검사 양육 코칭 결과
   behavioral_rating_scale, // 정서행동검사 척도
-  behavioral_rating_standard, // 정성행동검사 기준
+  behavioral_rating_standard, // 정서행동검사 기준
+  behavioral_rating_prompt, // 정서행동검사 프롬프트
 } = require("../DB/psy_test");
 
 const { base_pupu, base_soyes, base_lala } = require("../DB/base_prompt");
@@ -782,26 +783,26 @@ const openAIController = {
         parseMessageArr = JSON.parse(messageArr);
       } else parseMessageArr = [...messageArr];
 
-      // const user_name = "오예나";
+      const user_name = "예나";
 
-      parseMessageArr.push({
-        role: "user",
-        content: `문제 해결이 아닌 공감 위주의 답변을 작성해줘`,
-      });
+      // parseMessageArr.push({
+      //   role: "user",
+      //   content: `문제 해결이 아닌 공감 위주의 답변을 30자 이내로 작성하되, 종종 해결책을 제시해줘`,
+      // });
 
       const response = await openai.chat.completions.create({
         messages: [
           base_pupu,
-          // {
-          //   role: "system",
-          //   content: `user의 이름은 '${user_name}'야`,
-          // },
+          {
+            role: "system",
+            content: `user의 이름은 '${user_name}'입니다`,
+          },
           ...parseMessageArr,
         ],
         model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-        temperature: 0.2,
+        // temperature: 0.2,
       });
-      // gpt-4-1106-preview 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
+      // gpt-4-turbo 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
       // console.log(response.choices[0]);
 
       const message = { message: response.choices[0].message.content };
@@ -856,7 +857,7 @@ const openAIController = {
     const { messageArr } = req.body;
     // console.log("anxiety_depression");
     console.log("정서행동 검사 반영 상담 API /consulting_emotion Path 호출");
-    console.log(messageArr);
+    // console.log(messageArr);
 
     let parseMessageArr,
       parseTestResult = {};
@@ -866,18 +867,23 @@ const openAIController = {
       parseMessageArr = JSON.parse(messageArr);
     } else parseMessageArr = [...messageArr];
 
+    parseMessageArr.push({
+      role: "user",
+      content: `공감 위주로 30자 이내로 작성하되, 종종 해결책을 제시해주세요`,
+    });
+
     parseTestResult.emotional_behavior = {
-      adjust_school: 7,
-      peer_relationship: 7,
-      family_relationship: 7,
-      overall_mood: 7,
-      unrest: 7,
-      depressed: 7,
+      adjust_school: 8,
+      peer_relationship: -1,
+      family_relationship: -1,
+      overall_mood: -1,
+      unrest: -1,
+      depressed: -1,
       physical_symptoms: 7,
-      focus: 7,
-      hyperactivity: 7,
-      aggression: 7,
-      self_awareness: 7,
+      focus: -1,
+      hyperactivity: -1,
+      aggression: -1,
+      self_awareness: -1,
     };
 
     // console.log(JSON.stringify(parseTestResult.emotional_behavior));
@@ -886,28 +892,28 @@ const openAIController = {
       const response = await openai.chat.completions.create({
         messages: [
           // Base Prompt
-          base_lala,
+          base_pupu,
           // 정서행동결과 반영 Prompt
-          {
-            role: "system",
-            content: `
-            다음에 오는 문단은 아동의 정서행동검사의 척도에 대한 설명입니다.
-            '''
-            ${behavioral_rating_scale}
-            '''
-            다음에 오는 문단은 아동의 정서행동검사 척도에 대한 기준입니다.
-            score 값에 따라 위험/주의/경고 3가지 기준으로 나뉘어집니다.
-            '''
-            ${behavioral_rating_standard}
-            '''
-            다음에 오는 문단은 아동의 정서행동검사 결과입니다.
-            객체의 각 변수값을 score에 대입합니다.
-            '''
-            ${JSON.stringify(parseTestResult.emotional_behavior)}
-            '''
-            해당 결과를 반영하여 답변을 생성해주세요.
-            `,
-          },
+          // {
+          //   role: "user",
+          //   content: `
+          //   다음에 오는 문단은 아동의 정서행동검사의 척도에 대한 설명입니다.
+          //   '''
+          //   ${behavioral_rating_scale}
+          //   '''
+          //   다음에 오는 문단은 아동의 정서행동검사 척도에 대한 기준입니다.
+          //   score 값에 따라 위험/주의/경고 3가지 기준으로 나뉘어집니다.
+          //   '''
+          //   ${behavioral_rating_standard}
+          //   '''
+          //   다음에 오는 문단은 아동의 정서행동검사 결과입니다.
+          //   객체의 각 변수값을 score에 대입합니다. 값이 -1일 경우 무시합니다.
+          //   '''
+          //   ${JSON.stringify(parseTestResult.emotional_behavior)}
+          //   '''
+          //   해당 결과를 반영하여 답변을 생성해주세요.
+          //   `,
+          // },
           ...parseMessageArr,
         ],
         model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-1106, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
@@ -916,6 +922,10 @@ const openAIController = {
       // console.log(response.choices[0]);
 
       const message = { message: response.choices[0].message.content };
+      console.log([
+        ...parseMessageArr,
+        { role: "assistant", content: message.message },
+      ]);
       res.send(message);
     } catch (err) {
       // console.error(err.error);
