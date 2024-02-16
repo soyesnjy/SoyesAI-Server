@@ -784,6 +784,11 @@ const openAIController = {
 
       // const user_name = "오예나";
 
+      parseMessageArr.push({
+        role: "user",
+        content: `문제 해결이 아닌 공감 위주의 답변을 작성해줘`,
+      });
+
       const response = await openai.chat.completions.create({
         messages: [
           base_pupu,
@@ -801,7 +806,7 @@ const openAIController = {
 
       const message = { message: response.choices[0].message.content };
       console.log([
-        ...messageArr,
+        ...parseMessageArr,
         { role: "assistant", content: message.message },
       ]);
       res.json(message);
