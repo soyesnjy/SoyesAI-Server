@@ -782,9 +782,19 @@ const openAIController = {
         parseMessageArr = JSON.parse(messageArr);
       } else parseMessageArr = [...messageArr];
 
+      // const user_name = "오예나";
+
       const response = await openai.chat.completions.create({
-        messages: [base_pupu, ...parseMessageArr],
+        messages: [
+          base_pupu,
+          // {
+          //   role: "system",
+          //   content: `user의 이름은 '${user_name}'야`,
+          // },
+          ...parseMessageArr,
+        ],
         model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        temperature: 0.2,
       });
       // gpt-4-1106-preview 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
       // console.log(response.choices[0]);
@@ -907,10 +917,10 @@ const openAIController = {
       res.send(err);
     }
   },
-  // 테스트 결과 메일 전송 API
+  // 테스트 결과 분석 및 메일 전송 API
   postOpenAIPsychologicalAnalysis: async (req, res) => {
     const { EBTData, type, uid } = req.body;
-    console.log("테스트 결과 메일 전송 API /analysis Path 호출");
+    console.log("테스트 결과 분석 및 메일 전송 API /analysis Path 호출");
     console.log(EBTData);
 
     let data,
@@ -988,15 +998,15 @@ const openAIController = {
     });
     // 메일 관련 세팅 끝
 
-    // 파싱. Client JSON 데이터
-    if (typeof EBTData === "string") {
-      data = JSON.parse(EBTData);
-    } else data = EBTData;
-
-    // 파싱 후 값 대입
-    let parseMessageArr = [...data];
-
     try {
+      // 파싱. Client JSON 데이터
+      if (typeof EBTData === "string") {
+        data = JSON.parse(EBTData);
+      } else data = EBTData;
+
+      // 파싱 후 값 대입
+      let parseMessageArr = [...data];
+
       // AI 분석
       const response = await openai.chat.completions.create({
         messages: [
@@ -1009,6 +1019,7 @@ const openAIController = {
               소예는 주어진 문답으로만 심리 분석을 진행해야합니다.
               소예는 다른 정보에 대한 필요성을 어필해선 안됩니다.
               소예는 심리 전문가스러운 말투를 사용합니다.
+              답변은 한글 200자 이내로 생성합니다.
               `,
           },
           ...parseMessageArr,
@@ -1018,6 +1029,7 @@ const openAIController = {
           },
         ],
         model: "gpt-4-1106-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        temperature: 0.2,
       });
       // gpt-3.5-turbo-instruct 모델은 최신 문법이 아닌 레거시 문법으로 작성해야 사용 가능
       // gpt-4-1106-preview 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
