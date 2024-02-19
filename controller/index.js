@@ -862,16 +862,6 @@ const openAIController = {
     let parseMessageArr,
       parseTestResult = {};
 
-    // messageArr가 문자열일 경우 json 파싱
-    if (typeof messageArr === "string") {
-      parseMessageArr = JSON.parse(messageArr);
-    } else parseMessageArr = [...messageArr];
-
-    parseMessageArr.push({
-      role: "user",
-      content: `공감 위주로 30자 이내로 작성하되, 종종 해결책을 제시해주세요`,
-    });
-
     parseTestResult.emotional_behavior = {
       adjust_school: 8,
       peer_relationship: -1,
@@ -889,6 +879,11 @@ const openAIController = {
     // console.log(JSON.stringify(parseTestResult.emotional_behavior));
 
     try {
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
+
       const response = await openai.chat.completions.create({
         messages: [
           // Base Prompt
