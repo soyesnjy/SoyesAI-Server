@@ -85,10 +85,20 @@ const behavioral_rating_prompt = {
     "user는 관계, 능력, 외모 등의 중요한 자기 영역에 대한 긍정적 인식 여부를 나타내는 검사에서 위험군에 속하는 결과가 나왔습니다.",
 };
 
+const ebt_Question = {
+  school_question_0: "요즘 학교생활 하는 건 어때?",
+  school_question_1: "너희반 담임 선생님은 어떠셔?",
+  school_question_2: "요즘 숙제는 잘 해 가?",
+  school_question_3: "수업에 집중하는 건 어때?",
+  school_question_4: "너는 좋아하는 과목이 있어?",
+  school_question_5: "공부 잘 하는 편이야?",
+};
+
 module.exports = {
   persnal_short,
   persnal_long,
   behavioral_rating_scale,
   behavioral_rating_standard,
   behavioral_rating_prompt,
+  ebt_Question,
 };

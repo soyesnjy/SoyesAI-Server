@@ -766,6 +766,7 @@ const {
   behavioral_rating_scale, // 정서행동검사 척도
   behavioral_rating_standard, // 정서행동검사 기준
   behavioral_rating_prompt, // 정서행동검사 프롬프트
+  ebt_Question, // 정서행동검사 학교생활 질문 6종
 } = require("../DB/psy_test");
 
 const { base_pupu, base_soyes, base_lala } = require("../DB/base_prompt");
@@ -1194,6 +1195,140 @@ ${analyzeMsg}
     } catch (err) {
       // console.error(err.error);
       res.send(err);
+    }
+  },
+  // 테스트 결과 기반 상담 AI. 정서행동 검사 - 학교생활
+  postOpenAIEmotionTestResultConsultingV2: async (req, res) => {
+    const { messageArr, pUid } = req.body;
+    console.log(
+      "정서행동 검사- 학교생활 반영 상담 API /consulting_emotion_school Path 호출"
+    );
+    let parseMessageArr, parsepUid;
+
+    try {
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
+
+      // pUid default값 설정
+      parsepUid = pUid ? pUid : "njy95";
+      // console.log(parsepUid);
+
+      // console.log(parseMessageArr.length % 3);
+      // 문답 개수에 따른 시나리오 문답 투척
+      if (parseMessageArr.length % 3 === 0) {
+        // mysql query 메서드 동기식 작동 + DB 데이터 가져오기
+        // Promise 생성 메서드
+        function queryAsync(connection, query, parameters) {
+          return new Promise((resolve, reject) => {
+            connection.query(query, parameters, (error, results, fields) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(results);
+              }
+            });
+          });
+        }
+
+        // 프로미스 resolve 반환값 사용. (User Data return)
+        async function fetchUserData(connection, query) {
+          try {
+            let results = await queryAsync(connection, query, []);
+            // console.log(results[0]);
+            return results;
+          } catch (error) {
+            console.error(error);
+          }
+        }
+
+        const user_table = "soyes_ai_Ebt_School";
+        const user_attr = {
+          pKey: "uid",
+          // attr1: "",
+        };
+
+        const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`;
+        const ebt_school_data = await fetchUserData(
+          connection_AI,
+          select_query
+        );
+
+        // console.log(ebt_school_data[0]);
+        delete ebt_school_data[0].uid; // uid 속성 삭제
+        // Attribute의 값이 2가 아닌 요소의 배열 필터링
+        const problem_attr_arr = Object.keys(ebt_school_data[0]);
+        const problem_attr_nameArr = problem_attr_arr.filter(
+          (el) => ebt_school_data[0][el] !== 2
+        );
+
+        // Attribute의 값이 0인 요소가 없는 경우
+        if (problem_attr_nameArr.length === 0)
+          console.log("Non Zero Attribute");
+        else {
+          // 점수가 0인 값들 중 랜덤 문항 도출
+          const random_index = Math.floor(
+            Math.random() * problem_attr_nameArr.length
+          );
+          // console.log(random_index);
+          const random_question = problem_attr_nameArr[random_index];
+          const selected_question = ebt_Question[random_question];
+          console.log(selected_question);
+
+          const response = await openai.chat.completions.create({
+            messages: [
+              base_pupu,
+              ...parseMessageArr,
+              {
+                role: "assistant",
+                content: `위 대화에 이어지는 답변을 생성하고, 다음 문단에오는 문장을 맥락에 연결하듯 생성한 답변에 추가해줘.
+            '''
+            ${selected_question}
+            '''
+            한번 했던 질문이면 추가하지마.
+            `,
+              },
+            ],
+            model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+            temperature: 0.2,
+          });
+
+          const message = { message: response.choices[0].message.content };
+          console.log([
+            ...parseMessageArr,
+            { role: "assistant", content: message.message },
+          ]);
+          res.json(message);
+
+          // res.json({
+          //   message:
+          //     ebt_Question[
+          //       "school_question_" + (parseInt(Math.random() * 10) % 6)
+          //     ],
+          // });
+
+          return;
+        }
+      }
+
+      const response = await openai.chat.completions.create({
+        messages: [base_pupu, ...parseMessageArr],
+        model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        // temperature: 0.2,
+      });
+      // gpt-4-turbo 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
+      // console.log(response.choices[0]);
+
+      const message = { message: response.choices[0].message.content };
+      console.log([
+        ...parseMessageArr,
+        { role: "assistant", content: message.message },
+      ]);
+      res.json(message);
+    } catch (err) {
+      console.error(err.error);
+      res.json(err);
     }
   },
 };
