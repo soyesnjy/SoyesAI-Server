@@ -769,7 +769,12 @@ const {
   ebt_Question, // 정서행동검사 학교생활 질문 6종
 } = require("../DB/psy_test");
 
-const { base_pupu, base_soyes, base_lala } = require("../DB/base_prompt");
+const {
+  base_pupu,
+  base_soyes,
+  base_lala,
+  base_pupu_v2,
+} = require("../DB/base_prompt");
 
 const openAIController = {
   // 자율 상담 AI
@@ -1217,7 +1222,7 @@ ${analyzeMsg}
 
       // console.log(parseMessageArr.length % 3);
       // 문답 개수에 따른 시나리오 문답 투척
-      if (parseMessageArr.length % 3 === 0) {
+      if ((Math.floor(parseMessageArr.length / 2) + 1) % 3 === 0) {
         // mysql query 메서드 동기식 작동 + DB 데이터 가져오기
         // Promise 생성 메서드
         function queryAsync(connection, query, parameters) {
@@ -1281,8 +1286,8 @@ ${analyzeMsg}
               base_pupu,
               ...parseMessageArr,
               {
-                role: "assistant",
-                content: `위 대화에 이어지는 답변을 생성하고, 다음 문단에오는 문장을 맥락에 연결하듯 생성한 답변에 추가해줘.
+                role: "system",
+                content: `위 대화에 이어지는 답변을 생성하고, 다음 문단의 문장을 맥락에 맞게 변형시켜 답변에 추가해줘.
             '''
             ${selected_question}
             '''
@@ -1291,7 +1296,7 @@ ${analyzeMsg}
               },
             ],
             model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-            temperature: 0.2,
+            temperature: 1,
           });
 
           const message = { message: response.choices[0].message.content };
