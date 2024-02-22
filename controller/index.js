@@ -767,6 +767,7 @@ const {
   behavioral_rating_standard, // 정서행동검사 기준
   behavioral_rating_prompt, // 정서행동검사 프롬프트
   ebt_Question, // 정서행동검사 학교생활 질문 6종
+  ebt_Question_v2,
 } = require("../DB/psy_test");
 
 const {
@@ -1220,105 +1221,79 @@ ${analyzeMsg}
       parsepUid = pUid ? pUid : "njy95";
       // console.log(parsepUid);
 
-      // console.log(parseMessageArr.length % 3);
-      // 문답 개수에 따른 시나리오 문답 투척
-      if ((Math.floor(parseMessageArr.length / 2) + 1) % 3 === 0) {
-        // mysql query 메서드 동기식 작동 + DB 데이터 가져오기
-        // Promise 생성 메서드
-        function queryAsync(connection, query, parameters) {
-          return new Promise((resolve, reject) => {
-            connection.query(query, parameters, (error, results, fields) => {
-              if (error) {
-                reject(error);
-              } else {
-                resolve(results);
-              }
-            });
+      function queryAsync(connection, query, parameters) {
+        return new Promise((resolve, reject) => {
+          connection.query(query, parameters, (error, results, fields) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(results);
+            }
           });
-        }
+        });
+      }
 
-        // 프로미스 resolve 반환값 사용. (User Data return)
-        async function fetchUserData(connection, query) {
-          try {
-            let results = await queryAsync(connection, query, []);
-            // console.log(results[0]);
-            return results;
-          } catch (error) {
-            console.error(error);
-          }
-        }
-
-        const user_table = "soyes_ai_Ebt_School";
-        const user_attr = {
-          pKey: "uid",
-          // attr1: "",
-        };
-
-        const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`;
-        const ebt_school_data = await fetchUserData(
-          connection_AI,
-          select_query
-        );
-
-        // console.log(ebt_school_data[0]);
-        delete ebt_school_data[0].uid; // uid 속성 삭제
-        // Attribute의 값이 2가 아닌 요소의 배열 필터링
-        const problem_attr_arr = Object.keys(ebt_school_data[0]);
-        const problem_attr_nameArr = problem_attr_arr.filter(
-          (el) => ebt_school_data[0][el] !== 2
-        );
-
-        // Attribute의 값이 0인 요소가 없는 경우
-        if (problem_attr_nameArr.length === 0)
-          console.log("Non Zero Attribute");
-        else {
-          // 점수가 0인 값들 중 랜덤 문항 도출
-          const random_index = Math.floor(
-            Math.random() * problem_attr_nameArr.length
-          );
-          // console.log(random_index);
-          const random_question = problem_attr_nameArr[random_index];
-          const selected_question = ebt_Question[random_question];
-          console.log(selected_question);
-
-          const response = await openai.chat.completions.create({
-            messages: [
-              base_pupu,
-              ...parseMessageArr,
-              {
-                role: "system",
-                content: `위 대화에 이어지는 답변을 생성하고, 다음 문단의 문장을 맥락에 맞게 변형시켜 답변에 추가해줘.
-            '''
-            ${selected_question}
-            '''
-            한번 했던 질문이면 추가하지마.
-            `,
-              },
-            ],
-            model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-            temperature: 1,
-          });
-
-          const message = { message: response.choices[0].message.content };
-          console.log([
-            ...parseMessageArr,
-            { role: "assistant", content: message.message },
-          ]);
-          res.json(message);
-
-          // res.json({
-          //   message:
-          //     ebt_Question[
-          //       "school_question_" + (parseInt(Math.random() * 10) % 6)
-          //     ],
-          // });
-
-          return;
+      // 프로미스 resolve 반환값 사용. (User Data return)
+      async function fetchUserData(connection, query) {
+        try {
+          let results = await queryAsync(connection, query, []);
+          // console.log(results[0]);
+          return results;
+        } catch (error) {
+          console.error(error);
         }
       }
 
+      const user_table = "soyes_ai_Ebt_School";
+      const user_attr = {
+        pKey: "uid",
+        // attr1: "",
+      };
+
+      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`;
+      const ebt_school_data = await fetchUserData(connection_AI, select_query);
+
+      // console.log(ebt_school_data[0]);
+      delete ebt_school_data[0].uid; // uid 속성 삭제
+      // Attribute의 값이 2가 아닌 요소의 배열 필터링
+      const problem_attr_arr = Object.keys(ebt_school_data[0]);
+      const problem_attr_nameArr = problem_attr_arr.filter(
+        (el) => el.includes("question") && ebt_school_data[0][el] !== 2
+      );
+      let test_prompt_content;
+
+      // 문답 개수에 따른 시나리오 문답 투척
+      // Attribute의 값이 0인 요소가 없는 경우
+      if (problem_attr_nameArr.length === 0) {
+        test_prompt_content = "";
+
+        console.log(test_prompt_content);
+      } else {
+        // // 점수가 0인 값들 중 랜덤 문항 도출
+        // const random_index = Math.floor(
+        //   Math.random() * problem_attr_nameArr.length
+        // );
+        // // console.log(random_index);
+        // const random_question = problem_attr_nameArr[random_index];
+        // const selected_question = ebt_Question[random_question];
+        // console.log(selected_question);
+
+        test_prompt_content = problem_attr_nameArr
+          .map((el) => ebt_Question_v2[el])
+          .join(" ");
+
+        console.log(test_prompt_content);
+      }
+
       const response = await openai.chat.completions.create({
-        messages: [base_pupu, ...parseMessageArr],
+        messages: [
+          base_pupu,
+          {
+            role: "system",
+            content: `${test_prompt_content}`,
+          },
+          ...parseMessageArr,
+        ],
         model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
         // temperature: 0.2,
       });

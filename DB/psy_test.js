@@ -94,6 +94,15 @@ const ebt_Question = {
   school_question_5: "공부 잘 하는 편이야?",
 };
 
+const ebt_Question_v2 = {
+  school_question_0: "user는 현재 학교 생활에 흥미가 없는 상태입니다.",
+  school_question_1: "user는 담임 선생님과의 관계가 좋지 못합니다.",
+  school_question_2: "user는 숙제 수행에 흥미가 없습니다.",
+  school_question_3: "user는 수업시간에 집중하기 어려워합니다.",
+  school_question_4: "user는 좋아하는 과목이 없습니다.",
+  school_question_5: "user는 공부를 잘 하지 못하는 편입니다.",
+};
+
 module.exports = {
   persnal_short,
   persnal_long,
@@ -101,4 +110,5 @@ module.exports = {
   behavioral_rating_standard,
   behavioral_rating_prompt,
   ebt_Question,
+  ebt_Question_v2,
 };
