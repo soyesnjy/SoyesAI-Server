@@ -1287,11 +1287,11 @@ ${analyzeMsg}
 
       const response = await openai.chat.completions.create({
         messages: [
-          base_pupu,
           {
             role: "system",
             content: `${test_prompt_content}`,
           },
+          base_pupu,
           ...parseMessageArr,
         ],
         model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
