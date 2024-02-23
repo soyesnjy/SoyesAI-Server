@@ -1258,7 +1258,7 @@ ${analyzeMsg}
       // Attribute의 값이 2가 아닌 요소의 배열 필터링
       const problem_attr_arr = Object.keys(ebt_school_data[0]);
       const problem_attr_nameArr = problem_attr_arr.filter(
-        (el) => el.includes("question") && ebt_school_data[0][el] !== 2
+        (el) => el.includes("question") && ebt_school_data[0][el] === 2
       );
       let test_prompt_content;
 
@@ -1285,17 +1285,35 @@ ${analyzeMsg}
         console.log(test_prompt_content);
       }
 
+      // 유저 첫 질문 답변 - 정서행동검사 실시했음을 언급
+      if (parseMessageArr.length === 1) {
+        parseMessageArr.push({
+          role: "user",
+          content: `마지막 질문에 대해 답변한 뒤, 내가 정서행동검사를 실시했음을 언급해줘. 해결책은 제시하지 말아줘.`,
+        });
+      }
+      // 유저 네번째 질문 답변 - 정서행동검사 솔루션 제공
+      if (parseMessageArr.length === 5) {
+        parseMessageArr.push({
+          role: "user",
+          content: `마지막 질문에 대해 답변한 뒤, 자연스럽게 심리 검사 결과에 대한 해결책을 제시해줘.`,
+        });
+      }
+
       const response = await openai.chat.completions.create({
         messages: [
           {
             role: "system",
-            content: `${test_prompt_content}`,
+            content: `다음에 오는 문단은 user의 심리 검사 결과입니다.
+            '''
+            ${test_prompt_content}
+            '''`,
           },
           base_pupu,
           ...parseMessageArr,
         ],
         model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-        // temperature: 0.2,
+        temperature: 1.2,
       });
       // gpt-4-turbo 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
       // console.log(response.choices[0]);
