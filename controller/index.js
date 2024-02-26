@@ -1353,6 +1353,11 @@ ${analyzeMsg}
     let promptArr = []; // 삽입 Prompt Array
     let prevChat_flag = true; // 이전 대화 내역 유무
 
+    const completions_emotion_prompt = {
+      role: "system",
+      content: `답변이 생성되면 생성한 답변을 분석하여 '중립 === 0, 슬픔 === 1, 기쁨 === 2, 분노 === 3' 을 답변 마지막에 추가해줘.`,
+    };
+
     try {
       // messageArr가 문자열일 경우 json 파싱
       if (typeof messageArr === "string") {
@@ -1454,6 +1459,7 @@ ${analyzeMsg}
       }
 
       promptArr.push(common_prompt); // 공통 프롬프트 삽입
+      promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
 
       // console.log(promptArr);
 
@@ -1462,7 +1468,13 @@ ${analyzeMsg}
         model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
-      const message = { message: response.choices[0].message.content };
+      let emotion = parseInt(response.choices[0].message.content.slice(-1));
+      // console.log(emotion);
+
+      const message = {
+        message: response.choices[0].message.content.slice(0, -1),
+        emotion,
+      };
       console.log([
         ...parseMessageArr,
         { role: "assistant", content: message.message },
@@ -1470,7 +1482,10 @@ ${analyzeMsg}
       res.json(message);
     } catch (err) {
       console.error(err.error);
-      res.json(err);
+      res.json({
+        message: err.error,
+        emotion: 0,
+      });
     }
   },
 };
