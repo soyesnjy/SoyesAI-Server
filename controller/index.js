@@ -778,6 +778,15 @@ const {
   base_pupu_v2,
 } = require("../DB/base_prompt");
 
+const {
+  persona_prompt,
+  info_prompt,
+  prevChat_prompt,
+  solution_prompt,
+  psyResult_prompt,
+  common_prompt,
+} = require("../DB/test_prompt");
+
 const openAIController = {
   // 자율 상담 AI
   postOpenAIChattingNew: async (req, res) => {
@@ -854,81 +863,6 @@ const openAIController = {
       // console.log(response.choices[0]);
 
       const message = { message: response.choices[0].message.content };
-      res.send(message);
-    } catch (err) {
-      // console.error(err.error);
-      res.send(err);
-    }
-  },
-  // 테스트 결과 기반 상담 AI. 정서행동 검사
-  postOpenAIEmotionTestResultConsulting: async (req, res) => {
-    const { messageArr } = req.body;
-    // console.log("anxiety_depression");
-    console.log("정서행동 검사 반영 상담 API /consulting_emotion Path 호출");
-    // console.log(messageArr);
-
-    let parseMessageArr,
-      parseTestResult = {};
-
-    parseTestResult.emotional_behavior = {
-      adjust_school: 8,
-      peer_relationship: -1,
-      family_relationship: -1,
-      overall_mood: -1,
-      unrest: -1,
-      depressed: -1,
-      physical_symptoms: 7,
-      focus: -1,
-      hyperactivity: -1,
-      aggression: -1,
-      self_awareness: -1,
-    };
-
-    // console.log(JSON.stringify(parseTestResult.emotional_behavior));
-
-    try {
-      // messageArr가 문자열일 경우 json 파싱
-      if (typeof messageArr === "string") {
-        parseMessageArr = JSON.parse(messageArr);
-      } else parseMessageArr = [...messageArr];
-
-      const response = await openai.chat.completions.create({
-        messages: [
-          // Base Prompt
-          base_pupu,
-          // 정서행동결과 반영 Prompt
-          // {
-          //   role: "user",
-          //   content: `
-          //   다음에 오는 문단은 아동의 정서행동검사의 척도에 대한 설명입니다.
-          //   '''
-          //   ${behavioral_rating_scale}
-          //   '''
-          //   다음에 오는 문단은 아동의 정서행동검사 척도에 대한 기준입니다.
-          //   score 값에 따라 위험/주의/경고 3가지 기준으로 나뉘어집니다.
-          //   '''
-          //   ${behavioral_rating_standard}
-          //   '''
-          //   다음에 오는 문단은 아동의 정서행동검사 결과입니다.
-          //   객체의 각 변수값을 score에 대입합니다. 값이 -1일 경우 무시합니다.
-          //   '''
-          //   ${JSON.stringify(parseTestResult.emotional_behavior)}
-          //   '''
-          //   해당 결과를 반영하여 답변을 생성해주세요.
-          //   `,
-          // },
-          ...parseMessageArr,
-        ],
-        model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-1106, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-      });
-
-      // console.log(response.choices[0]);
-
-      const message = { message: response.choices[0].message.content };
-      console.log([
-        ...parseMessageArr,
-        { role: "assistant", content: message.message },
-      ]);
       res.send(message);
     } catch (err) {
       // console.error(err.error);
@@ -1204,11 +1138,86 @@ ${analyzeMsg}
       res.send(err);
     }
   },
-  // 테스트 결과 기반 상담 AI. 정서행동 검사 - 학교생활
+  // 테스트 결과 기반 상담 AI. 정서행동 검사 - 학교생활 V1
+  postOpenAIEmotionTestResultConsulting: async (req, res) => {
+    const { messageArr } = req.body;
+    // console.log("anxiety_depression");
+    console.log("정서행동 검사 반영 상담 API /consulting_emotion Path 호출");
+    // console.log(messageArr);
+
+    let parseMessageArr,
+      parseTestResult = {};
+
+    parseTestResult.emotional_behavior = {
+      adjust_school: 8,
+      peer_relationship: -1,
+      family_relationship: -1,
+      overall_mood: -1,
+      unrest: -1,
+      depressed: -1,
+      physical_symptoms: 7,
+      focus: -1,
+      hyperactivity: -1,
+      aggression: -1,
+      self_awareness: -1,
+    };
+
+    // console.log(JSON.stringify(parseTestResult.emotional_behavior));
+
+    try {
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
+
+      const response = await openai.chat.completions.create({
+        messages: [
+          // Base Prompt
+          base_pupu,
+          // 정서행동결과 반영 Prompt
+          // {
+          //   role: "user",
+          //   content: `
+          //   다음에 오는 문단은 아동의 정서행동검사의 척도에 대한 설명입니다.
+          //   '''
+          //   ${behavioral_rating_scale}
+          //   '''
+          //   다음에 오는 문단은 아동의 정서행동검사 척도에 대한 기준입니다.
+          //   score 값에 따라 위험/주의/경고 3가지 기준으로 나뉘어집니다.
+          //   '''
+          //   ${behavioral_rating_standard}
+          //   '''
+          //   다음에 오는 문단은 아동의 정서행동검사 결과입니다.
+          //   객체의 각 변수값을 score에 대입합니다. 값이 -1일 경우 무시합니다.
+          //   '''
+          //   ${JSON.stringify(parseTestResult.emotional_behavior)}
+          //   '''
+          //   해당 결과를 반영하여 답변을 생성해주세요.
+          //   `,
+          // },
+          ...parseMessageArr,
+        ],
+        model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-1106, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      });
+
+      // console.log(response.choices[0]);
+
+      const message = { message: response.choices[0].message.content };
+      console.log([
+        ...parseMessageArr,
+        { role: "assistant", content: message.message },
+      ]);
+      res.send(message);
+    } catch (err) {
+      // console.error(err.error);
+      res.send(err);
+    }
+  },
+  // 테스트 결과 기반 상담 AI. 정서행동 검사 - 학교생활 V2
   postOpenAIEmotionTestResultConsultingV2: async (req, res) => {
     const { messageArr, pUid } = req.body;
     console.log(
-      "정서행동 검사- 학교생활 반영 상담 API /consulting_emotion_school Path 호출"
+      "정서행동 검사- 학교생활 V2 반영 상담 API /consulting_emotion_v2 Path 호출"
     );
     let parseMessageArr, parsepUid; // Parsing 변수
     let test_prompt_content; // 심리 검사 결과 문장 저장 변수
@@ -1322,6 +1331,136 @@ ${analyzeMsg}
       });
       // gpt-4-turbo 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
       // console.log(response.choices[0]);
+
+      const message = { message: response.choices[0].message.content };
+      console.log([
+        ...parseMessageArr,
+        { role: "assistant", content: message.message },
+      ]);
+      res.json(message);
+    } catch (err) {
+      console.error(err.error);
+      res.json(err);
+    }
+  },
+  // 테스트 결과 기반 상담 AI. 정서행동 검사 - 학교생활 V3
+  postOpenAIEmotionTestResultConsultingV3: async (req, res) => {
+    const { messageArr, pUid } = req.body;
+    console.log(
+      "정서행동 검사- 학교생활 V3 반영 상담 API /consulting_emotion_v3 Path 호출"
+    );
+    let parseMessageArr, parsepUid; // Parsing 변수
+    let promptArr = []; // 삽입 Prompt Array
+    let prevChat_flag = true; // 이전 대화 내역 유무
+
+    try {
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
+
+      // 고정 삽입 프롬프트
+      promptArr.push(persona_prompt); // 페르소나 프롬프트 삽입
+      promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
+
+      /* 봉인
+      // pUid default값 설정
+      parsepUid = pUid ? pUid : "njy95";
+      // console.log(parsepUid);
+
+      // 동기식 DB 접근 함수 1. Promise 생성 함수
+      function queryAsync(connection, query, parameters) {
+        return new Promise((resolve, reject) => {
+          connection.query(query, parameters, (error, results, fields) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(results);
+            }
+          });
+        });
+      }
+      // 프로미스 resolve 반환값 사용. (User Data return)
+      async function fetchUserData(connection, query) {
+        try {
+          let results = await queryAsync(connection, query, []);
+          // console.log(results[0]);
+          return results;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      const user_table = "soyes_ai_Ebt_School"; // DB Table Name
+      const user_attr = {
+        pKey: "uid",
+        // attr1: "",
+      }; // DB Table Attribue
+
+      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
+      const ebt_school_data = await fetchUserData(connection_AI, select_query);
+
+      // console.log(ebt_school_data[0]);
+      delete ebt_school_data[0].uid; // uid 속성 삭제
+      // Attribute의 값이 2인 요소의 배열 필터링
+      const problem_attr_arr = Object.keys(ebt_school_data[0]);
+      const problem_attr_nameArr = problem_attr_arr.filter(
+        (el) => el.includes("question") && ebt_school_data[0][el] === 2
+      );
+
+      // 문답 개수에 따른 시나리오 문답 투척
+      // Attribute의 값이 0인 요소가 없는 경우
+      if (problem_attr_nameArr.length === 0) {
+        test_prompt_content = "";
+
+        console.log(test_prompt_content);
+      } else {
+        // 점수가 0인 값들 중 랜덤 문항 도출
+        // const random_index = Math.floor(
+        //   Math.random() * problem_attr_nameArr.length
+        // );
+        // // console.log(random_index);
+        // const random_question = problem_attr_nameArr[random_index];
+        // const selected_question = ebt_Question[random_question];
+        // console.log(selected_question);
+
+        test_prompt_content = problem_attr_nameArr
+          .map((el) => ebt_Question_v3[el])
+          .join(" ");
+
+        console.log(test_prompt_content);
+      }
+
+      */
+
+      /* 개발자 의도 질문 - N번째 문답에 대한 답변을 개발자가 임의로 지정 */
+
+      if (parseMessageArr.length === 1 && prevChat_flag) {
+        // 이전 대화 프롬프트 삽입
+        console.log("이전 대화 프롬프트 삽입");
+        promptArr.push(prevChat_prompt);
+      }
+
+      if (parseMessageArr.length === 9) {
+        // 심리 검사 프롬프트 삽입
+        console.log("심리 검사 프롬프트 삽입");
+        promptArr.push(psyResult_prompt);
+      }
+
+      if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
+        // 솔루션 프롬프트 삽입
+        console.log("솔루션 프롬프트 삽입");
+        promptArr.push(solution_prompt);
+      }
+
+      promptArr.push(common_prompt); // 공통 프롬프트 삽입
+
+      // console.log(promptArr);
+
+      const response = await openai.chat.completions.create({
+        messages: [...promptArr, ...parseMessageArr],
+        model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      });
 
       const message = { message: response.choices[0].message.content };
       console.log([

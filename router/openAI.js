@@ -11,6 +11,7 @@ const {
   postOpenAIPsychologicalAnalysis,
   postOpenAIPersnalTestResultConsulting,
   postOpenAIEmotionTestResultConsultingV2,
+  postOpenAIEmotionTestResultConsultingV3,
 } = openAIController;
 
 router.get("/", (req, res) => {
@@ -21,6 +22,7 @@ router.post("/message", postOpenAIChattingNew); // postOpenAIChattingNew
 router.post("/emotion", postOpenAIEmotionAnalyze);
 router.post("/consulting_emotion", postOpenAIEmotionTestResultConsulting);
 router.post("/consulting_emotion_v2", postOpenAIEmotionTestResultConsultingV2);
+router.post("/consulting_emotion_v3", postOpenAIEmotionTestResultConsultingV3);
 router.post("/consulting_persnal", postOpenAIPersnalTestResultConsulting);
 router.post("/analysis", postOpenAIPsychologicalAnalysis);
 
