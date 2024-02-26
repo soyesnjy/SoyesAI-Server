@@ -768,6 +768,7 @@ const {
   behavioral_rating_prompt, // 정서행동검사 프롬프트
   ebt_Question, // 정서행동검사 학교생활 질문 6종
   ebt_Question_v2,
+  ebt_Question_v3,
 } = require("../DB/psy_test");
 
 const {
@@ -936,17 +937,17 @@ const openAIController = {
   },
   // 테스트 결과 분석 및 메일 전송 API
   postOpenAIPsychologicalAnalysis: async (req, res) => {
-    const { EBTData, type, uid } = req.body;
+    const { EBTData, type, pUid } = req.body;
     console.log("테스트 결과 분석 및 메일 전송 API /analysis Path 호출");
     console.log(EBTData);
 
     let data,
       parsingType,
-      pUid,
+      parsepUid,
       yourMailAddr = "";
 
     // uid, type 전처리. 없는 경우 디폴트값 할당
-    pUid = uid ? uid : "njy95";
+    parsepUid = pUid ? pUid : "njy95";
     parsingType = type ? type : "default";
 
     // 테스트 타입 객체. 추후 검사를 늘림에 따라 추가 될 예정
@@ -1101,7 +1102,7 @@ ${analyzeMsg}
 
       /*
       // 1. SELECT TEST (row가 있는지 없는지 검사)
-      const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${pUid}'`;
+      const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`;
       connection_AI.query(select_query, (error, rows, fields) => {
         if (error) console.log(error);
         else {
@@ -1118,7 +1119,7 @@ ${analyzeMsg}
       const update_value = [
         JSON.stringify({ ...mailOptions, date }),
         date,
-        pUid,
+        parsepUid,
       ];
 
       // 분석 기록 DB 저장
@@ -1131,7 +1132,7 @@ ${analyzeMsg}
       // 3. INSERT TEST (row값이 없는 경우 실행)
       const insert_query = `INSERT INTO ${table} (${attribute.pKey}, ${attribute.attr1}, ${attribute.attr2}) VALUES (?, ?, ?)`;
       const insert_value = [
-        pUid,
+        parsepUid,
         JSON.stringify({ ...mailOptions, date }),
         date,
       ];
@@ -1209,7 +1210,8 @@ ${analyzeMsg}
     console.log(
       "정서행동 검사- 학교생활 반영 상담 API /consulting_emotion_school Path 호출"
     );
-    let parseMessageArr, parsepUid;
+    let parseMessageArr, parsepUid; // Parsing 변수
+    let test_prompt_content; // 심리 검사 결과 문장 저장 변수
 
     try {
       // messageArr가 문자열일 경우 json 파싱
@@ -1221,6 +1223,7 @@ ${analyzeMsg}
       parsepUid = pUid ? pUid : "njy95";
       // console.log(parsepUid);
 
+      // 동기식 DB 접근 함수 1. Promise 생성 함수
       function queryAsync(connection, query, parameters) {
         return new Promise((resolve, reject) => {
           connection.query(query, parameters, (error, results, fields) => {
@@ -1232,7 +1235,6 @@ ${analyzeMsg}
           });
         });
       }
-
       // 프로미스 resolve 반환값 사용. (User Data return)
       async function fetchUserData(connection, query) {
         try {
@@ -1244,23 +1246,22 @@ ${analyzeMsg}
         }
       }
 
-      const user_table = "soyes_ai_Ebt_School";
+      const user_table = "soyes_ai_Ebt_School"; // DB Table Name
       const user_attr = {
         pKey: "uid",
         // attr1: "",
-      };
+      }; // DB Table Attribue
 
-      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`;
+      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
       const ebt_school_data = await fetchUserData(connection_AI, select_query);
 
       // console.log(ebt_school_data[0]);
       delete ebt_school_data[0].uid; // uid 속성 삭제
-      // Attribute의 값이 2가 아닌 요소의 배열 필터링
+      // Attribute의 값이 2인 요소의 배열 필터링
       const problem_attr_arr = Object.keys(ebt_school_data[0]);
       const problem_attr_nameArr = problem_attr_arr.filter(
         (el) => el.includes("question") && ebt_school_data[0][el] === 2
       );
-      let test_prompt_content;
 
       // 문답 개수에 따른 시나리오 문답 투척
       // Attribute의 값이 0인 요소가 없는 경우
@@ -1269,7 +1270,7 @@ ${analyzeMsg}
 
         console.log(test_prompt_content);
       } else {
-        // // 점수가 0인 값들 중 랜덤 문항 도출
+        // 점수가 0인 값들 중 랜덤 문항 도출
         // const random_index = Math.floor(
         //   Math.random() * problem_attr_nameArr.length
         // );
@@ -1279,24 +1280,26 @@ ${analyzeMsg}
         // console.log(selected_question);
 
         test_prompt_content = problem_attr_nameArr
-          .map((el) => ebt_Question_v2[el])
+          .map((el) => ebt_Question_v3[el])
           .join(" ");
 
         console.log(test_prompt_content);
       }
 
+      /* 개발자 의도 질문 - N번째 문답에 대한 답변을 개발자가 임의로 지정 */
+
       // 유저 첫 질문 답변 - 정서행동검사 실시했음을 언급
-      if (parseMessageArr.length === 1) {
+      if (parseMessageArr.length === 1 && test_prompt_content) {
         parseMessageArr.push({
           role: "user",
           content: `마지막 질문에 대해 답변한 뒤, 내가 정서행동검사를 실시했음을 언급해줘. 해결책은 제시하지 말아줘.`,
         });
       }
       // 유저 네번째 질문 답변 - 정서행동검사 솔루션 제공
-      if (parseMessageArr.length === 5) {
+      if (parseMessageArr.length === 5 && test_prompt_content) {
         parseMessageArr.push({
           role: "user",
-          content: `마지막 질문에 대해 답변한 뒤, 자연스럽게 심리 검사 결과에 대한 해결책을 제시해줘.`,
+          content: `마지막 질문에 대해 답변한 뒤, 심리 검사 결과에 대한 해결책을 자연스럽게 추천해줘. 해결책을 이미 추천했다면 다른 해결책을 추천해줘.`,
         });
       }
 
@@ -1304,16 +1307,18 @@ ${analyzeMsg}
         messages: [
           {
             role: "system",
-            content: `다음에 오는 문단은 user의 심리 검사 결과입니다.
+            content: `다음에 오는 문단은 user의 정서행동검사 결과입니다.
             '''
             ${test_prompt_content}
-            '''`,
+            '''
+            위 문단에 아무 내용이 없다면 user의 심리 상태는 문제가 없습니다.
+            `,
           },
           base_pupu,
           ...parseMessageArr,
         ],
         model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-        temperature: 1.2,
+        // temperature: 1.2,
       });
       // gpt-4-turbo 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
       // console.log(response.choices[0]);

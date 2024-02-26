@@ -103,6 +103,21 @@ const ebt_Question_v2 = {
   school_question_5: "공부는 잘 못하는 편이야.",
 };
 
+const ebt_Question_v3 = {
+  school_question_0:
+    "user는 '학교생활 하는 건 어때?'라는 질문에 '별로야' 라고 답변했습니다.",
+  school_question_1:
+    "user는 '담임 선생님은 어떠셔?'라는 질문에 '별로야' 라고 답변했습니다.",
+  school_question_2:
+    "user는 '숙제는 잘 해 가?'라는 질문에 '아니 잘 안해' 라고 답변했습니다.",
+  school_question_3:
+    "user는 '수업에 집중하는 건 어때?'라는 질문에 '못하겠어' 라고 답변했습니다.",
+  school_question_4:
+    "user는 '좋아하는 과목이 있어?'라는 질문에 '없어' 라고 답변했습니다.",
+  school_question_5:
+    "user는 '공부 잘 하는 편이야?'라는 질문에 '아니 못해' 라고 답변했습니다.",
+};
+
 module.exports = {
   persnal_short,
   persnal_long,
@@ -111,4 +126,5 @@ module.exports = {
   behavioral_rating_prompt,
   ebt_Question,
   ebt_Question_v2,
+  ebt_Question_v3,
 };
