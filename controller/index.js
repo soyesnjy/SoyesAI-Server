@@ -785,6 +785,7 @@ const {
   solution_prompt,
   psyResult_prompt,
   common_prompt,
+  completions_emotion_prompt,
 } = require("../DB/test_prompt");
 
 const openAIController = {
@@ -1349,14 +1350,9 @@ ${analyzeMsg}
     console.log(
       "정서행동 검사- 학교생활 V3 반영 상담 API /consulting_emotion_v3 Path 호출"
     );
-    let parseMessageArr, parsepUid; // Parsing 변수
+    let parseMessageArr, parsepUid, testResult; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     let prevChat_flag = true; // 이전 대화 내역 유무
-
-    const completions_emotion_prompt = {
-      role: "system",
-      content: `답변이 생성되면 생성한 답변을 분석하여 '중립 === 0, 슬픔 === 1, 기쁨 === 2, 분노 === 3' 을 답변 마지막에 추가해줘.`,
-    };
 
     try {
       // messageArr가 문자열일 경우 json 파싱
@@ -1368,7 +1364,6 @@ ${analyzeMsg}
       promptArr.push(persona_prompt); // 페르소나 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
-      /* 봉인
       // pUid default값 설정
       parsepUid = pUid ? pUid : "njy95";
       // console.log(parsepUid);
@@ -1404,60 +1399,67 @@ ${analyzeMsg}
 
       const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
       const ebt_school_data = await fetchUserData(connection_AI, select_query);
-
       // console.log(ebt_school_data[0]);
-      delete ebt_school_data[0].uid; // uid 속성 삭제
-      // Attribute의 값이 2인 요소의 배열 필터링
-      const problem_attr_arr = Object.keys(ebt_school_data[0]);
+      ebt_school_data[0]
+        ? console.log(`${parsepUid} 계정은 존재합니다`)
+        : console.log(`${parsepUid} 계정은 없습니다`);
+      // delete ebt_school_data[0].uid; // uid 속성 삭제
+      // Attribute의 값이 2인 요소의 배열 필터링. select 값이 없으면
+      const problem_attr_arr = ebt_school_data[0]
+        ? Object.keys(ebt_school_data[0])
+        : [];
       const problem_attr_nameArr = problem_attr_arr.filter(
+        // 속성명이 question을 가지고있고, 해당 속성의 값이 2인 경우 filtering
         (el) => el.includes("question") && ebt_school_data[0][el] === 2
       );
-
       // 문답 개수에 따른 시나리오 문답 투척
-      // Attribute의 값이 0인 요소가 없는 경우
+      // Attribute의 값이 2인 요소가 없는 경우
       if (problem_attr_nameArr.length === 0) {
-        test_prompt_content = "";
-
-        console.log(test_prompt_content);
+        testResult = "";
       } else {
-        // 점수가 0인 값들 중 랜덤 문항 도출
-        // const random_index = Math.floor(
-        //   Math.random() * problem_attr_nameArr.length
-        // );
-        // // console.log(random_index);
-        // const random_question = problem_attr_nameArr[random_index];
-        // const selected_question = ebt_Question[random_question];
-        // console.log(selected_question);
-
-        test_prompt_content = problem_attr_nameArr
+        testResult = problem_attr_nameArr
           .map((el) => ebt_Question_v3[el])
-          .join(" ");
-
-        console.log(test_prompt_content);
+          .join("\n");
       }
 
-      */
+      const psy_testResult_prompt = {
+        role: "system",
+        content: `다음에 오는 문단은 user의 심리검사 결과입니다.
+'''
+${testResult}
+'''
+위 문단이 비어있다면 ${
+          // DB Table의 값 유무에 따라 다른 프롬프트 입력
+          !ebt_school_data[0]
+            ? "user는 심리검사를 진행하지 않았습니다."
+            : "user의 심리검사 결과는 문제가 없습니다."
+        }`,
+      };
+
+      // console.log(psy_testResult_prompt);
 
       /* 개발자 의도 질문 - N번째 문답에 대한 답변을 개발자가 임의로 지정 */
 
-      if (parseMessageArr.length === 1 && prevChat_flag) {
-        // 이전 대화 프롬프트 삽입
-        console.log("이전 대화 프롬프트 삽입");
-        promptArr.push(prevChat_prompt);
-      }
+      // if (parseMessageArr.length === 1 && prevChat_flag) {
+      //   // 이전 대화 프롬프트 삽입
+      //   console.log("이전 대화 프롬프트 삽입");
+      //   promptArr.push(prevChat_prompt);
+      // }
 
-      if (parseMessageArr.length === 9) {
+      if (parseMessageArr.length) {
         // 심리 검사 프롬프트 삽입
         console.log("심리 검사 프롬프트 삽입");
+        promptArr.push(psy_testResult_prompt);
         promptArr.push(psyResult_prompt);
       }
 
-      if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
-        // 솔루션 프롬프트 삽입
-        console.log("솔루션 프롬프트 삽입");
-        promptArr.push(solution_prompt);
-      }
+      // if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
+      //   // 솔루션 프롬프트 삽입
+      //   console.log("솔루션 프롬프트 삽입");
+      //   promptArr.push(solution_prompt);
+      // }
 
+      // 상시 삽입 프롬프트
       promptArr.push(common_prompt); // 공통 프롬프트 삽입
       promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
 
@@ -1481,9 +1483,9 @@ ${analyzeMsg}
       ]);
       res.json(message);
     } catch (err) {
-      console.error(err.error);
+      console.error(err);
       res.json({
-        message: err.error,
+        message: "Server Error",
         emotion: 0,
       });
     }
