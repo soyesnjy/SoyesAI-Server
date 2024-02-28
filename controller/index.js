@@ -1490,6 +1490,152 @@ ${testResult}
       });
     }
   },
+  // 테스트 결과 기반 상담 AI. 정서행동 검사 - 학교생활 V3
+  postOpenAIEmotionTestResultConsultingV4: async (req, res) => {
+    const { messageArr, pUid } = req.body;
+    console.log(
+      "정서행동 검사- 학교생활 V4 반영 상담 API /consulting_emotion_v4 Path 호출"
+    );
+    let parseMessageArr, parsepUid, testResult; // Parsing 변수
+    let promptArr = []; // 삽입 Prompt Array
+    let prevChat_flag = true; // 이전 대화 내역 유무
+
+    try {
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
+
+      // 고정 삽입 프롬프트
+      promptArr.push(base_lala); // 페르소나 프롬프트 삽입
+      promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
+
+      // pUid default값 설정
+      parsepUid = pUid ? pUid : "njy95";
+      // console.log(parsepUid);
+
+      // 동기식 DB 접근 함수 1. Promise 생성 함수
+      function queryAsync(connection, query, parameters) {
+        return new Promise((resolve, reject) => {
+          connection.query(query, parameters, (error, results, fields) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(results);
+            }
+          });
+        });
+      }
+      // 프로미스 resolve 반환값 사용. (User Data return)
+      async function fetchUserData(connection, query) {
+        try {
+          let results = await queryAsync(connection, query, []);
+          // console.log(results[0]);
+          return results;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      const user_table = "soyes_ai_Ebt_School"; // DB Table Name
+      const user_attr = {
+        pKey: "uid",
+        // attr1: "",
+      }; // DB Table Attribue
+
+      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
+      const ebt_school_data = await fetchUserData(connection_AI, select_query);
+      // console.log(ebt_school_data[0]);
+      ebt_school_data[0]
+        ? console.log(`${parsepUid} 계정은 존재합니다`)
+        : console.log(`${parsepUid} 계정은 없습니다`);
+      // delete ebt_school_data[0].uid; // uid 속성 삭제
+      // Attribute의 값이 2인 요소의 배열 필터링. select 값이 없으면
+      const problem_attr_arr = ebt_school_data[0]
+        ? Object.keys(ebt_school_data[0])
+        : [];
+      const problem_attr_nameArr = problem_attr_arr.filter(
+        // 속성명이 question을 가지고있고, 해당 속성의 값이 2인 경우 filtering
+        (el) => el.includes("question") && ebt_school_data[0][el] === 2
+      );
+      // 문답 개수에 따른 시나리오 문답 투척
+      // Attribute의 값이 2인 요소가 없는 경우
+      if (problem_attr_nameArr.length === 0) {
+        testResult = "";
+      } else {
+        testResult = problem_attr_nameArr
+          .map((el) => ebt_Question_v3[el])
+          .join("\n");
+      }
+
+      const psy_testResult_prompt = {
+        role: "system",
+        content: `다음에 오는 문단은 user의 심리검사 결과입니다.
+'''
+${testResult}
+'''
+위 문단이 비어있다면 ${
+          // DB Table의 값 유무에 따라 다른 프롬프트 입력
+          !ebt_school_data[0]
+            ? "user는 심리검사를 진행하지 않았습니다."
+            : "user의 심리검사 결과는 문제가 없습니다."
+        }`,
+      };
+
+      console.log(psy_testResult_prompt);
+
+      /* 개발자 의도 질문 - N번째 문답에 대한 답변을 개발자가 임의로 지정 */
+
+      // if (parseMessageArr.length === 1 && prevChat_flag) {
+      //   // 이전 대화 프롬프트 삽입
+      //   console.log("이전 대화 프롬프트 삽입");
+      //   promptArr.push(prevChat_prompt);
+      // }
+
+      if (parseMessageArr.length) {
+        // 심리 검사 프롬프트 삽입
+        console.log("심리 검사 프롬프트 삽입");
+        promptArr.push(psy_testResult_prompt);
+        promptArr.push(psyResult_prompt);
+      }
+
+      // if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
+      //   // 솔루션 프롬프트 삽입
+      //   console.log("솔루션 프롬프트 삽입");
+      //   promptArr.push(solution_prompt);
+      // }
+
+      // 상시 삽입 프롬프트
+      // promptArr.push(common_prompt); // 공통 프롬프트 삽입
+      promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
+
+      // console.log(promptArr);
+
+      const response = await openai.chat.completions.create({
+        messages: [...promptArr, ...parseMessageArr],
+        model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      });
+
+      let emotion = parseInt(response.choices[0].message.content.slice(-1));
+      // console.log(emotion);
+
+      const message = {
+        message: response.choices[0].message.content.slice(0, -1),
+        emotion,
+      };
+      console.log([
+        ...parseMessageArr,
+        { role: "assistant", content: message.message },
+      ]);
+      res.json(message);
+    } catch (err) {
+      console.error(err);
+      res.json({
+        message: "Server Error",
+        emotion: 0,
+      });
+    }
+  },
 };
 
 const mailController = {
