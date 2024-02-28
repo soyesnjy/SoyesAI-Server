@@ -780,6 +780,7 @@ const {
 
 const {
   persona_prompt,
+  persona_prompt_lala,
   info_prompt,
   prevChat_prompt,
   solution_prompt,
@@ -1507,7 +1508,7 @@ ${testResult}
       } else parseMessageArr = [...messageArr];
 
       // 고정 삽입 프롬프트
-      promptArr.push(base_lala); // 페르소나 프롬프트 삽입
+      promptArr.push(persona_prompt_lala); // 페르소나 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       // pUid default값 설정
@@ -1582,7 +1583,7 @@ ${testResult}
         }`,
       };
 
-      console.log(psy_testResult_prompt);
+      // console.log(psy_testResult_prompt);
 
       /* 개발자 의도 질문 - N번째 문답에 대한 답변을 개발자가 임의로 지정 */
 
@@ -1596,7 +1597,7 @@ ${testResult}
         // 심리 검사 프롬프트 삽입
         console.log("심리 검사 프롬프트 삽입");
         promptArr.push(psy_testResult_prompt);
-        promptArr.push(psyResult_prompt);
+        // promptArr.push(psyResult_prompt);
       }
 
       // if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
