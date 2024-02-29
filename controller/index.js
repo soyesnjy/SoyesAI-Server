@@ -1504,7 +1504,7 @@ ${analyzeMsg}
     let parseMessageArr, parsepUid, testResult; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     let prevChat_flag = true; // 이전 대화 내역 유무
-
+    // console.log(messageArr);
     try {
       // messageArr가 문자열일 경우 json 파싱
       if (typeof messageArr === "string") {
@@ -1685,7 +1685,7 @@ ${select_Ebt_School_result.testResult}
         console.log(random_class);
         parseMessageArr.push({
           role: "user",
-          content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 5문장 이내로 설명해줘. 이후 '검사 결과에 대해 더 궁금한점이 있어?' 라고 물어봐줘.`,
+          content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 5문장 이내로 설명해줘. 이후 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
         });
         promptArr.push({
           role: "system",
@@ -1701,7 +1701,7 @@ ${select_Ebt_School_result.testResult}
 
       // 상시 삽입 프롬프트
       // promptArr.push(common_prompt); // 공통 프롬프트 삽입
-      // promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
+      promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
 
       // console.log(promptArr);
 
