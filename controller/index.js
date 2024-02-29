@@ -789,6 +789,54 @@ const {
   completions_emotion_prompt,
 } = require("../DB/test_prompt");
 
+const EBT_Table_Info = {
+  School: {
+    table: "soyes_ai_Ebt_School",
+    attribute: {
+      pKey: "uid",
+      attr1: "school_question_0",
+      attr2: "school_question_1",
+      attr3: "school_question_2",
+      attr4: "school_question_3",
+      attr5: "school_question_4",
+      attr6: "school_question_5",
+      attr7: "chat",
+      attr8: "date",
+    },
+  },
+  Friend: {
+    table: "soyes_ai_Ebt_Friend",
+    attribute: {
+      pKey: "uid",
+      attr1: "friend_question_0",
+      attr2: "friend_question_1",
+      attr3: "friend_question_2",
+      attr4: "friend_question_3",
+      attr5: "friend_question_4",
+      attr6: "friend_question_5",
+      attr7: "friend_question_6",
+      attr8: "friend_question_7",
+      attr9: "chat",
+      attr10: "date",
+    },
+  },
+  Family: {
+    table: "soyes_ai_Ebt_Family",
+    attribute: {
+      pKey: "uid",
+      attr1: "family_question_0",
+      attr2: "family_question_1",
+      attr3: "family_question_2",
+      attr4: "family_question_3",
+      attr5: "family_question_4",
+      attr6: "family_question_5",
+      attr7: "family_question_6",
+      attr8: "chat",
+      attr9: "date",
+    },
+  },
+};
+
 const select_soyes_AI_Ebt_Table = async (
   user_table,
   user_attr,
@@ -936,29 +984,31 @@ const openAIController = {
   },
   // 테스트 결과 분석 및 메일 전송 API
   postOpenAIPsychologicalAnalysis: async (req, res) => {
-    const { EBTData, type, pUid } = req.body;
+    const { messageArr, type, score, pUid } = req.body;
     console.log("테스트 결과 분석 및 메일 전송 API /analysis Path 호출");
-    console.log(EBTData);
 
     let data,
+      parsingScore,
       parsingType,
       parsepUid,
       yourMailAddr = "";
 
-    // uid, type 전처리. 없는 경우 디폴트값 할당
-    parsepUid = pUid ? pUid : "njy95";
-    parsingType = type ? type : "default";
-
     // 테스트 타입 객체. 추후 검사를 늘림에 따라 추가 될 예정
     const testType = {
-      school: "학교",
-      friendship: "교우관계",
-      default: "학교",
+      School: "학교생활",
+      Friend: "또래관계",
+      Family: "가족관계",
+      default: "학교생활",
     };
 
-    // 메일 관련 세팅 시작
+    try {
+      // uid, type 전처리. 없는 경우 디폴트값 할당
+      parsepUid = pUid ? pUid : "njy95";
+      parsingType = type ? type : "default";
 
-    /*
+      // 메일 관련 세팅 시작
+
+      /*
     // mysql query 메서드 동기식 작동 + DB 데이터 가져오기
     let yourMailAddr = "";
 
@@ -997,29 +1047,32 @@ const openAIController = {
     console.log("받는사람: " + yourMailAddr);
     */
 
-    yourMailAddr = "soyesnjy@gmail.com"; // dummy email. 받는사람
+      yourMailAddr = "soyesnjy@gmail.com"; // dummy email. 받는사람
 
-    // 보내는 사람 계정 로그인
-    const myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
-    const myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
+      // 보내는 사람 계정 로그인
+      const myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
+      const myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail", // 사용할 이메일 서비스
-      // host: "smtp.gmail.com",
-      // port: 587,
-      // secure: false,
-      auth: {
-        user: myMailAddr, // 보내는 이메일 주소
-        pass: myMailPwd, // 이메일 비밀번호
-      },
-    });
-    // 메일 관련 세팅 끝
+      const transporter = nodemailer.createTransport({
+        service: "gmail", // 사용할 이메일 서비스
+        // host: "smtp.gmail.com",
+        // port: 587,
+        // secure: false,
+        auth: {
+          user: myMailAddr, // 보내는 이메일 주소
+          pass: myMailPwd, // 이메일 비밀번호
+        },
+      });
+      // 메일 관련 세팅 끝
 
-    try {
       // 파싱. Client JSON 데이터
-      if (typeof EBTData === "string") {
-        data = JSON.parse(EBTData);
-      } else data = EBTData;
+      if (typeof messageArr === "string") {
+        data = JSON.parse(messageArr);
+      } else data = messageArr;
+
+      if (typeof score === "string") {
+        parsingScore = JSON.parse(score);
+      } else parsingScore = score;
 
       // 파싱 후 값 대입
       let parseMessageArr = [...data];
@@ -1048,10 +1101,6 @@ const openAIController = {
         model: "gpt-4-1106-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
         temperature: 0.2,
       });
-      // gpt-3.5-turbo-instruct 모델은 최신 문법이 아닌 레거시 문법으로 작성해야 사용 가능
-      // gpt-4-1106-preview 모델은 OpenAI 유료고객(Plus 결제 회원) 대상으로 사용 권한 지급
-
-      // console.log(response.choices[0]);
 
       const message = { message: response.choices[0].message.content };
       // AI 분석 내용 보기좋게 정리
@@ -1073,7 +1122,7 @@ ${analyzeMsg}
         // attachments : 'logo.png' // 이미지 첨부 속성
       };
 
-      /* 잠시 봉인
+      /* 메일 전송 봉인
       // 메일 전송 (비동기)
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
@@ -1090,8 +1139,8 @@ ${analyzeMsg}
       res.json({ message: mailOptions.text });
 
       // 메일 내역 DB 저장
-      const table = "soyes_ai_Analysis";
-      const attribute = { pKey: "uid", attr1: "chat", attr2: "date" };
+      const table = EBT_Table_Info[type].table;
+      const attribute = EBT_Table_Info[type].attribute;
       // 오늘 날짜 변환
       const dateObj = new Date();
       const year = dateObj.getFullYear();
@@ -1099,53 +1148,91 @@ ${analyzeMsg}
       const day = ("0" + dateObj.getDate()).slice(-2);
       const date = `${year}-${month}-${day}`;
 
-      /*
+      // 동기식 DB 접근 함수 1. Promise 생성 함수
+      function queryAsync(connection, query, parameters) {
+        return new Promise((resolve, reject) => {
+          connection.query(query, parameters, (error, results, fields) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(results);
+            }
+          });
+        });
+      }
+      // 프로미스 resolve 반환값 사용. (User Data return)
+      async function fetchUserData(connection, query) {
+        try {
+          let results = await queryAsync(connection, query, []);
+          // console.log(results[0]);
+          return results;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
       // 1. SELECT TEST (row가 있는지 없는지 검사)
       const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`;
-      connection_AI.query(select_query, (error, rows, fields) => {
-        if (error) console.log(error);
-        else {
-          // row 값 콘솔에 찍어보기
-          console.log(rows[0][attribute.pKey]);
-          console.log(JSON.parse(rows[0][attribute.attr1])); // json parsing 필수
-          console.log(rows[0][attribute.attr2]);
-        }
-      });
-      */
+      const ebt_data = await fetchUserData(connection_AI, select_query);
 
-      // 2. UPDATE TEST (row값이 있는 경우 실행)
-      const update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr2} = ? WHERE ${attribute.pKey} = ?`;
-      const update_value = [
-        JSON.stringify({ ...mailOptions, date }),
-        date,
-        parsepUid,
-      ];
+      if (ebt_data[0]) {
+        // 2. UPDATE TEST (row값이 있는 경우 실행)
+        const update_query = `UPDATE ${table} SET ${Object.values(attribute)
+          .filter((el) => el !== "uid")
+          .map((el) => {
+            return `${el} = ?`;
+          })
+          .join(", ")} WHERE ${attribute.pKey} = ?`;
+        // console.log(update_query);
 
-      // 분석 기록 DB 저장
-      connection_AI.query(update_query, update_value, (error, rows, fields) => {
-        if (error) console.log(error);
-        else console.log("AI Analysis Data DB Save Success!");
-      });
+        const update_value = [
+          ...parsingScore,
+          JSON.stringify({ ...mailOptions, date }),
+          date,
+          parsepUid,
+        ];
 
-      /*
-      // 3. INSERT TEST (row값이 없는 경우 실행)
-      const insert_query = `INSERT INTO ${table} (${attribute.pKey}, ${attribute.attr1}, ${attribute.attr2}) VALUES (?, ?, ?)`;
-      const insert_value = [
-        parsepUid,
-        JSON.stringify({ ...mailOptions, date }),
-        date,
-      ];
+        // console.log(update_value);
 
-      connection_AI.query(insert_query, insert_value, (error, rows, fields) => {
-        if (error) console.log(error);
-        else console.log("INSERT Success");
-      });
-      */
+        connection_AI.query(
+          update_query,
+          update_value,
+          (error, rows, fields) => {
+            if (error) console.log(error);
+            else console.log("AI Analysis Data DB UPDATE Success!");
+          }
+        );
+      } else {
+        // 3. INSERT TEST (row값이 없는 경우 실행)
+        const insert_query = `INSERT INTO ${table} (${Object.values(
+          attribute
+        ).join(", ")}) VALUES (${Object.values(attribute)
+          .map((el) => "?")
+          .join(", ")})`;
+        // console.log(insert_query);
+
+        const insert_value = [
+          parsepUid,
+          ...parsingScore,
+          JSON.stringify({ ...mailOptions, date }),
+          date,
+        ];
+        // console.log(insert_value);
+
+        connection_AI.query(
+          insert_query,
+          insert_value,
+          (error, rows, fields) => {
+            if (error) console.log(error);
+            else console.log("AI Analysis Data DB INSERT Success!");
+          }
+        );
+      }
 
       // res.json(message);
     } catch (err) {
-      console.error(err.error);
-      res.json("Fail!");
+      console.error(err);
+      res.json({ message: "Server Error" });
     }
   },
   // 테스트 결과 기반 상담 AI. 성격 검사
