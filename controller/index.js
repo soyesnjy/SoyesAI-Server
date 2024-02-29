@@ -766,9 +766,9 @@ const {
   behavioral_rating_scale, // 정서행동검사 척도
   behavioral_rating_standard, // 정서행동검사 기준
   behavioral_rating_prompt, // 정서행동검사 프롬프트
-  ebt_Question, // 정서행동검사 학교생활 질문 6종
-  ebt_Question_v2,
-  ebt_Question_v3,
+  ebt_School_Result, // 정서행동검사 학교생활 질문 6종
+  ebt_Friend_Result, // 정서행동검사 또래관계 질문 8종
+  ebt_Family_Result, // 정서행동검사 가족관계 질문 7종
 } = require("../DB/psy_test");
 
 const {
@@ -788,6 +788,69 @@ const {
   common_prompt,
   completions_emotion_prompt,
 } = require("../DB/test_prompt");
+
+const select_soyes_AI_Ebt_Table = async (
+  user_table,
+  user_attr,
+  ebt_Question,
+  parsepUid
+) => {
+  // 동기식 DB 접근 함수 1. Promise 생성 함수
+  function queryAsync(connection, query, parameters) {
+    return new Promise((resolve, reject) => {
+      connection.query(query, parameters, (error, results, fields) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+  }
+  // 프로미스 resolve 반환값 사용. (User Data return)
+  async function fetchUserData(connection, query) {
+    try {
+      let results = await queryAsync(connection, query, []);
+      // console.log(results[0]);
+      return results;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  try {
+    // console.log(user_table);
+    const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
+    const ebt_school_data = await fetchUserData(connection_AI, select_query);
+    // console.log(ebt_school_data[0]);
+    // ebt_school_data[0]
+    //   ? console.log(`${parsepUid} 계정은 존재합니다`)
+    //   : console.log(`${parsepUid} 계정은 없습니다`);
+    // delete ebt_school_data[0].uid; // uid 속성 삭제
+    // Attribute의 값이 2인 요소의 배열 필터링. select 값이 없으면
+    const problem_attr_arr = ebt_school_data[0]
+      ? Object.keys(ebt_school_data[0])
+      : [];
+    const problem_attr_nameArr = problem_attr_arr.filter(
+      // 속성명이 question을 가지고있고, 해당 속성의 값이 2인 경우 filtering
+      (el) => el.includes("question") && ebt_school_data[0][el] === 2
+    );
+    // console.log(problem_attr_nameArr);
+
+    // 문답 개수에 따른 시나리오 문답 투척
+    // Attribute의 값이 2인 요소가 없는 경우
+    return problem_attr_nameArr.length === 0
+      ? { testResult: "", ebt_school_data }
+      : {
+          testResult: problem_attr_nameArr
+            .map((el) => ebt_Question[el])
+            .join("\n"),
+          ebt_school_data,
+        };
+  } catch (err) {
+    console.log(err);
+    return { testResult: "", ebt_school_data: {} };
+  }
+};
 
 const openAIController = {
   // 자율 상담 AI
@@ -1291,7 +1354,7 @@ ${analyzeMsg}
         // console.log(selected_question);
 
         test_prompt_content = problem_attr_nameArr
-          .map((el) => ebt_Question_v3[el])
+          .map((el) => ebt_School_Result[el])
           .join(" ");
 
         console.log(test_prompt_content);
@@ -1369,69 +1432,24 @@ ${analyzeMsg}
       parsepUid = pUid ? pUid : "njy95";
       // console.log(parsepUid);
 
-      // 동기식 DB 접근 함수 1. Promise 생성 함수
-      function queryAsync(connection, query, parameters) {
-        return new Promise((resolve, reject) => {
-          connection.query(query, parameters, (error, results, fields) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(results);
-            }
-          });
-        });
-      }
-      // 프로미스 resolve 반환값 사용. (User Data return)
-      async function fetchUserData(connection, query) {
-        try {
-          let results = await queryAsync(connection, query, []);
-          // console.log(results[0]);
-          return results;
-        } catch (error) {
-          console.error(error);
-        }
-      }
-
-      const user_table = "soyes_ai_Ebt_School"; // DB Table Name
-      const user_attr = {
-        pKey: "uid",
-        // attr1: "",
-      }; // DB Table Attribue
-
-      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
-      const ebt_school_data = await fetchUserData(connection_AI, select_query);
-      // console.log(ebt_school_data[0]);
-      ebt_school_data[0]
-        ? console.log(`${parsepUid} 계정은 존재합니다`)
-        : console.log(`${parsepUid} 계정은 없습니다`);
-      // delete ebt_school_data[0].uid; // uid 속성 삭제
-      // Attribute의 값이 2인 요소의 배열 필터링. select 값이 없으면
-      const problem_attr_arr = ebt_school_data[0]
-        ? Object.keys(ebt_school_data[0])
-        : [];
-      const problem_attr_nameArr = problem_attr_arr.filter(
-        // 속성명이 question을 가지고있고, 해당 속성의 값이 2인 경우 filtering
-        (el) => el.includes("question") && ebt_school_data[0][el] === 2
+      const select_Ebt_School_result = await select_soyes_AI_Ebt_Table(
+        "soyes_ai_Ebt_School", // Table Name
+        {
+          pKey: "uid",
+        }, // primary Key Name
+        ebt_School_Result, // EBT Question 11가지 분야 중 1개 (Table에 따라 결정)
+        parsepUid // Uid
       );
-      // 문답 개수에 따른 시나리오 문답 투척
-      // Attribute의 값이 2인 요소가 없는 경우
-      if (problem_attr_nameArr.length === 0) {
-        testResult = "";
-      } else {
-        testResult = problem_attr_nameArr
-          .map((el) => ebt_Question_v3[el])
-          .join("\n");
-      }
 
       const psy_testResult_prompt = {
         role: "system",
         content: `다음에 오는 문단은 user의 심리검사 결과입니다.
 '''
-${testResult}
+${select_Ebt_School_result.testResult}
 '''
 위 문단이 비어있다면 ${
           // DB Table의 값 유무에 따라 다른 프롬프트 입력
-          !ebt_school_data[0]
+          !select_Ebt_School_result.ebt_school_data[0]
             ? "user는 심리검사를 진행하지 않았습니다."
             : "user의 심리검사 결과는 문제가 없습니다."
         }`,
@@ -1491,15 +1509,22 @@ ${testResult}
       });
     }
   },
-  // 테스트 결과 기반 상담 AI. 정서행동 검사 - 학교생활 V3
+  // 테스트 결과 기반 상담 AI. 정서행동 검사 - 학교생활 V4
   postOpenAIEmotionTestResultConsultingV4: async (req, res) => {
     const { messageArr, pUid } = req.body;
     console.log(
       "정서행동 검사- 학교생활 V4 반영 상담 API /consulting_emotion_v4 Path 호출"
     );
-    let parseMessageArr, parsepUid, testResult; // Parsing 변수
+    let parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     let prevChat_flag = true; // 이전 대화 내역 유무
+
+    const EBT_classArr = ["School", "Friend", "Family"];
+    const EBT_ObjArr = {
+      School: { table: "soyes_ai_Ebt_School", result: ebt_School_Result },
+      Friend: { table: "soyes_ai_Ebt_Friend", result: ebt_Friend_Result },
+      Family: { table: "soyes_ai_Ebt_Family", result: ebt_Family_Result },
+    };
 
     try {
       // messageArr가 문자열일 경우 json 파싱
@@ -1515,89 +1540,70 @@ ${testResult}
       parsepUid = pUid ? pUid : "njy95";
       // console.log(parsepUid);
 
-      // 동기식 DB 접근 함수 1. Promise 생성 함수
-      function queryAsync(connection, query, parameters) {
-        return new Promise((resolve, reject) => {
-          connection.query(query, parameters, (error, results, fields) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(results);
-            }
-          });
-        });
-      }
-      // 프로미스 resolve 반환값 사용. (User Data return)
-      async function fetchUserData(connection, query) {
-        try {
-          let results = await queryAsync(connection, query, []);
-          // console.log(results[0]);
-          return results;
-        } catch (error) {
-          console.error(error);
-        }
-      }
+      let psy_testResult_promptArr_last = []; // 2점을 획득한 정서행동검사 문항을 저장하는 prompt
 
-      const user_table = "soyes_ai_Ebt_School"; // DB Table Name
-      const user_attr = {
-        pKey: "uid",
-        // attr1: "",
-      }; // DB Table Attribue
+      // 해당 계정의 모든 정서행동검사 결과 DB에서 차출
+      const psy_testResult_promptArr = EBT_classArr.map(async (ebt_class) => {
+        const select_Ebt_School_result = await select_soyes_AI_Ebt_Table(
+          EBT_ObjArr[ebt_class].table, // Table Name
+          {
+            pKey: "uid",
+          }, // primary Key Name
+          EBT_ObjArr[ebt_class].result, // EBT Question 11가지 분야 중 1개 (Table에 따라 결정)
+          parsepUid // Uid
+        );
 
-      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
-      const ebt_school_data = await fetchUserData(connection_AI, select_query);
-      // console.log(ebt_school_data[0]);
-      ebt_school_data[0]
-        ? console.log(`${parsepUid} 계정은 존재합니다`)
-        : console.log(`${parsepUid} 계정은 없습니다`);
-      // delete ebt_school_data[0].uid; // uid 속성 삭제
-      // Attribute의 값이 2인 요소의 배열 필터링. select 값이 없으면
-      const problem_attr_arr = ebt_school_data[0]
-        ? Object.keys(ebt_school_data[0])
-        : [];
-      const problem_attr_nameArr = problem_attr_arr.filter(
-        // 속성명이 question을 가지고있고, 해당 속성의 값이 2인 경우 filtering
-        (el) => el.includes("question") && ebt_school_data[0][el] === 2
-      );
-      // 문답 개수에 따른 시나리오 문답 투척
-      // Attribute의 값이 2인 요소가 없는 경우
-      if (problem_attr_nameArr.length === 0) {
-        testResult = "";
-      } else {
-        testResult = problem_attr_nameArr
-          .map((el) => ebt_Question_v3[el])
-          .join("\n");
-      }
+        // console.log(select_Ebt_School_result);
 
-      const psy_testResult_prompt = {
-        role: "system",
-        content: `다음에 오는 문단은 user의 심리검사 결과입니다.
-'''
-${testResult}
-'''
-위 문단이 비어있다면 ${
-          // DB Table의 값 유무에 따라 다른 프롬프트 입력
-          !ebt_school_data[0]
-            ? "user는 심리검사를 진행하지 않았습니다."
-            : "user의 심리검사 결과는 문제가 없습니다."
-        }`,
-      };
+        const psy_testResult_prompt = {
+          role: "system",
+          content: `다음에 오는 문단은 user의 ${ebt_class} 관련 심리검사 결과입니다.
+  '''
+  ${select_Ebt_School_result.testResult}
+  '''
+  위 문단이 비어있다면 ${
+    // DB Table의 값 유무에 따라 다른 프롬프트 입력
+    !select_Ebt_School_result.ebt_school_data[0]
+      ? "user는 심리검사를 진행하지 않았습니다."
+      : "user의 심리검사 결과는 문제가 없습니다."
+  }`,
+        };
+        // console.log(psy_testResult_prompt);
+        return psy_testResult_prompt;
+      });
 
-      // console.log(psy_testResult_prompt);
+      // map method는 pending 상태의 promise를 반환하므로 Promise.all method를 사용하여 resolve 상태가 되기를 기다려준다.
+      await Promise.all(psy_testResult_promptArr).then((prompt) => {
+        psy_testResult_promptArr_last = [...prompt]; // resolve 상태로 반환된 prompt 배열을 psy_testResult_promptArr_last 변수에 복사
+      });
+
+      // console.log(psy_testResult_promptArr_last);
 
       /* 개발자 의도 질문 - N번째 문답에 대한 답변을 개발자가 임의로 지정 */
 
-      // if (parseMessageArr.length === 1 && prevChat_flag) {
-      //   // 이전 대화 프롬프트 삽입
-      //   console.log("이전 대화 프롬프트 삽입");
-      //   promptArr.push(prevChat_prompt);
-      // }
-
       if (parseMessageArr.length) {
-        // 심리 검사 프롬프트 삽입
-        console.log("심리 검사 프롬프트 삽입");
-        promptArr.push(psy_testResult_prompt);
-        // promptArr.push(psyResult_prompt);
+        // 심리 검사 결과 프롬프트 삽입
+        console.log("심리 검사 결과 프롬프트 삽입");
+        promptArr.push(...psy_testResult_promptArr_last);
+        promptArr.push(psyResult_prompt);
+        promptArr.push(solution_prompt);
+      }
+
+      if (parseMessageArr.length === 1) {
+        // 고정 답변1 프롬프트 삽입
+        console.log("고정 답변1 프롬프트 삽입");
+
+        const random_class =
+          EBT_classArr[Math.floor(Math.random() * EBT_classArr.length)];
+        console.log(random_class);
+        parseMessageArr.push({
+          role: "user",
+          content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 5문장 이내로 설명해줘. 이후 '검사 결과에 대해 더 궁금한점이 있어?' 라고 물어봐줘.`,
+        });
+        promptArr.push({
+          role: "system",
+          content: `이번 문답은 예외적으로 6문장 이내로 답변을 생성합니다.`,
+        });
       }
 
       // if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
@@ -1608,7 +1614,7 @@ ${testResult}
 
       // 상시 삽입 프롬프트
       // promptArr.push(common_prompt); // 공통 프롬프트 삽입
-      promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
+      // promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
 
       // console.log(promptArr);
 

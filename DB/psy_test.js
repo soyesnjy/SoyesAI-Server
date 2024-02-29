@@ -103,7 +103,7 @@ const ebt_Question_v2 = {
   school_question_5: "공부는 잘 못하는 편이야.",
 };
 
-const ebt_Question_v3 = {
+const ebt_School_Result = {
   school_question_0:
     "user는 '학교생활 하는 건 어때?'라는 질문에 '별로야' 라고 답변했습니다.",
   school_question_1:
@@ -118,6 +118,42 @@ const ebt_Question_v3 = {
     "user는 '공부 잘 하는 편이야?'라는 질문에 '아니 못해' 라고 답변했습니다.",
 };
 
+const ebt_Friend_Result = {
+  friend_question_0:
+    "user는 '같은 반에 친한 친구가 몇 명 있니?'라는 질문에 '하나도 없어' 라고 답변했습니다.",
+  friend_question_1:
+    "user는 '같은 반이 아닌 친구 중에 친한 친구가 몇 명이야?'라는 질문에 '하나도 없어' 라고 답변했습니다.",
+  friend_question_2:
+    "user는 '친구가 더 많았으면 좋겠니?'라는 질문에 '응 훨씬 더~' 라고 답변했습니다.",
+  friend_question_3:
+    "user는 '친구들과 얼마나 자주 어울려 놀아?'라는 질문에 '일주일에 1번~' 라고 답변했습니다.",
+  friend_question_4:
+    "user는 '친구들이랑 잘 지내는 것 같아?'라는 질문에 '아니 별로야' 라고 답변했습니다.",
+  friend_question_5:
+    "user는 '다른 친구들에게 인기가 많니?'라는 질문에 '아니 없어' 라고 답변했습니다.",
+  friend_question_6:
+    "user는 '친구들이 괴롭힐 때가 있어?'라는 질문에 '자주 있어' 라고 답변했습니다.",
+  friend_question_7:
+    "user는 '친구들과 싸울 때가 있니?'라는 질문에 '자주 있어' 라고 답변했습니다.",
+};
+
+const ebt_Family_Result = {
+  family_question_0:
+    "user는 '너와 엄마 사이는 어때?'라는 질문에 '안 좋아' 라고 답변했습니다.",
+  family_question_1:
+    "user는 '너와 아빠 사이는 어때?'라는 질문에 '안 좋아' 라고 답변했습니다.",
+  family_question_2:
+    "user는 '너와 형제자매 사이는 어때?'라는 질문에 '안 좋아' 라고 답변했습니다.",
+  family_question_3:
+    "user는 '부모님 사이는 어떤 것 같아?'라는 질문에 '안 좋아' 라고 답변했습니다.",
+  family_question_4:
+    "user는 '부모님께서 다투실 때는 없어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  family_question_5:
+    "user는 '가족끼리 밥을 먹거나 대화를 나누거나 어떤 활동을 하면서 함께 시간을 보내니?'라는 질문에 '거의 없어' 라고 답변했습니다.",
+  family_question_6:
+    "user는 '가족끼리 서로에 대한 관심과 사랑을 표현하니?'라는 질문에 '거의 안 그래' 라고 답변했습니다.",
+};
+
 module.exports = {
   persnal_short,
   persnal_long,
@@ -126,5 +162,7 @@ module.exports = {
   behavioral_rating_prompt,
   ebt_Question,
   ebt_Question_v2,
-  ebt_Question_v3,
+  ebt_School_Result,
+  ebt_Friend_Result,
+  ebt_Family_Result,
 };
