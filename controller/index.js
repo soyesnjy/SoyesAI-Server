@@ -769,6 +769,8 @@ const {
   ebt_School_Result, // 정서행동검사 학교생활 질문 6종
   ebt_Friend_Result, // 정서행동검사 또래관계 질문 8종
   ebt_Family_Result, // 정서행동검사 가족관계 질문 7종
+  ebt_Mood_Result,
+  ebt_Unrest_Result,
 } = require("../DB/psy_test");
 
 const {
@@ -835,6 +837,31 @@ const EBT_Table_Info = {
       attr7: "family_question_6",
       attr8: "chat",
       attr9: "date",
+    },
+  },
+  Mood: {
+    table: "soyes_ai_Ebt_Mood",
+    attribute: {
+      pKey: "uid",
+      attr1: "mood_question_0",
+      attr2: "mood_question_1",
+      attr3: "mood_question_2",
+      attr4: "chat",
+      attr5: "date",
+    },
+  },
+  Unrest: {
+    table: "soyes_ai_Ebt_Mood",
+    attribute: {
+      pKey: "uid",
+      attr1: "unrest_question_0",
+      attr2: "unrest_question_1",
+      attr3: "unrest_question_2",
+      attr4: "unrest_question_3",
+      attr5: "unrest_question_4",
+      attr6: "unrest_question_5",
+      attr7: "chat",
+      attr8: "date",
     },
   },
 };
@@ -1001,6 +1028,8 @@ const openAIController = {
       School: "학교생활",
       Friend: "또래관계",
       Family: "가족관계",
+      Mood: "전반적 기분",
+      Unrest: "불안",
       default: "학교생활",
     };
 
@@ -1012,7 +1041,7 @@ const openAIController = {
 
       const { messageArr, type, score, pUid } = parseEBTdata;
 
-      console.log(messageArr);
+      console.log(parseEBTdata);
 
       // uid, type 전처리. 없는 경우 디폴트값 할당
       parsepUid = pUid ? pUid : "njy95";
@@ -1617,11 +1646,13 @@ ${select_Ebt_School_result.testResult}
     // let prevChat_flag = true; // 이전 대화 내역 유무
 
     // EBT 반영 Class 정의
-    const EBT_classArr = ["School", "Friend", "Family"];
+    const EBT_classArr = ["School", "Friend", "Family", "Mood", "Unrest"];
     const EBT_ObjArr = {
       School: { table: "soyes_ai_Ebt_School", result: ebt_School_Result },
       Friend: { table: "soyes_ai_Ebt_Friend", result: ebt_Friend_Result },
       Family: { table: "soyes_ai_Ebt_Family", result: ebt_Family_Result },
+      Mood: { table: "soyes_ai_Ebt_Mood", result: ebt_Mood_Result },
+      Unrest: { table: "soyes_ai_Ebt_Unrest", result: ebt_Unrest_Result },
     };
 
     try {
@@ -1687,22 +1718,22 @@ ${select_Ebt_School_result.testResult}
         promptArr.push(solution_prompt);
       }
 
-      if (parseMessageArr.length === 1) {
-        // 고정 답변1 프롬프트 삽입
-        console.log("고정 답변1 프롬프트 삽입");
+      // if (parseMessageArr.length === 1) {
+      //   // 고정 답변1 프롬프트 삽입
+      //   console.log("고정 답변1 프롬프트 삽입");
 
-        const random_class =
-          EBT_classArr[Math.floor(Math.random() * EBT_classArr.length)];
-        console.log(random_class);
-        parseMessageArr.push({
-          role: "user",
-          content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 5문장 이내로 설명해줘. 이후 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
-        });
-        promptArr.push({
-          role: "system",
-          content: `이번 문답은 예외적으로 6문장 이내로 답변을 생성합니다.`,
-        });
-      }
+      //   const random_class =
+      //     EBT_classArr[Math.floor(Math.random() * EBT_classArr.length)];
+      //   console.log(random_class);
+      //   parseMessageArr.push({
+      //     role: "user",
+      //     content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 5문장 이내로 설명해줘. 이후 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
+      //   });
+      //   promptArr.push({
+      //     role: "system",
+      //     content: `이번 문답은 예외적으로 6문장 이내로 답변을 생성합니다.`,
+      //   });
+      // }
 
       // if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
       //   // 솔루션 프롬프트 삽입

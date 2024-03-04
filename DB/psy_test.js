@@ -153,6 +153,28 @@ const ebt_Family_Result = {
   family_question_6:
     "user는 '가족끼리 서로에 대한 관심과 사랑을 표현하니?'라는 질문에 '거의 안 그래' 라고 답변했습니다.",
 };
+const ebt_Mood_Result = {
+  mood_question_0:
+    "user는 '평소 너의 기분은 어때?'라는 질문에 '안 좋아' 라고 답변했습니다.",
+  mood_question_1:
+    "user는 '마음이 편안하거나 기쁠 때가 있니?'라는 질문에 '거의 안 그래' 라고 답변했습니다.",
+  mood_question_2:
+    "user는 '마음이 불편하거나 속상할 때가 있어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+};
+const ebt_Unrest_Result = {
+  unrest_question_0:
+    "user는 '무서움을 잘 타거나 자주 깜짝깜짝 놀라니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  unrest_question_1:
+    "user는 '어둠이나 귀신, 거미, 개와 같이 무서워하는 게 있어?'라는 질문에 '많이 있어' 라고 답변했습니다.",
+  unrest_question_2:
+    "user는 '새로운 곳에 가거나 처음 해보는 일을 할 때 어떠니?'라는 질문에 '긴장이 돼' 라고 답변했습니다.",
+  unrest_question_3:
+    "user는 '처음 본 사람을 만나면 얼굴이 빨개지거나 말이 잘 안 나오고 긴장돼?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  unrest_question_4:
+    "user는 '무언가 안 좋은 일이 일어날까 봐 걱정을 자주 하니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  unrest_question_5:
+    "user는 '부모님과 떨어지는 게 힘들어?'라는 질문에 '많이 힘들어' 라고 답변했습니다.",
+};
 
 module.exports = {
   persnal_short,
@@ -165,4 +187,6 @@ module.exports = {
   ebt_School_Result,
   ebt_Friend_Result,
   ebt_Family_Result,
+  ebt_Mood_Result,
+  ebt_Unrest_Result,
 };
