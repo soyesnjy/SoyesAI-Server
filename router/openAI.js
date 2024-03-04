@@ -13,6 +13,7 @@ const {
   postOpenAIEmotionTestResultConsultingV2,
   postOpenAIEmotionTestResultConsultingV3,
   postOpenAIEmotionTestResultConsultingV4,
+  postOpenAITestResultConsultingV1,
 } = openAIController;
 
 router.get("/", (req, res) => {
@@ -28,6 +29,7 @@ router.post(
   "/consulting_emotion_lala",
   postOpenAIEmotionTestResultConsultingV4
 );
+router.post("/consulting_lala", postOpenAITestResultConsultingV1);
 router.post("/consulting_persnal", postOpenAIPersnalTestResultConsulting);
 router.post("/analysis", postOpenAIPsychologicalAnalysis);
 

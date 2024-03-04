@@ -787,6 +787,7 @@ const {
   psyResult_prompt,
   common_prompt,
   completions_emotion_prompt,
+  test_prompt_20240304,
 } = require("../DB/test_prompt");
 
 const EBT_Table_Info = {
@@ -986,6 +987,8 @@ const openAIController = {
   postOpenAIPsychologicalAnalysis: async (req, res) => {
     const { messageArr, type, score, pUid } = req.body;
     console.log("테스트 결과 분석 및 메일 전송 API /analysis Path 호출");
+
+    console.log(req.body);
 
     let data,
       parsingScore,
@@ -1694,6 +1697,142 @@ ${select_Ebt_School_result.testResult}
           content: `이번 문답은 예외적으로 6문장 이내로 답변을 생성합니다.`,
         });
       }
+
+      // if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
+      //   // 솔루션 프롬프트 삽입
+      //   console.log("솔루션 프롬프트 삽입");
+      //   promptArr.push(solution_prompt);
+      // }
+
+      // 상시 삽입 프롬프트
+      // promptArr.push(common_prompt); // 공통 프롬프트 삽입
+      promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
+
+      // console.log(promptArr);
+
+      const response = await openai.chat.completions.create({
+        messages: [...promptArr, ...parseMessageArr],
+        model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      });
+
+      let emotion = parseInt(response.choices[0].message.content.slice(-1));
+      // console.log(emotion);
+
+      const message = {
+        message: response.choices[0].message.content.slice(0, -1),
+        emotion,
+      };
+      console.log([
+        ...parseMessageArr,
+        { role: "assistant", content: message.message },
+      ]);
+      res.json(message);
+    } catch (err) {
+      console.error(err);
+      res.json({
+        message: "Server Error",
+        emotion: 0,
+      });
+    }
+  },
+  // 테스트 결과 기반 상담 AI. 정서행동, 성격검사, 진로검사 - V1
+  postOpenAITestResultConsultingV1: async (req, res) => {
+    const { messageArr, pUid } = req.body;
+    console.log("Test 결과 반영 검사- V1 상담 API /consulting_lala Path 호출");
+    let parseMessageArr, parsepUid; // Parsing 변수
+    let promptArr = []; // 삽입 Prompt Array
+    // let prevChat_flag = true; // 이전 대화 내역 유무
+
+    // EBT 반영 Class 정의
+    // const EBT_classArr = ["School", "Friend", "Family"];
+    // const EBT_ObjArr = {
+    //   School: { table: "soyes_ai_Ebt_School", result: ebt_School_Result },
+    //   Friend: { table: "soyes_ai_Ebt_Friend", result: ebt_Friend_Result },
+    //   Family: { table: "soyes_ai_Ebt_Family", result: ebt_Family_Result },
+    // };
+
+    try {
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
+
+      // pUid default값 설정
+      parsepUid = pUid ? pUid : "njy95";
+      // console.log(parsepUid);
+
+      // 고정 삽입 프롬프트
+      // promptArr.push(persona_prompt_lala2); // 페르소나 프롬프트 삽입
+      // promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
+
+      // 박사님 프롬프트 삽입
+      promptArr.push(test_prompt_20240304);
+
+      // let psy_testResult_promptArr_last = []; // 2점을 획득한 정서행동검사 문항을 저장하는 prompt
+
+      // 해당 계정의 모든 정서행동검사 결과 DB에서 차출
+      //     const psy_testResult_promptArr = EBT_classArr.map(async (ebt_class) => {
+      //       const select_Ebt_School_result = await select_soyes_AI_Ebt_Table(
+      //         EBT_ObjArr[ebt_class].table, // Table Name
+      //         {
+      //           pKey: "uid",
+      //         }, // primary Key Name
+      //         EBT_ObjArr[ebt_class].result, // EBT Question 11가지 분야 중 1개 (Table에 따라 결정)
+      //         parsepUid // Uid
+      //       );
+
+      //       // console.log(select_Ebt_School_result);
+
+      //       const psy_testResult_prompt = {
+      //         role: "system",
+      //         content: `다음에 오는 문단은 user의 ${ebt_class} 관련 심리검사 결과입니다.
+      // '''
+      // ${select_Ebt_School_result.testResult}
+      // '''
+      // 위 문단이 비어있다면 ${
+      //   // DB Table의 값 유무에 따라 다른 프롬프트 입력
+      //   !select_Ebt_School_result.ebt_school_data[0]
+      //     ? "user는 심리검사를 진행하지 않았습니다."
+      //     : "user의 심리검사 결과는 문제가 없습니다."
+      // }`,
+      //       };
+      //       // console.log(psy_testResult_prompt);
+      //       return psy_testResult_prompt;
+      //     });
+
+      //     // map method는 pending 상태의 promise를 반환하므로 Promise.all method를 사용하여 resolve 상태가 되기를 기다려준다.
+      //     await Promise.all(psy_testResult_promptArr).then((prompt) => {
+      //       psy_testResult_promptArr_last = [...prompt]; // resolve 상태로 반환된 prompt 배열을 psy_testResult_promptArr_last 변수에 복사
+      //     });
+
+      // console.log(psy_testResult_promptArr_last);
+
+      /* 개발자 의도 질문 - N번째 문답에 대한 답변을 개발자가 임의로 지정 */
+
+      // if (parseMessageArr.length) {
+      //   // 심리 검사 결과 프롬프트 삽입
+      //   console.log("심리 검사 결과 프롬프트 삽입");
+      //   promptArr.push(...psy_testResult_promptArr_last);
+      //   promptArr.push(psyResult_prompt);
+      //   promptArr.push(solution_prompt);
+      // }
+
+      // if (parseMessageArr.length === 1) {
+      //   // 고정 답변1 프롬프트 삽입
+      //   console.log("고정 답변1 프롬프트 삽입");
+
+      //   const random_class =
+      //     EBT_classArr[Math.floor(Math.random() * EBT_classArr.length)];
+      //   console.log(random_class);
+      //   parseMessageArr.push({
+      //     role: "user",
+      //     content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 5문장 이내로 설명해줘. 이후 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
+      //   });
+      //   promptArr.push({
+      //     role: "system",
+      //     content: `이번 문답은 예외적으로 6문장 이내로 답변을 생성합니다.`,
+      //   });
+      // }
 
       // if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
       //   // 솔루션 프롬프트 삽입
