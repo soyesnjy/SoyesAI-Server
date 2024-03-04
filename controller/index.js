@@ -1535,15 +1535,21 @@ ${analyzeMsg}
   },
   // 테스트 결과 기반 상담 AI. 정서행동 검사 - 학교생활 V3
   postOpenAIEmotionTestResultConsultingV3: async (req, res) => {
-    const { messageArr, pUid } = req.body;
+    const { EBTData } = req.body;
+
     console.log(
-      "정서행동 검사- 학교생활 V3 반영 상담 API /consulting_emotion_v3 Path 호출"
+      "정서행동 검사- 학교생활 V3 반영 상담 API /consulting_emotion_pupu Path 호출"
     );
-    let parseMessageArr, parsepUid, testResult; // Parsing 변수
+    let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     let prevChat_flag = true; // 이전 대화 내역 유무
     // console.log(messageArr);
     try {
+      if (typeof EBTData === "string") {
+        parseEBTdata = JSON.parse(EBTData);
+      } else parseEBTdata = EBTData;
+
+      const { messageArr, pUid } = parseEBTdata;
       // messageArr가 문자열일 경우 json 파싱
       if (typeof messageArr === "string") {
         parseMessageArr = JSON.parse(messageArr);
@@ -1637,11 +1643,11 @@ ${select_Ebt_School_result.testResult}
   },
   // 테스트 결과 기반 상담 AI. 정서행동 검사 - V4 (학교생활 + 또래관계 + 가족관계)
   postOpenAIEmotionTestResultConsultingV4: async (req, res) => {
-    const { messageArr, pUid } = req.body;
+    const { EBTData } = req.body;
     console.log(
       "정서행동 검사- V4 반영 상담 API /consulting_emotion_lala Path 호출"
     );
-    let parseMessageArr, parsepUid; // Parsing 변수
+    let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
 
@@ -1656,6 +1662,11 @@ ${select_Ebt_School_result.testResult}
     };
 
     try {
+      if (typeof EBTData === "string") {
+        parseEBTdata = JSON.parse(EBTData);
+      } else parseEBTdata = EBTData;
+
+      const { messageArr, pUid } = parseEBTdata;
       // messageArr가 문자열일 경우 json 파싱
       if (typeof messageArr === "string") {
         parseMessageArr = JSON.parse(messageArr);
@@ -1774,9 +1785,10 @@ ${select_Ebt_School_result.testResult}
   },
   // 테스트 결과 기반 상담 AI. 정서행동, 성격검사, 진로검사 - V1
   postOpenAITestResultConsultingV1: async (req, res) => {
-    const { messageArr, pUid } = req.body;
+    const { EBTData } = req.body;
+
     console.log("Test 결과 반영 검사- V1 상담 API /consulting_lala Path 호출");
-    let parseMessageArr, parsepUid; // Parsing 변수
+    let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
 
@@ -1789,6 +1801,12 @@ ${select_Ebt_School_result.testResult}
     // };
 
     try {
+      if (typeof EBTData === "string") {
+        parseEBTdata = JSON.parse(EBTData);
+      } else parseEBTdata = EBTData;
+
+      const { messageArr, pUid } = parseEBTdata;
+
       // messageArr가 문자열일 경우 json 파싱
       if (typeof messageArr === "string") {
         parseMessageArr = JSON.parse(messageArr);

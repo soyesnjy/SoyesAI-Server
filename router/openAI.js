@@ -24,7 +24,10 @@ router.post("/message", postOpenAIChattingNew); // postOpenAIChattingNew
 router.post("/emotion", postOpenAIEmotionAnalyze);
 router.post("/consulting_emotion", postOpenAIEmotionTestResultConsulting);
 router.post("/consulting_emotion_v2", postOpenAIEmotionTestResultConsultingV2);
-router.post("/consulting_emotion_v3", postOpenAIEmotionTestResultConsultingV3);
+router.post(
+  "/consulting_emotion_pupu",
+  postOpenAIEmotionTestResultConsultingV3
+);
 router.post(
   "/consulting_emotion_lala",
   postOpenAIEmotionTestResultConsultingV4
