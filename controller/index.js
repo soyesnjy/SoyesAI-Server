@@ -1718,22 +1718,22 @@ ${select_Ebt_School_result.testResult}
         promptArr.push(solution_prompt);
       }
 
-      // if (parseMessageArr.length === 1) {
-      //   // 고정 답변1 프롬프트 삽입
-      //   console.log("고정 답변1 프롬프트 삽입");
+      if (parseMessageArr.length === 1) {
+        // 고정 답변1 프롬프트 삽입
+        console.log("고정 답변1 프롬프트 삽입");
 
-      //   const random_class =
-      //     EBT_classArr[Math.floor(Math.random() * EBT_classArr.length)];
-      //   console.log(random_class);
-      //   parseMessageArr.push({
-      //     role: "user",
-      //     content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 5문장 이내로 설명해줘. 이후 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
-      //   });
-      //   promptArr.push({
-      //     role: "system",
-      //     content: `이번 문답은 예외적으로 6문장 이내로 답변을 생성합니다.`,
-      //   });
-      // }
+        const random_class =
+          EBT_classArr[Math.floor(Math.random() * EBT_classArr.length)];
+        console.log(random_class);
+        parseMessageArr.push({
+          role: "user",
+          content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 5문장 이내로 설명해줘. 이후 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
+        });
+        promptArr.push({
+          role: "system",
+          content: `이번 문답은 예외적으로 6문장 이내로 답변을 생성합니다.`,
+        });
+      }
 
       // if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
       //   // 솔루션 프롬프트 삽입
