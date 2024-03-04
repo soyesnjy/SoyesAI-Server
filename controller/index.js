@@ -986,13 +986,11 @@ const openAIController = {
   },
   // 테스트 결과 분석 및 DB 저장 및 메일 전송 API
   postOpenAIPsychologicalAnalysis: async (req, res) => {
-    const { EBTData } = req.body; // 클라이언트 한계로 데이터를 나눠서 받음.
-    const { messageArr, type, score, pUid } = EBTData;
+    const { EBTData } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
     console.log("테스트 결과 분석 및 메일 전송 API /analysis Path 호출");
 
-    console.log(EBTData);
-
-    let data,
+    let parseEBTdata,
+      parseMessageArr,
       parsingScore,
       parsingType,
       parsepUid,
@@ -1007,6 +1005,15 @@ const openAIController = {
     };
 
     try {
+      // 파싱. Client JSON 데이터
+      if (typeof EBTData === "string") {
+        parseEBTdata = JSON.parse(EBTData);
+      } else parseEBTdata = EBTData;
+
+      const { messageArr, type, score, pUid } = parseEBTdata;
+
+      console.log(messageArr);
+
       // uid, type 전처리. 없는 경우 디폴트값 할당
       parsepUid = pUid ? pUid : "njy95";
       parsingType = type ? type : "School";
@@ -1072,15 +1079,12 @@ const openAIController = {
 
       // 파싱. Client JSON 데이터
       if (typeof messageArr === "string") {
-        data = JSON.parse(messageArr);
-      } else data = messageArr;
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = messageArr;
 
       if (typeof score === "string") {
         parsingScore = JSON.parse(score);
       } else parsingScore = score;
-
-      // 파싱 후 값 대입
-      let parseMessageArr = [...data];
 
       // AI 분석
       const response = await openai.chat.completions.create({
