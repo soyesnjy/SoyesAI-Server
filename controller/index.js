@@ -788,6 +788,7 @@ const {
   common_prompt,
   completions_emotion_prompt,
   test_prompt_20240304,
+  test_prompt_20240304_v2,
 } = require("../DB/test_prompt");
 
 const EBT_Table_Info = {
@@ -983,12 +984,13 @@ const openAIController = {
       res.send(err);
     }
   },
-  // 테스트 결과 분석 및 메일 전송 API
+  // 테스트 결과 분석 및 DB 저장 및 메일 전송 API
   postOpenAIPsychologicalAnalysis: async (req, res) => {
-    const { messageArr, type, score, pUid } = req.body;
+    const { EBTData } = req.body; // 클라이언트 한계로 데이터를 나눠서 받음.
+    const { messageArr, type, score, pUid } = EBTData;
     console.log("테스트 결과 분석 및 메일 전송 API /analysis Path 호출");
 
-    console.log(req.body);
+    console.log(EBTData);
 
     let data,
       parsingScore,
@@ -1007,7 +1009,7 @@ const openAIController = {
     try {
       // uid, type 전처리. 없는 경우 디폴트값 할당
       parsepUid = pUid ? pUid : "njy95";
-      parsingType = type ? type : "default";
+      parsingType = type ? type : "School";
 
       // 메일 관련 세팅 시작
 
@@ -1766,7 +1768,13 @@ ${select_Ebt_School_result.testResult}
       // promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       // 박사님 프롬프트 삽입
-      promptArr.push(test_prompt_20240304);
+      if (parsepUid.includes("v2")) {
+        console.log("test_prompt_20240304_v2 삽입");
+        promptArr.push(test_prompt_20240304_v2);
+      } else {
+        console.log("test_prompt_20240304 삽입");
+        promptArr.push(test_prompt_20240304);
+      }
 
       // let psy_testResult_promptArr_last = []; // 2점을 획득한 정서행동검사 문항을 저장하는 prompt
 
