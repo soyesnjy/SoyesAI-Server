@@ -1557,6 +1557,7 @@ ${select_Ebt_School_result.testResult}
         console.log("심리 검사 프롬프트 삽입");
         promptArr.push(psy_testResult_prompt);
         promptArr.push(psyResult_prompt);
+        promptArr.push(solution_prompt);
       }
 
       // if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
@@ -1596,16 +1597,17 @@ ${select_Ebt_School_result.testResult}
       });
     }
   },
-  // 테스트 결과 기반 상담 AI. 정서행동 검사 - 학교생활 V4
+  // 테스트 결과 기반 상담 AI. 정서행동 검사 - V4 (학교생활 + 또래관계 + 가족관계)
   postOpenAIEmotionTestResultConsultingV4: async (req, res) => {
     const { messageArr, pUid } = req.body;
     console.log(
-      "정서행동 검사- 학교생활 V4 반영 상담 API /consulting_emotion_v4 Path 호출"
+      "정서행동 검사- V4 반영 상담 API /consulting_emotion_lala Path 호출"
     );
     let parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
-    let prevChat_flag = true; // 이전 대화 내역 유무
+    // let prevChat_flag = true; // 이전 대화 내역 유무
 
+    // EBT 반영 Class 정의
     const EBT_classArr = ["School", "Friend", "Family"];
     const EBT_ObjArr = {
       School: { table: "soyes_ai_Ebt_School", result: ebt_School_Result },
@@ -1619,13 +1621,13 @@ ${select_Ebt_School_result.testResult}
         parseMessageArr = JSON.parse(messageArr);
       } else parseMessageArr = [...messageArr];
 
-      // 고정 삽입 프롬프트
-      promptArr.push(persona_prompt_lala); // 페르소나 프롬프트 삽입
-      promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
-
       // pUid default값 설정
       parsepUid = pUid ? pUid : "njy95";
       // console.log(parsepUid);
+
+      // 고정 삽입 프롬프트
+      promptArr.push(persona_prompt_lala); // 페르소나 프롬프트 삽입
+      promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       let psy_testResult_promptArr_last = []; // 2점을 획득한 정서행동검사 문항을 저장하는 prompt
 
