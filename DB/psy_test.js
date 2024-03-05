@@ -117,7 +117,6 @@ const ebt_School_Result = {
   school_question_5:
     "user는 '공부 잘 하는 편이야?'라는 질문에 '아니 못해' 라고 답변했습니다.",
 };
-
 const ebt_Friend_Result = {
   friend_question_0:
     "user는 '같은 반에 친한 친구가 몇 명 있니?'라는 질문에 '하나도 없어' 라고 답변했습니다.",
@@ -136,7 +135,6 @@ const ebt_Friend_Result = {
   friend_question_7:
     "user는 '친구들과 싸울 때가 있니?'라는 질문에 '자주 있어' 라고 답변했습니다.",
 };
-
 const ebt_Family_Result = {
   family_question_0:
     "user는 '너와 엄마 사이는 어때?'라는 질문에 '안 좋아' 라고 답변했습니다.",

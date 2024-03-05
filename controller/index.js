@@ -783,6 +783,8 @@ const {
 const {
   persona_prompt,
   persona_prompt_lala,
+  adler_prompt,
+  gestalt_prompt,
   info_prompt,
   prevChat_prompt,
   solution_prompt,
@@ -791,6 +793,7 @@ const {
   completions_emotion_prompt,
   test_prompt_20240304,
   test_prompt_20240304_v2,
+  test_prompt_20240305_v1,
 } = require("../DB/test_prompt");
 
 const EBT_Table_Info = {
@@ -1678,6 +1681,7 @@ ${select_Ebt_School_result.testResult}
 
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_lala); // 페르소나 프롬프트 삽입
+      promptArr.push(gestalt_prompt); // 아들러 상담 기법 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       let psy_testResult_promptArr_last = []; // 2점을 획득한 정서행동검사 문항을 저장하는 prompt
@@ -1726,7 +1730,7 @@ ${select_Ebt_School_result.testResult}
         console.log("심리 검사 결과 프롬프트 삽입");
         promptArr.push(...psy_testResult_promptArr_last);
         promptArr.push(psyResult_prompt);
-        promptArr.push(solution_prompt);
+        // promptArr.push(solution_prompt);
       }
 
       if (parseMessageArr.length === 1) {
@@ -1738,7 +1742,7 @@ ${select_Ebt_School_result.testResult}
         console.log(random_class);
         parseMessageArr.push({
           role: "user",
-          content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 5문장 이내로 설명해줘. 이후 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
+          content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 분석한 아동의 심리 상태를 5문장 이내로 설명해줘. 이후 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
         });
         promptArr.push({
           role: "system",
@@ -1821,9 +1825,12 @@ ${select_Ebt_School_result.testResult}
       // promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       // 박사님 프롬프트 삽입
-      if (parsepUid.includes("v2")) {
+      if (parsepUid.includes("20240304_v2")) {
         console.log("test_prompt_20240304_v2 삽입");
         promptArr.push(test_prompt_20240304_v2);
+      } else if (parsepUid.includes("20240305_v1")) {
+        console.log("test_prompt_20240305_v1 삽입");
+        promptArr.push(test_prompt_20240305_v1);
       } else {
         console.log("test_prompt_20240304 삽입");
         promptArr.push(test_prompt_20240304);
