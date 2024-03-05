@@ -1647,6 +1647,7 @@ ${select_Ebt_School_result.testResult}
   // 테스트 결과 기반 상담 AI. 정서행동 검사 - V4 (학교생활 + 또래관계 + 가족관계)
   postOpenAIEmotionTestResultConsultingV4: async (req, res) => {
     const { EBTData } = req.body;
+    console.log(req.body);
     console.log(
       "정서행동 검사- V4 반영 상담 API /consulting_emotion_lala Path 호출"
     );
@@ -1681,7 +1682,7 @@ ${select_Ebt_School_result.testResult}
 
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_lala); // 페르소나 프롬프트 삽입
-      promptArr.push(gestalt_prompt); // 아들러 상담 기법 프롬프트 삽입
+      // promptArr.push(gestalt_prompt); // 아들러 상담 기법 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       let psy_testResult_promptArr_last = []; // 2점을 획득한 정서행동검사 문항을 저장하는 prompt
@@ -1750,11 +1751,15 @@ ${select_Ebt_School_result.testResult}
         });
       }
 
-      // if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
-      //   // 솔루션 프롬프트 삽입
-      //   console.log("솔루션 프롬프트 삽입");
-      //   promptArr.push(solution_prompt);
-      // }
+      if (parseMessageArr.length === 5) {
+        // 고정 답변1 프롬프트 삽입
+        console.log("고정 답변2 프롬프트 삽입");
+
+        parseMessageArr.push({
+          role: "user",
+          content: ``,
+        });
+      }
 
       // 상시 삽입 프롬프트
       // promptArr.push(common_prompt); // 공통 프롬프트 삽입
