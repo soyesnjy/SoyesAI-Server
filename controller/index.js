@@ -796,6 +796,13 @@ const {
   test_prompt_20240305_v1,
 } = require("../DB/test_prompt");
 
+const {
+  cb_test_friend,
+  cb_test_family,
+  cb_test_school,
+  cb_test_remain,
+} = require("../DB/cognitive_behavior_test");
+
 const EBT_Table_Info = {
   School: {
     table: "soyes_ai_Ebt_School",
@@ -1647,7 +1654,7 @@ ${select_Ebt_School_result.testResult}
   // 테스트 결과 기반 상담 AI. 정서행동 검사 - V4 (학교생활 + 또래관계 + 가족관계)
   postOpenAIEmotionTestResultConsultingV4: async (req, res) => {
     const { EBTData } = req.body;
-    console.log(req.body);
+    console.log(EBTData);
     console.log(
       "정서행동 검사- V4 반영 상담 API /consulting_emotion_lala Path 호출"
     );
@@ -1735,8 +1742,8 @@ ${select_Ebt_School_result.testResult}
       }
 
       if (parseMessageArr.length === 1) {
-        // 고정 답변1 프롬프트 삽입
-        console.log("고정 답변1 프롬프트 삽입");
+        // 고정 답변1 프롬프트 삽입 - 정서행동검사 결과 분석
+        console.log("정서행동검사 결과 분석 프롬프트 삽입");
 
         const random_class =
           EBT_classArr[Math.floor(Math.random() * EBT_classArr.length)];
@@ -1752,12 +1759,26 @@ ${select_Ebt_School_result.testResult}
       }
 
       if (parseMessageArr.length === 5) {
-        // 고정 답변1 프롬프트 삽입
-        console.log("고정 답변2 프롬프트 삽입");
-
+        // 고정 답변3 프롬프트 삽입 - 인지행동 치료 문제
+        console.log("인지행동 치료 프롬프트 삽입");
+        const random_cb_question =
+          cb_test_friend[Math.floor(Math.random() * cb_test_friend.length)];
+        console.log(random_cb_question);
         parseMessageArr.push({
           role: "user",
-          content: ``,
+          content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), 
+          이후 '그 전에 우리 상황극 한 번 하자!' 라고 말한 뒤 다음 문단에 오는 인지행동 검사를 문제와 문항으로 나누어 user에게 제시해줘.
+
+          ${random_cb_question}
+
+          문항 앞에는 '1) 2) 3) 4)'같이 번호를 붙이고 점수는 제거해줘.
+          답변 마지막에 '넌 이 상황에서 어떻게 할거야? 번호로 알려줘!'를 추가해줘.
+          `,
+        });
+
+        promptArr.push({
+          role: "system",
+          content: `이번 문답은 예외적으로 8문장 이내로 답변을 생성합니다.`,
         });
       }
 

@@ -16,6 +16,7 @@ assistant는 반드시 반말을 사용해야하며, 전문가스러운 말투�
 assistant의 답변은 반드시 2문장 이내로 생성되어야 합니다.`,
 };
 
+// 논문 프롬프트
 const adler_prompt = {
   role: "system",
   content: `assistant는 다음 문단에 오는 '아들러 개인 심리학 이론'을 기반하여 상담을 진행합니다.
@@ -33,7 +34,6 @@ const adler_prompt = {
   '''
   `,
 };
-
 const gestalt_prompt = {
   role: "system",
   content: `assistant는 다음 문단에 오는 이론을 기반하여 상담을 진행합니다.
