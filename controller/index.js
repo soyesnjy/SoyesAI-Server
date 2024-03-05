@@ -790,6 +790,7 @@ const {
   solution_prompt,
   psyResult_prompt,
   common_prompt,
+  sentence_division_prompt,
   completions_emotion_prompt,
   test_prompt_20240304,
   test_prompt_20240304_v2,
@@ -1750,15 +1751,16 @@ ${select_Ebt_School_result.testResult}
         console.log(random_class);
         parseMessageArr.push({
           role: "user",
-          content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 분석한 아동의 심리 상태를 5문장 이내로 설명해줘. 이후 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
+          content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), 
+          '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 분석한 아동의 심리 상태를 5문장 이내로 설명해줘.
+          문장은 반드시 '\n' 를 통해 구분해줘.
+          답변 마지막에는 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
         });
         promptArr.push({
           role: "system",
           content: `이번 문답은 예외적으로 6문장 이내로 답변을 생성합니다.`,
         });
-      }
-
-      if (parseMessageArr.length === 5) {
+      } else if (parseMessageArr.length === 5) {
         // 고정 답변3 프롬프트 삽입 - 인지행동 치료 문제
         console.log("인지행동 치료 프롬프트 삽입");
         const random_cb_question =
@@ -1780,10 +1782,12 @@ ${select_Ebt_School_result.testResult}
           role: "system",
           content: `이번 문답은 예외적으로 8문장 이내로 답변을 생성합니다.`,
         });
+      } else {
+        promptArr.push(sentence_division_prompt);
       }
 
       // 상시 삽입 프롬프트
-      // promptArr.push(common_prompt); // 공통 프롬프트 삽입
+      // promptArr.push(sentence_division_prompt); // 문장 구분 프롬프트 삽입
       promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
 
       // console.log(promptArr);
