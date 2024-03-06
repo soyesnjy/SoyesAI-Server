@@ -100,7 +100,7 @@ const common_prompt = {
 const sentence_division_prompt = {
   role: "system",
   content: `assistant의 답변은 반드시 2문장 이내로 생성되어야 합니다.
-  assistant는 생성되는 답변의 각 '마디'뒤에 '\n'를 붙여야합니다.`,
+  assistant는 . 혹은 ? 같은 특수문자로 끝나는 마디 뒤에는 반드시 줄바꿈(\n)을 추가합니다.`,
 };
 
 const completions_emotion_prompt = {
