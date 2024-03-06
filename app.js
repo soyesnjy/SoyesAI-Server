@@ -15,7 +15,7 @@ const cors = require("cors");
 app.use(
   cors({
     origin: [
-      "soyes-ai-project-https.vercel.app",
+      "https://soyes-ai-project-https.vercel.app",
       "http://d1rq5xi9hzhyrc.cloudfront.net",
       "http://127.0.0.1:64495",
       "http://localhost:4000",
