@@ -4,6 +4,7 @@ const session = require("express-session");
 
 const app = express();
 const PORT = 4000;
+const PORT_https = 4040;
 
 // 서버와 동일한 url을 브라우저에 입력하면 src 폴더 내부의 html 파일 실행.
 const path = require("path");
@@ -129,18 +130,19 @@ const https = require("https");
 const fs = require("fs");
 let server;
 // https 보안 파일이 있을 경우
-if (fs.existsSync("./key.pem") && fs.existsSync("./cert.pem")) {
-  const privateKey = fs.readFileSync(__dirname + "/key.pem", "utf8");
-  const certificate = fs.readFileSync(__dirname + "/cert.pem", "utf8");
-  const credentials = {
-    key: privateKey,
-    cert: certificate,
+if (
+  fs.existsSync("/etc/letsencrypt/live/soyeskids.co.kr/fullchain.pem") &&
+  fs.existsSync("/etc/letsencrypt/live/soyeskids.co.kr/privkey.pem")
+) {
+  const httpsOptions = {
+    ca: fs.readFileSync("/etc/letsencrypt/live/soyeskids.co.kr/fullchain.pem"),
+    key: fs.readFileSync("/etc/letsencrypt/live/soyeskids.co.kr/privkey.pem"),
+    cert: fs.readFileSync("/etc/letsencrypt/live/soyeskids.co.kr/cert.pem"),
   };
 
-  server = https.createServer(credentials, app);
-  server.listen(PORT, () =>
-    console.log(`🚀 HTTPS Server is starting on ${PORT}`)
-  );
+  https.createServer(httpsOptions, app).listen(PORT_https, () => {
+    console.log(`🚀 HTTPs Server is starting on ${PORT_https}`);
+  });
 }
 // https 보안 파일이 없을 경우
 else {
