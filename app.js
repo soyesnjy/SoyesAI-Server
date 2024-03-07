@@ -17,8 +17,7 @@ app.use(
     origin: [
       "https://soyes-ai-project-https.vercel.app",
       "http://d1rq5xi9hzhyrc.cloudfront.net",
-      "http://127.0.0.1:64495",
-      "http://localhost:4000",
+      "http://127.0.0.1:53298",
       "http://localhost:3000",
       "http://soyes.chatbot.s3-website.ap-northeast-2.amazonaws.com",
       "http://soyes.toy.com.s3-website.ap-northeast-2.amazonaws.com",
@@ -46,7 +45,7 @@ app.use(
       sameSite: "none",
       secure: true,
       // sameSite: "lax", // 또는 "strict", 로컬 개발 환경에 더 적합
-      // httpOnly: true,
+      // httpOnly: false,
       // secure: false, // 로컬 개발 환경에서는 false로 설정
     },
   })

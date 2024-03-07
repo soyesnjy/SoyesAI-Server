@@ -28,12 +28,12 @@ const {
 // router.get("/logout", CookieLogoutHandler);
 
 // 세션
-// router.post("/", vaildateSession, sessionLoginHandler);
-// router.get("/logout", sessionLogoutHandler);
+router.post("/", vaildateSession, sessionLoginHandler);
+router.get("/logout", sessionLogoutHandler);
 
 // 토큰
-router.post("/", tokenLoginHandler);
-router.get("/logout", tokenLogoutHandler);
+// router.post("/", tokenLoginHandler);
+// router.get("/logout", tokenLogoutHandler);
 
 // 유저 정보 반환
 router.get("/getUser", getUserHandler);

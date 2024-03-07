@@ -1792,6 +1792,7 @@ ${select_Ebt_School_result.testResult}
         });
       } else {
         req.session.ebt_class = "School";
+        req.session.cookie.maxAge = 10000;
 
         promptArr.push(sentence_division_prompt);
       }
