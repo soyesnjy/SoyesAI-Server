@@ -43,10 +43,11 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      sameSite: "strict",
-      // sameSite: "none",
-      // secure: true,
-      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+      // sameSite: "lax", // 또는 "strict", 로컬 개발 환경에 더 적합
+      // httpOnly: true,
+      // secure: false, // 로컬 개발 환경에서는 false로 설정
     },
   })
 );

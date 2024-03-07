@@ -1652,7 +1652,7 @@ ${select_Ebt_School_result.testResult}
       });
     }
   },
-  // 테스트 결과 기반 상담 AI. 정서행동 검사 - V4 (학교생활 + 또래관계 + 가족관계)
+  // 테스트 결과 기반 상담 AI. 정서행동 검사 - V4 (검사 5종)
   postOpenAIEmotionTestResultConsultingV4: async (req, res) => {
     const { EBTData } = req.body;
     console.log(EBTData);
@@ -1675,6 +1675,9 @@ ${select_Ebt_School_result.testResult}
 
     // 응답에 헤더를 추가하는 메서드
     // res.header("Test_Header", "Success Header");
+
+    // 세션 확인 코드
+    console.log(req.session);
 
     try {
       if (typeof EBTData === "string") {
@@ -1745,13 +1748,14 @@ ${select_Ebt_School_result.testResult}
         // promptArr.push(solution_prompt);
       }
 
-      if (parseMessageArr.length === 1) {
+      if (parseMessageArr.length === 165) {
         // 고정 답변1 프롬프트 삽입 - 정서행동검사 결과 분석
         console.log("정서행동검사 결과 분석 프롬프트 삽입");
 
         const random_class =
           EBT_classArr[Math.floor(Math.random() * EBT_classArr.length)];
-        console.log(random_class);
+        // 세션에 클래스 추가
+
         parseMessageArr.push({
           role: "user",
           content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), 
@@ -1766,6 +1770,7 @@ ${select_Ebt_School_result.testResult}
       } else if (parseMessageArr.length === 5) {
         // 고정 답변3 프롬프트 삽입 - 인지행동 치료 문제
         console.log("인지행동 치료 프롬프트 삽입");
+
         const random_cb_question =
           cb_test_friend[Math.floor(Math.random() * cb_test_friend.length)];
         console.log(random_cb_question);
@@ -1786,6 +1791,8 @@ ${select_Ebt_School_result.testResult}
           content: `이번 문답은 예외적으로 8문장 이내로 답변을 생성합니다.`,
         });
       } else {
+        req.session.ebt_class = "School";
+
         promptArr.push(sentence_division_prompt);
       }
 
@@ -1821,7 +1828,7 @@ ${select_Ebt_School_result.testResult}
       });
     }
   },
-  // 테스트 결과 기반 상담 AI. 정서행동, 성격검사, 진로검사 - V1
+  // 테스트 결과 기반 상담 AI. 정서행동, 성격검사, 진로검사 - V1 (박사님 프롬프트)
   postOpenAITestResultConsultingV1: async (req, res) => {
     const { EBTData } = req.body;
 
