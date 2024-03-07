@@ -48,7 +48,8 @@ app.use(
       secure: true,
       // sameSite: "lax", // 또는 "strict", 로컬 개발 환경에 더 적합
       // secure: false, // 로컬 개발 환경에서는 false로 설정
-      httpOnly: false,
+      httpOnly: true,
+      maxAge: 10000,
     },
   })
 );
