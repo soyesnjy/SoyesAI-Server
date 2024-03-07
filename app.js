@@ -43,7 +43,7 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      domain: "soyeskids.co.kr:4040",
+      domain: "soyeskids.co.kr",
       sameSite: "none",
       secure: true,
       // sameSite: "lax", // 또는 "strict", 로컬 개발 환경에 더 적합
