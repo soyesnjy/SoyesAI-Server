@@ -15,6 +15,7 @@ const cors = require("cors");
 app.use(
   cors({
     origin: [
+      "https://soyeskids.co.kr:4040",
       "https://soyes-ai-project-https.vercel.app",
       "http://d1rq5xi9hzhyrc.cloudfront.net",
       "http://127.0.0.1:53298",
@@ -42,11 +43,11 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      sameSite: "none",
-      secure: true,
-      // sameSite: "lax", // 또는 "strict", 로컬 개발 환경에 더 적합
-      // httpOnly: false,
-      // secure: false, // 로컬 개발 환경에서는 false로 설정
+      // sameSite: "none",
+      // secure: true,
+      sameSite: "lax", // 또는 "strict", 로컬 개발 환경에 더 적합
+      httpOnly: false,
+      secure: false, // 로컬 개발 환경에서는 false로 설정
     },
   })
 );
