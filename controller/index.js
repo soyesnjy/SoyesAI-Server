@@ -1820,7 +1820,9 @@ ${select_Ebt_School_result.testResult}
         { role: "assistant", content: message.message },
       ]);
 
-      res.json(message);
+      req.session.save(() => {
+        res.json(message);
+      });
     } catch (err) {
       console.error(err);
       res.json({
