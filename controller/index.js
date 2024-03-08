@@ -1748,13 +1748,15 @@ ${select_Ebt_School_result.testResult}
         // promptArr.push(solution_prompt);
       }
 
-      if (parseMessageArr.length === 1332) {
+      if (parseMessageArr.length === 1) {
         // 고정 답변1 프롬프트 삽입 - 정서행동검사 결과 분석
         console.log("정서행동검사 결과 분석 프롬프트 삽입");
 
         const random_class =
           EBT_classArr[Math.floor(Math.random() * EBT_classArr.length)];
         // 세션에 클래스 추가
+        // 세션 추가
+        req.session.ebt_class = random_class;
 
         parseMessageArr.push({
           role: "user",
@@ -1767,12 +1769,22 @@ ${select_Ebt_School_result.testResult}
           role: "system",
           content: `이번 문답은 예외적으로 6문장 이내로 답변을 생성합니다.`,
         });
-      } else if (parseMessageArr.length === 115) {
+      } else if (parseMessageArr.length === 5) {
         // 고정 답변3 프롬프트 삽입 - 인지행동 치료 문제
         console.log("인지행동 치료 프롬프트 삽입");
+        let cb_testArr;
+
+        // 인지행동 문제 분야 정하기
+        if (req.session.ebt_class === "School") {
+          cb_testArr = cb_test_school;
+        } else if (req.session.ebt_class === "Friend") {
+          cb_testArr = cb_test_friend;
+        } else if (req.session.ebt_class === "Family") {
+          cb_testArr = cb_test_family;
+        } else cb_testArr = cb_test_remain;
 
         const random_cb_question =
-          cb_test_friend[Math.floor(Math.random() * cb_test_friend.length)];
+          cb_testArr[Math.floor(Math.random() * cb_testArr.length)];
         console.log(random_cb_question);
         parseMessageArr.push({
           role: "user",
@@ -1791,10 +1803,6 @@ ${select_Ebt_School_result.testResult}
           content: `이번 문답은 예외적으로 8문장 이내로 답변을 생성합니다.`,
         });
       } else {
-        // 세션 추가
-        if (!req.session.ebt_class) req.session.ebt_class = "School";
-        // req.session.cookie.maxAge = 10000;
-
         promptArr.push(sentence_division_prompt);
       }
 
