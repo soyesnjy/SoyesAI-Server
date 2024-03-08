@@ -1,3 +1,9 @@
+const https = require("https");
+const fs = require("fs");
+
+// 환경 변수 불러오기
+require("dotenv").config();
+
 // app은 기본 express() 인스턴스 생성.
 const express = require("express");
 const session = require("express-session");
@@ -45,8 +51,8 @@ app.use(
     cookie: {
       // domain: "soyeskids.co.kr",
       httpOnly: true,
-      sameSite: "none",
-      secure: true,
+      sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+      secure: process.env.DEV_OPS !== "local",
       // sameSite: "lax", // 또는 "strict", 로컬 개발 환경에 더 적합
       // secure: false, // 로컬 개발 환경에서는 false로 설정
       // maxAge: 10000,
@@ -133,9 +139,6 @@ app.use("/mailtest", mailTestRouter);
 
 // app.listen(PORT, () => console.log(`🚀 HTTP Server is starting on ${PORT}`));
 
-const https = require("https");
-const fs = require("fs");
-let server;
 // https 보안 파일이 있을 경우
 if (
   fs.existsSync("/etc/letsencrypt/live/soyeskids.co.kr/fullchain.pem") &&
