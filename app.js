@@ -8,7 +8,7 @@ const PORT_https = 4040;
 
 // 서버와 동일한 url을 브라우저에 입력하면 src 폴더 내부의 html 파일 실행.
 const path = require("path");
-app.use(express.static(path.join(__dirname, "src")));
+// app.use(express.static(path.join(__dirname, "src")));
 
 // cors에러 처리. default는 모든 origin에 대해 허용 -> { origin:'*' } 파라미터 생략 가능.
 const cors = require("cors");
@@ -33,8 +33,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // cookie-parser 추가.
-const cookieParser = require("cookie-parser");
-app.use(cookieParser("@earthworm"));
+// const cookieParser = require("cookie-parser");
+// app.use(cookieParser("@earthworm"));
 
 // 세션 설정 - Cross-Site 설정 불가능. (secure 이슈)
 app.use(
@@ -43,13 +43,13 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      domain: "soyeskids.co.kr",
+      // domain: "soyeskids.co.kr",
+      httpOnly: true,
       sameSite: "none",
       secure: true,
       // sameSite: "lax", // 또는 "strict", 로컬 개발 환경에 더 적합
       // secure: false, // 로컬 개발 환경에서는 false로 설정
-      httpOnly: true,
-      maxAge: 10000,
+      // maxAge: 10000,
     },
   })
 );
@@ -62,6 +62,9 @@ app.use(
 // 7. 현재 설정을 적용하여 localhost 도메인에서만 session이 작동함.
 
 app.get("/", (req, res) => {
+  console.log(req.session);
+  if (!req.session.test) req.session.test = "a";
+
   res.send({ text: "Hello World!" });
 });
 
