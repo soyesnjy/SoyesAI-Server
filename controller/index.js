@@ -1748,7 +1748,21 @@ ${select_Ebt_School_result.testResult}
         // promptArr.push(solution_prompt);
       }
 
-      if (parseMessageArr.length === 1) {
+      // 심리 검사 분석 감지 멘트
+      const test_result_ment = [
+        "심리검사",
+        "검사결과",
+        "심리 검사",
+        "검사 결과",
+      ];
+
+      const lastUserContent =
+        parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
+      // 검사 결과 분석 관련 멘트가 발생할 경우
+      if (
+        !req.session.ebt_class &&
+        test_result_ment.some((el) => lastUserContent.includes(el))
+      ) {
         // 고정 답변1 프롬프트 삽입 - 정서행동검사 결과 분석
         console.log("정서행동검사 결과 분석 프롬프트 삽입");
 
@@ -1777,11 +1791,17 @@ ${select_Ebt_School_result.testResult}
         // 인지행동 문제 분야 정하기
         if (req.session.ebt_class === "School") {
           cb_testArr = cb_test_school;
+          req.session.cb_class = "School";
         } else if (req.session.ebt_class === "Friend") {
           cb_testArr = cb_test_friend;
+          req.session.cb_class = "Friend";
         } else if (req.session.ebt_class === "Family") {
           cb_testArr = cb_test_family;
-        } else cb_testArr = cb_test_remain;
+          req.session.cb_class = "Family";
+        } else {
+          cb_testArr = cb_test_remain;
+          req.session.cb_class = "Remain";
+        }
 
         const random_cb_question =
           cb_testArr[Math.floor(Math.random() * cb_testArr.length)];
