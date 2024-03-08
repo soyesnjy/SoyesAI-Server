@@ -1759,10 +1759,7 @@ ${select_Ebt_School_result.testResult}
       const lastUserContent =
         parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
       // 검사 결과 분석 관련 멘트가 발생할 경우
-      if (
-        !req.session.ebt_class &&
-        test_result_ment.some((el) => lastUserContent.includes(el))
-      ) {
+      if (test_result_ment.some((el) => lastUserContent.includes(el))) {
         // 고정 답변1 프롬프트 삽입 - 정서행동검사 결과 분석
         console.log("정서행동검사 결과 분석 프롬프트 삽입");
 
