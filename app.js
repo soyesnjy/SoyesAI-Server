@@ -39,8 +39,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // cookie-parser 추가.
-// const cookieParser = require("cookie-parser");
-// app.use(cookieParser("@earthworm"));
+const cookieParser = require("cookie-parser");
+app.use(cookieParser("@earthworm"));
 
 // 세션 설정 - Cross-Site 설정 불가능. (secure 이슈)
 app.use(
@@ -55,7 +55,7 @@ app.use(
       secure: process.env.DEV_OPS !== "local",
       // sameSite: "lax", // 또는 "strict", 로컬 개발 환경에 더 적합
       // secure: false, // 로컬 개발 환경에서는 false로 설정
-      // maxAge: 10000,
+      maxAge: 100000, // sid 쿠키 수명 100초로 설정
     },
   })
 );

@@ -804,6 +804,11 @@ const {
   cb_test_remain,
 } = require("../DB/cognitive_behavior_test");
 
+const {
+  test_result_ment,
+  cb_solution_ment,
+} = require("../DB/detect_ment_Array");
+
 const EBT_Table_Info = {
   School: {
     table: "soyes_ai_Ebt_School",
@@ -938,6 +943,16 @@ const select_soyes_AI_Ebt_Table = async (
     console.log(err);
     return { testResult: "", ebt_school_data: {} };
   }
+};
+
+// EBT 반영 Class 정의
+const EBT_classArr = ["School", "Friend", "Family", "Mood", "Unrest"];
+const EBT_ObjArr = {
+  School: { table: "soyes_ai_Ebt_School", result: ebt_School_Result },
+  Friend: { table: "soyes_ai_Ebt_Friend", result: ebt_Friend_Result },
+  Family: { table: "soyes_ai_Ebt_Family", result: ebt_Family_Result },
+  Mood: { table: "soyes_ai_Ebt_Mood", result: ebt_Mood_Result },
+  Unrest: { table: "soyes_ai_Ebt_Unrest", result: ebt_Unrest_Result },
 };
 
 const openAIController = {
@@ -1663,21 +1678,8 @@ ${select_Ebt_School_result.testResult}
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
 
-    // EBT 반영 Class 정의
-    const EBT_classArr = ["School", "Friend", "Family", "Mood", "Unrest"];
-    const EBT_ObjArr = {
-      School: { table: "soyes_ai_Ebt_School", result: ebt_School_Result },
-      Friend: { table: "soyes_ai_Ebt_Friend", result: ebt_Friend_Result },
-      Family: { table: "soyes_ai_Ebt_Family", result: ebt_Family_Result },
-      Mood: { table: "soyes_ai_Ebt_Mood", result: ebt_Mood_Result },
-      Unrest: { table: "soyes_ai_Ebt_Unrest", result: ebt_Unrest_Result },
-    };
-
     // 응답에 헤더를 추가하는 메서드
     // res.header("Test_Header", "Success Header");
-
-    // 세션 확인 코드
-    console.log(req.session);
 
     try {
       if (typeof EBTData === "string") {
@@ -1699,76 +1701,70 @@ ${select_Ebt_School_result.testResult}
       // promptArr.push(gestalt_prompt); // 아들러 상담 기법 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
-      let psy_testResult_promptArr_last = []; // 2점을 획득한 정서행동검사 문항을 저장하는 prompt
+      /* 프롬프트 삽입 분기 */
 
-      // 해당 계정의 모든 정서행동검사 결과 DB에서 차출
-      const psy_testResult_promptArr = EBT_classArr.map(async (ebt_class) => {
-        const select_Ebt_School_result = await select_soyes_AI_Ebt_Table(
-          EBT_ObjArr[ebt_class].table, // Table Name
-          {
-            pKey: "uid",
-          }, // primary Key Name
-          EBT_ObjArr[ebt_class].result, // EBT Question 11가지 분야 중 1개 (Table에 따라 결정)
-          parsepUid // Uid
-        );
-
-        // console.log(select_Ebt_School_result);
-
-        const psy_testResult_prompt = {
-          role: "system",
-          content: `다음에 오는 문단은 user의 ${ebt_class} 관련 심리검사 결과입니다.
-  '''
-  ${select_Ebt_School_result.testResult}
-  '''
-  위 문단이 비어있다면 ${
-    // DB Table의 값 유무에 따라 다른 프롬프트 입력
-    !select_Ebt_School_result.ebt_school_data[0]
-      ? "user는 심리검사를 진행하지 않았습니다."
-      : "user의 심리검사 결과는 문제가 없습니다."
-  }`,
-        };
-        // console.log(psy_testResult_prompt);
-        return psy_testResult_prompt;
-      });
-
-      // map method는 pending 상태의 promise를 반환하므로 Promise.all method를 사용하여 resolve 상태가 되기를 기다려준다.
-      await Promise.all(psy_testResult_promptArr).then((prompt) => {
-        psy_testResult_promptArr_last = [...prompt]; // resolve 상태로 반환된 prompt 배열을 psy_testResult_promptArr_last 변수에 복사
-      });
-
-      // console.log(psy_testResult_promptArr_last);
-
-      /* 개발자 의도 질문 - N번째 문답에 대한 답변을 개발자가 임의로 지정 */
-
+      // 심리 검사 결과 프롬프트 상시 삽입
       if (parseMessageArr.length) {
         // 심리 검사 결과 프롬프트 삽입
         console.log("심리 검사 결과 프롬프트 삽입");
+        let psy_testResult_promptArr_last = []; // 2점을 획득한 정서행동검사 문항을 저장하는 prompt
+        // 해당 계정의 모든 정서행동검사 결과 DB에서 차출
+        const psy_testResult_promptArr = EBT_classArr.map(async (ebt_class) => {
+          const select_Ebt_School_result = await select_soyes_AI_Ebt_Table(
+            EBT_ObjArr[ebt_class].table, // Table Name
+            {
+              pKey: "uid",
+            }, // primary Key Name
+            EBT_ObjArr[ebt_class].result, // EBT Question 11가지 분야 중 1개 (Table에 따라 결정)
+            parsepUid // Uid
+          );
+
+          // console.log(select_Ebt_School_result);
+
+          const psy_testResult_prompt = {
+            role: "system",
+            content: `다음에 오는 문단은 user의 ${ebt_class} 관련 심리검사 결과입니다.
+    '''
+    ${select_Ebt_School_result.testResult}
+    '''
+    위 문단이 비어있다면 ${
+      // DB Table의 값 유무에 따라 다른 프롬프트 입력
+      !select_Ebt_School_result.ebt_school_data[0]
+        ? "user는 심리검사를 진행하지 않았습니다."
+        : "user의 심리검사 결과는 문제가 없습니다."
+    }`,
+          };
+          // console.log(psy_testResult_prompt);
+          return psy_testResult_prompt;
+        });
+        // map method는 pending 상태의 promise를 반환하므로 Promise.all method를 사용하여 resolve 상태가 되기를 기다려준다.
+        await Promise.all(psy_testResult_promptArr).then((prompt) => {
+          psy_testResult_promptArr_last = [...prompt]; // resolve 상태로 반환된 prompt 배열을 psy_testResult_promptArr_last 변수에 복사
+        });
+
+        // console.log(psy_testResult_promptArr_last);
+
         promptArr.push(...psy_testResult_promptArr_last);
         promptArr.push(psyResult_prompt);
         // promptArr.push(solution_prompt);
       }
 
-      // 심리 검사 분석 감지 멘트
-      const test_result_ment = [
-        "심리검사",
-        "검사결과",
-        "심리 검사",
-        "검사 결과",
-      ];
-
       const lastUserContent =
         parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
+
       // 검사 결과 분석 관련 멘트가 발생할 경우
       if (test_result_ment.some((el) => lastUserContent.includes(el))) {
         // 고정 답변1 프롬프트 삽입 - 정서행동검사 결과 분석
         console.log("정서행동검사 결과 분석 프롬프트 삽입");
 
+        // 랜덤 1개 분야 선택
         const random_class =
           EBT_classArr[Math.floor(Math.random() * EBT_classArr.length)];
-        // 세션에 클래스 추가
-        // 세션 추가
+
+        // 랜덤 1개 분야 세션 추가
         req.session.ebt_class = random_class;
 
+        // 심리 결과 분석 프롬프트
         parseMessageArr.push({
           role: "user",
           content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), 
@@ -1780,7 +1776,12 @@ ${select_Ebt_School_result.testResult}
           role: "system",
           content: `이번 문답은 예외적으로 6문장 이내로 답변을 생성합니다.`,
         });
-      } else if (parseMessageArr.length === 5) {
+      }
+      // 인지행동 세션 데이터가 없고, 인지행동 검사 관련 멘트가 발생할 경우
+      else if (
+        !req.session.cb_class &&
+        cb_solution_ment.some((el) => lastUserContent.includes(el))
+      ) {
         // 고정 답변3 프롬프트 삽입 - 인지행동 치료 문제
         console.log("인지행동 치료 프롬프트 삽입");
         let cb_testArr;
@@ -1800,28 +1801,88 @@ ${select_Ebt_School_result.testResult}
           req.session.cb_class = "Remain";
         }
 
-        const random_cb_question =
-          cb_testArr[Math.floor(Math.random() * cb_testArr.length)];
+        const random_cb_index = Math.floor(Math.random() * cb_testArr.length);
+        const random_cb_question = cb_testArr[random_cb_index];
+        req.session.cb_question = random_cb_question;
+
         console.log(random_cb_question);
+
+        // 인지행동 문제 프롬프트
         parseMessageArr.push({
           role: "user",
           content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), 
           이후 '그 전에 우리 상황극 한 번 하자!' 라고 말한 뒤 다음 문단에 오는 인지행동 검사를 문제와 문항으로 나누어 user에게 제시해줘.
 
-          ${random_cb_question}
+          ${random_cb_question.question}
 
           문항 앞에는 '1) 2) 3) 4)'같이 번호를 붙이고 점수는 제거해줘.
           답변 마지막에 '넌 이 상황에서 어떻게 할거야? 번호로 알려줘!'를 추가해줘.
           `,
         });
-
         promptArr.push({
           role: "system",
           content: `이번 문답은 예외적으로 8문장 이내로 답변을 생성합니다.`,
         });
-      } else {
-        promptArr.push(sentence_division_prompt);
       }
+      // 인지행동 문항을 이미 냈을 경우
+      else if (req.session.cb_class) {
+        // 정답을 골랐을 경우
+        if (lastUserContent.includes(req.session.cb_question.answer)) {
+          console.log("인지행동 검사 정답 선택");
+          parseMessageArr.push({
+            role: "user",
+            content: `'올바른 답을 골랐구나! 대단해!'를 말한 뒤 ${req.session.cb_question.answer}번 문항에 대한 견해를 2문장 이내로 답변해줘.`,
+          });
+
+          // 인지행동 관련 데이터 초기화
+          delete req.session.cb_class;
+          delete req.session.cb_question;
+          delete req.session.cb_wrongCnt;
+        }
+        // 오답을 고를 경우
+        else {
+          console.log("인지행동 검사 오답 선택");
+          // 오답 횟수 카운트
+          if (!req.session.cb_wrongCnt) req.session.cb_wrongCnt = 1;
+          else req.session.cb_wrongCnt++;
+
+          // 오답 횟수 4회 미만
+          if (req.session.cb_wrongCnt < 4) {
+            parseMessageArr.push({
+              role: "user",
+              content: `'user'가 고른 문항에 대한 견해를 2문장 이내로 답변한 뒤
+              (만약 문항을 고르지 않았다면 마지막 질문에 대해 1문장 이내로 답변한 뒤 '문제에 집중하자!'를 추가해줘),
+              마지막에 '다시 한 번 생각해봐!'를 추가해줘.`,
+            });
+          }
+          // 오답 횟수 4회 이상
+          else {
+            console.log("인지행동 검사 오답 4회 이상 선택 -> 정답 알려주기");
+            parseMessageArr.push({
+              role: "user",
+              content: `'올바른 답은 ${req.session.cb_question.answer}번 이였어!' 를 말한 뒤 마지막 ${req.session.cb_question.answer}번 문항에 대한 견해를 2문장 이내로 답변해줘.`,
+            });
+
+            // 인지행동 관련 데이터 초기화
+            delete req.session.cb_class;
+            delete req.session.cb_question;
+            delete req.session.cb_wrongCnt;
+          }
+        }
+      }
+      // 아무런 분기도 걸리지 않을 경우
+      else promptArr.push(sentence_division_prompt);
+
+      /*
+      // 답변 횟수 카운트
+      if (!req.session.answerCnt || parseMessageArr.length === 1)
+        req.session.answerCnt = 1;
+      else if (req.session.answerCnt > 9) {
+        // 답변 10회 이상 진행 시 세션 파괴
+        req.session.destroy();
+        res.clearCookie("connect.sid");
+      } else req.session.answerCnt++;
+      */
 
       // 상시 삽입 프롬프트
       // promptArr.push(sentence_division_prompt); // 문장 구분 프롬프트 삽입
@@ -1845,6 +1906,9 @@ ${select_Ebt_School_result.testResult}
         ...parseMessageArr,
         { role: "assistant", content: message.message },
       ]);
+
+      // 세션 확인 코드
+      console.log(req.session);
 
       res.json(message);
     } catch (err) {
