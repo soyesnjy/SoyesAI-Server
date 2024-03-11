@@ -1805,7 +1805,7 @@ ${select_Ebt_School_result.testResult}
         const random_cb_question = cb_testArr[random_cb_index];
         req.session.cb_question = random_cb_question;
 
-        console.log(random_cb_question);
+        // console.log(random_cb_question);
 
         // 인지행동 문제 프롬프트
         parseMessageArr.push({
@@ -1824,7 +1824,7 @@ ${select_Ebt_School_result.testResult}
           content: `이번 문답은 예외적으로 8문장 이내로 답변을 생성합니다.`,
         });
       }
-      // 인지행동 문항을 이미 냈을 경우
+      // 인지행동 검사 문항을 이미 냈을 경우
       else if (req.session.cb_class) {
         // 정답을 골랐을 경우
         if (lastUserContent.includes(req.session.cb_question.answer)) {
@@ -1850,9 +1850,9 @@ ${select_Ebt_School_result.testResult}
           if (req.session.cb_wrongCnt < 4) {
             parseMessageArr.push({
               role: "user",
-              content: `'user'가 고른 문항에 대한 견해를 2문장 이내로 답변한 뒤
-              (만약 문항을 고르지 않았다면 마지막 질문에 대해 1문장 이내로 답변한 뒤 '문제에 집중하자!'를 추가해줘),
-              마지막에 '다시 한 번 생각해봐!'를 추가해줘.`,
+              content: `'user'가 고른 문항에 대한 견해를 2문장 이내로 답변한 뒤,
+              (만약 문항을 고르지 않았다면 마지막 질문에 대해 1문장 이내로 답변한 뒤, 문제에 집중해달라고 'user'에게 부탁해줘),
+              마지막에는 '다시 한 번 생각해봐!' 를 추가해줘.`,
             });
           }
           // 오답 횟수 4회 이상
@@ -1896,7 +1896,7 @@ ${select_Ebt_School_result.testResult}
       });
 
       let emotion = parseInt(response.choices[0].message.content.slice(-1));
-      // console.log(emotion);
+      console.log("emotion: " + emotion);
 
       const message = {
         message: response.choices[0].message.content.slice(0, -1),
