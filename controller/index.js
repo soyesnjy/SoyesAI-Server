@@ -759,18 +759,21 @@ const openai = new OpenAI({
 });
 
 const nodemailer = require("nodemailer");
-// 성격 검사 결과
+// 심리 검사 관련
 const {
   persnal_short, // 성격검사 짧은 결과
   persnal_long, // 성격검사 양육 코칭 결과
-  behavioral_rating_scale, // 정서행동검사 척도
-  behavioral_rating_standard, // 정서행동검사 기준
-  behavioral_rating_prompt, // 정서행동검사 프롬프트
-  ebt_School_Result, // 정서행동검사 학교생활 질문 6종
-  ebt_Friend_Result, // 정서행동검사 또래관계 질문 8종
-  ebt_Family_Result, // 정서행동검사 가족관계 질문 7종
+  ebt_School_Result,
+  ebt_Friend_Result,
+  ebt_Family_Result,
   ebt_Mood_Result,
   ebt_Unrest_Result,
+  ebt_Sad_Result,
+  ebt_Health_Result,
+  ebt_Attention_Result,
+  ebt_Movement_Result,
+  ebt_Angry_Result,
+  ebt_Self_Result,
 } = require("../DB/psy_test");
 
 const {
@@ -780,6 +783,7 @@ const {
   base_pupu_v2,
 } = require("../DB/base_prompt");
 
+// 프롬프트 관련
 const {
   persona_prompt,
   persona_prompt_lala,
@@ -797,6 +801,7 @@ const {
   test_prompt_20240305_v1,
 } = require("../DB/test_prompt");
 
+// 인지행동 검사 관련
 const {
   cb_test_friend,
   cb_test_family,
@@ -804,6 +809,7 @@ const {
   cb_test_remain,
 } = require("../DB/cognitive_behavior_test");
 
+// 텍스트 감지 관련
 const {
   test_result_ment,
   cb_solution_ment,
@@ -920,9 +926,11 @@ const select_soyes_AI_Ebt_Table = async (
     //   : console.log(`${parsepUid} 계정은 없습니다`);
     // delete ebt_school_data[0].uid; // uid 속성 삭제
     // Attribute의 값이 2인 요소의 배열 필터링. select 값이 없으면
+
     const problem_attr_arr = ebt_school_data[0]
       ? Object.keys(ebt_school_data[0])
       : [];
+
     const problem_attr_nameArr = problem_attr_arr.filter(
       // 속성명이 question을 가지고있고, 해당 속성의 값이 2인 경우 filtering
       (el) => el.includes("question") && ebt_school_data[0][el] === 2
@@ -946,13 +954,31 @@ const select_soyes_AI_Ebt_Table = async (
 };
 
 // EBT 반영 Class 정의
-const EBT_classArr = ["School", "Friend", "Family", "Mood", "Unrest"];
+const EBT_classArr = [
+  "School",
+  "Friend",
+  "Family",
+  "Mood",
+  "Unrest",
+  "Sad",
+  "Health",
+  "Attention",
+  "Movement",
+  "Angry",
+  "Self",
+];
 const EBT_ObjArr = {
   School: { table: "soyes_ai_Ebt_School", result: ebt_School_Result },
   Friend: { table: "soyes_ai_Ebt_Friend", result: ebt_Friend_Result },
   Family: { table: "soyes_ai_Ebt_Family", result: ebt_Family_Result },
   Mood: { table: "soyes_ai_Ebt_Mood", result: ebt_Mood_Result },
   Unrest: { table: "soyes_ai_Ebt_Unrest", result: ebt_Unrest_Result },
+  Sad: { table: "soyes_ai_Ebt_Sad", result: ebt_Sad_Result },
+  Health: { table: "soyes_ai_Ebt_Health", result: ebt_Health_Result },
+  Attention: { table: "soyes_ai_Ebt_Attention", result: ebt_Attention_Result },
+  Movement: { table: "soyes_ai_Ebt_Movement", result: ebt_Movement_Result },
+  Angry: { table: "soyes_ai_Ebt_Angry", result: ebt_Angry_Result },
+  Self: { table: "soyes_ai_Ebt_Self", result: ebt_Self_Result },
 };
 
 const openAIController = {
@@ -1589,7 +1615,7 @@ ${analyzeMsg}
       parsepUid = pUid ? pUid : "njy95";
       // console.log(parsepUid);
 
-      const select_Ebt_School_result = await select_soyes_AI_Ebt_Table(
+      const select_Ebt_Result = await select_soyes_AI_Ebt_Table(
         "soyes_ai_Ebt_School", // Table Name
         {
           pKey: "uid",
@@ -1602,11 +1628,11 @@ ${analyzeMsg}
         role: "system",
         content: `다음에 오는 문단은 user의 심리검사 결과입니다.
 '''
-${select_Ebt_School_result.testResult}
+${select_Ebt_Result.testResult}
 '''
 위 문단이 비어있다면 ${
           // DB Table의 값 유무에 따라 다른 프롬프트 입력
-          !select_Ebt_School_result.ebt_school_data[0]
+          !select_Ebt_Result.ebt_school_data[0]
             ? "user는 심리검사를 진행하지 않았습니다."
             : "user의 심리검사 결과는 문제가 없습니다."
         }`,
@@ -1710,7 +1736,7 @@ ${select_Ebt_School_result.testResult}
         let psy_testResult_promptArr_last = []; // 2점을 획득한 정서행동검사 문항을 저장하는 prompt
         // 해당 계정의 모든 정서행동검사 결과 DB에서 차출
         const psy_testResult_promptArr = EBT_classArr.map(async (ebt_class) => {
-          const select_Ebt_School_result = await select_soyes_AI_Ebt_Table(
+          const select_Ebt_Result = await select_soyes_AI_Ebt_Table(
             EBT_ObjArr[ebt_class].table, // Table Name
             {
               pKey: "uid",
@@ -1719,17 +1745,17 @@ ${select_Ebt_School_result.testResult}
             parsepUid // Uid
           );
 
-          // console.log(select_Ebt_School_result);
+          // console.log(select_Ebt_Result);
 
           const psy_testResult_prompt = {
             role: "system",
             content: `다음에 오는 문단은 user의 ${ebt_class} 관련 심리검사 결과입니다.
     '''
-    ${select_Ebt_School_result.testResult}
+    ${select_Ebt_Result.testResult}
     '''
     위 문단이 비어있다면 ${
       // DB Table의 값 유무에 따라 다른 프롬프트 입력
-      !select_Ebt_School_result.ebt_school_data[0]
+      !select_Ebt_Result.ebt_school_data[0]
         ? "user는 심리검사를 진행하지 않았습니다."
         : "user의 심리검사 결과는 문제가 없습니다."
     }`,
@@ -1850,9 +1876,8 @@ ${select_Ebt_School_result.testResult}
           if (req.session.cb_wrongCnt < 4) {
             parseMessageArr.push({
               role: "user",
-              content: `'user'가 고른 문항에 대한 견해를 2문장 이내로 답변한 뒤,
-              (만약 문항을 고르지 않았다면 마지막 질문에 대해 1문장 이내로 답변한 뒤, 문제에 집중해달라고 'user'에게 부탁해줘),
-              마지막에는 '다시 한 번 생각해봐!' 를 추가해줘.`,
+              content: `'user'가 고른 문항에 대한 견해를 2문장 이내로 답변한 뒤, 마지막에는 '그치만 다시 한 번 생각해봐!' 를 추가해줘.
+              (만약 문항을 고르지 않았다면 1문장 이내로 문제에 집중해달라고 'user'에게 부탁해줘. 이 때는 '그치만 다시 한 번 생각해봐!'를 추가하지마.)`,
             });
           }
           // 오답 횟수 4회 이상

@@ -173,6 +173,92 @@ const ebt_Unrest_Result = {
   unrest_question_5:
     "user는 '부모님과 떨어지는 게 힘들어?'라는 질문에 '많이 힘들어' 라고 답변했습니다.",
 };
+const ebt_Sad_Result = {
+  sad_question_0:
+    "user는 '좋아하거나 관심 가지고 있는 게 있니?'라는 질문에 '거의 없어' 라고 답변했습니다.",
+  sad_question_1:
+    "user는 '슬픈 기분이 들거나 울 때가 있어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  sad_question_2:
+    "user는 '활기차고 기분이 좋을 때가 있니?'라는 질문에 '거의 안 그래' 라고 답변했습니다.",
+  sad_question_3:
+    "user는 '기운이 없고 피곤해서 아무것도 하기 싫을 때가 있어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  sad_question_4:
+    "user는 '아무도 나에게 관심이 없는 것 같고 외로울 때가 있니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  sad_question_5:
+    "user는 '너무 많이 먹거나 너무 적게 먹을 때가 있어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  sad_question_6:
+    "user는 '너무 많이 자거나 너무 적게 잘 때가 있니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+};
+const ebt_Health_Result = {
+  health_question_0:
+    "user는 '너는 네 몸이 튼튼한 것 같니?'라는 질문에 '아니' 라고 답변했습니다.",
+  health_question_1:
+    "user는 '머리가 아플 때가 있어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  health_question_2:
+    "user는 '배가 아프거나 속이 불편할 때가 있니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  health_question_3:
+    "user는 '피곤하거나 쉽게 지칠 때가 있어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  health_question_4:
+    "user는 '여기저기 아픈 편이니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+};
+const ebt_Attention_Result = {
+  attention_question_0:
+    "user는 '숙제 같은 걸 할 때 뭔가 빼 먹거나 실수할 때가 있니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  attention_question_1:
+    "user는 '수업을 듣거나, 긴 글을 읽거나, 대화를 할 때 잘 집중하지 못하고 딴 생각을 할 때가 있어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  attention_question_2:
+    "user는 '숙제를 끝내야 하는데 한참 동안 딴짓을 해서 오래 걸리거나 다 끝내지 못할 때가 있니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  attention_question_3:
+    "user는 '숙제를 하거나 긴 글을 읽는 것처럼 머리를 많이 쓰는 일은 어때?'라는 질문에 '너무 싫어' 라고 답변했습니다.",
+  attention_question_4:
+    "user는 '연필이나 실내화 가방 같이 챙겨야 할 물건을 자주 잃어버리니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  attention_question_5:
+    "user는 '뭔가에 집중하다가도 주변에서 어떤 소리가 들리거나 하면 주의가 자주 흐트러지니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  attention_question_6:
+    "user는 '기억해야 할 것을 자주 깜빡해?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+};
+const ebt_Movement_Result = {
+  movement_question_0:
+    "user는 '손발을 가만두지 못하고 자주 꼼지락거리니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  movement_question_1:
+    "user는 '수업시간 같이 가만히 앉아 있어야 할 때 허락 받지 않고 자리에서 벗어날 때가 있어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  movement_question_2:
+    "user는 '심하게 뛰어다니거나 위험하게 어딘가를 기어오를 때가 있니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  movement_question_3:
+    "user는 '차분히 앉아서 조용하게 놀기 어려울 때가 있어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  movement_question_4:
+    "user는 '말이 많고 시끄러운 편이니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  movement_question_5:
+    "user는 '네 차례가 올 때까지 기다리지 못할 때가 있어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  movement_question_6:
+    "user는 '다른 사람이 이야기 나누고 있거나 무언가 하고 있을 때 자주 방해하거나 끼어드니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+};
+const ebt_Angry_Result = {
+  angry_question_0:
+    "user는 '짜증나거나 신경질 날 때가 있니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  angry_question_1:
+    "user는 '화가 나서 큰 소리를 지를 때가 있어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  angry_question_2:
+    "user는 '화가 나서 물건을 던지거나 부술 때가 있니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  angry_question_3:
+    "user는 '친구를 못살게 굴 때가 있어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  angry_question_4:
+    "user는 '형제자매와 자주 다투니?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+  angry_question_5:
+    "user는 '부모님이나 선생님 말씀을 안 듣고 네 마음대로 할 때가 있어?'라는 질문에 '자주 그래' 라고 답변했습니다.",
+};
+const ebt_Self_Result = {
+  self_question_0:
+    "user는 '너는 네가 착하고 좋은 사람이라고 느껴져?'라는 질문에 '아니' 라고 답변했습니다.",
+  self_question_1:
+    "user는 '네가 사랑받는 소중한 사람이라고 느껴져?'라는 질문에 '아니' 라고 답변했습니다.",
+  self_question_2:
+    "user는 '네가 할 일을 항상 잘 해낼 수 있니?'라는 질문에 '아니' 라고 답변했습니다.",
+  self_question_3:
+    "user는 '네가 부족한 점이 많다고 생각해?'라는 질문에 '진짜 많아' 라고 답변했습니다.",
+  self_question_4:
+    "user는 '네 외모는 어떤 거 같아?'라는 질문에 '별로야' 라고 답변했습니다.",
+};
 
 module.exports = {
   persnal_short,
@@ -187,4 +273,10 @@ module.exports = {
   ebt_Family_Result,
   ebt_Mood_Result,
   ebt_Unrest_Result,
+  ebt_Sad_Result,
+  ebt_Health_Result,
+  ebt_Attention_Result,
+  ebt_Movement_Result,
+  ebt_Angry_Result,
+  ebt_Self_Result,
 };
