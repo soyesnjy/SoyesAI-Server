@@ -1082,6 +1082,12 @@ const openAIController = {
       Family: "가족관계",
       Mood: "전반적 기분",
       Unrest: "불안",
+      Sad: "우울",
+      Health: "신체증상",
+      Attention: "주의 집중",
+      Movement: "과잉 행동",
+      Angry: "분노",
+      Self: "자기인식",
       default: "학교생활",
     };
 
@@ -1102,43 +1108,45 @@ const openAIController = {
       // 메일 관련 세팅 시작
 
       /*
-    // mysql query 메서드 동기식 작동 + DB 데이터 가져오기
-    let yourMailAddr = "";
 
-    // Promise 생성 메서드
-    function queryAsync(connection, query, parameters) {
-      return new Promise((resolve, reject) => {
-        connection.query(query, parameters, (error, results, fields) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(results);
-          }
+      // mysql query 메서드 동기식 작동 + DB 데이터 가져오기
+      let yourMailAddr = "";
+
+      // Promise 생성 메서드
+      function queryAsync(connection, query, parameters) {
+        return new Promise((resolve, reject) => {
+          connection.query(query, parameters, (error, results, fields) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(results);
+            }
+          });
         });
-      });
-    }
-
-    // 프로미스 resolve 반환값 사용. (User Data return)
-    async function fetchUserData(connection, query) {
-      try {
-        let results = await queryAsync(connection, query, []);
-        // console.log(results[0]);
-        yourMailAddr = results[0].email; // Select email
-      } catch (error) {
-        console.error(error);
       }
-    }
 
-    const user_table = "soyes_ai_User";
-    const user_attr = {
-      pKey: "uid",
-      attr1: "email"
-    }
+      // 프로미스 resolve 반환값 사용. (User Data return)
+      async function fetchUserData(connection, query) {
+        try {
+          let results = await queryAsync(connection, query, []);
+          // console.log(results[0]);
+          yourMailAddr = results[0].email; // Select email
+        } catch (error) {
+          console.error(error);
+        }
+      }
 
-    const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${pUid}'`;
-    await fetchUserData(connection_AI, select_query);
-    console.log("받는사람: " + yourMailAddr);
-    */
+      const user_table = "soyes_ai_User";
+      const user_attr = {
+        pKey: "uid",
+        attr1: "email"
+      }
+
+      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${pUid}'`;
+      await fetchUserData(connection_AI, select_query);
+      console.log("받는사람: " + yourMailAddr);
+
+      */
 
       yourMailAddr = "soyesnjy@gmail.com"; // dummy email. 받는사람
 
@@ -1189,7 +1197,7 @@ const openAIController = {
           },
         ],
         model: "gpt-4-1106-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-        temperature: 0.2,
+        temperature: 1,
       });
 
       const message = { message: response.choices[0].message.content };
