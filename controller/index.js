@@ -815,79 +815,6 @@ const {
   cb_solution_ment,
 } = require("../DB/detect_ment_Array");
 
-const EBT_Table_Info = {
-  School: {
-    table: "soyes_ai_Ebt_School",
-    attribute: {
-      pKey: "uid",
-      attr1: "school_question_0",
-      attr2: "school_question_1",
-      attr3: "school_question_2",
-      attr4: "school_question_3",
-      attr5: "school_question_4",
-      attr6: "school_question_5",
-      attr7: "chat",
-      attr8: "date",
-    },
-  },
-  Friend: {
-    table: "soyes_ai_Ebt_Friend",
-    attribute: {
-      pKey: "uid",
-      attr1: "friend_question_0",
-      attr2: "friend_question_1",
-      attr3: "friend_question_2",
-      attr4: "friend_question_3",
-      attr5: "friend_question_4",
-      attr6: "friend_question_5",
-      attr7: "friend_question_6",
-      attr8: "friend_question_7",
-      attr9: "chat",
-      attr10: "date",
-    },
-  },
-  Family: {
-    table: "soyes_ai_Ebt_Family",
-    attribute: {
-      pKey: "uid",
-      attr1: "family_question_0",
-      attr2: "family_question_1",
-      attr3: "family_question_2",
-      attr4: "family_question_3",
-      attr5: "family_question_4",
-      attr6: "family_question_5",
-      attr7: "family_question_6",
-      attr8: "chat",
-      attr9: "date",
-    },
-  },
-  Mood: {
-    table: "soyes_ai_Ebt_Mood",
-    attribute: {
-      pKey: "uid",
-      attr1: "mood_question_0",
-      attr2: "mood_question_1",
-      attr3: "mood_question_2",
-      attr4: "chat",
-      attr5: "date",
-    },
-  },
-  Unrest: {
-    table: "soyes_ai_Ebt_Mood",
-    attribute: {
-      pKey: "uid",
-      attr1: "unrest_question_0",
-      attr2: "unrest_question_1",
-      attr3: "unrest_question_2",
-      attr4: "unrest_question_3",
-      attr5: "unrest_question_4",
-      attr6: "unrest_question_5",
-      attr7: "chat",
-      attr8: "date",
-    },
-  },
-};
-
 const select_soyes_AI_Ebt_Table = async (
   user_table,
   user_attr,
@@ -952,7 +879,164 @@ const select_soyes_AI_Ebt_Table = async (
     return { testResult: "", ebt_school_data: {} };
   }
 };
-
+// Database EBT Table Info
+const EBT_Table_Info = {
+  School: {
+    table: "soyes_ai_Ebt_School",
+    attribute: {
+      pKey: "uid",
+      attr1: "school_question_0",
+      attr2: "school_question_1",
+      attr3: "school_question_2",
+      attr4: "school_question_3",
+      attr5: "school_question_4",
+      attr6: "school_question_5",
+      attr7: "chat",
+      attr8: "date",
+    },
+  },
+  Friend: {
+    table: "soyes_ai_Ebt_Friend",
+    attribute: {
+      pKey: "uid",
+      attr1: "friend_question_0",
+      attr2: "friend_question_1",
+      attr3: "friend_question_2",
+      attr4: "friend_question_3",
+      attr5: "friend_question_4",
+      attr6: "friend_question_5",
+      attr7: "friend_question_6",
+      attr8: "friend_question_7",
+      attr9: "chat",
+      attr10: "date",
+    },
+  },
+  Family: {
+    table: "soyes_ai_Ebt_Family",
+    attribute: {
+      pKey: "uid",
+      attr1: "family_question_0",
+      attr2: "family_question_1",
+      attr3: "family_question_2",
+      attr4: "family_question_3",
+      attr5: "family_question_4",
+      attr6: "family_question_5",
+      attr7: "family_question_6",
+      attr8: "chat",
+      attr9: "date",
+    },
+  },
+  Mood: {
+    table: "soyes_ai_Ebt_Mood",
+    attribute: {
+      pKey: "uid",
+      attr1: "mood_question_0",
+      attr2: "mood_question_1",
+      attr3: "mood_question_2",
+      attr4: "chat",
+      attr5: "date",
+    },
+  },
+  Unrest: {
+    table: "soyes_ai_Ebt_Unrest",
+    attribute: {
+      pKey: "uid",
+      attr1: "unrest_question_0",
+      attr2: "unrest_question_1",
+      attr3: "unrest_question_2",
+      attr4: "unrest_question_3",
+      attr5: "unrest_question_4",
+      attr6: "unrest_question_5",
+      attr7: "chat",
+      attr8: "date",
+    },
+  },
+  Sad: {
+    table: "soyes_ai_Ebt_Sad",
+    attribute: {
+      pKey: "uid",
+      attr1: "sad_question_0",
+      attr2: "sad_question_1",
+      attr3: "sad_question_2",
+      attr4: "sad_question_3",
+      attr5: "sad_question_4",
+      attr6: "sad_question_5",
+      attr7: "sad_question_6",
+      attr8: "chat",
+      attr9: "date",
+    },
+  },
+  Health: {
+    table: "soyes_ai_Ebt_Health",
+    attribute: {
+      pKey: "uid",
+      attr1: "health_question_0",
+      attr2: "health_question_1",
+      attr3: "health_question_2",
+      attr4: "health_question_3",
+      attr5: "health_question_4",
+      attr6: "chat",
+      attr7: "date",
+    },
+  },
+  Attention: {
+    table: "soyes_ai_Ebt_Attention",
+    attribute: {
+      pKey: "uid",
+      attr1: "attention_question_0",
+      attr2: "attention_question_1",
+      attr3: "attention_question_2",
+      attr4: "attention_question_3",
+      attr5: "attention_question_4",
+      attr6: "attention_question_5",
+      attr7: "attention_question_6",
+      attr8: "chat",
+      attr9: "date",
+    },
+  },
+  Movement: {
+    table: "soyes_ai_Ebt_Movement",
+    attribute: {
+      pKey: "uid",
+      attr1: "movement_question_0",
+      attr2: "movement_question_1",
+      attr3: "movement_question_2",
+      attr4: "movement_question_3",
+      attr5: "movement_question_4",
+      attr6: "movement_question_5",
+      attr7: "movement_question_6",
+      attr8: "chat",
+      attr9: "date",
+    },
+  },
+  Angry: {
+    table: "soyes_ai_Ebt_Angry",
+    attribute: {
+      pKey: "uid",
+      attr1: "angry_question_0",
+      attr2: "angry_question_1",
+      attr3: "angry_question_2",
+      attr4: "angry_question_3",
+      attr5: "angry_question_4",
+      attr6: "angry_question_5",
+      attr7: "chat",
+      attr8: "date",
+    },
+  },
+  Self: {
+    table: "soyes_ai_Ebt_Self",
+    attribute: {
+      pKey: "uid",
+      attr1: "self_question_0",
+      attr2: "self_question_1",
+      attr3: "self_question_2",
+      attr4: "self_question_3",
+      attr5: "self_question_4",
+      attr6: "chat",
+      attr7: "date",
+    },
+  },
+};
 // EBT 반영 Class 정의
 const EBT_classArr = [
   "School",
@@ -967,6 +1051,7 @@ const EBT_classArr = [
   "Angry",
   "Self",
 ];
+
 const EBT_ObjArr = {
   School: { table: "soyes_ai_Ebt_School", result: ebt_School_Result },
   Friend: { table: "soyes_ai_Ebt_Friend", result: ebt_Friend_Result },
