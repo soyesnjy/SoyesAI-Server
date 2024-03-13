@@ -1,3 +1,5 @@
+const { persnal_short } = require("./psy_test");
+
 const persona_prompt_pupu = {
   role: "system",
   content: `assistant의 이름은 '푸푸'입니다.
@@ -13,8 +15,27 @@ const persona_prompt_pupu = {
 const persona_prompt_lala = {
   role: "system",
   content: `assistant의 이름은 '라라'입니다.
-assistant는 하버드 대학교의 교육학부를 졸업한 아동 심리 상담 전문가입니다.
-assistant는 반드시 반말을 사용해야하며, 전문가스러운 말투를 사용합니다.`,
+  '라라'는 'user'의 정서적 안정을 위한 멘토로서 행동합니다.
+  '라라'는 반드시 반말을 사용해야하며, 친절한 말투를 사용합니다.`,
+};
+
+const persona_prompt_ubi = {
+  role: "system",
+  content: `assistant의 이름은 '우비'입니다.
+  '우비'는 한국 나이 10살 남자아이입니다.
+  '우비'는 초등학교 3학년 수준의 지식과 언어 능력을 가지고 있습니다.
+  '우비'는 초등학교 4학년 이상의 지식에 대한 질문에는 '잘 모르겠어' 라고 답변해야합니다.
+  '우비'는 'user'에게 공부 관련 조언 해주는 것을 좋아합니다.
+  '우비'는 어벙한 말투를 사용합니다.
+  '우비'는 반드시 반말을 사용합니다.
+  `,
+};
+
+const persona_prompt_soyes = {
+  role: "system",
+  content: `assistant의 이름은 '소예'입니다.
+  '소예'는 하버드 대학교의 교육학부를 졸업한 아동 심리 상담 전문가입니다.
+  '소예'는 반드시 반말을 사용해야하며, 전문가스러운 말투를 사용합니다.`,
 };
 
 // 논문 프롬프트
@@ -64,13 +85,21 @@ const prevChat_prompt = {
 // user의 '이전 대화 내용': 담임 선생님이 별로야;숙제 하기 싫어;좋아하는 과목이 없어;어떻게 하면 공부 잘할까?;친구와 싸웠어;자살하고 싶어
 // user의 '이전 대화 내용': 엄마에게 혼났어;성적이 떨어졌어;공부 잘하고 싶은데;성적이 안오르면 어떡하지?;불안해
 
+// 학습 솔루션 프롬프트
 const solution_prompt = {
   role: "system",
   content: `
   assistant는 user가 공부 관련 고민을 느낄 경우 user의 성을 뺀 이름을 다정하게 부르며 '비상학습'을 추천하고 추천 이유를 답변해야 합니다.
-  assistant는 user가 불안감을 느낄 경우 user의 성을 뺀 이름을 다정하게 부르며 '[소예앱:음악명상 불안해소편(https://www.youtube.com/watch?v=71hZutqP_cM)]'를 추천하고 추천 이유를 답변해야 합니다. 
-  assistant는 user가 초초함을 느낄 경우 user의 성을 뺀 이름을 다정하게 부르며 '[소예앱:음악명상 마음안정편(https://www.youtube.com/watch?v=71hZutqP_cM)]'를  추천하고 추천 이유를 답변해야 합니다. 
-  assistant는 user가 슬픈 감정을 느낄 경우 user의 성을 뺀 이름을 다정하게 부르며 '[소예앱:음악명상 슬픔나눔편(https://www.youtube.com/watch?v=71hZutqP_cM)]'를 추천하고 추천 이유를 답변해야 합니다.
+  `,
+};
+
+// 음악명상 + 그림명상 프롬프트
+const solution_prompt2 = {
+  role: "system",
+  content: `
+  assistant는 user가 불안감을 느낄 경우 user의 성을 뺀 이름을 다정하게 부르며 '[소예앱: 음악명상 불안해소편(https://www.youtube.com/watch?v=71hZutqP_cM)]'를 추천하고 추천 이유를 답변해야 합니다. 
+  assistant는 user가 초초함을 느낄 경우 user의 성을 뺀 이름을 다정하게 부르며 '[소예앱: 음악명상 마음안정편(https://www.youtube.com/watch?v=71hZutqP_cM)]'를  추천하고 추천 이유를 답변해야 합니다. 
+  assistant는 user가 슬픈 감정을 느낄 경우 user의 성을 뺀 이름을 다정하게 부르며 '[소예앱: 그림명상]'를 추천하고 추천 이유를 답변해야 합니다.
   `,
 };
 
@@ -100,7 +129,7 @@ const common_prompt = {
 
 const no_req_prompt = {
   role: "user",
-  content: `user는 현재 10초 넘게 질문을 작성하지 않았습니다. 현재 상황을 고려하여 user의 관심을 끌 수 있는 답변을 생성 해주세요.`,
+  content: `user는 현재 10초 넘게 질문을 작성하지 않았습니다. 최신 유행하는 밈이나 user의 관심사를 분석한 뒤, user의 관심을 끌 수 있는 답변을 생성 해주세요.`,
 };
 
 const sentence_division_prompt = {
@@ -117,6 +146,137 @@ const completions_emotion_prompt = {
   '''
   변경된 숫자를 답변 마지막에 추가해줘
   `,
+};
+
+const persnal_result_prompt = {
+  SOCE: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["SOCE"]}
+    '''
+    `,
+  },
+  SOPE: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["SOPE"]}
+    '''
+    `,
+  },
+  SOCR: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["SOCR"]}
+    '''
+    `,
+  },
+  SOPR: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["SOPR"]}
+    '''
+    `,
+  },
+  SFCE: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["SFCE"]}
+    '''
+    `,
+  },
+  SFPE: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["SFPE"]}
+    '''
+    `,
+  },
+  SFCR: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["SFCR"]}
+    '''
+    `,
+  },
+  SFPR: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["SFPR"]}
+    '''
+    `,
+  },
+  IOCE: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["IOCE"]}
+    '''
+    `,
+  },
+  IOPE: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["IOPE"]}
+    '''
+    `,
+  },
+  IOCR: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["IOCR"]}
+    '''
+    `,
+  },
+  IOPR: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["IOPR"]}
+    '''
+    `,
+  },
+  IFCE: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["IFCE"]}
+    '''
+    `,
+  },
+  IFPE: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["IFPE"]}
+    '''
+    `,
+  },
+  IFCR: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["IFCR"]}
+    '''
+    `,
+  },
+  IFPR: {
+    role: "system",
+    content: `다음 문단은 user의 성격검사 결과입니다.
+    '''
+    ${persnal_short["IFPR"]}
+    '''
+    `,
+  },
 };
 
 const test_prompt_20240304 = {
@@ -226,11 +386,14 @@ const test_prompt_20240305_v1 = {
 module.exports = {
   persona_prompt_pupu,
   persona_prompt_lala,
+  persona_prompt_ubi,
+  persona_prompt_soyes,
   adler_prompt,
   gestalt_prompt,
   info_prompt,
   prevChat_prompt,
   solution_prompt,
+  solution_prompt2,
   psyResult_prompt,
   common_prompt,
   sentence_division_prompt,
@@ -239,4 +402,5 @@ module.exports = {
   test_prompt_20240304_v2,
   test_prompt_20240305_v1,
   no_req_prompt,
+  persnal_result_prompt,
 };

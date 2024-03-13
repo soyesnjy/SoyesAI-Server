@@ -93,7 +93,6 @@ const ebt_Question = {
   school_question_4: "너는 좋아하는 과목이 있어?",
   school_question_5: "공부 잘 하는 편이야?",
 };
-
 const ebt_Question_v2 = {
   school_question_0: "학교생활 별로야.",
   school_question_1: "담임 선생님은 별로야.",
