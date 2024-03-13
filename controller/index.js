@@ -1955,7 +1955,8 @@ ${analyzeMsg}
         promptArr.push(psyResult_prompt);
       }
 
-      let testClass = "";
+      let testClass = "",
+        testClass_cb = "";
       // 검사 결과 분석 관련 멘트 감지
       if (
         !req.session.ebt_class &&
@@ -2002,26 +2003,27 @@ ${analyzeMsg}
       // 인지행동 세션 데이터가 없고, 인지행동 검사 관련 멘트 감지
       else if (
         !req.session.cb_class &&
-        cb_solution_ment.some((el) => lastUserContent.includes(el))
+        cb_solution_ment.some((el) => {
+          if (lastUserContent.includes(el)) {
+            testClass_cb = el;
+            return true;
+          } else return false;
+        })
       ) {
         // 고정 답변3 프롬프트 삽입 - 인지행동 치료 문제
         console.log("인지행동 치료 프롬프트 삽입");
         let cb_testArr;
 
-        // 인지행동 문제 분야 정하기
-        if (req.session.ebt_class === "School") {
-          cb_testArr = cb_test_school;
-          req.session.cb_class = "School";
-        } else if (req.session.ebt_class === "Friend") {
-          cb_testArr = cb_test_friend;
-          req.session.cb_class = "Friend";
-        } else if (req.session.ebt_class === "Family") {
-          cb_testArr = cb_test_family;
-          req.session.cb_class = "Family";
-        } else {
-          cb_testArr = cb_test_remain;
-          req.session.cb_class = "Remain";
-        }
+        const cb_class_map = {
+          학교인지: cb_test_school,
+          가족인지: cb_test_family,
+          친구인지: cb_test_friend,
+          그외인지: cb_test_remain,
+        };
+
+        // 감지된 인지행동 문제 분야 선택
+        cb_testArr = cb_class_map[testClass_cb];
+        req.session.cb_class = testClass_cb;
 
         const random_cb_index = Math.floor(Math.random() * cb_testArr.length);
         const random_cb_question = cb_testArr[random_cb_index];
