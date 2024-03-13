@@ -1902,7 +1902,7 @@ ${analyzeMsg}
       /* 프롬프트 삽입 분기 */
 
       // 심리 검사 결과 프롬프트 상시 삽입
-      if (parseMessageArr.length) {
+      if (!req.session.psy_testResult_promptArr_last) {
         // 심리 검사 결과 프롬프트 삽입
         console.log("심리 검사 결과 프롬프트 삽입");
         let psy_testResult_promptArr_last = []; // 2점을 획득한 정서행동검사 문항을 저장하는 prompt
@@ -1945,6 +1945,14 @@ ${analyzeMsg}
         promptArr.push(...psy_testResult_promptArr_last);
         promptArr.push(psyResult_prompt);
         // promptArr.push(solution_prompt);
+
+        req.session.psy_testResult_promptArr_last = [
+          ...psy_testResult_promptArr_last,
+        ];
+      } else {
+        console.log("세션 저장된 심리 검사 결과 프롬프트 삽입");
+        promptArr.push(...req.session.psy_testResult_promptArr_last);
+        promptArr.push(psyResult_prompt);
       }
 
       let testClass = "";
@@ -2279,7 +2287,7 @@ ${analyzeMsg}
       /* 프롬프트 삽입 분기 */
 
       // 심리 검사 결과 프롬프트 상시 삽입
-      if (parseMessageArr.length) {
+      if (!req.session.psy_testResult_promptArr_last) {
         // 심리 검사 결과 프롬프트 삽입
         console.log("심리 검사 결과 프롬프트 삽입");
         let psy_testResult_promptArr_last = []; // 2점을 획득한 정서행동검사 문항을 저장하는 prompt
@@ -2299,15 +2307,15 @@ ${analyzeMsg}
           const psy_testResult_prompt = {
             role: "system",
             content: `다음에 오는 문단은 user의 ${ebt_class} 관련 심리검사 결과입니다.
-    '''
-    ${select_Ebt_Result.testResult}
-    '''
-    위 문단이 비어있다면 ${
-      // DB Table의 값 유무에 따라 다른 프롬프트 입력
-      !select_Ebt_Result.ebt_school_data[0]
-        ? "user는 심리검사를 진행하지 않았습니다."
-        : "user의 심리검사 결과는 문제가 없습니다."
-    }`,
+  '''
+  ${select_Ebt_Result.testResult}
+  '''
+  위 문단이 비어있다면 ${
+    // DB Table의 값 유무에 따라 다른 프롬프트 입력
+    !select_Ebt_Result.ebt_school_data[0]
+      ? "user는 심리검사를 진행하지 않았습니다."
+      : "user의 심리검사 결과는 문제가 없습니다."
+  }`,
           };
           // console.log(psy_testResult_prompt);
           return psy_testResult_prompt;
@@ -2322,6 +2330,14 @@ ${analyzeMsg}
         promptArr.push(...psy_testResult_promptArr_last);
         promptArr.push(psyResult_prompt);
         // promptArr.push(solution_prompt);
+
+        req.session.psy_testResult_promptArr_last = [
+          ...psy_testResult_promptArr_last,
+        ];
+      } else {
+        console.log("세션 저장된 심리 검사 결과 프롬프트 삽입");
+        promptArr.push(...req.session.psy_testResult_promptArr_last);
+        promptArr.push(psyResult_prompt);
       }
 
       // 검사 결과 분석 관련 멘트 감지
