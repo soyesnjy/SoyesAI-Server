@@ -785,7 +785,7 @@ const {
 
 // 프롬프트 관련
 const {
-  persona_prompt,
+  persona_prompt_pupu,
   persona_prompt_lala,
   adler_prompt,
   gestalt_prompt,
@@ -799,6 +799,7 @@ const {
   test_prompt_20240304,
   test_prompt_20240304_v2,
   test_prompt_20240305_v1,
+  no_req_prompt,
 } = require("../DB/test_prompt");
 
 // 인지행동 검사 관련
@@ -1321,7 +1322,7 @@ ${analyzeMsg}
       // client 전송
       res.json({ message: mailOptions.text });
 
-      // 메일 내역 DB 저장
+      /* DB 저장 */
       const table = EBT_Table_Info[type].table;
       const attribute = EBT_Table_Info[type].attribute;
       // 오늘 날짜 변환
@@ -1358,8 +1359,8 @@ ${analyzeMsg}
       const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`;
       const ebt_data = await fetchUserData(connection_AI, select_query);
 
+      // 2. UPDATE TEST (row값이 있는 경우 실행)
       if (ebt_data[0]) {
-        // 2. UPDATE TEST (row값이 있는 경우 실행)
         const update_query = `UPDATE ${table} SET ${Object.values(attribute)
           .filter((el) => el !== "uid")
           .map((el) => {
@@ -1385,8 +1386,9 @@ ${analyzeMsg}
             else console.log("AI Analysis Data DB UPDATE Success!");
           }
         );
-      } else {
-        // 3. INSERT TEST (row값이 없는 경우 실행)
+      }
+      // 3. INSERT TEST (row값이 없는 경우 실행)
+      else {
         const insert_query = `INSERT INTO ${table} (${Object.values(
           attribute
         ).join(", ")}) VALUES (${Object.values(attribute)
@@ -1678,16 +1680,14 @@ ${analyzeMsg}
       res.json(err);
     }
   },
-  // 테스트 결과 기반 상담 AI. 정서행동 검사 - 학교생활 V3
+  // 상담 AI. 푸푸
   postOpenAIEmotionTestResultConsultingV3: async (req, res) => {
     const { EBTData } = req.body;
-
-    console.log(
-      "정서행동 검사- 학교생활 V3 반영 상담 API /consulting_emotion_pupu Path 호출"
-    );
+    console.log(EBTData);
+    console.log("푸푸 상담 API /consulting_emotion_pupu Path 호출");
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
-    let prevChat_flag = true; // 이전 대화 내역 유무
+    // let prevChat_flag = true; // 이전 대화 내역 유무
     // console.log(messageArr);
     try {
       if (typeof EBTData === "string") {
@@ -1700,36 +1700,60 @@ ${analyzeMsg}
         parseMessageArr = JSON.parse(messageArr);
       } else parseMessageArr = [...messageArr];
 
+      parsepUid = pUid ? pUid : "njy95";
+
       // 고정 삽입 프롬프트
-      promptArr.push(persona_prompt); // 페르소나 프롬프트 삽입
+      promptArr.push(persona_prompt_pupu); // 페르소나 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
+      const lastUserContent =
+        parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
+
+      // NO REQ 질문 처리. 10초 이상 질문이 없을 경우 Client 측에서 'NO REQUEST' 메시지를 담은 요청을 보냄. 그에 대한 처리
+      if (lastUserContent.includes("NO REQ")) {
+        console.log("NO REQUEST 전달");
+
+        parseMessageArr.push(no_req_prompt);
+        promptArr.push(sentence_division_prompt);
+
+        const response = await openai.chat.completions.create({
+          messages: [...promptArr, ...parseMessageArr],
+          model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        });
+
+        res.json({
+          message: response.choices[0].message.content,
+          emotion: 0,
+        });
+
+        return;
+      }
+
       // pUid default값 설정
-      parsepUid = pUid ? pUid : "njy95";
       // console.log(parsepUid);
 
-      const select_Ebt_Result = await select_soyes_AI_Ebt_Table(
-        "soyes_ai_Ebt_School", // Table Name
-        {
-          pKey: "uid",
-        }, // primary Key Name
-        ebt_School_Result, // EBT Question 11가지 분야 중 1개 (Table에 따라 결정)
-        parsepUid // Uid
-      );
+      //       const select_Ebt_Result = await select_soyes_AI_Ebt_Table(
+      //         "soyes_ai_Ebt_School", // Table Name
+      //         {
+      //           pKey: "uid",
+      //         }, // primary Key Name
+      //         ebt_School_Result, // EBT Question 11가지 분야 중 1개 (Table에 따라 결정)
+      //         parsepUid // Uid
+      //       );
 
-      const psy_testResult_prompt = {
-        role: "system",
-        content: `다음에 오는 문단은 user의 심리검사 결과입니다.
-'''
-${select_Ebt_Result.testResult}
-'''
-위 문단이 비어있다면 ${
-          // DB Table의 값 유무에 따라 다른 프롬프트 입력
-          !select_Ebt_Result.ebt_school_data[0]
-            ? "user는 심리검사를 진행하지 않았습니다."
-            : "user의 심리검사 결과는 문제가 없습니다."
-        }`,
-      };
+      //       const psy_testResult_prompt = {
+      //         role: "system",
+      //         content: `다음에 오는 문단은 user의 심리검사 결과입니다.
+      // '''
+      // ${select_Ebt_Result.testResult}
+      // '''
+      // 위 문단이 비어있다면 ${
+      //           // DB Table의 값 유무에 따라 다른 프롬프트 입력
+      //           !select_Ebt_Result.ebt_school_data[0]
+      //             ? "user는 심리검사를 진행하지 않았습니다."
+      //             : "user의 심리검사 결과는 문제가 없습니다."
+      //         }`,
+      //       };
 
       // console.log(psy_testResult_prompt);
 
@@ -1741,13 +1765,13 @@ ${select_Ebt_Result.testResult}
       //   promptArr.push(prevChat_prompt);
       // }
 
-      if (parseMessageArr.length) {
-        // 심리 검사 프롬프트 삽입
-        console.log("심리 검사 프롬프트 삽입");
-        promptArr.push(psy_testResult_prompt);
-        promptArr.push(psyResult_prompt);
-        promptArr.push(solution_prompt);
-      }
+      // if (parseMessageArr.length) {
+      //   // 심리 검사 프롬프트 삽입
+      //   console.log("심리 검사 프롬프트 삽입");
+      //   promptArr.push(psy_testResult_prompt);
+      //   promptArr.push(psyResult_prompt);
+      //   promptArr.push(solution_prompt);
+      // }
 
       // if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
       //   // 솔루션 프롬프트 삽입
@@ -1756,6 +1780,7 @@ ${select_Ebt_Result.testResult}
       // }
 
       // 상시 삽입 프롬프트
+
       promptArr.push(common_prompt); // 공통 프롬프트 삽입
       promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
 
@@ -1786,7 +1811,7 @@ ${select_Ebt_Result.testResult}
       });
     }
   },
-  // 테스트 결과 기반 상담 AI. 정서행동 검사 - V4 (검사 5종)
+  // 테스트 결과 기반 상담 AI. 정서행동 검사 - 라라
   postOpenAIEmotionTestResultConsultingV4: async (req, res) => {
     const { EBTData } = req.body;
     console.log(EBTData);
@@ -1817,8 +1842,30 @@ ${select_Ebt_Result.testResult}
 
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_lala); // 페르소나 프롬프트 삽입
-      // promptArr.push(gestalt_prompt); // 아들러 상담 기법 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
+
+      const lastUserContent =
+        parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
+
+      // NO REQ 질문 처리. 10초 이상 질문이 없을 경우 Client 측에서 'NO REQUEST' 메시지를 담은 요청을 보냄. 그에 대한 처리
+      if (lastUserContent.includes("NO REQ")) {
+        console.log("NO REQUEST 전달");
+        parseMessageArr.pop(); // 'NO REQUEST 질문 삭제'
+        parseMessageArr.push(no_req_prompt);
+        promptArr.push(sentence_division_prompt);
+
+        const response = await openai.chat.completions.create({
+          messages: [...promptArr, ...parseMessageArr],
+          model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        });
+
+        res.json({
+          message: response.choices[0].message.content,
+          emotion: 0,
+        });
+
+        return;
+      }
 
       /* 프롬프트 삽입 분기 */
 
@@ -1868,10 +1915,7 @@ ${select_Ebt_Result.testResult}
         // promptArr.push(solution_prompt);
       }
 
-      const lastUserContent =
-        parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
-
-      // 검사 결과 분석 관련 멘트가 발생할 경우
+      // 검사 결과 분석 관련 멘트 감지
       if (test_result_ment.some((el) => lastUserContent.includes(el))) {
         // 고정 답변1 프롬프트 삽입 - 정서행동검사 결과 분석
         console.log("정서행동검사 결과 분석 프롬프트 삽입");
@@ -1896,7 +1940,7 @@ ${select_Ebt_Result.testResult}
           content: `이번 문답은 예외적으로 6문장 이내로 답변을 생성합니다.`,
         });
       }
-      // 인지행동 세션 데이터가 없고, 인지행동 검사 관련 멘트가 발생할 경우
+      // 인지행동 세션 데이터가 없고, 인지행동 검사 관련 멘트 감지
       else if (
         !req.session.cb_class &&
         cb_solution_ment.some((el) => lastUserContent.includes(el))
@@ -1943,7 +1987,7 @@ ${select_Ebt_Result.testResult}
           content: `이번 문답은 예외적으로 8문장 이내로 답변을 생성합니다.`,
         });
       }
-      // 인지행동 검사 문항을 이미 냈을 경우
+      // 인지행동 세션 데이터가 있는 경우
       else if (req.session.cb_class) {
         // 정답을 골랐을 경우
         if (lastUserContent.includes(req.session.cb_question.answer)) {
@@ -1978,7 +2022,7 @@ ${select_Ebt_Result.testResult}
             console.log("인지행동 검사 오답 4회 이상 선택 -> 정답 알려주기");
             parseMessageArr.push({
               role: "user",
-              content: `'올바른 답은 ${req.session.cb_question.answer}번 이였어!' 를 말한 뒤 마지막 ${req.session.cb_question.answer}번 문항에 대한 견해를 2문장 이내로 답변해줘.`,
+              content: `'올바른 답은 ${req.session.cb_question.answer}번이였어!' 를 말한 뒤 마지막 ${req.session.cb_question.answer}번 문항에 대한 견해를 2문장 이내로 답변해줘.`,
             });
 
             // 인지행동 관련 데이터 초기화
