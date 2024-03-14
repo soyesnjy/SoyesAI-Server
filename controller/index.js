@@ -1734,7 +1734,7 @@ ${analyzeMsg}
   // 공감친구 모델 - 푸푸
   postOpenAIEmotionTestResultConsultingV3: async (req, res) => {
     const { EBTData } = req.body;
-    console.log(EBTData);
+    //console.log(EBTData);
     console.log("푸푸 상담 API /consulting_emotion_pupu Path 호출");
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
