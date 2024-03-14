@@ -277,6 +277,11 @@ const persnal_result_prompt = {
     '''
     `,
   },
+  default: {
+    role: "system",
+    content: `user는 성격검사 결과가 없습니다.
+    `,
+  },
 };
 
 const test_prompt_20240304 = {
