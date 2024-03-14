@@ -1168,7 +1168,7 @@ const openAIController = {
   postOpenAIEmotionAnalyze: async (req, res) => {
     const { messageArr } = req.body;
     console.log("감정 분석 API /emotion Path 호출");
-    // console.log(req.body);
+    console.log(req.body);
     // console.log(typeof messageArr);
 
     let parseMessageArr;
