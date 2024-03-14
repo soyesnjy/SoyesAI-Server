@@ -1789,7 +1789,7 @@ ${analyzeMsg}
         PT_Table_Info.attribute,
         parsepUid
       );
-      console.log(pt_result);
+      // console.log(pt_result);
       promptArr.push(persnal_result_prompt[pt_result]);
 
       // if (parseMessageArr.length === 1 && prevChat_flag) {
