@@ -2632,6 +2632,8 @@ const mailController = {
   },
 };
 
+// jenkins 테스트용 주석
+
 module.exports = {
   pathController,
   errController,
