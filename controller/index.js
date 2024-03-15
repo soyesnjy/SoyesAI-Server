@@ -2131,7 +2131,7 @@ ${analyzeMsg}
       ]);
 
       // 세션 확인 코드
-      console.log(req.session);
+      // console.log(req.session);
 
       res.json(message);
     } catch (err) {
@@ -2425,7 +2425,7 @@ ${analyzeMsg}
       ]);
 
       // 세션 확인 코드
-      console.log(req.session);
+      // console.log(req.session);
 
       res.json(message);
     } catch (err) {
