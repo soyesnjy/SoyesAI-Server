@@ -22,7 +22,7 @@ app.use(
   cors({
     origin: [
       "https://soyeskids.co.kr:4040",
-      "https://soyes-ai-project.vercel.app/",
+      "https://soyes-ai-project.vercel.app",
       "http://d1rq5xi9hzhyrc.cloudfront.net",
       "http://127.0.0.1:53298",
       "http://localhost:3000",
