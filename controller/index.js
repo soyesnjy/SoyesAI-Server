@@ -90,8 +90,8 @@ const { users } = require("../DB/database");
 
 const { generateToken, verifyToken } = require("../controller/tokenFnc");
 
+// OAuth2Client 설정
 const { OAuth2Client } = require("google-auth-library");
-
 const oAuth2Client = new OAuth2Client(
   process.env.CLIENT_ID,
   process.env.CLIENT_SECRET,
@@ -246,8 +246,15 @@ const loginController = {
     const { oauthType } = req.body;
     // console.log(oauthType);
 
+    const scopeMap = {
+      google: "https://www.googleapis.com/auth/userinfo.profile",
+      kakao: "https://www.kakaoapis.com/auth/userinfo.profile",
+      default: "https://www.googleapis.com/auth/userinfo.profile",
+    };
+
     try {
-      const SCOPES = ["https://www.googleapis.com/auth/userinfo.profile"];
+      if (!oauthType) oauthType = "default";
+      const SCOPES = [scopeMap[oauthType]];
 
       const authUrl = oAuth2Client.generateAuthUrl({
         access_type: "offline", // 필요한 경우
@@ -268,8 +275,8 @@ const loginController = {
       oAuth2Client.getToken(code, (err, token) => {
         if (err) return console.error("Error retrieving access token", err);
         oAuth2Client.setCredentials(token);
-        // 액세스 토큰을 사용하여 API를 호출할 수 있습니다.
 
+        // 액세스 토큰을 사용하여 API를 호출할 수 있습니다.
         const oauth2 = google.oauth2({
           auth: oAuth2Client,
           version: "v2",
@@ -1798,7 +1805,7 @@ ${analyzeMsg}
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
-    // console.log(messageArr);
+    // console.log(req.session);
     try {
       if (typeof EBTData === "string") {
         parseEBTdata = JSON.parse(EBTData);
