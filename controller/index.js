@@ -99,6 +99,17 @@ const oAuth2Client = new OAuth2Client(
 );
 const { google } = require("googleapis");
 
+const User_Table_Info = {
+  table: "soyes_ai_User",
+  attribute: {
+    pKey: "uid",
+    attr1: "Email",
+    attr2: "passWard",
+    attr3: "name",
+    attr4: "phoneNumber",
+  },
+};
+
 const loginController = {
   // 쿠키 유효성 검사
   vaildateCookies: (req, res, next) => {
@@ -246,15 +257,24 @@ const loginController = {
     const { oauthType } = req.body;
     // console.log(oauthType);
 
+    // SCOPE 설정. 유저 정보를 어디까지 가져올지 결정
     const scopeMap = {
-      google: "https://www.googleapis.com/auth/userinfo.profile",
-      kakao: "https://www.kakaoapis.com/auth/userinfo.profile",
-      default: "https://www.googleapis.com/auth/userinfo.profile",
+      google: [
+        "https://www.googleapis.com/auth/userinfo.profile", // 기본 프로필
+        "https://www.googleapis.com/auth/userinfo.email", // 이메일
+      ],
+
+      // 다른 플랫폼의 OAuth 추가 대비
+      kakao: ["https://www.kakaoapis.com/auth/userinfo.profile"],
+      default: [
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+      ],
     };
 
     try {
       if (!oauthType) oauthType = "default";
-      const SCOPES = [scopeMap[oauthType]];
+      const SCOPES = [...scopeMap[oauthType]];
 
       const authUrl = oAuth2Client.generateAuthUrl({
         access_type: "offline", // 필요한 경우
@@ -283,11 +303,70 @@ const loginController = {
         });
 
         // 유저 정보 GET
-        oauth2.userinfo.get((err, response) => {
+        oauth2.userinfo.get(async (err, response) => {
           if (err) return console.error(err);
-          console.log(response.data);
+          // console.log(response.data);
+
+          const { id, email, name } = response.data;
+
+          const table = User_Table_Info.table;
+          const attribute = User_Table_Info.attribute;
+          // 오늘 날짜 변환
+          const dateObj = new Date();
+          const year = dateObj.getFullYear();
+          const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+          const day = ("0" + dateObj.getDate()).slice(-2);
+          const date = `${year}-${month}-${day}`;
 
           // DB 계정 생성 코드 추가 예정
+          // 동기식 DB 접근 함수 1. Promise 생성 함수
+          function queryAsync(connection, query, parameters) {
+            return new Promise((resolve, reject) => {
+              connection.query(query, parameters, (error, results, fields) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results);
+                }
+              });
+            });
+          }
+          // 프로미스 resolve 반환값 사용. (User Data return)
+          async function fetchUserData(connection, query) {
+            try {
+              let results = await queryAsync(connection, query, []);
+              // console.log(results[0]);
+              return results;
+            } catch (error) {
+              console.error(error);
+            }
+          }
+
+          // 1. SELECT USER (row가 있는지 없는지 검사)
+          const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${response.data.id}'`;
+          const ebt_data = await fetchUserData(connection_AI, select_query);
+
+          // 2. INSERT USER (row값이 없는 경우 실행)
+          if (!ebt_data[0]) {
+            const insert_query = `INSERT INTO ${table} (${Object.values(
+              attribute
+            ).join(", ")}) VALUES (${Object.values(attribute)
+              .map((el) => "?")
+              .join(", ")})`;
+            // console.log(insert_query);
+
+            const insert_value = [id, email, "", name, ""];
+            // console.log(insert_value);
+
+            connection_AI.query(
+              insert_query,
+              insert_value,
+              (error, rows, fields) => {
+                if (error) console.log(error);
+                else console.log("OAuth User Row DB INSERT Success!");
+              }
+            );
+          }
 
           res.json({ data: response.data });
         });
