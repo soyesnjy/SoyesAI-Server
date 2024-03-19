@@ -255,7 +255,7 @@ const loginController = {
   // OAuth URL 발급
   oauthUrlHandler: (req, res) => {
     const { oauthType } = req.body;
-    // console.log(oauthType);
+    console.log(oauthType);
 
     // SCOPE 설정. 유저 정보를 어디까지 가져올지 결정
     const scopeMap = {
@@ -273,7 +273,10 @@ const loginController = {
     };
 
     try {
-      if (!oauthType) oauthType = "default";
+      if (!oauthType) {
+        res.json({ data: "" });
+        return;
+      }
       const SCOPES = [...scopeMap[oauthType]];
 
       const authUrl = oAuth2Client.generateAuthUrl({
