@@ -89,6 +89,16 @@ connection_AI.connect();
 const { users } = require("../DB/database");
 
 const { generateToken, verifyToken } = require("../controller/tokenFnc");
+
+const { OAuth2Client } = require("google-auth-library");
+
+const oAuth2Client = new OAuth2Client(
+  process.env.CLIENT_ID,
+  process.env.CLIENT_SECRET,
+  process.env.REDIRECT_URL
+);
+const { google } = require("googleapis");
+
 const loginController = {
   // 쿠키 유효성 검사
   vaildateCookies: (req, res, next) => {
@@ -135,16 +145,16 @@ const loginController = {
   // 세션 로그인
   sessionLoginHandler: (req, res) => {
     const { id, pwd } = req.body;
-
+    // console.log(id, pwd);
     if (users.find((user) => user.id === id && user.pwd === pwd)) {
       // 로그인 성공 시 세션 아이디 추가
       req.session.sessionId = id;
       req.session.cookie.maxAge = 10000;
       req.session.save(() => {
-        res.json("Login Success");
+        res.json({ data: "Login Success" });
       });
     } else {
-      res.json("Login Fail");
+      res.json({ data: "Login Fail" });
     }
   },
   // 세션 로그아웃
@@ -230,6 +240,55 @@ const loginController = {
     // });
 
     res.json("Token LogOut Success");
+  },
+  // OAuth URL 발급
+  oauthUrlHandler: (req, res) => {
+    const { oauthType } = req.body;
+    // console.log(oauthType);
+
+    try {
+      const SCOPES = ["https://www.googleapis.com/auth/userinfo.profile"];
+
+      const authUrl = oAuth2Client.generateAuthUrl({
+        access_type: "offline", // 필요한 경우
+        scope: SCOPES,
+      });
+      res.json({ data: authUrl });
+    } catch (err) {
+      console.error(err);
+      res.json({ data: "Non " });
+    }
+  },
+  // OAuth AccessToken 발급
+  oauthAccessTokenHandler: async (req, res) => {
+    const { code } = req.body;
+    // console.log(code);
+
+    try {
+      oAuth2Client.getToken(code, (err, token) => {
+        if (err) return console.error("Error retrieving access token", err);
+        oAuth2Client.setCredentials(token);
+        // 액세스 토큰을 사용하여 API를 호출할 수 있습니다.
+
+        const oauth2 = google.oauth2({
+          auth: oAuth2Client,
+          version: "v2",
+        });
+
+        // 유저 정보 GET
+        oauth2.userinfo.get((err, response) => {
+          if (err) return console.error(err);
+          console.log(response.data);
+
+          // DB 계정 생성 코드 추가 예정
+
+          res.json({ data: response.data });
+        });
+      });
+    } catch (err) {
+      console.error(err);
+      res.json({ data: "Fail" });
+    }
   },
   // 유저 정보 전달. 모든 학생 정보 출력
   getUserHandler: (req, res) => {
