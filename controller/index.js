@@ -90,7 +90,7 @@ const { users } = require("../DB/database");
 
 const { generateToken, verifyToken } = require("../controller/tokenFnc");
 
-// OAuth2Client 설정
+// google OAuth2Client 설정
 const { OAuth2Client } = require("google-auth-library");
 const oAuth2Client = new OAuth2Client(
   process.env.CLIENT_ID,
@@ -361,14 +361,15 @@ const loginController = {
             const insert_value = [id, email, "", name, ""];
             // console.log(insert_value);
 
-            connection_AI.query(
-              insert_query,
-              insert_value,
-              (error, rows, fields) => {
-                if (error) console.log(error);
-                else console.log("OAuth User Row DB INSERT Success!");
-              }
-            );
+            // 계정 생성 쿼리 임시 주석
+            // connection_AI.query(
+            //   insert_query,
+            //   insert_value,
+            //   (error, rows, fields) => {
+            //     if (error) console.log(error);
+            //     else console.log("OAuth User Row DB INSERT Success!");
+            //   }
+            // );
           }
 
           res.json({ data: response.data });
