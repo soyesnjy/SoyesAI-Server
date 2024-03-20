@@ -284,6 +284,9 @@ const loginController = {
         access_type: "offline", // 필요한 경우
         scope: SCOPES,
       });
+
+      console.log(authUrl);
+
       res.json({ data: authUrl });
     } catch (err) {
       console.error(err);
