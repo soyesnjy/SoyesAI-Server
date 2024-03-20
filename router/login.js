@@ -24,6 +24,7 @@ const {
   // OAuth
   oauthUrlHandler,
   oauthGoogleAccessTokenHandler,
+  oauthKakaoAccessTokenHandler,
 } = loginController;
 
 // 쿠키
@@ -49,8 +50,10 @@ router.post("/postTeacher");
 
 // OAuth_url 발급
 router.post("/oauth_url", oauthUrlHandler);
-// OAuth AccessToken 발급
-router.post("/oauth_token", oauthGoogleAccessTokenHandler);
+// Google OAuth AccessToken 발급
+router.post("/oauth_token/google", oauthGoogleAccessTokenHandler);
+// Kakao OAuth AccessToken 발급
+router.post("/oauth_token/kakao", oauthKakaoAccessTokenHandler);
 
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);

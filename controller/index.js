@@ -99,6 +99,9 @@ const oAuth2Client = new OAuth2Client(
 );
 const { google } = require("googleapis");
 
+// kakao OAuth 관련
+const axios = require("axios");
+
 const User_Table_Info = {
   table: "soyes_ai_User",
   attribute: {
@@ -285,7 +288,7 @@ const loginController = {
         scope: SCOPES,
       });
 
-      console.log(authUrl);
+      // console.log(authUrl);
 
       res.json({ data: authUrl });
     } catch (err) {
@@ -379,6 +382,48 @@ const loginController = {
           res.json({ data: response.data });
         });
       });
+    } catch (err) {
+      console.error(err);
+      res.json({ data: "Fail" });
+    }
+  },
+  // Kakao OAuth AccessToken 발급
+  oauthKakaoAccessTokenHandler: async (req, res) => {
+    const { code } = req.body;
+    console.log("Kakao OAuth AccessToken 발급 API 호출");
+    // 현재 카카오 소셜 로그인은 사업자등록을 해두지 않았기에 닉네임 정보만 가져올 수 있습니다.
+    try {
+      // POST 요청으로 액세스 토큰 요청
+      const tokenResponse = await axios.post(
+        "https://kauth.kakao.com/oauth/token",
+        null,
+        {
+          params: {
+            grant_type: "authorization_code",
+            client_id: process.env.KAKAO_CLIENT_ID, // 카카오 개발자 콘솔에서 발급받은 REST API 키
+            redirect_uri: `${process.env.REDIRECT_URL}?type=kakao`, // 카카오 개발자 콘솔에 등록한 리디렉션 URI
+            code: code, // 클라이언트로부터 받은 권한 코드
+          },
+          headers: {
+            "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+          },
+        }
+      );
+
+      const response = await axios.get("https://kapi.kakao.com/v2/user/me", {
+        headers: {
+          Authorization: `Bearer ${tokenResponse.data.access_token}`,
+          "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+        },
+      });
+
+      // 성공적으로 사용자 정보를 받아옴
+      console.log(response.data);
+
+      // DB 계정 생성 파트
+
+      // 클라이언트에 사용자 정보 응답
+      res.json({ data: response.data });
     } catch (err) {
       console.error(err);
       res.json({ data: "Fail" });
