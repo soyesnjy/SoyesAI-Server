@@ -255,7 +255,8 @@ const loginController = {
   // OAuth URL 발급
   oauthUrlHandler: (req, res) => {
     const { oauthType } = req.body;
-    console.log(oauthType);
+    console.log("OAuth URL 발급 API 호출");
+    console.log("type: " + oauthType);
 
     // SCOPE 설정. 유저 정보를 어디까지 가져올지 결정
     const scopeMap = {
@@ -289,10 +290,10 @@ const loginController = {
       res.json({ data: "Non " });
     }
   },
-  // OAuth AccessToken 발급
-  oauthAccessTokenHandler: async (req, res) => {
+  // Google OAuth AccessToken 발급
+  oauthGoogleAccessTokenHandler: async (req, res) => {
     const { code } = req.body;
-    // console.log(code);
+    console.log("Google OAuth AccessToken 발급 API 호출");
 
     try {
       oAuth2Client.getToken(code, (err, token) => {

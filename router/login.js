@@ -23,7 +23,7 @@ const {
   postTeacherHandler,
   // OAuth
   oauthUrlHandler,
-  oauthAccessTokenHandler,
+  oauthGoogleAccessTokenHandler,
 } = loginController;
 
 // 쿠키
@@ -50,7 +50,7 @@ router.post("/postTeacher");
 // OAuth_url 발급
 router.post("/oauth_url", oauthUrlHandler);
 // OAuth AccessToken 발급
-router.post("/oauth_token", oauthAccessTokenHandler);
+router.post("/oauth_token", oauthGoogleAccessTokenHandler);
 
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);
