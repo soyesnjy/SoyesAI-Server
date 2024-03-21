@@ -400,7 +400,7 @@ const loginController = {
         {
           params: {
             grant_type: "authorization_code",
-            client_id: process.env.KAKAO_CLIENT_ID, // 카카오 개발자 콘솔에서 발급받은 REST API 키
+            client_id: process.env.KAKAO_REST_API_KEY, // 카카오 개발자 콘솔에서 발급받은 REST API 키
             redirect_uri: `${process.env.REDIRECT_URL}?type=kakao`, // 카카오 개발자 콘솔에 등록한 리디렉션 URI
             code: code, // 클라이언트로부터 받은 권한 코드
           },
