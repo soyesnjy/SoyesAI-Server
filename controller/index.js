@@ -1200,7 +1200,6 @@ const select_soyes_AI_Ebt_Table = async (
     return { testResult: "", ebt_school_data: {} };
   }
 };
-
 // User 성격 검사 유형 반환 (String)
 const select_soyes_AI_Pt_Table = async (user_table, user_attr, parsepUid) => {
   // 동기식 DB 접근 함수 1. Promise 생성 함수
@@ -1392,6 +1391,15 @@ const EBT_Table_Info = {
       attr5: "self_question_4",
       attr6: "chat",
       attr7: "date",
+    },
+  },
+  Log: {
+    table: "soyes_ai_User_Ebt_Log",
+    attribute: {
+      cKey: "uid",
+      attr1: "date",
+      attr2: "ebt_analysis",
+      attr3: "ebt_type",
     },
   },
 };
@@ -1722,6 +1730,7 @@ ${analyzeMsg}
         }
       }
 
+      // soyes_ai_Ebt Table 삽입
       // 1. SELECT TEST (row가 있는지 없는지 검사)
       const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`;
       const ebt_data = await fetchUserData(connection_AI, select_query);
@@ -1781,9 +1790,33 @@ ${analyzeMsg}
         );
       }
 
-      // res.json(message);
+      // soyes_ai_Ebt_Log Table 삽입
+      const table_log = EBT_Table_Info["Log"].table; // 해당 table은 soyes_ai_User table과 외래키로 연결된 상태
+      const attribute_log = EBT_Table_Info["Log"].attribute;
+
+      const log_insert_query = `INSERT INTO ${table_log} (${Object.values(
+        attribute_log
+      ).join(", ")}) VALUES (${Object.values(attribute_log)
+        .map((el) => "?")
+        .join(", ")})`;
+      // console.log(insert_query);
+
+      const log_insert_value = [
+        parsepUid,
+        date,
+        JSON.stringify({ ...mailOptions, date }),
+        type,
+      ];
+      // console.log(insert_value);
+
+      connection_AI.query(log_insert_query, log_insert_value, (err) => {
+        if (err) {
+          console.log("AI Analysis Data LOG DB INSERT Fail!");
+          console.log("Err sqlMessage: " + err.sqlMessage);
+        } else console.log("AI Analysis Data LOG DB INSERT Success!");
+      });
     } catch (err) {
-      console.error(err);
+      console.log(err);
       res.json({ message: "Server Error" });
     }
   },
@@ -2901,6 +2934,84 @@ ${analyzeMsg}
       res.json({
         message: "Server Error",
         emotion: 0,
+      });
+    }
+  },
+  // Mypage User 달력 관련 데이터 반환
+  postOpenAIMypageCalendarData: async (req, res) => {
+    const { EBTData } = req.body;
+
+    console.log("달력 데이터 반환 API /calendar Path 호출");
+    let parseEBTdata, parsepUid; // Parsing 변수
+
+    try {
+      // json 파싱
+      if (typeof EBTData === "string") {
+        parseEBTdata = JSON.parse(EBTData);
+      } else parseEBTdata = EBTData;
+
+      const { pUid } = parseEBTdata;
+
+      // pUid default값 설정
+      parsepUid = pUid ? pUid : "njy95";
+
+      // DB 조회 => User Table + User EBT Table JOIN 후 관련 데이터 전달
+      const user_table = User_Table_Info.table;
+      const ebt_log_table = EBT_Table_Info["Log"].table;
+      // const pt_log_table = PT_Table_Info["Log"].table;
+
+      // DB 계정 생성 코드 추가 예정
+      // 동기식 DB 접근 함수 1. Promise 생성 함수
+      function queryAsync(connection, query, parameters) {
+        return new Promise((resolve, reject) => {
+          connection.query(query, parameters, (error, results, fields) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(results);
+            }
+          });
+        });
+      }
+      // 프로미스 resolve 반환값 사용. (User Data return)
+      async function fetchUserData(connection, query) {
+        try {
+          let results = await queryAsync(connection, query, []);
+          // console.log(results[0]);
+          return results;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      // 1. SELECT USER JOIN EBT_Log
+      const select_ebt_join_query = `SELECT ${ebt_log_table}.date, ${ebt_log_table}.ebt_type, ${ebt_log_table}.ebt_analysis FROM ${user_table} JOIN ${ebt_log_table} ON ${user_table}.uid = ${ebt_log_table}.uid WHERE ${user_table}.uid = '${pUid}';`;
+
+      const ebt_join_data = await fetchUserData(
+        connection_AI,
+        select_ebt_join_query
+      );
+      // console.log(ebt_join_data);
+
+      // 2. SELECT USER JOIN PT_Log
+      // const select_pt_join_query = `select_ebt_join_query 참조`;
+
+      // const ebt_join_data = await fetchUserData(
+      //   connection_AI,
+      //   select_pt_join_query
+      // );
+
+      res.json({
+        ebt_data: ebt_join_data.map((el) => {
+          const pasingEbtAnalysis = JSON.parse(el.ebt_analysis);
+          return { ...el, ebt_analysis: pasingEbtAnalysis.text };
+        }),
+        // pt_data: []
+      });
+    } catch (err) {
+      console.error(err);
+      res.json({
+        data: "Server Error",
       });
     }
   },
