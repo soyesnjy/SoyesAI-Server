@@ -110,6 +110,9 @@ const User_Table_Info = {
     attr2: "passWard",
     attr3: "name",
     attr4: "phoneNumber",
+    attr5: "oauth_type",
+    attr6: "creation_date",
+    attr7: "lastLogin_date",
   },
 };
 
@@ -317,7 +320,7 @@ const loginController = {
           if (err) return console.error(err);
           // console.log(response.data);
 
-          const { id, email, name } = response.data;
+          const { id, email } = response.data;
 
           const table = User_Table_Info.table;
           const attribute = User_Table_Info.attribute;
@@ -365,18 +368,50 @@ const loginController = {
               .join(", ")})`;
             // console.log(insert_query);
 
-            const insert_value = [id, email, "", name, ""];
+            const insert_value = [
+              id,
+              email,
+              null,
+              null,
+              null,
+              "google",
+              date,
+              date,
+            ];
             // console.log(insert_value);
 
             // 계정 생성 쿼리 임시 주석
-            // connection_AI.query(
-            //   insert_query,
-            //   insert_value,
-            //   (error, rows, fields) => {
-            //     if (error) console.log(error);
-            //     else console.log("OAuth User Row DB INSERT Success!");
-            //   }
-            // );
+            connection_AI.query(
+              insert_query,
+              insert_value,
+              (error, rows, fields) => {
+                if (error) console.log(error);
+                else console.log("OAuth User Row DB INSERT Success!");
+              }
+            );
+          } else {
+            // Update LastLoginDate
+            try {
+              const update_query = `UPDATE ${table} SET ${Object.values(
+                attribute
+              )
+                .filter((el) => el === "lastLogin_date")
+                .map((el) => {
+                  return `${el} = ?`;
+                })
+                .join(", ")} WHERE ${attribute.pKey} = ?`;
+              // console.log(update_query);
+
+              const update_value = [date, id];
+              // console.log(update_value);
+
+              connection_AI.query(update_query, update_value, () => {
+                console.log("Google OAuth User Data UPDATE Success!");
+              });
+            } catch (err) {
+              console.log("Google OAuth User Data UPDATE Fail!");
+              console.log(err);
+            }
           }
 
           res.json({ data: response.data });
@@ -418,9 +453,92 @@ const loginController = {
       });
 
       // 성공적으로 사용자 정보를 받아옴
-      console.log(response.data);
+      // console.log(response.data);
 
       // DB 계정 생성 파트
+      const { id } = response.data;
+      const { email } = response.data.kakao_account;
+
+      const table = User_Table_Info.table;
+      const attribute = User_Table_Info.attribute;
+      // 오늘 날짜 변환
+      const dateObj = new Date();
+      const year = dateObj.getFullYear();
+      const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+      const day = ("0" + dateObj.getDate()).slice(-2);
+      const date = `${year}-${month}-${day}`;
+
+      // DB 계정 생성 코드 추가 예정
+      // 동기식 DB 접근 함수 1. Promise 생성 함수
+      function queryAsync(connection, query, parameters) {
+        return new Promise((resolve, reject) => {
+          connection.query(query, parameters, (error, results, fields) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(results);
+            }
+          });
+        });
+      }
+      // 프로미스 resolve 반환값 사용. (User Data return)
+      async function fetchUserData(connection, query) {
+        try {
+          let results = await queryAsync(connection, query, []);
+          // console.log(results[0]);
+          return results;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      // 1. SELECT USER (row가 있는지 없는지 검사)
+      const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${response.data.id}'`;
+      const ebt_data = await fetchUserData(connection_AI, select_query);
+
+      // 2. INSERT USER (row값이 없는 경우 실행)
+      if (!ebt_data[0]) {
+        const insert_query = `INSERT INTO ${table} (${Object.values(
+          attribute
+        ).join(", ")}) VALUES (${Object.values(attribute)
+          .map((el) => "?")
+          .join(", ")})`;
+        // console.log(insert_query);
+
+        const insert_value = [id, email, null, null, null, "kakao", date, date];
+        // console.log(insert_value);
+
+        // 계정 생성 쿼리 임시 주석
+        connection_AI.query(
+          insert_query,
+          insert_value,
+          (error, rows, fields) => {
+            if (error) console.log(error);
+            else console.log("Kakao OAuth User Row DB INSERT Success!");
+          }
+        );
+      } else {
+        // Update LastLoginDate
+        try {
+          const update_query = `UPDATE ${table} SET ${Object.values(attribute)
+            .filter((el) => el === "lastLogin_date")
+            .map((el) => {
+              return `${el} = ?`;
+            })
+            .join(", ")} WHERE ${attribute.pKey} = ?`;
+          // console.log(update_query);
+
+          const update_value = [date, id];
+          // console.log(update_value);
+
+          connection_AI.query(update_query, update_value, () => {
+            console.log("KaKao OAuth User Data UPDATE Success!");
+          });
+        } catch (err) {
+          console.log("KaKao OAuth User Data UPDATE Fail!");
+          console.log(err);
+        }
+      }
 
       // 클라이언트에 사용자 정보 응답
       res.json({ data: response.data });
