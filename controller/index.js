@@ -93,8 +93,8 @@ const { generateToken, verifyToken } = require("../controller/tokenFnc");
 // google OAuth2Client 설정
 const { OAuth2Client } = require("google-auth-library");
 const oAuth2Client = new OAuth2Client(
-  process.env.CLIENT_ID,
-  process.env.CLIENT_SECRET,
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
   process.env.REDIRECT_URL
 );
 const { google } = require("googleapis");
