@@ -1120,6 +1120,8 @@ const {
   test_prompt_20240305_v1,
   no_req_prompt,
   persnal_result_prompt,
+  ebt_analysis_prompt,
+  pt_analysis_prompt,
 } = require("../DB/test_prompt");
 
 // 인지행동 검사 관련
@@ -1233,7 +1235,7 @@ const select_soyes_AI_Pt_Table = async (user_table, user_attr, parsepUid) => {
     return ebt_school_data[0] ? ebt_school_data[0].persanl_result : "default";
   } catch (err) {
     console.log(err);
-    return { testResult: "", ebt_school_data: {} };
+    return "default";
   }
 };
 // Database EBT Table Info
@@ -1549,6 +1551,7 @@ const openAIController = {
       Movement: "과잉 행동",
       Angry: "분노",
       Self: "자기인식",
+      Persnal: "성격검사",
       default: "학교생활",
     };
 
@@ -1564,7 +1567,31 @@ const openAIController = {
 
       // uid, type 전처리. 없는 경우 디폴트값 할당
       parsepUid = pUid ? pUid : "njy95";
-      parsingType = type ? type : "School";
+      parsingType = type ? type : "default";
+
+      const analysisPrompt = [];
+      const userPrompt = [];
+
+      if (type === "Persnal") {
+        // 혹시 몰라서 성격검사용 페르소나 프롬프트를 따로 구분해둠
+        analysisPrompt.push(pt_analysis_prompt);
+        userPrompt.push({
+          role: "user",
+          content: `다음 문단은 아동의 성격검사 결과야.
+          '''
+          SOCE 즉, 관계형(S)-개방형(O)-용기형(C)-감정형(E)입니다. 
+          SOCE 유형은 다른 사람들과 어울리는 것을 좋아하고, 모험을 즐기며, 위축되지 않는 용기를 보이고, 감수성이 풍부합니다.
+          '''
+          아동의 성격검사 결과를 바탕으로 아동의 성격을 장점과 단점으로 나눠서 분석해줘. 분석이 끝나면 단점에 대한 해결 방안을 제시해줘
+          `,
+        });
+      } else {
+        analysisPrompt.push(ebt_analysis_prompt);
+        userPrompt.push({
+          role: "user",
+          content: `앞선 대화를 기반으로 ${testType[parsingType]}에 대한 아동의 심리 상태를 분석해줘. 분석이 끝나면 문제에 대한 해결 방안을 제시해줘`,
+        });
+      }
 
       // 메일 관련 세팅 시작
 
@@ -1638,25 +1665,7 @@ const openAIController = {
 
       // AI 분석
       const response = await openai.chat.completions.create({
-        messages: [
-          // Base Prompt
-          {
-            role: "system",
-            content: `너의 이름은 소예.
-              소예는 아동 심리 분석가입니다.
-              소예는 주어진 문답을 분석하여 유저의 심리 상태를 파악합니다.
-              소예는 주어진 문답으로만 심리 분석을 진행해야합니다.
-              소예는 다른 정보에 대한 필요성을 어필해선 안됩니다.
-              소예는 심리 전문가스러운 말투를 사용합니다.
-              답변은 한글 200자 이내로 생성합니다.
-              `,
-          },
-          ...parseMessageArr,
-          {
-            role: "user",
-            content: `앞선 대화를 기반으로 ${testType[parsingType]}에 대한 아동의 심리 상태를 분석해줘. 분석이 끝나면 문제에 대한 해결 방안을 제시해줘`,
-          },
-        ],
+        messages: [...analysisPrompt, ...parseMessageArr, ...userPrompt],
         model: "gpt-4-1106-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
         temperature: 1,
       });
@@ -1697,124 +1706,127 @@ ${analyzeMsg}
       // client 전송
       res.json({ message: mailOptions.text });
 
-      /* DB 저장 */
-      const table = EBT_Table_Info[type].table;
-      const attribute = EBT_Table_Info[type].attribute;
-      // 오늘 날짜 변환
-      const dateObj = new Date();
-      const year = dateObj.getFullYear();
-      const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
-      const day = ("0" + dateObj.getDate()).slice(-2);
-      const date = `${year}-${month}-${day}`;
+      /* EBT Data DB 저장 */
+      if (type !== "Persnal") {
+        /* DB 저장 */
+        const table = EBT_Table_Info[type].table;
+        const attribute = EBT_Table_Info[type].attribute;
+        // 오늘 날짜 변환
+        const dateObj = new Date();
+        const year = dateObj.getFullYear();
+        const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+        const day = ("0" + dateObj.getDate()).slice(-2);
+        const date = `${year}-${month}-${day}`;
 
-      // 동기식 DB 접근 함수 1. Promise 생성 함수
-      function queryAsync(connection, query, parameters) {
-        return new Promise((resolve, reject) => {
-          connection.query(query, parameters, (error, results, fields) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(results);
-            }
+        // 동기식 DB 접근 함수 1. Promise 생성 함수
+        function queryAsync(connection, query, parameters) {
+          return new Promise((resolve, reject) => {
+            connection.query(query, parameters, (error, results, fields) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(results);
+              }
+            });
           });
-        });
-      }
-      // 프로미스 resolve 반환값 사용. (User Data return)
-      async function fetchUserData(connection, query) {
-        try {
-          let results = await queryAsync(connection, query, []);
-          // console.log(results[0]);
-          return results;
-        } catch (error) {
-          console.error(error);
         }
-      }
-
-      // soyes_ai_Ebt Table 삽입
-      // 1. SELECT TEST (row가 있는지 없는지 검사)
-      const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`;
-      const ebt_data = await fetchUserData(connection_AI, select_query);
-
-      // 2. UPDATE TEST (row값이 있는 경우 실행)
-      if (ebt_data[0]) {
-        const update_query = `UPDATE ${table} SET ${Object.values(attribute)
-          .filter((el) => el !== "uid")
-          .map((el) => {
-            return `${el} = ?`;
-          })
-          .join(", ")} WHERE ${attribute.pKey} = ?`;
-        // console.log(update_query);
-
-        const update_value = [
-          ...parsingScore,
-          JSON.stringify({ ...mailOptions, date }),
-          date,
-          parsepUid,
-        ];
-
-        // console.log(update_value);
-
-        connection_AI.query(
-          update_query,
-          update_value,
-          (error, rows, fields) => {
-            if (error) console.log(error);
-            else console.log("AI Analysis Data DB UPDATE Success!");
+        // 프로미스 resolve 반환값 사용. (User Data return)
+        async function fetchUserData(connection, query) {
+          try {
+            let results = await queryAsync(connection, query, []);
+            // console.log(results[0]);
+            return results;
+          } catch (error) {
+            console.error(error);
           }
-        );
-      }
-      // 3. INSERT TEST (row값이 없는 경우 실행)
-      else {
-        const insert_query = `INSERT INTO ${table} (${Object.values(
-          attribute
-        ).join(", ")}) VALUES (${Object.values(attribute)
+        }
+
+        // soyes_ai_Ebt Table 삽입
+        // 1. SELECT TEST (row가 있는지 없는지 검사)
+        const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`;
+        const ebt_data = await fetchUserData(connection_AI, select_query);
+
+        // 2. UPDATE TEST (row값이 있는 경우 실행)
+        if (ebt_data[0]) {
+          const update_query = `UPDATE ${table} SET ${Object.values(attribute)
+            .filter((el) => el !== "uid")
+            .map((el) => {
+              return `${el} = ?`;
+            })
+            .join(", ")} WHERE ${attribute.pKey} = ?`;
+          // console.log(update_query);
+
+          const update_value = [
+            ...parsingScore,
+            JSON.stringify({ ...mailOptions, date }),
+            date,
+            parsepUid,
+          ];
+
+          // console.log(update_value);
+
+          connection_AI.query(
+            update_query,
+            update_value,
+            (error, rows, fields) => {
+              if (error) console.log(error);
+              else console.log("AI Analysis Data DB UPDATE Success!");
+            }
+          );
+        }
+        // 3. INSERT TEST (row값이 없는 경우 실행)
+        else {
+          const insert_query = `INSERT INTO ${table} (${Object.values(
+            attribute
+          ).join(", ")}) VALUES (${Object.values(attribute)
+            .map((el) => "?")
+            .join(", ")})`;
+          // console.log(insert_query);
+
+          const insert_value = [
+            parsepUid,
+            ...parsingScore,
+            JSON.stringify({ ...mailOptions, date }),
+            date,
+          ];
+          // console.log(insert_value);
+
+          connection_AI.query(
+            insert_query,
+            insert_value,
+            (error, rows, fields) => {
+              if (error) console.log(error);
+              else console.log("AI Analysis Data DB INSERT Success!");
+            }
+          );
+        }
+
+        // soyes_ai_Ebt_Log Table 삽입
+        const table_log = EBT_Table_Info["Log"].table; // 해당 table은 soyes_ai_User table과 외래키로 연결된 상태
+        const attribute_log = EBT_Table_Info["Log"].attribute;
+
+        const log_insert_query = `INSERT INTO ${table_log} (${Object.values(
+          attribute_log
+        ).join(", ")}) VALUES (${Object.values(attribute_log)
           .map((el) => "?")
           .join(", ")})`;
         // console.log(insert_query);
 
-        const insert_value = [
+        const log_insert_value = [
           parsepUid,
-          ...parsingScore,
-          JSON.stringify({ ...mailOptions, date }),
           date,
+          JSON.stringify({ ...mailOptions, date }),
+          type,
         ];
         // console.log(insert_value);
 
-        connection_AI.query(
-          insert_query,
-          insert_value,
-          (error, rows, fields) => {
-            if (error) console.log(error);
-            else console.log("AI Analysis Data DB INSERT Success!");
-          }
-        );
+        connection_AI.query(log_insert_query, log_insert_value, (err) => {
+          if (err) {
+            console.log("AI Analysis Data LOG DB INSERT Fail!");
+            console.log("Err sqlMessage: " + err.sqlMessage);
+          } else console.log("AI Analysis Data LOG DB INSERT Success!");
+        });
       }
-
-      // soyes_ai_Ebt_Log Table 삽입
-      const table_log = EBT_Table_Info["Log"].table; // 해당 table은 soyes_ai_User table과 외래키로 연결된 상태
-      const attribute_log = EBT_Table_Info["Log"].attribute;
-
-      const log_insert_query = `INSERT INTO ${table_log} (${Object.values(
-        attribute_log
-      ).join(", ")}) VALUES (${Object.values(attribute_log)
-        .map((el) => "?")
-        .join(", ")})`;
-      // console.log(insert_query);
-
-      const log_insert_value = [
-        parsepUid,
-        date,
-        JSON.stringify({ ...mailOptions, date }),
-        type,
-      ];
-      // console.log(insert_value);
-
-      connection_AI.query(log_insert_query, log_insert_value, (err) => {
-        if (err) {
-          console.log("AI Analysis Data LOG DB INSERT Fail!");
-          console.log("Err sqlMessage: " + err.sqlMessage);
-        } else console.log("AI Analysis Data LOG DB INSERT Success!");
-      });
     } catch (err) {
       console.log(err);
       res.json({ message: "Server Error" });
