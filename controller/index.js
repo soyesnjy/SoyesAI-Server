@@ -3043,7 +3043,7 @@ ${analyzeMsg}
         },
       });
 
-      console.log(response.data);
+      // console.log(response.data);
       // 음성 데이터를 클라이언트로 전송
       res.writeHead(200, {
         "Content-Type": "audio/mp3",
