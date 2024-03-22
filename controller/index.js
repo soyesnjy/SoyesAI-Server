@@ -2953,7 +2953,7 @@ ${analyzeMsg}
   postOpenAIMypageCalendarData: async (req, res) => {
     const { EBTData } = req.body;
 
-    console.log("달력 데이터 반환 API /calendar Path 호출");
+    console.log("달력 데이터 반환 API /openAI/calendar Path 호출");
     let parseEBTdata, parsepUid; // Parsing 변수
 
     try {
@@ -3025,6 +3025,35 @@ ${analyzeMsg}
       res.json({
         data: "Server Error",
       });
+    }
+  },
+  postClovaVoiceTTS: async (req, res) => {
+    // console.log("ClovaVoiceTTS API /openAI/tts Path 호출");
+    const api_url = "https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts";
+    const client_id = "tcxypw1fkm";
+    const client_secret = "hdVu9xHqyW1Kzw1m0w6vnHGtQagKKeYwGR91UciV";
+
+    try {
+      const response = await axios.post(api_url, req.body, {
+        responseType: "arraybuffer", // Clova 음성 데이터를 arraybuffer로 받음
+        headers: {
+          "X-NCP-APIGW-API-KEY-ID": client_id,
+          "X-NCP-APIGW-API-KEY": client_secret,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
+
+      console.log(response.data);
+      // 음성 데이터를 클라이언트로 전송
+      res.writeHead(200, {
+        "Content-Type": "audio/mp3",
+        "Content-Length": response.data.length,
+      });
+
+      res.end(response.data);
+    } catch (error) {
+      console.error(error);
+      res.status(500).end("Internal Server Error");
     }
   },
 };

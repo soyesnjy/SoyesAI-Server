@@ -17,6 +17,7 @@ const {
   postOpenAIEmotionTestResultConsultingV6,
   postOpenAITestResultConsultingV1,
   postOpenAIMypageCalendarData,
+  postClovaVoiceTTS,
 } = openAIController;
 
 router.get("/", (req, res) => {
@@ -56,6 +57,8 @@ router.post(
 router.post("/analysis", postOpenAIPsychologicalAnalysis);
 
 router.post("/calendar", postOpenAIMypageCalendarData);
+
+router.post("/tts", postClovaVoiceTTS);
 
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);
