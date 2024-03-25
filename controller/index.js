@@ -3027,18 +3027,18 @@ ${analyzeMsg}
       });
     }
   },
+  // Clova Voice API 사용
   postClovaVoiceTTS: async (req, res) => {
-    // console.log("ClovaVoiceTTS API /openAI/tts Path 호출");
+    console.log("ClovaVoiceTTS API /openAI/tts Path 호출");
+
     const api_url = "https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts";
-    const client_id = "tcxypw1fkm";
-    const client_secret = "hdVu9xHqyW1Kzw1m0w6vnHGtQagKKeYwGR91UciV";
 
     try {
       const response = await axios.post(api_url, req.body, {
         responseType: "arraybuffer", // Clova 음성 데이터를 arraybuffer로 받음
         headers: {
-          "X-NCP-APIGW-API-KEY-ID": client_id,
-          "X-NCP-APIGW-API-KEY": client_secret,
+          "X-NCP-APIGW-API-KEY-ID": process.env.CLOVA_CLIENT_ID,
+          "X-NCP-APIGW-API-KEY": process.env.CLOVA_CLIENT_SECRET,
           "Content-Type": "application/x-www-form-urlencoded",
         },
       });
@@ -3050,6 +3050,7 @@ ${analyzeMsg}
         "Content-Length": response.data.length,
       });
 
+      // JSON 형식이 아니기에 res.json 사용 X
       res.end(response.data);
     } catch (error) {
       console.error(error);
