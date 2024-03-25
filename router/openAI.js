@@ -2,7 +2,8 @@
 const express = require("express");
 const router = express.Router();
 const { errController } = require("../controller/index");
-const { openAIController } = require("../controller/index");
+// const { openAIController } = require("../controller/index");
+const { openAIController } = require("../controller/openAI");
 
 const {
   postOpenAIChattingNew,
@@ -51,9 +52,6 @@ router.post(
   "/consulting_emotion_soyes",
   postOpenAIEmotionTestResultConsultingV6
 );
-
-// router.post("/consulting_lala", postOpenAITestResultConsultingV1);
-// router.post("/consulting_persnal", postOpenAIPersnalTestResultConsulting);
 
 router.post("/analysis", postOpenAIPsychologicalAnalysis);
 router.post("/analysis_pt", postOpenAIPernalTestAnalysis);

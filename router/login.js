@@ -2,7 +2,9 @@
 const express = require("express");
 const router = express.Router();
 const { errController } = require("../controller/index");
-const { loginController } = require("../controller/index");
+// const { loginController } = require("../controller/index");
+const { loginController } = require("../controller/login");
+
 const {
   // 쿠키
   vaildateCookies,
