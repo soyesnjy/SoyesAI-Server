@@ -1228,47 +1228,11 @@ const select_soyes_AI_Pt_Table = async (user_table, user_attr, parsepUid) => {
   }
   try {
     // console.log(user_table);
-    const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.fKey}='${parsepUid}'`; // Select Query
+    const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
     const ebt_school_data = await fetchUserData(connection_AI, select_query);
     // console.log(ebt_school_data[0]);
 
     return ebt_school_data[0] ? ebt_school_data[0].persanl_result : "default";
-  } catch (err) {
-    console.log(err);
-    return "default";
-  }
-};
-// User 성격 검사 유형 반환 (String)
-const patch_soyes_AI_Pt_Table = async (user_table, user_attr, parsepUid) => {
-  // 동기식 DB 접근 함수 1. Promise 생성 함수
-  function queryAsync(connection, query, parameters) {
-    return new Promise((resolve, reject) => {
-      connection.query(query, parameters, (error, results, fields) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(results);
-        }
-      });
-    });
-  }
-  // 프로미스 resolve 반환값 사용. (User Data return)
-  async function fetchUserData(connection, query) {
-    try {
-      let results = await queryAsync(connection, query, []);
-      // console.log(results[0]);
-      return results;
-    } catch (error) {
-      console.error(error);
-    }
-  }
-  try {
-    // console.log(user_table);
-    const patch_query = `SELECT * FROM ${user_table} WHERE ${user_attr.fKey}='${parsepUid}'`; // Patch Query
-    const pt_data = await fetchUserData(connection_AI, patch_query);
-    // console.log(ebt_school_data[0]);
-
-    return pt_data[0] ? pt_data[0].persanl_result : "default";
   } catch (err) {
     console.log(err);
     return "default";
@@ -2459,8 +2423,8 @@ ${analyzeMsg}
 
       // 유저 성격검사 결과 DB에서 가져오기
       const pt_result = await select_soyes_AI_Pt_Table(
-        PT_Table_Info.table,
-        PT_Table_Info.attribute,
+        PT_Table_Info["Main"].table,
+        PT_Table_Info["Main"].attribute,
         parsepUid
       );
 
@@ -2868,8 +2832,8 @@ ${analyzeMsg}
 
       // 유저 성격검사 결과 DB에서 가져오기
       const pt_result = await select_soyes_AI_Pt_Table(
-        PT_Table_Info.table,
-        PT_Table_Info.attribute,
+        PT_Table_Info["Main"].table,
+        PT_Table_Info["Main"].attribute,
         parsepUid
       );
       // console.log(pt_result);
