@@ -1424,7 +1424,7 @@ const PT_Table_Info = {
       cKey: "uid",
       attr1: "date",
       attr2: "persanl_result",
-      attr3: "chat",
+      attr3: "pt_analysis",
     },
   },
 };
@@ -2372,8 +2372,8 @@ ${analyzeMsg}
   // 공감친구 모델 - 푸푸
   postOpenAIEmotionTestResultConsultingV3: async (req, res) => {
     const { EBTData } = req.body;
-    console.log(EBTData);
     console.log("푸푸 상담 API /consulting_emotion_pupu Path 호출");
+    console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
@@ -2487,8 +2487,8 @@ ${analyzeMsg}
   // 정서멘토 모델 - 라라
   postOpenAIEmotionTestResultConsultingV4: async (req, res) => {
     const { EBTData } = req.body;
-    console.log(EBTData);
     console.log("라라 상담 API /consulting_emotion_lala Path 호출");
+    console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
@@ -2784,8 +2784,8 @@ ${analyzeMsg}
   // 공부친구 모델 - 우비
   postOpenAIEmotionTestResultConsultingV5: async (req, res) => {
     const { EBTData } = req.body;
-    // console.log(EBTData);
     console.log("우비 상담 API /consulting_emotion_ubi Path 호출");
+    console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
@@ -2874,8 +2874,8 @@ ${analyzeMsg}
   // 전문상담사 모델 - 소예
   postOpenAIEmotionTestResultConsultingV6: async (req, res) => {
     const { EBTData } = req.body;
-    console.log(EBTData);
     console.log("소예 상담 API /consulting_emotion_soyes Path 호출");
+    console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
@@ -3248,7 +3248,9 @@ ${analyzeMsg}
       // DB 조회 => User Table + User EBT Table JOIN 후 관련 데이터 전달
       const user_table = User_Table_Info.table;
       const ebt_log_table = EBT_Table_Info["Log"].table;
-      // const pt_log_table = PT_Table_Info["Log"].table;
+      const ebt_log_attribute = EBT_Table_Info["Log"].attribute;
+      const pt_log_table = PT_Table_Info["Log"].table;
+      const pt_log_attribute = PT_Table_Info["Log"].attribute;
 
       // DB 계정 생성 코드 추가 예정
       // 동기식 DB 접근 함수 1. Promise 생성 함수
@@ -3275,7 +3277,7 @@ ${analyzeMsg}
       }
 
       // 1. SELECT USER JOIN EBT_Log
-      const select_ebt_join_query = `SELECT ${ebt_log_table}.date, ${ebt_log_table}.ebt_type, ${ebt_log_table}.ebt_analysis FROM ${user_table} JOIN ${ebt_log_table} ON ${user_table}.uid = ${ebt_log_table}.uid WHERE ${user_table}.uid = '${pUid}';`;
+      const select_ebt_join_query = `SELECT ${ebt_log_table}.${ebt_log_attribute.attr1}, ${ebt_log_table}.${ebt_log_attribute.attr2}, ${ebt_log_table}.${ebt_log_attribute.attr3} FROM ${user_table} JOIN ${ebt_log_table} ON ${user_table}.uid = ${ebt_log_table}.uid WHERE ${user_table}.uid = '${pUid}';`;
 
       const ebt_join_data = await fetchUserData(
         connection_AI,
@@ -3284,19 +3286,20 @@ ${analyzeMsg}
       // console.log(ebt_join_data);
 
       // 2. SELECT USER JOIN PT_Log
-      // const select_pt_join_query = `select_ebt_join_query 참조`;
+      const select_pt_join_query = `SELECT ${pt_log_table}.${pt_log_attribute.attr1}, ${pt_log_table}.${pt_log_attribute.attr2}, ${pt_log_table}.${pt_log_attribute.attr3} FROM ${user_table} JOIN ${pt_log_table} ON ${user_table}.uid = ${pt_log_table}.uid WHERE ${user_table}.uid = '${pUid}';`;
 
-      // const ebt_join_data = await fetchUserData(
-      //   connection_AI,
-      //   select_pt_join_query
-      // );
+      const pt_join_data = await fetchUserData(
+        connection_AI,
+        select_pt_join_query
+      );
 
       res.json({
         ebt_data: ebt_join_data.map((el) => {
-          const pasingEbtAnalysis = JSON.parse(el.ebt_analysis);
-          return { ...el, ebt_analysis: pasingEbtAnalysis.text };
+          return { ...el, ebt_analysis: JSON.parse(el.ebt_analysis).text };
         }),
-        // pt_data: []
+        pt_data: pt_join_data.map((el) => {
+          return { ...el, pt_analysis: JSON.parse(el.pt_analysis).text };
+        }),
       });
     } catch (err) {
       console.error(err);
