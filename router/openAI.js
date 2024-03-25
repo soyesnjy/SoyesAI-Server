@@ -3,61 +3,46 @@ const express = require("express");
 const router = express.Router();
 const { errController } = require("../controller/index");
 // const { openAIController } = require("../controller/index");
-const { openAIController } = require("../controller/openAI");
+const {
+  openAIController,
+  openAIController_Regercy, // 레거시 코드
+} = require("../controller/openAI");
 
 const {
-  postOpenAIChattingNew,
   postOpenAIEmotionAnalyze,
-  postOpenAIEmotionTestResultConsulting,
   postOpenAIPsychologicalAnalysis,
-  postOpenAIPersnalTestResultConsulting,
-  postOpenAIEmotionTestResultConsultingV2,
-  postOpenAIEmotionTestResultConsultingV3,
-  postOpenAIEmotionTestResultConsultingV4,
-  postOpenAIEmotionTestResultConsultingV5,
-  postOpenAIEmotionTestResultConsultingV6,
-  postOpenAITestResultConsultingV1,
+  postOpenAIConsultingPupu,
+  postOpenAIConsultingUbi,
+  postOpenAIConsultingLala,
+  postOpenAIConsultingSoyes,
   postOpenAIMypageCalendarData,
   postClovaVoiceTTS,
   postOpenAIPernalTestAnalysis,
 } = openAIController;
 
 router.get("/", (req, res) => {
-  res.send("Welcome to the Coding Nexus API");
+  res.send("Welcome to the GPT API");
 });
 
-router.post("/message", postOpenAIChattingNew);
+// 감정 분석
 router.post("/emotion", postOpenAIEmotionAnalyze);
 
-router.post("/consulting_emotion", postOpenAIEmotionTestResultConsulting);
-router.post("/consulting_emotion_v2", postOpenAIEmotionTestResultConsultingV2);
-
 // 공감친구 모델 - 푸푸
-router.post(
-  "/consulting_emotion_pupu",
-  postOpenAIEmotionTestResultConsultingV3
-);
-
-// 정서멘토 모델 - 라라
-router.post(
-  "/consulting_emotion_lala",
-  postOpenAIEmotionTestResultConsultingV4
-);
-
+router.post("/consulting_emotion_pupu", postOpenAIConsultingPupu);
 // 공부친구 모델 - 우비
-router.post("/consulting_emotion_ubi", postOpenAIEmotionTestResultConsultingV5);
-
+router.post("/consulting_emotion_ubi", postOpenAIConsultingUbi);
+// 정서멘토 모델 - 라라
+router.post("/consulting_emotion_lala", postOpenAIConsultingLala);
 // 전문상담사 모델 - 소예
-router.post(
-  "/consulting_emotion_soyes",
-  postOpenAIEmotionTestResultConsultingV6
-);
+router.post("/consulting_emotion_soyes", postOpenAIConsultingSoyes);
 
+// EBT 결과 분석
 router.post("/analysis", postOpenAIPsychologicalAnalysis);
+// PT 결과 분석
 router.post("/analysis_pt", postOpenAIPernalTestAnalysis);
-
+// 달력 데이터 반환
 router.post("/calendar", postOpenAIMypageCalendarData);
-
+// Clova Voice Data 반환
 router.post("/tts", postClovaVoiceTTS);
 
 // 에러 메세지 처리
