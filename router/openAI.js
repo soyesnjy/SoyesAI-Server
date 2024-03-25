@@ -18,6 +18,7 @@ const {
   postOpenAITestResultConsultingV1,
   postOpenAIMypageCalendarData,
   postClovaVoiceTTS,
+  postOpenAIPernalTestAnalysis,
 } = openAIController;
 
 router.get("/", (req, res) => {
@@ -55,6 +56,7 @@ router.post(
 // router.post("/consulting_persnal", postOpenAIPersnalTestResultConsulting);
 
 router.post("/analysis", postOpenAIPsychologicalAnalysis);
+router.post("/analysis_pt", postOpenAIPernalTestAnalysis);
 
 router.post("/calendar", postOpenAIMypageCalendarData);
 

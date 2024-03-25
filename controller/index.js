@@ -1228,7 +1228,7 @@ const select_soyes_AI_Pt_Table = async (user_table, user_attr, parsepUid) => {
   }
   try {
     // console.log(user_table);
-    const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
+    const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.fKey}='${parsepUid}'`; // Select Query
     const ebt_school_data = await fetchUserData(connection_AI, select_query);
     // console.log(ebt_school_data[0]);
 
@@ -1238,6 +1238,43 @@ const select_soyes_AI_Pt_Table = async (user_table, user_attr, parsepUid) => {
     return "default";
   }
 };
+// User 성격 검사 유형 반환 (String)
+const patch_soyes_AI_Pt_Table = async (user_table, user_attr, parsepUid) => {
+  // 동기식 DB 접근 함수 1. Promise 생성 함수
+  function queryAsync(connection, query, parameters) {
+    return new Promise((resolve, reject) => {
+      connection.query(query, parameters, (error, results, fields) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+  }
+  // 프로미스 resolve 반환값 사용. (User Data return)
+  async function fetchUserData(connection, query) {
+    try {
+      let results = await queryAsync(connection, query, []);
+      // console.log(results[0]);
+      return results;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  try {
+    // console.log(user_table);
+    const patch_query = `SELECT * FROM ${user_table} WHERE ${user_attr.fKey}='${parsepUid}'`; // Patch Query
+    const pt_data = await fetchUserData(connection_AI, patch_query);
+    // console.log(ebt_school_data[0]);
+
+    return pt_data[0] ? pt_data[0].persanl_result : "default";
+  } catch (err) {
+    console.log(err);
+    return "default";
+  }
+};
+
 // Database EBT Table Info
 const EBT_Table_Info = {
   School: {
@@ -1407,12 +1444,24 @@ const EBT_Table_Info = {
 };
 
 const PT_Table_Info = {
-  table: "soyes_ai_PT",
-  attribute: {
-    pKey: "uid",
-    attr1: "persanl_result",
-    attr2: "chat",
-    attr3: "date",
+  Main: {
+    table: "soyes_ai_PT",
+    attribute: {
+      pKey: "uid",
+      attr1: "date",
+      attr2: "persanl_result",
+      attr3: "chat",
+    },
+  },
+
+  Log: {
+    table: "soyes_ai_User_Pt_Log",
+    attribute: {
+      cKey: "uid",
+      attr1: "date",
+      attr2: "persanl_result",
+      attr3: "chat",
+    },
   },
 };
 // EBT 반영 Class 정의
@@ -1526,10 +1575,10 @@ const openAIController = {
       res.send(err);
     }
   },
-  // 테스트 결과 분석 및 DB 저장 및 메일 전송 API
+  // EBT 결과 분석 및 DB 저장 및 메일 전송 API
   postOpenAIPsychologicalAnalysis: async (req, res) => {
     const { EBTData } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
-    console.log("테스트 결과 분석 및 메일 전송 API /analysis Path 호출");
+    console.log("EBT 테스트 결과 분석 및 메일 전송 API /analysis Path 호출");
 
     let parseEBTdata,
       parseMessageArr,
@@ -1827,6 +1876,270 @@ ${analyzeMsg}
           } else console.log("AI Analysis Data LOG DB INSERT Success!");
         });
       }
+    } catch (err) {
+      console.log(err);
+      res.json({ message: "Server Error" });
+    }
+  },
+  // PT 결과 분석 및 DB 저장 및 메일 전송 API
+  postOpenAIPernalTestAnalysis: async (req, res) => {
+    const { PTDataSend } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
+    console.log("PT 테스트 결과 분석 및 메일 전송 API /analysis_pt Path 호출");
+
+    let parsePTData,
+      parsePTResult,
+      yourMailAddr = "";
+    try {
+      // 파싱. Client JSON 데이터
+      if (typeof PTDataSend === "string") {
+        parsePTData = JSON.parse(PTDataSend);
+      } else parsePTData = PTDataSend;
+
+      const { resultText, pUid } = parsePTData;
+
+      console.log(parsePTData);
+
+      // uid, resultText 전처리. 없는 경우 디폴트값 할당
+      parsepUid = pUid ? pUid : "njy96";
+      parsePTResult = resultText ? resultText : "SOCE";
+
+      const analysisPrompt = [];
+      const userPrompt = [];
+
+      // 성격 검사용 프롬프트 구분
+      analysisPrompt.push(pt_analysis_prompt);
+      userPrompt.push({
+        role: "user",
+        content: `다음 문단은 아동의 성격검사 결과야.
+          '''
+          아동의 성격 검사 유형은 ${parsePTResult}입니다.
+          ${parsePTResult} 유형은 ${persnal_short[parsePTResult]}
+          '''
+          아동의 성격검사 결과를 바탕으로 아동의 성격을 장점과 단점으로 나눠서 분석해줘. 분석이 끝나면 단점에 대한 해결 방안을 제시해줘
+          `,
+      });
+
+      // 메일 관련 세팅 시작
+      /*
+      // mysql query 메서드 동기식 작동 + DB 데이터 가져오기
+      let yourMailAddr = "";
+
+      // Promise 생성 메서드
+      function queryAsync(connection, query, parameters) {
+        return new Promise((resolve, reject) => {
+          connection.query(query, parameters, (error, results, fields) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(results);
+            }
+          });
+        });
+      }
+
+      // 프로미스 resolve 반환값 사용. (User Data return)
+      async function fetchUserData(connection, query) {
+        try {
+          let results = await queryAsync(connection, query, []);
+          // console.log(results[0]);
+          yourMailAddr = results[0].email; // Select email
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      const user_table = "soyes_ai_User";
+      const user_attr = {
+        pKey: "uid",
+        attr1: "email"
+      }
+
+      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${pUid}'`;
+      await fetchUserData(connection_AI, select_query);
+      console.log("받는사람: " + yourMailAddr);
+      */
+
+      yourMailAddr = "soyesnjy@gmail.com"; // dummy email. 받는사람
+
+      // 보내는 사람 계정 로그인
+      const myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
+      const myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail", // 사용할 이메일 서비스
+        // host: "smtp.gmail.com",
+        // port: 587,
+        // secure: false,
+        auth: {
+          user: myMailAddr, // 보내는 이메일 주소
+          pass: myMailPwd, // 이메일 비밀번호
+        },
+      });
+      // 메일 관련 세팅 끝
+
+      // AI 분석
+      const response = await openai.chat.completions.create({
+        messages: [...analysisPrompt, ...userPrompt],
+        model: "gpt-4-1106-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        temperature: 1,
+      });
+
+      const message = { message: response.choices[0].message.content };
+      // AI 분석 내용 보기좋게 정리
+      const analyzeMsg = message.message.split(". ").join(".\n");
+
+      // 메일 제목 및 내용 + 보내는사람 + 받는사람
+      const mailOptions = {
+        from: myMailAddr,
+        to: yourMailAddr,
+        subject: "성격 검사 AI 상담 분석 결과입니다",
+        text: `
+안녕하세요? 소예키즈 AI 상담사입니다.
+귀하의 상담 내용에 대한 AI 분석 결과를 안내드립니다.
+
+${analyzeMsg}
+
+이상입니다. 감사합니다!
+        `,
+        // attachments : 'logo.png' // 이미지 첨부 속성
+      };
+
+      /* 메일 전송 봉인
+      // 메일 전송 (비동기)
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log("Mail Send Fail!");
+          res.json("Mail Send Fail!");
+        } else {
+          console.log("Mail Send Success!");
+          console.log(info.envelope);
+        }
+      });
+      */
+
+      // client 전송
+      res.json({ message: mailOptions.text });
+
+      /* PT Data DB 저장 */
+      const pt_table = PT_Table_Info["Main"].table;
+      const pt_attribute = PT_Table_Info["Main"].attribute;
+
+      // 오늘 날짜 변환
+      const dateObj = new Date();
+      const year = dateObj.getFullYear();
+      const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+      const day = ("0" + dateObj.getDate()).slice(-2);
+      const date = `${year}-${month}-${day}`;
+
+      // 동기식 DB 접근 함수 1. Promise 생성 함수
+      function queryAsync(connection, query, parameters) {
+        return new Promise((resolve, reject) => {
+          connection.query(query, parameters, (error, results, fields) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(results);
+            }
+          });
+        });
+      }
+      // 프로미스 resolve 반환값 사용. (User Data return)
+      async function fetchUserData(connection, query) {
+        try {
+          let results = await queryAsync(connection, query, []);
+          // console.log(results[0]);
+          return results;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      // soyes_ai_Pt Table 삽입
+      // 1. SELECT TEST (row가 있는지 없는지 검사)
+      const select_query = `SELECT * FROM ${pt_table} WHERE ${pt_attribute.pKey}='${parsepUid}'`;
+      const ebt_data = await fetchUserData(connection_AI, select_query);
+
+      // 2. UPDATE TEST (row값이 있는 경우 실행)
+      if (ebt_data[0]) {
+        const update_query = `UPDATE ${pt_table} SET ${Object.values(
+          pt_attribute
+        )
+          .filter((el) => el !== "uid")
+          .map((el) => {
+            return `${el} = ?`;
+          })
+          .join(", ")} WHERE ${pt_attribute.pKey} = ?`;
+        // console.log(update_query);
+
+        const update_value = [
+          date,
+          parsePTResult,
+          JSON.stringify({ ...mailOptions, date }),
+          parsepUid,
+        ];
+
+        // console.log(update_value);
+
+        connection_AI.query(
+          update_query,
+          update_value,
+          (error, rows, fields) => {
+            if (error) console.log(error);
+            else console.log("PT TEST Analysis Data DB UPDATE Success!");
+          }
+        );
+      }
+      // 3. INSERT TEST (row값이 없는 경우 실행)
+      else {
+        const pt_insert_query = `INSERT INTO ${pt_table} (${Object.values(
+          pt_attribute
+        ).join(", ")}) VALUES (${Object.values(pt_attribute)
+          .map((el) => "?")
+          .join(", ")})`;
+        // console.log(insert_query);
+
+        const pt_insert_value = [
+          parsepUid,
+          date,
+          resultText,
+          JSON.stringify({ ...mailOptions, date }),
+        ];
+
+        connection_AI.query(
+          pt_insert_query,
+          pt_insert_value,
+          (error, rows, fields) => {
+            if (error) console.log(error);
+            else console.log("PT TEST Analysis Data DB INSERT Success!");
+          }
+        );
+      }
+
+      /* PT_Log DB 저장 */
+      const pt_log_table = PT_Table_Info["Log"].table;
+      const pt_log_attribute = PT_Table_Info["Log"].attribute;
+      // PT_Log DB 저장
+      const pt_insert_query = `INSERT INTO ${pt_log_table} (${Object.values(
+        pt_log_attribute
+      ).join(", ")}) VALUES (${Object.values(pt_attribute)
+        .map((el) => "?")
+        .join(", ")})`;
+      // console.log(insert_query);
+
+      const pt_insert_value = [
+        parsepUid,
+        date,
+        resultText,
+        JSON.stringify({ ...mailOptions, date }),
+      ];
+      // console.log(insert_value);
+
+      connection_AI.query(pt_insert_query, pt_insert_value, (err) => {
+        if (err) {
+          console.log("PT Analysis Data DB Save Fail!");
+          console.log("Err sqlMessage: " + err.sqlMessage);
+        } else console.log("AI Analysis Data LOG DB INSERT Success!");
+      });
     } catch (err) {
       console.log(err);
       res.json({ message: "Server Error" });
@@ -2150,7 +2463,8 @@ ${analyzeMsg}
         PT_Table_Info.attribute,
         parsepUid
       );
-      // console.log(pt_result);
+
+      console.log(pt_result);
       promptArr.push(persnal_result_prompt[pt_result]);
 
       // if (parseMessageArr.length === 1 && prevChat_flag) {
