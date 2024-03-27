@@ -484,7 +484,7 @@ const openAIController = {
       console.log(parseEBTdata);
 
       // uid, type 전처리. 없는 경우 디폴트값 할당
-      parsepUid = pUid ? pUid : "njy95";
+      parsepUid = pUid ? pUid : "dummy";
       parsingType = type ? type : "default";
 
       const analysisPrompt = [];
@@ -769,7 +769,7 @@ ${analyzeMsg}
       console.log(parsePTData);
 
       // uid, resultText 전처리. 없는 경우 디폴트값 할당
-      parsepUid = pUid ? pUid : "njy96";
+      parsepUid = pUid ? pUid : "dummy";
       parsePTResult = resultText ? resultText : "SOCE";
 
       const analysisPrompt = [];
@@ -1035,7 +1035,7 @@ ${analyzeMsg}
       } else parseMessageArr = [...messageArr];
 
       // pUid default값 설정
-      parsepUid = pUid ? pUid : "njy95";
+      parsepUid = pUid ? pUid : "dummy";
 
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_pupu); // 페르소나 프롬프트 삽입
@@ -1074,7 +1074,20 @@ ${analyzeMsg}
       );
 
       console.log(pt_result);
-      promptArr.push(persnal_result_prompt[pt_result]);
+      // promptArr.push(persnal_result_prompt[pt_result]);
+
+      promptArr.push({
+        role: "system",
+        content: `다음 문단은 user의 성격검사 결과입니다.
+        '''
+        ${
+          pt_result !== "default"
+            ? `'user'는 성격검사 결과 ${pt_result} 유형에 해당됩니다. ${pt_result} 유형은 ${persnal_short["IFPE"]}`
+            : "user는 성격검사를 진행하지 않았습니다."
+        }
+        '''
+        `,
+      });
 
       // if (parseMessageArr.length === 1 && prevChat_flag) {
       //   // 이전 대화 프롬프트 삽입
@@ -1149,7 +1162,7 @@ ${analyzeMsg}
         parseMessageArr = JSON.parse(messageArr);
       } else parseMessageArr = [...messageArr];
 
-      parsepUid = pUid ? pUid : "njy95";
+      parsepUid = pUid ? pUid : "dummy";
 
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_ubi); // 페르소나 프롬프트 삽입
@@ -1219,10 +1232,10 @@ ${analyzeMsg}
       });
     }
   },
-  // 정서멘토 모델 - 라라
+  // 정서멘토 모델 - 엘라
   postOpenAIConsultingLala: async (req, res) => {
     const { EBTData } = req.body;
-    console.log("라라 상담 API /consulting_emotion_lala Path 호출");
+    console.log("엘라 상담 API /consulting_emotion_lala Path 호출");
     console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
@@ -1243,7 +1256,7 @@ ${analyzeMsg}
       } else parseMessageArr = [...messageArr];
 
       // pUid default값 설정
-      parsepUid = pUid ? pUid : "njy95";
+      parsepUid = pUid ? pUid : "dummy";
       // console.log(parsepUid);
 
       // 고정 삽입 프롬프트
@@ -1542,7 +1555,7 @@ ${analyzeMsg}
       } else parseMessageArr = [...messageArr];
 
       // pUid default값 설정
-      parsepUid = pUid ? pUid : "njy95";
+      parsepUid = pUid ? pUid : "dummy";
       // console.log(parsepUid);
 
       // 고정 삽입 프롬프트
@@ -1738,7 +1751,7 @@ ${analyzeMsg}
       const { pUid } = parseEBTdata;
 
       // pUid default값 설정
-      parsepUid = pUid ? pUid : "njy95";
+      parsepUid = pUid ? pUid : "dummy";
 
       // DB 조회 => User Table + User EBT Table JOIN 후 관련 데이터 전달
       const user_table = User_Table_Info.table;
