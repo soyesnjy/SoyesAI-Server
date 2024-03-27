@@ -1230,7 +1230,7 @@ ${analyzeMsg}
 
     // 응답에 헤더를 추가하는 메서드
     // res.header("Test_Header", "Success Header");
-
+    // console.log(req.session);
     try {
       if (typeof EBTData === "string") {
         parseEBTdata = JSON.parse(EBTData);
@@ -1336,7 +1336,7 @@ ${analyzeMsg}
         !req.session.ebt_class &&
         test_result_ment.some((el) => {
           if (lastUserContent.includes(el)) {
-            testClass = el;
+            testClass = el; // 검사 분야 저장
             return true;
           } else return false;
         })
@@ -1364,14 +1364,15 @@ ${analyzeMsg}
           role: "user",
           content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), 
           '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 분석한 아동의 심리 상태를 5문장 이내로 설명해줘.
+          만약 심리 검사 결과를 진행하지 않았다면, 잘 모르겠다고 답변해줘.
           . 혹은 ? 같은 특수문자로 끝나는 각 마디 뒤에는 반드시 줄바꿈(\n)을 추가해줘.
-          답변 마지막에는 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
+          검사 결과가 있다면 답변 마지막에는 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
         });
         promptArr.push({
           role: "system",
           content: `이번 문답은 예외적으로 6문장 이내로 답변을 생성합니다.`,
         });
-        // 랜덤 1개 분야 세션 추가
+        // 검사 분야 세션 추가. 해당 세션동안 검사 결과 분석은 1회만 진행되도록 세션 데이터 설정.
         req.session.ebt_class = random_class;
       }
       // 인지행동 세션 데이터가 없고, 인지행동 검사 관련 멘트 감지
@@ -1379,7 +1380,7 @@ ${analyzeMsg}
         !req.session.cb_class &&
         cb_solution_ment.some((el) => {
           if (lastUserContent.includes(el)) {
-            testClass_cb = el;
+            testClass_cb = el; // 인지 분야 저장
             return true;
           } else return false;
         })
@@ -1399,6 +1400,7 @@ ${analyzeMsg}
         cb_testArr = cb_class_map[testClass_cb];
         req.session.cb_class = testClass_cb;
 
+        // 랜덤 문항 1개 선택
         const random_cb_index = Math.floor(Math.random() * cb_testArr.length);
         const random_cb_question = cb_testArr[random_cb_index];
         req.session.cb_question = random_cb_question;
@@ -1720,7 +1722,7 @@ ${analyzeMsg}
       });
     }
   },
-  // Mypage User 달력 관련 데이터 반환
+  // 달력 관련 데이터 반환
   postOpenAIMypageCalendarData: async (req, res) => {
     const { EBTData } = req.body;
 
