@@ -18,11 +18,14 @@ const {
   postOpenAIMypageCalendarData,
   postClovaVoiceTTS,
   postOpenAIPernalTestAnalysis,
+  getClearCookies,
 } = openAIController;
 
 router.get("/", (req, res) => {
   res.send("Welcome to the GPT API");
 });
+
+router.get("/clear_cookies", getClearCookies);
 
 // 감정 분석
 router.post("/emotion", postOpenAIEmotionAnalyze);

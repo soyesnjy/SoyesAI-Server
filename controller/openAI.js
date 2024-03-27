@@ -1833,6 +1833,21 @@ ${analyzeMsg}
       res.status(500).end("Internal Server Error");
     }
   },
+  // ClearCookies API
+  getClearCookies: (req, res) => {
+    console.log("ClearCookies API /openAI/clear_cookies Path 호출");
+    try {
+      res.clearCookie("connect.sid", { path: "/" });
+      res.json({
+        data: "Clear Cookies Success!",
+      });
+    } catch (err) {
+      console.log(err);
+      res.json({
+        data: "Clear Cookies Fail!",
+      });
+    }
+  },
 };
 
 const openAIController_Regercy = {
