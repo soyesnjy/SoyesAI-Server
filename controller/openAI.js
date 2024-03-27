@@ -1078,7 +1078,7 @@ ${analyzeMsg}
 
       promptArr.push({
         role: "system",
-        content: `다음 문단은 user의 성격검사 결과입니다.
+        content: `다음 문단은 'user'의 성격검사 결과입니다.
         '''
         ${
           pt_result !== "default"
@@ -1086,6 +1086,7 @@ ${analyzeMsg}
             : "user는 성격검사를 진행하지 않았습니다."
         }
         '''
+        'assistant'는 'user'의 성격 유형을 알고있습니다. 
         `,
       });
 
@@ -1198,7 +1199,19 @@ ${analyzeMsg}
         parsepUid
       );
       // console.log(pt_result);
-      promptArr.push(persnal_result_prompt[pt_result]);
+      promptArr.push({
+        role: "system",
+        content: `다음 문단은 'user'의 성격검사 결과입니다.
+        '''
+        ${
+          pt_result !== "default"
+            ? `'user'는 성격검사 결과 ${pt_result} 유형에 해당됩니다. ${pt_result} 유형은 ${persnal_short["IFPE"]}`
+            : "user는 성격검사를 진행하지 않았습니다."
+        }
+        '''
+        'assistant'는 'user'의 성격 유형을 알고있습니다. 
+        `,
+      });
 
       // 상시 삽입 프롬프트
       promptArr.push(solution_prompt); // 학습 관련 솔루션 프롬프트
