@@ -19,17 +19,16 @@ const {
   postClovaVoiceTTS,
   postOpenAIPernalTestAnalysis,
   getClearCookies,
+  postOpenAIConsultingLogSave,
 } = openAIController;
 
 router.get("/", (req, res) => {
   res.send("Welcome to the GPT API");
 });
-
+// 쿠키 삭제
 router.get("/clear_cookies", getClearCookies);
-
 // 감정 분석
 router.post("/emotion", postOpenAIEmotionAnalyze);
-
 // 공감친구 모델 - 푸푸
 router.post("/consulting_emotion_pupu", postOpenAIConsultingPupu);
 // 공부친구 모델 - 우비
@@ -38,11 +37,14 @@ router.post("/consulting_emotion_ubi", postOpenAIConsultingUbi);
 router.post("/consulting_emotion_lala", postOpenAIConsultingLala);
 // 전문상담사 모델 - 소예
 router.post("/consulting_emotion_soyes", postOpenAIConsultingSoyes);
+// 상담 내역 저장
+router.post("/consulting_emotion_log", postOpenAIConsultingLogSave);
 
 // EBT 결과 분석
 router.post("/analysis", postOpenAIPsychologicalAnalysis);
 // PT 결과 분석
 router.post("/analysis_pt", postOpenAIPernalTestAnalysis);
+
 // 달력 데이터 반환
 router.post("/calendar", postOpenAIMypageCalendarData);
 // Clova Voice Data 반환

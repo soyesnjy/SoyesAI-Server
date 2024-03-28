@@ -179,6 +179,7 @@ const select_soyes_AI_Pt_Table = async (user_table, user_attr, parsepUid) => {
   }
 };
 
+// Database Table Info
 const User_Table_Info = {
   table: "soyes_ai_User",
   attribute: {
@@ -192,7 +193,6 @@ const User_Table_Info = {
     attr7: "lastLogin_date",
   },
 };
-// Database EBT Table Info
 const EBT_Table_Info = {
   School: {
     table: "soyes_ai_Ebt_School",
@@ -380,6 +380,18 @@ const PT_Table_Info = {
     },
   },
 };
+const Consult_Log_Table_Info = {
+  Log: {
+    table: "soyes_ai_User_Consult_Log",
+    attribute: {
+      pKey: "uid",
+      attr1: "date",
+      attr2: "avarta_name",
+      attr3: "consult_log",
+    },
+  },
+};
+
 // EBT 반영 Class 정의
 const EBT_classArr = [
   "School",
@@ -1859,19 +1871,91 @@ ${analyzeMsg}
       res.status(500).end("Internal Server Error");
     }
   },
-  // ClearCookies API
-  getClearCookies: (req, res) => {
-    console.log("ClearCookies API /openAI/clear_cookies Path 호출");
+  // 상담 로그 저장 API
+  postOpenAIConsultingLogSave: async (req, res) => {
+    const { EBTData } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
+    console.log("상담 로그 저장 API /consulting_emotion_log Path 호출");
+
+    let parseEBTdata, parsepUid;
     try {
+      // 파싱. Client JSON 데이터
+      if (typeof EBTData === "string") {
+        parseEBTdata = JSON.parse(EBTData);
+      } else parseEBTdata = EBTData;
+
+      const { messageArr, avarta, pUid } = parseEBTdata;
+      console.log(parseEBTdata);
+
+      // 쿠키 삭제
       res.clearCookie("connect.sid", { path: "/" });
-      res.json({
-        data: "Clear Cookies Success!",
+
+      // 문답 5회 미만일 경우 return
+      if (messageArr.length <= 8) {
+        console.log("messageArr Not enough length");
+        res.json({ message: "messageArr Not enough length" });
+        return;
+      }
+
+      // uid 전처리. 없는 경우 디폴트값 할당
+      parsepUid = pUid ? pUid : "dummy";
+
+      // 오늘 날짜 변환
+      const dateObj = new Date();
+      const year = dateObj.getFullYear();
+      const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+      const day = ("0" + dateObj.getDate()).slice(-2);
+      const date = `${year}-${month}-${day}`;
+
+      /* Consult_Log DB 저장 */
+      const consult_log_table = Consult_Log_Table_Info["Log"].table;
+      const consult_log_attribute = Consult_Log_Table_Info["Log"].attribute;
+
+      // Consult_Log DB 저장
+      const consult_insert_query = `INSERT INTO ${consult_log_table} (${Object.values(
+        consult_log_attribute
+      ).join(", ")}) VALUES (${Object.values(consult_log_attribute)
+        .map((el) => "?")
+        .join(", ")})`;
+      // console.log(consult_insert_query);
+
+      const consult_insert_value = [
+        parsepUid,
+        date,
+        avarta,
+        JSON.stringify(messageArr),
+      ];
+      // console.log(consult_insert_value);
+
+      connection_AI.query(consult_insert_query, consult_insert_value, (err) => {
+        if (err) {
+          console.log("Consulting_Log DB Save Fail!");
+          console.log("Err sqlMessage: " + err.sqlMessage);
+          res.json({ message: "Err sqlMessage: " + err.sqlMessage });
+        } else {
+          console.log("Consulting_Log DB Save Success!");
+          res.json({ message: "Consulting_Log DB Save Success!" });
+        }
       });
     } catch (err) {
       console.log(err);
-      res.json({
-        data: "Clear Cookies Fail!",
-      });
+      res.json({ message: "Consulting_Log DB Save Fail!" });
+    }
+  },
+  // ClearCookies API
+  getClearCookies: (req, res, next) => {
+    console.log("ClearCookies API /openAI/clear_cookies Path 호출");
+    try {
+      res.clearCookie("connect.sid", { path: "/" });
+      console.log("ClearCookies Success!");
+      // res.json({
+      //   data: "Clear Cookies Success!",
+      // });
+      next();
+    } catch (err) {
+      console.log(err);
+      // res.json({
+      //   data: "Clear Cookies Fail!",
+      // });
     }
   },
 };
