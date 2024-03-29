@@ -1874,7 +1874,7 @@ ${analyzeMsg}
   // 상담 로그 저장 API
   postOpenAIConsultingLogSave: async (req, res) => {
     const { EBTData } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
-    console.log("상담 로그 저장 API /consulting_emotion_log Path 호출22");
+    console.log("상담 로그 저장 API /consulting_emotion_log Path 호출");
 
     let parseEBTdata, parsepUid;
     try {

@@ -10,13 +10,12 @@ COPY package*.json ./
 
 # 패키지를 설치합니다.
 RUN npm install
-RUN npm start
 
 # 애플리케이션 소스를 복사합니다.
 COPY . .
 
 # 애플리케이션이 사용할 포트를 명시합니다.
-EXPOSE 4000
+EXPOSE 4040
 
 # 애플리케이션을 실행합니다.
-CMD [ "node", "app.js" ]
+CMD [ "npm", "start" ]
