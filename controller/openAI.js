@@ -1960,7 +1960,7 @@ ${analyzeMsg}
   },
 };
 
-console.log("jenkins 테스트용 주석");
+// console.log("jenkins 테스트용 주석");
 
 const openAIController_Regercy = {
   // (Regercy) 자율 상담 AI
