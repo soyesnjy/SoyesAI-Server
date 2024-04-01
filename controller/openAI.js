@@ -1356,7 +1356,7 @@ ${analyzeMsg}
 
         promptArr.push(...psy_testResult_promptArr_last);
         promptArr.push(psyResult_prompt);
-        // promptArr.push(solution_prompt);
+        promptArr.push(solution_prompt2); // 음악 명상 + 그림 명상 관련 솔루션 프롬프트
 
         req.session.psy_testResult_promptArr_last = [
           ...psy_testResult_promptArr_last,
