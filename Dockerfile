@@ -11,6 +11,9 @@ COPY package*.json ./
 # 패키지를 설치합니다.
 RUN npm install
 
+# pm2를 글로벌로 설치합니다.
+RUN npm install pm2 -g
+
 # 애플리케이션 소스를 복사합니다.
 COPY . .
 
