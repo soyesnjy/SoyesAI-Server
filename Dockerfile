@@ -21,4 +21,4 @@ COPY . .
 EXPOSE 4040
 
 # 애플리케이션을 pm2로 실행합니다.
-CMD ["pm2-runtime", "start", "npm", "--", "start"]
+CMD ["pm2-runtime", "start", "app.js", "--time", "--watch"]
