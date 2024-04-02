@@ -557,11 +557,17 @@ const loginController = {
   postAILoginHandler: async (req, res) => {
     const { pUid, passWard } = req.body;
     console.log(req.body);
-
     try {
       // 입력값 파싱
       let parsepUid = pUid;
       let parsePassWard = passWard;
+
+      // Input 없을 경우
+      if (!parsepUid || !parsePassWard) {
+        return res
+          .status(400)
+          .json({ message: "Non Input Value - 400 Bad Request" });
+      }
 
       /* User DB 조회 */
       const user_table = User_Table_Info.table;
@@ -605,7 +611,9 @@ const loginController = {
       if (ebt_data[0]) {
         // Password 불일치
         if (ebt_data[0].passWard !== parsePassWard) {
-          res.json({ message: "Password is incorrect!" });
+          res
+            .status(202)
+            .json({ message: "Password is incorrect! - 202 Accepted" });
         }
         // Password 일치
         else {
@@ -633,17 +641,17 @@ const loginController = {
             }
           );
           // client 전송
-          res.json({ message: "User Login Success!" });
+          res.status(200).json({ message: "User Login Success! - 200 OK" });
         }
       }
       // User 계정이 없는 경우 (row값이 없는 경우 실행)
       else {
         // client 전송
-        res.json({ message: "Non User" });
+        res.status(404).json({ message: "Non User - 404 Not Found" });
       }
     } catch (err) {
       console.error(err);
-      res.json({ message: "Server Error" });
+      res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
 };
