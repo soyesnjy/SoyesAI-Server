@@ -71,7 +71,7 @@ const gestalt_prompt = {
 
 const info_prompt = {
   role: "system",
-  content: `'user'의 정보: 내 나이는 9살이고, 내 이름은 오예나입니다. 
+  content: `'user'의 정보: 내 나이는 9살이고, 내 이름은 소예입니다. 
   나는 초등학교 2학년 여자 아이이고, 장래 희망은 아이돌입니다. 
   친구들과 노는 것을 좋아하고 좋아하는 음식은 치킨과 치즈 떡볶이 입니다.`,
 };
