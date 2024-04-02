@@ -553,6 +553,99 @@ const loginController = {
       }
     );
   },
+  // AI 로그인
+  postAILoginHandler: async (req, res) => {
+    const { pUid, passWard } = req.body;
+    console.log(req.body);
+
+    try {
+      // 입력값 파싱
+      let parsepUid = pUid;
+      let parsePassWard = passWard;
+
+      /* User DB 조회 */
+      const user_table = User_Table_Info.table;
+      const user_attribute = User_Table_Info.attribute;
+
+      // 오늘 날짜 변환
+      const dateObj = new Date();
+      const year = dateObj.getFullYear();
+      const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+      const day = ("0" + dateObj.getDate()).slice(-2);
+      const date = `${year}-${month}-${day}`;
+
+      // 동기식 DB 접근 함수 1. Promise 생성 함수
+      function queryAsync(connection, query, parameters) {
+        return new Promise((resolve, reject) => {
+          connection.query(query, parameters, (error, results, fields) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(results);
+            }
+          });
+        });
+      }
+      // 프로미스 resolve 반환값 사용. (User Data return)
+      async function fetchUserData(connection, query) {
+        try {
+          let results = await queryAsync(connection, query, []);
+          // console.log(results[0]);
+          return results;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      // 1. SELECT TEST (row가 있는지 없는지 검사)
+      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attribute.pKey}='${parsepUid}'`;
+      const ebt_data = await fetchUserData(connection_AI, select_query);
+
+      // User 계정이 있는 경우 (row값이 있는 경우 실행)
+      if (ebt_data[0]) {
+        // Password 불일치
+        if (ebt_data[0].passWard !== parsePassWard) {
+          res.json({ message: "Password is incorrect!" });
+        }
+        // Password 일치
+        else {
+          // 최종 로그인 날짜 갱신
+          const update_query = `UPDATE ${user_table} SET ${Object.values(
+            user_attribute
+          )
+            .filter((el) => el === "lastLogin_date")
+            .map((el) => {
+              return `${el} = ?`;
+            })
+            .join(", ")} WHERE ${user_attribute.pKey} = ?`;
+          // console.log(update_query);
+
+          const update_value = [date, parsepUid];
+
+          // console.log(update_value);
+
+          connection_AI.query(
+            update_query,
+            update_value,
+            (error, rows, fields) => {
+              if (error) console.log(error);
+              else console.log("User Login Date UPDATE Success!");
+            }
+          );
+          // client 전송
+          res.json({ message: "User Login Success!" });
+        }
+      }
+      // User 계정이 없는 경우 (row값이 없는 경우 실행)
+      else {
+        // client 전송
+        res.json({ message: "Non User" });
+      }
+    } catch (err) {
+      console.error(err);
+      res.json({ message: "Server Error" });
+    }
+  },
 };
 
 module.exports = {

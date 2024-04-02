@@ -27,6 +27,8 @@ const {
   oauthUrlHandler,
   oauthGoogleAccessTokenHandler,
   oauthKakaoAccessTokenHandler,
+  // AI 일반 로그인
+  postAILoginHandler,
 } = loginController;
 
 // 쿠키
@@ -50,6 +52,8 @@ router.post("/postUser", postUserHandler);
 // 조건부 선생 정보 반환
 router.post("/postTeacher");
 
+// AI 일반 로그인
+router.post("/ai", postAILoginHandler);
 // OAuth_url 발급
 router.post("/oauth_url", oauthUrlHandler);
 // Google OAuth AccessToken 발급
