@@ -14,7 +14,7 @@ const test_result_ment = [
 ];
 
 // 인지행동 검사 감지 멘트
-const cb_solution_ment = ["학교인지", "가족인지", "친구인지", "그외인지"];
+const cb_solution_ment = ["학교가기 싫다", "가족인지", "친구인지", "그외인지"];
 
 module.exports = {
   test_result_ment,
