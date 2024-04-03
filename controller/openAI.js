@@ -1445,7 +1445,7 @@ ${analyzeMsg}
         let cb_testArr;
 
         const cb_class_map = {
-          학교인지: cb_test_school,
+          학교가기싫어: cb_test_school,
           가족인지: cb_test_family,
           친구인지: cb_test_friend,
           그외인지: cb_test_remain,
