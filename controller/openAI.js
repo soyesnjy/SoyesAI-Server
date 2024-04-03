@@ -62,6 +62,7 @@ const {
   persnal_result_prompt,
   ebt_analysis_prompt,
   pt_analysis_prompt,
+  test_prompt_20240402,
 } = require("../DB/test_prompt");
 
 // 인지행동 검사 관련
@@ -1049,6 +1050,7 @@ ${analyzeMsg}
       // pUid default값 설정
       parsepUid = pUid ? pUid : "dummy";
 
+      /* Regercy
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_pupu); // 페르소나 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
@@ -1075,8 +1077,6 @@ ${analyzeMsg}
 
         return;
       }
-
-      /* 개발자 의도 질문 - N번째 문답에 대한 답변을 개발자가 임의로 지정 */
 
       // 유저 성격검사 결과 DB에서 가져오기
       const pt_result = await select_soyes_AI_Pt_Table(
@@ -1129,24 +1129,40 @@ ${analyzeMsg}
       promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
 
       // console.log(promptArr);
+      */
+
+      // 심리팀 Test Prompt. {role: user} 상태로 삽입
+      parseMessageArr.unshift(test_prompt_20240402);
 
       const response = await openai.chat.completions.create({
         messages: [...promptArr, ...parseMessageArr],
         model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
+      /* Regercy
       let emotion = parseInt(response.choices[0].message.content.slice(-1));
-      // console.log(emotion);
 
       const message = {
         message: response.choices[0].message.content.slice(0, -1),
         emotion,
       };
+
+      console.log(emotion);
+      */
+      let emotion = "0";
+      const message = {
+        message: response.choices[0].message.content,
+        emotion,
+      };
+
+      // Log 출력
       console.log([
         ...parseMessageArr,
         { role: "assistant", content: message.message },
       ]);
-      res.json(message);
+
+      // Client 반환
+      res.status(200).json(message);
     } catch (err) {
       console.error(err);
       res.json({
@@ -1268,7 +1284,8 @@ ${analyzeMsg}
 
     // 응답에 헤더를 추가하는 메서드
     // res.header("Test_Header", "Success Header");
-    // console.log(req.session);
+    console.log(req.session.accessAuth);
+
     try {
       if (typeof EBTData === "string") {
         parseEBTdata = JSON.parse(EBTData);
@@ -1887,7 +1904,7 @@ ${analyzeMsg}
       console.log(parseEBTdata);
 
       // 쿠키 삭제
-      res.clearCookie("connect.sid", { path: "/" });
+      // res.clearCookie("connect.sid", { path: "/" });
 
       // 문답 5회 미만일 경우 return
       if (messageArr.length <= 8) {
