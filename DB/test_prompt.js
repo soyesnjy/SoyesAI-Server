@@ -424,6 +424,8 @@ const pt_analysis_prompt = {
     `,
 };
 
+// 주석 처리~
+
 module.exports = {
   persona_prompt_pupu,
   persona_prompt_lala,
