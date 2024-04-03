@@ -335,6 +335,8 @@ const loginController = {
               console.log(err);
             }
           }
+          // accessAuth = true
+          req.session.accessAuth = true;
 
           res.json({ data: response.data });
         });
@@ -461,6 +463,9 @@ const loginController = {
           console.log(err);
         }
       }
+
+      // accessAuth = true
+      req.session.accessAuth = true;
 
       // 클라이언트에 사용자 정보 응답
       res.json({ data: response.data });
@@ -629,7 +634,6 @@ const loginController = {
           // console.log(update_query);
 
           const update_value = [date, parsepUid];
-
           // console.log(update_value);
 
           connection_AI.query(
@@ -640,6 +644,9 @@ const loginController = {
               else console.log("User Login Date UPDATE Success!");
             }
           );
+
+          // accessAuth = true
+          req.session.accessAuth = true;
           // client 전송
           res.status(200).json({ message: "User Login Success! - 200 OK" });
         }
