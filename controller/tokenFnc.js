@@ -19,6 +19,7 @@ module.exports = {
 
     return result;
   },
+  // 토큰 검증 메서드
   verifyToken: (type, token) => {
     let secretKey, decoded;
     // access, refresh에 따라 비밀키 선택
