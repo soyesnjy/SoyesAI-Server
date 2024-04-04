@@ -596,7 +596,7 @@ const loginController = {
         );
 
         if (user_data[0]) {
-          return res.json({ message: "AccessToken Login Success" });
+          return res.status(200).json({ message: "AccessToken Login Success" });
         }
         // refreshToken만 있는 경우
       } else if (refreshToken) {
@@ -613,7 +613,9 @@ const loginController = {
             id: decoded.id,
             email: `${decoded.id}@naver.com`,
           }).accessToken;
-          return res.json({ message: "RefreshToken Login Success" });
+          return res
+            .status(200)
+            .json({ message: "RefreshToken Login Success" });
         }
       } else next();
     } catch (err) {
