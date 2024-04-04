@@ -550,7 +550,7 @@ const loginController = {
           req.session.accessToken = token.accessToken;
           // browser Cookie에 refreshToken 저장
           res.cookie("refreshToken", token.refreshToken, {
-            maxAge: 900000,
+            maxAge: 3600000,
             httpOnly: true,
             sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
             secure: process.env.DEV_OPS !== "local",
@@ -570,8 +570,83 @@ const loginController = {
       res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
-  // AI JWT 토큰 유효성 검사 - 인가
+  // AI JWT 토큰 유효성 검사 - 로그인
   vaildateTokenAI: async (req, res, next) => {
+    console.log("AI JWT 토큰 유효성 검사 API 호출 /login/ai");
+    const { LoginData } = req.body;
+    // console.log(req.body);
+    // Session data 조회
+    const accessToken = req.session.accessToken;
+    const refreshToken = req.cookies.refreshToken;
+
+    let parseLoginData;
+    try {
+      // 입력값 파싱
+      if (typeof LoginData === "string") {
+        parseLoginData = JSON.parse(LoginData);
+      } else parseLoginData = LoginData;
+
+      const { pUid } = parseLoginData;
+
+      let parsepUid = pUid;
+
+      // accessToken이 있는 경우
+      if (accessToken) {
+        // accessToken Decoding
+        const decoded = verifyToken("access", accessToken);
+        // DB 계정과 입력 id가 같을 경우 인가
+        if (decoded.id === parsepUid) {
+          console.log("accessToken Login Success!");
+          return res.status(200).json({ message: "AccessToken Login Success" });
+        }
+        // refreshToken만 있는 경우
+      } else if (refreshToken) {
+        // refreshToken Decoding
+        const decoded = verifyToken("refresh", refreshToken);
+        if (decoded.id === parsepUid) {
+          console.log("refreshToken Login Success!");
+          // accessToken 재발행 후 세션에 저장
+          req.session.accessToken = generateToken({
+            id: decoded.id,
+            email: decoded.email,
+          }).accessToken;
+          return res
+            .status(200)
+            .json({ message: "RefreshToken Login Success" });
+        }
+      }
+      next();
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ message: "Server Error - 500" });
+    }
+  },
+  // AI 로그아웃 - 인증 삭제
+  getAILogoutHandler: (req, res) => {
+    console.log("AI Logout API 호출");
+    // console.log(req.cookies);
+    try {
+      // 세션 삭제
+      req.session.destroy((err) => {
+        if (err) console.error("세션 삭제 중 에러 발생", err);
+      });
+      // 쿠키 삭제
+      res.clearCookie("connect.sid", {
+        sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+        secure: process.env.DEV_OPS !== "local",
+      });
+      res.clearCookie("refreshToken", {
+        sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+        secure: process.env.DEV_OPS !== "local",
+      });
+      res.status(200).json({ message: "Logout Success! - 200 OK" });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
+    }
+  },
+  // AI JWT 토큰 유효성 검사 - 서비스 이용
+  vaildateTokenConsulting: async (req, res, next) => {
     // Session data 조회
     const accessToken = req.session.accessToken;
     const refreshToken = req.cookies.refreshToken;
@@ -610,8 +685,8 @@ const loginController = {
         if (user_data[0]) {
           // accessToken 재발행 후 세션에 저장
           req.session.accessToken = generateToken({
-            id: decoded.id,
-            email: `${decoded.id}@naver.com`,
+            id: user_data[0].uid,
+            email: user_data[0].Email,
           }).accessToken;
           return res
             .status(200)
@@ -621,30 +696,6 @@ const loginController = {
     } catch (err) {
       console.log(err.message);
       res.status(500).json({ message: "Server Error - 500" });
-    }
-  },
-  // AI 로그아웃 - 인증 삭제
-  getAILogoutHandler: (req, res) => {
-    console.log("AI Logout API 호출");
-    // console.log(req.cookies);
-    try {
-      // 세션 삭제
-      req.session.destroy((err) => {
-        if (err) console.error("세션 삭제 중 에러 발생", err);
-      });
-      // 쿠키 삭제
-      res.clearCookie("connect.sid", {
-        sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
-        secure: process.env.DEV_OPS !== "local",
-      });
-      res.clearCookie("refreshToken", {
-        sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
-        secure: process.env.DEV_OPS !== "local",
-      });
-      res.status(200).json({ message: "Logout Success! - 200 OK" });
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
 };
