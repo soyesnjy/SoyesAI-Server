@@ -1033,11 +1033,21 @@ ${analyzeMsg}
     const { EBTData } = req.body;
     console.log("푸푸 상담 API /consulting_emotion_pupu Path 호출");
     console.log(EBTData);
+
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
     // console.log(`accessAuth: ${req.session.accessAuth}`);
     try {
+      /* 비인증 || 세션 만료 유저 접근 처리
+      if (!req.session.accessToken) {
+        console.log("Unauthorized User Accessed");
+        return res
+          .status(401)
+          .json({ message: "Session Expiration" });
+      }
+      */
+
       if (typeof EBTData === "string") {
         parseEBTdata = JSON.parse(EBTData);
       } else parseEBTdata = EBTData;
@@ -1287,7 +1297,7 @@ ${analyzeMsg}
 
     // 응답에 헤더를 추가하는 메서드
     // res.header("Test_Header", "Success Header");
-    // console.log(req.session.accessAuth);
+    // console.log(req.session.accessToken);
 
     try {
       if (typeof EBTData === "string") {

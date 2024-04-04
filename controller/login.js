@@ -38,6 +38,38 @@ const User_Table_Info = {
   },
 };
 
+const user_ai_select = async (user_table, user_attribute, parsepUid) => {
+  /* User DB 조회 */
+  // 동기식 DB 접근 함수 1. Promise 생성 함수
+  function queryAsync(connection, query, parameters) {
+    return new Promise((resolve, reject) => {
+      connection.query(query, parameters, (error, results, fields) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+  }
+  // 프로미스 resolve 반환값 사용. (User Data return)
+  async function fetchUserData(connection, query) {
+    try {
+      let results = await queryAsync(connection, query, []);
+      // console.log(results[0]);
+      return results;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // 1. SELECT TEST (row가 있는지 없는지 검사)
+  const select_query = `SELECT * FROM ${user_table} WHERE ${user_attribute.pKey}='${parsepUid}'`;
+  const ebt_data = await fetchUserData(connection_AI, select_query);
+
+  return ebt_data;
+};
+
 const loginController = {
   // JWT 토큰 유효성 검사
   vaildateToken: (req, res, next) => {
@@ -47,7 +79,7 @@ const loginController = {
     if (accessToken) {
       const decoded = verifyToken("access", accessToken);
       if (users.find((user) => user.id === decoded.id)) {
-        res.json("AccessToken Login Success");
+        res.json({ message: "AccessToken Login Success" });
       }
       // refreshToken만 있는 경우
     } else if (refreshToken) {
@@ -58,7 +90,7 @@ const loginController = {
           id: decoded.id,
           email: `${decoded.id}@naver.com`,
         }).accessToken;
-        res.json("RefreshToken Login Success");
+        res.json({ message: "RefreshToken Login Success" });
       }
     } else next();
   },
@@ -265,8 +297,22 @@ const loginController = {
               console.log(err);
             }
           }
-          // accessAuth = true
-          req.session.accessAuth = true;
+
+          // JWT Token 발급 후 세션 저장
+          const token = generateToken({
+            id: ebt_data[0].uid,
+            email: ebt_data[0].Email,
+          });
+
+          // Session 내부에 accessToken 저장
+          req.session.accessToken = token.accessToken;
+          // browser Cookie에 refreshToken 저장
+          // res.cookie("refreshToken", token.refreshToken, {
+          //   maxAge: 900000,
+          //   httpOnly: true,
+          //   sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+          //   secure: process.env.DEV_OPS !== "local",
+          // });
 
           res.json({ data: response.data });
         });
@@ -394,17 +440,30 @@ const loginController = {
         }
       }
 
-      // accessAuth = true
-      req.session.accessAuth = true;
+      // JWT Token 발급 후 세션 저장
+      const token = generateToken({
+        id: ebt_data[0].uid,
+        email: ebt_data[0].Email,
+      });
+
+      // Session 내부에 accessToken 저장
+      req.session.accessToken = token.accessToken;
+      // browser Cookie에 refreshToken 저장
+      // res.cookie("refreshToken", token.refreshToken, {
+      //   maxAge: 900000,
+      //   httpOnly: true,
+      //   sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+      //   secure: process.env.DEV_OPS !== "local",
+      // });
 
       // 클라이언트에 사용자 정보 응답
       res.json({ data: response.data });
     } catch (err) {
-      console.error(err);
+      console.error(err.message);
       res.json({ data: "Fail" });
     }
   },
-  // AI 로그인
+  // AI 로그인 - 인증
   postAILoginHandler: async (req, res) => {
     const { LoginData } = req.body;
     console.log(req.body);
@@ -428,6 +487,8 @@ const loginController = {
       }
 
       /* User DB 조회 */
+
+      // User Table && attribut 명시
       const user_table = User_Table_Info.table;
       const user_attribute = User_Table_Info.attribute;
 
@@ -438,32 +499,13 @@ const loginController = {
       const day = ("0" + dateObj.getDate()).slice(-2);
       const date = `${year}-${month}-${day}`;
 
-      // 동기식 DB 접근 함수 1. Promise 생성 함수
-      function queryAsync(connection, query, parameters) {
-        return new Promise((resolve, reject) => {
-          connection.query(query, parameters, (error, results, fields) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(results);
-            }
-          });
-        });
-      }
-      // 프로미스 resolve 반환값 사용. (User Data return)
-      async function fetchUserData(connection, query) {
-        try {
-          let results = await queryAsync(connection, query, []);
-          // console.log(results[0]);
-          return results;
-        } catch (error) {
-          console.error(error);
-        }
-      }
-
       // 1. SELECT TEST (row가 있는지 없는지 검사)
-      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attribute.pKey}='${parsepUid}'`;
-      const ebt_data = await fetchUserData(connection_AI, select_query);
+      // User 계정 DB SELECT Method. uid를 입력값으로 받음
+      const ebt_data = await user_ai_select(
+        user_table,
+        user_attribute,
+        parsepUid
+      );
 
       // User 계정이 있는 경우 (row값이 있는 경우 실행)
       if (ebt_data[0]) {
@@ -498,8 +540,22 @@ const loginController = {
             }
           );
 
-          // accessAuth = true
-          req.session.accessAuth = true;
+          // JWT Token 발급 후 세션 저장
+          const token = generateToken({
+            id: ebt_data[0].uid,
+            email: ebt_data[0].Email,
+          });
+
+          // Session 내부에 accessToken 저장
+          req.session.accessToken = token.accessToken;
+          // browser Cookie에 refreshToken 저장
+          res.cookie("refreshToken", token.refreshToken, {
+            maxAge: 900000,
+            httpOnly: true,
+            sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+            secure: process.env.DEV_OPS !== "local",
+          });
+
           // client 전송
           res.status(200).json({ message: "User Login Success! - 200 OK" });
         }
@@ -512,6 +568,57 @@ const loginController = {
     } catch (err) {
       console.error(err);
       res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
+    }
+  },
+  // AI JWT 토큰 유효성 검사 - 인가
+  vaildateTokenAI: async (req, res, next) => {
+    // Session data 조회
+    const accessToken = req.session.accessToken;
+    const refreshToken = req.cookies.refreshToken;
+
+    //console.log(refreshToken);
+
+    /* User DB 조회 */
+    const user_table = User_Table_Info.table;
+    const user_attribute = User_Table_Info.attribute;
+
+    try {
+      // accessToken이 있는 경우
+      if (accessToken) {
+        console.log("accessToken Login!");
+        // accessToken Decoding
+        const decoded = verifyToken("access", accessToken);
+        // user_data 존재 여부 확인
+        const user_data = await user_ai_select(
+          user_table,
+          user_attribute,
+          decoded.id
+        );
+
+        if (user_data[0]) {
+          return res.json({ message: "AccessToken Login Success" });
+        }
+        // refreshToken만 있는 경우
+      } else if (refreshToken) {
+        console.log("refreshToken Login!");
+        const decoded = verifyToken("refresh", refreshToken);
+        const user_data = await user_ai_select(
+          user_table,
+          user_attribute,
+          decoded.id
+        );
+        if (user_data[0]) {
+          // accessToken 재발행 후 세션에 저장
+          req.session.accessToken = generateToken({
+            id: decoded.id,
+            email: `${decoded.id}@naver.com`,
+          }).accessToken;
+          return res.json({ message: "RefreshToken Login Success" });
+        }
+      } else next();
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).json({ message: "Server Error - 500" });
     }
   },
 };

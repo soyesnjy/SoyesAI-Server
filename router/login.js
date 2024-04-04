@@ -19,6 +19,7 @@ const {
   oauthKakaoAccessTokenHandler,
   // AI 일반 로그인
   postAILoginHandler,
+  vaildateTokenAI,
 } = loginController;
 
 const {
@@ -59,7 +60,7 @@ router.post("/postUser", postUserHandler);
 router.post("/postTeacher");
 
 // AI 일반 로그인
-router.post("/ai", postAILoginHandler);
+router.post("/ai", vaildateTokenAI, postAILoginHandler);
 // OAuth_url 발급
 router.post("/oauth_url", oauthUrlHandler);
 // Google OAuth AccessToken 발급
