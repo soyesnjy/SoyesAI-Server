@@ -1390,8 +1390,8 @@ ${analyzeMsg}
       if (
         !req.session.ebt_class &&
         test_result_ment.some((el) => {
-          if (lastUserContent.includes(el)) {
-            testClass = el; // 검사 분야 저장
+          if (lastUserContent.includes(el.text)) {
+            testClass = el.class; // 검사 분야 저장
             return true;
           } else return false;
         })
@@ -1399,17 +1399,17 @@ ${analyzeMsg}
         console.log(`정서행동검사 결과 - ${testClass} 분석 프롬프트 삽입`);
         // 분야-index 맵핑
         const class_map = {
-          학교생활: 0,
-          친구관계: 1,
-          가족관계: 2,
-          전반적기분: 3,
-          불안: 4,
-          우울: 5,
-          신체증상: 6,
-          주의집중: 7,
-          과잉행동: 8,
-          분노: 9,
-          자기인식: 10,
+          school: 0,
+          friend: 1,
+          family: 2,
+          mood: 3,
+          unrest: 4,
+          sad: 5,
+          health: 6,
+          attention: 7,
+          angry: 8,
+          movement: 9,
+          self: 10,
         };
         // 감지된 분야 선택
         const random_class = EBT_classArr[class_map[testClass]];
@@ -1434,8 +1434,8 @@ ${analyzeMsg}
       else if (
         !req.session.cb_class &&
         cb_solution_ment.some((el) => {
-          if (lastUserContent.includes(el)) {
-            testClass_cb = el; // 인지 분야 저장
+          if (lastUserContent.includes(el.text)) {
+            testClass_cb = el.class; // 인지 분야 저장
             return true;
           } else return false;
         })
@@ -1445,10 +1445,10 @@ ${analyzeMsg}
         let cb_testArr;
 
         const cb_class_map = {
-          학교가기싫어: cb_test_school,
-          가족인지: cb_test_family,
-          친구인지: cb_test_friend,
-          그외인지: cb_test_remain,
+          school: cb_test_school,
+          friend: cb_test_family,
+          family: cb_test_friend,
+          etc: cb_test_remain,
         };
 
         // 감지된 인지행동 문제 분야 선택
