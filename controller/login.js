@@ -623,6 +623,23 @@ const loginController = {
       res.status(500).json({ message: "Server Error - 500" });
     }
   },
+  // AI 로그아웃 - 인증 삭제
+  getAILogoutHandler: (req, res) => {
+    console.log("AI Logout API 호출");
+    try {
+      // 세션 삭제
+      req.session.destroy((err) => {
+        if (err) console.error("세션 삭제 중 에러 발생", err);
+      });
+      // 쿠키 삭제
+      res.clearCookie("connect.sid", { path: "/" });
+      res.clearCookie("refreshToken", { path: "/" });
+      res.status(200).json({ message: "Logout Success! - 200 OK" });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
+    }
+  },
 };
 
 const loginController_Regercy = {
