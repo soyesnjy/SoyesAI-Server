@@ -628,12 +628,18 @@ const loginController = {
     console.log("AI Logout API 호출");
     // console.log(req.cookies);
     try {
-      // 쿠키 삭제
-      res.clearCookie("connect.sid");
-      res.clearCookie("refreshToken");
       // 세션 삭제
       req.session.destroy((err) => {
         if (err) console.error("세션 삭제 중 에러 발생", err);
+      });
+      // 쿠키 삭제
+      res.clearCookie("connect.sid", {
+        sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+        secure: process.env.DEV_OPS !== "local",
+      });
+      res.clearCookie("refreshToken", {
+        sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+        secure: process.env.DEV_OPS !== "local",
       });
       res.status(200).json({ message: "Logout Success! - 200 OK" });
     } catch (err) {
