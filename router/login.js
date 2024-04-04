@@ -3,7 +3,23 @@ const express = require("express");
 const router = express.Router();
 const { errController } = require("../controller/index");
 // const { loginController } = require("../controller/index");
-const { loginController } = require("../controller/login");
+const {
+  loginController,
+  loginController_Regercy,
+} = require("../controller/login");
+
+const {
+  // 토큰
+  vaildateToken,
+  tokenLoginHandler,
+  tokenLogoutHandler,
+  // OAuth
+  oauthUrlHandler,
+  oauthGoogleAccessTokenHandler,
+  oauthKakaoAccessTokenHandler,
+  // AI 일반 로그인
+  postAILoginHandler,
+} = loginController;
 
 const {
   // 쿠키
@@ -14,22 +30,12 @@ const {
   vaildateSession,
   sessionLoginHandler,
   sessionLogoutHandler,
-  // 토큰
-  vaildateToken,
-  tokenLoginHandler,
-  tokenLogoutHandler,
   // 유저 정보
   getUserHandler,
   postUsersHandler,
   postUserHandler,
   postTeacherHandler,
-  // OAuth
-  oauthUrlHandler,
-  oauthGoogleAccessTokenHandler,
-  oauthKakaoAccessTokenHandler,
-  // AI 일반 로그인
-  postAILoginHandler,
-} = loginController;
+} = loginController_Regercy;
 
 // 쿠키
 // router.post("/", vaildateCookies, CookieLoginHandler);

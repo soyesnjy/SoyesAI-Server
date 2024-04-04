@@ -39,69 +39,7 @@ const User_Table_Info = {
 };
 
 const loginController = {
-  // 쿠키 유효성 검사
-  vaildateCookies: (req, res, next) => {
-    const { login } = req.cookies;
-    if (login) {
-      if (req.cookies.login === "true") {
-        res.json("Cookie Login Success");
-      }
-    } else next();
-  },
-  // 쿠키 로그인
-  CookieLoginHandler: (req, res) => {
-    const { id, pwd } = req.body;
-
-    if (users.find((user) => user.id === id && user.pwd === pwd)) {
-      // 로그인 성공 시 쿠키 관련 설정 추가. 도메인은 자동으로 현재 서버와 동일하게 적용.
-      res.cookie("login", "true", {
-        maxAge: 100000, // 쿠키 유효기간
-        path: "/", // 서버 라우팅 시 세부 경로
-        httpOnly: true, // JS의 쿠키 접근 가능 여부 결정
-        secure: true, // sameSite를 none으로 설정하려면 필수
-        sameSite: "none", // none으로 설정해야 cross-site 처리가 가능.
-      });
-      res.json("Login Success");
-    } else {
-      res.json("Login Fail");
-    }
-  },
-  // 쿠키 로그아웃
-  CookieLogoutHandler: (req, res) => {
-    res.clearCookie("login", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
-    res.json("Cookie LogOut Success");
-  },
-  // 세션 유효성 검사
-  vaildateSession: (req, res, next) => {
-    if (req.session.sessionId) {
-      res.json("Session Login Success");
-    } else next();
-  },
-  // 세션 로그인
-  sessionLoginHandler: (req, res) => {
-    const { id, pwd } = req.body;
-    // console.log(id, pwd);
-    if (users.find((user) => user.id === id && user.pwd === pwd)) {
-      // 로그인 성공 시 세션 아이디 추가
-      req.session.sessionId = id;
-      req.session.cookie.maxAge = 10000;
-      req.session.save(() => {
-        res.json({ data: "Login Success" });
-      });
-    } else {
-      res.json({ data: "Login Fail" });
-    }
-  },
-  // 세션 로그아웃
-  sessionLogoutHandler: (req, res) => {
-    req.session.destroy();
-    res.json("Session LogOut Success");
-  },
-  // 토큰 유효성 검사
+  // JWT 토큰 유효성 검사
   vaildateToken: (req, res, next) => {
     const accessToken = req.session.accessToken;
     const refreshToken = req.cookies.refreshToken;
@@ -124,7 +62,7 @@ const loginController = {
       }
     } else next();
   },
-  // 토큰 로그인
+  // JWT 토큰 로그인
   tokenLoginHandler: (req, res) => {
     const { id, pwd } = req.body;
     console.log(id, pwd);
@@ -146,16 +84,8 @@ const loginController = {
           // const token = generateToken({ id, email: `${id}@naver.com` });
           // // accessToken 세션에 추가
           // req.session.accessToken = token.accessToken;
-          // // refreshToken 쿠키에 추가
-          // res.cookie("refreshToken", token.refreshToken, {
-          //   path: "/", // 서버 라우팅 시 세부 경로
-          //   httpOnly: true, // JS의 쿠키 접근 가능 여부 결정
-          //   secure: true, // sameSite를 none으로 설정하려면 필수
-          //   sameSite: "none", // none으로 설정해야 cross-site 처리가 `가능.
-          // });
-          // req.session.save(() => {
-          //   res.json("Login Success");
-          // });
+          // req.session.refreshToken = token.refreshToken;
+
           res.json({ data: "Login Success" });
         } else res.json({ data: "Login fail" });
       }
@@ -166,7 +96,7 @@ const loginController = {
     //   res.json("Login Success");
     // } else res.json("Login Fail");
   },
-  // 토큰 로그아웃
+  // JWT 토큰 로그아웃
   tokenLogoutHandler: (req, res) => {
     // // 세션 삭제
     // req.session.destroy();
@@ -474,96 +404,19 @@ const loginController = {
       res.json({ data: "Fail" });
     }
   },
-  // 유저 정보 전달. 모든 학생 정보 출력
-  getUserHandler: (req, res) => {
-    connection.query(`SELECT * FROM user`, (error, rows, fields) => {
-      if (error) console.log(error);
-
-      if (rows.length) {
-        const data = rows.map((row) => {
-          const { user_name, user_number } = row;
-          return { user_name, user_number };
-        });
-        // 오름차순 정렬
-        data.sort((a, b) => {
-          if (a.user_name < b.user_name) return -1;
-          else if (a.user_name > b.user_name) return 1;
-          else return 0;
-        });
-
-        res.json({ data });
-      } else res.json("NonUser");
-    });
-  },
-  // 조건부 선생 정보 전달
-  postUsersHandler: (req, res) => {
-    const { vrNum } = req.body;
-    console.log("postTeacher Request => vrNum: " + vrNum);
-    connection.query(
-      `select * from teacher 
-      inner join user on teacher.vr_number = user.user_vr_number 
-      where teacher.vr_number = '${vrNum}'`,
-      (error, rows, fields) => {
-        if (error) console.log(error);
-
-        if (rows.length) {
-          const data = rows.map((row) => {
-            const { user_number, user_name } = row;
-            return { user_number, user_name };
-          });
-
-          res.json({ data });
-        } else res.json("NonUser");
-      }
-    );
-  },
-  // 조건부 유저 정보 전달
-  postUserHandler: (req, res) => {
-    const { user_number } = req.body;
-    console.log("postUser Request => user_number: " + user_number);
-
-    connection.query(
-      `select * from user where user.user_number = '${user_number}'`,
-      (error, rows, fields) => {
-        if (error) console.log(error);
-
-        if (rows.length) {
-          const data = rows.map((row) => {
-            const { user_age } = row;
-            return { user_age };
-          });
-
-          res.json({ data });
-        } else res.json("NonUser");
-      }
-    );
-  },
-  // 조건부 선생 정보 전달 (vr_number)
-  postTeacherHandler: (req, res) => {
-    const { teacher_uid } = req.body;
-    console.log("postTeacher Request => teacher_uid: " + teacher_uid);
-
-    connection.query(
-      `select * from teacher where teacher.teacher_uid = '${teacher_uid}'`,
-      (error, rows, fields) => {
-        if (error) console.log(error);
-
-        if (rows.length) {
-          const data = rows.map((row) => {
-            const { vr_number } = row;
-            return { vr_number };
-          });
-          res.json({ data });
-        } else res.json("NonUser");
-      }
-    );
-  },
   // AI 로그인
   postAILoginHandler: async (req, res) => {
-    const { pUid, passWard } = req.body;
+    const { LoginData } = req.body;
     console.log(req.body);
+    let parseLoginData;
     try {
       // 입력값 파싱
+      if (typeof LoginData === "string") {
+        parseLoginData = JSON.parse(LoginData);
+      } else parseLoginData = LoginData;
+
+      const { pUid, passWard } = parseLoginData;
+
       let parsepUid = pUid;
       let parsePassWard = passWard;
 
@@ -663,6 +516,156 @@ const loginController = {
   },
 };
 
+const loginController_Regercy = {
+  // 쿠키 유효성 검사
+  vaildateCookies: (req, res, next) => {
+    const { login } = req.cookies;
+    if (login) {
+      if (req.cookies.login === "true") {
+        res.json("Cookie Login Success");
+      }
+    } else next();
+  },
+  // 쿠키 로그인
+  CookieLoginHandler: (req, res) => {
+    const { id, pwd } = req.body;
+
+    if (users.find((user) => user.id === id && user.pwd === pwd)) {
+      // 로그인 성공 시 쿠키 관련 설정 추가. 도메인은 자동으로 현재 서버와 동일하게 적용.
+      res.cookie("login", "true", {
+        maxAge: 100000, // 쿠키 유효기간
+        path: "/", // 서버 라우팅 시 세부 경로
+        httpOnly: true, // JS의 쿠키 접근 가능 여부 결정
+        secure: true, // sameSite를 none으로 설정하려면 필수
+        sameSite: "none", // none으로 설정해야 cross-site 처리가 가능.
+      });
+      res.json("Login Success");
+    } else {
+      res.json("Login Fail");
+    }
+  },
+  // 쿠키 로그아웃
+  CookieLogoutHandler: (req, res) => {
+    res.clearCookie("login", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    res.json("Cookie LogOut Success");
+  },
+  // 세션 유효성 검사
+  vaildateSession: (req, res, next) => {
+    if (req.session.sessionId) {
+      res.json("Session Login Success");
+    } else next();
+  },
+  // 세션 로그인
+  sessionLoginHandler: (req, res) => {
+    const { id, pwd } = req.body;
+    // console.log(id, pwd);
+    if (users.find((user) => user.id === id && user.pwd === pwd)) {
+      // 로그인 성공 시 세션 아이디 추가
+      req.session.sessionId = id;
+      req.session.cookie.maxAge = 10000;
+      req.session.save(() => {
+        res.json({ data: "Login Success" });
+      });
+    } else {
+      res.json({ data: "Login Fail" });
+    }
+  },
+  // 세션 로그아웃
+  sessionLogoutHandler: (req, res) => {
+    req.session.destroy();
+    res.json("Session LogOut Success");
+  },
+  // 유저 정보 전달. 모든 학생 정보 출력
+  getUserHandler: (req, res) => {
+    connection.query(`SELECT * FROM user`, (error, rows, fields) => {
+      if (error) console.log(error);
+
+      if (rows.length) {
+        const data = rows.map((row) => {
+          const { user_name, user_number } = row;
+          return { user_name, user_number };
+        });
+        // 오름차순 정렬
+        data.sort((a, b) => {
+          if (a.user_name < b.user_name) return -1;
+          else if (a.user_name > b.user_name) return 1;
+          else return 0;
+        });
+
+        res.json({ data });
+      } else res.json("NonUser");
+    });
+  },
+  // 조건부 선생 정보 전달
+  postUsersHandler: (req, res) => {
+    const { vrNum } = req.body;
+    console.log("postTeacher Request => vrNum: " + vrNum);
+    connection.query(
+      `select * from teacher 
+      inner join user on teacher.vr_number = user.user_vr_number 
+      where teacher.vr_number = '${vrNum}'`,
+      (error, rows, fields) => {
+        if (error) console.log(error);
+
+        if (rows.length) {
+          const data = rows.map((row) => {
+            const { user_number, user_name } = row;
+            return { user_number, user_name };
+          });
+
+          res.json({ data });
+        } else res.json("NonUser");
+      }
+    );
+  },
+  // 조건부 유저 정보 전달
+  postUserHandler: (req, res) => {
+    const { user_number } = req.body;
+    console.log("postUser Request => user_number: " + user_number);
+
+    connection.query(
+      `select * from user where user.user_number = '${user_number}'`,
+      (error, rows, fields) => {
+        if (error) console.log(error);
+
+        if (rows.length) {
+          const data = rows.map((row) => {
+            const { user_age } = row;
+            return { user_age };
+          });
+
+          res.json({ data });
+        } else res.json("NonUser");
+      }
+    );
+  },
+  // 조건부 선생 정보 전달 (vr_number)
+  postTeacherHandler: (req, res) => {
+    const { teacher_uid } = req.body;
+    console.log("postTeacher Request => teacher_uid: " + teacher_uid);
+
+    connection.query(
+      `select * from teacher where teacher.teacher_uid = '${teacher_uid}'`,
+      (error, rows, fields) => {
+        if (error) console.log(error);
+
+        if (rows.length) {
+          const data = rows.map((row) => {
+            const { vr_number } = row;
+            return { vr_number };
+          });
+          res.json({ data });
+        } else res.json("NonUser");
+      }
+    );
+  },
+};
+
 module.exports = {
   loginController,
+  loginController_Regercy,
 };
