@@ -63,6 +63,7 @@ const {
   ebt_analysis_prompt,
   pt_analysis_prompt,
   test_prompt_20240402,
+  persona_prompt_lala_v2,
 } = require("../DB/test_prompt");
 
 // 인지행동 검사 관련
@@ -1035,7 +1036,7 @@ ${analyzeMsg}
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
-    // console.log(req.session);
+    // console.log(`accessAuth: ${req.session.accessAuth}`);
     try {
       if (typeof EBTData === "string") {
         parseEBTdata = JSON.parse(EBTData);
@@ -1050,7 +1051,6 @@ ${analyzeMsg}
       // pUid default값 설정
       parsepUid = pUid ? pUid : "dummy";
 
-      /* Regercy
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_pupu); // 페르소나 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
@@ -1085,7 +1085,7 @@ ${analyzeMsg}
         parsepUid
       );
 
-      console.log(pt_result);
+      console.log(`성격검사 결과: ${pt_result}`);
       // promptArr.push(persnal_result_prompt[pt_result]);
 
       promptArr.push({
@@ -1129,29 +1129,32 @@ ${analyzeMsg}
       promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
 
       // console.log(promptArr);
-      */
 
+      /* Regercy
       // 심리팀 Test Prompt. {role: user} 상태로 삽입
       parseMessageArr.unshift(test_prompt_20240402);
+    
+      const response = await openai.chat.completions.create({
+        messages: [...promptArr, ...parseMessageArr],
+        model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      });
+
+      let emotion = "0";
+      const message = {
+        message: response.choices[0].message.content,
+        emotion,
+      };
+      */
 
       const response = await openai.chat.completions.create({
         messages: [...promptArr, ...parseMessageArr],
         model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
-      /* Regercy
       let emotion = parseInt(response.choices[0].message.content.slice(-1));
 
       const message = {
         message: response.choices[0].message.content.slice(0, -1),
-        emotion,
-      };
-
-      console.log(emotion);
-      */
-      let emotion = "0";
-      const message = {
-        message: response.choices[0].message.content,
         emotion,
       };
 
@@ -1284,7 +1287,7 @@ ${analyzeMsg}
 
     // 응답에 헤더를 추가하는 메서드
     // res.header("Test_Header", "Success Header");
-    console.log(req.session.accessAuth);
+    // console.log(req.session.accessAuth);
 
     try {
       if (typeof EBTData === "string") {
@@ -1302,7 +1305,8 @@ ${analyzeMsg}
       // console.log(parsepUid);
 
       // 고정 삽입 프롬프트
-      promptArr.push(persona_prompt_lala); // 페르소나 프롬프트 삽입
+      // promptArr.push(persona_prompt_lala); // 페르소나 프롬프트 삽입
+      promptArr.push(persona_prompt_lala_v2);
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       const lastUserContent =
