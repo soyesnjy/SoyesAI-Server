@@ -1917,8 +1917,8 @@ ${analyzeMsg}
       const { messageArr, avarta, pUid } = parseEBTdata;
       console.log(parseEBTdata);
 
-      // 쿠키 삭제
-      // res.clearCookie("connect.sid", { path: "/" });
+      // pUid 없는 경우
+      if (!pUid) return res.json({ message: "Non pUid" });
 
       // 문답 5회 미만일 경우 return
       if (messageArr.length <= 8) {
