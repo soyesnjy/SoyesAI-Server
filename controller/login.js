@@ -307,12 +307,12 @@ const loginController = {
           // Session 내부에 accessToken 저장
           req.session.accessToken = token.accessToken;
           // browser Cookie에 refreshToken 저장
-          // res.cookie("refreshToken", token.refreshToken, {
-          //   maxAge: 900000,
-          //   httpOnly: true,
-          //   sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
-          //   secure: process.env.DEV_OPS !== "local",
-          // });
+          res.cookie("refreshToken", token.refreshToken, {
+            maxAge: 3600000,
+            httpOnly: true,
+            sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+            secure: process.env.DEV_OPS !== "local",
+          });
 
           res.json({ data: response.data });
         });
@@ -449,12 +449,12 @@ const loginController = {
       // Session 내부에 accessToken 저장
       req.session.accessToken = token.accessToken;
       // browser Cookie에 refreshToken 저장
-      // res.cookie("refreshToken", token.refreshToken, {
-      //   maxAge: 900000,
-      //   httpOnly: true,
-      //   sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
-      //   secure: process.env.DEV_OPS !== "local",
-      // });
+      res.cookie("refreshToken", token.refreshToken, {
+        maxAge: 3600000,
+        httpOnly: true,
+        sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+        secure: process.env.DEV_OPS !== "local",
+      });
 
       // 클라이언트에 사용자 정보 응답
       res.json({ data: response.data });

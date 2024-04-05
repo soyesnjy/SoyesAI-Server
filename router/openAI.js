@@ -24,6 +24,7 @@ const {
   postOpenAIConsultingLogSave,
 } = openAIController;
 
+// 토큰 유효성 검사 미들웨어
 const { vaildateTokenConsulting } = loginController;
 
 router.get("/", (req, res) => {
