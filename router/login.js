@@ -61,7 +61,7 @@ router.post("/postUser", postUserHandler);
 router.post("/postTeacher");
 
 // AI 일반 로그인
-router.post("/ai", vaildateTokenAI, postAILoginHandler);
+router.post("/ai", postAILoginHandler);
 // AI 일반 로그아웃
 router.get("/ai/logout", getAILogoutHandler);
 // OAuth_url 발급

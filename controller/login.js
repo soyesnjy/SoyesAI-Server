@@ -663,13 +663,14 @@ const loginController = {
         const decoded = verifyToken("access", accessToken);
         // 1. SELECT TEST (row가 있는지 없는지 검사)
         // User 계정 DB SELECT Method. uid를 입력값으로 받음
-        const ebt_data = await user_ai_select(
-          user_table,
-          user_attribute,
-          decoded.id
-        );
+        // const ebt_data = await user_ai_select(
+        //   user_table,
+        //   user_attribute,
+        //   decoded.id
+        // );
 
-        if (ebt_data[0]) {
+        // accessToken은 세션에 저장된 값이기 때문에 비교적 간단한 검사 진행
+        if (decoded.id) {
           console.log("AccessToken 유효성 검증 통과!");
           next();
         } else return res.status(400).json({ message: "Non User!" });
@@ -677,7 +678,7 @@ const loginController = {
         // refreshToken만 있는 경우
       } else if (refreshToken) {
         const decoded = verifyToken("refresh", refreshToken);
-
+        // refreshToken은 쿠키에 저장된 값이기 때문에 DB 계정이 있는지 검사
         // User 계정 DB SELECT Method. uid를 입력값으로 받음
         const ebt_data = await user_ai_select(
           user_table,
