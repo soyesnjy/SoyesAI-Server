@@ -8,6 +8,8 @@ const {
   openAIController_Regercy, // 레거시 코드
 } = require("../controller/openAI");
 
+const { loginController } = require("../controller/login");
+
 const {
   postOpenAIEmotionAnalyze,
   postOpenAIPsychologicalAnalysis,
@@ -21,6 +23,8 @@ const {
   getClearCookies,
   postOpenAIConsultingLogSave,
 } = openAIController;
+
+const { vaildateTokenConsulting } = loginController;
 
 router.get("/", (req, res) => {
   res.send("Welcome to the GPT API");

@@ -645,54 +645,59 @@ const loginController = {
       res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
-  // AI JWT 토큰 유효성 검사 - 서비스 이용
+  // AI JWT 토큰 유효성 검사 - 서비스 이용 (Test)
   vaildateTokenConsulting: async (req, res, next) => {
+    console.log("AI JWT 토큰 유효성 검사 API 호출");
     // Session data 조회
     const accessToken = req.session.accessToken;
     const refreshToken = req.cookies.refreshToken;
 
-    //console.log(refreshToken);
-
-    /* User DB 조회 */
+    // User Table && attribut 명시
     const user_table = User_Table_Info.table;
     const user_attribute = User_Table_Info.attribute;
 
     try {
       // accessToken이 있는 경우
       if (accessToken) {
-        console.log("accessToken Login!");
         // accessToken Decoding
         const decoded = verifyToken("access", accessToken);
-        // user_data 존재 여부 확인
-        const user_data = await user_ai_select(
+        // 1. SELECT TEST (row가 있는지 없는지 검사)
+        // User 계정 DB SELECT Method. uid를 입력값으로 받음
+        const ebt_data = await user_ai_select(
           user_table,
           user_attribute,
           decoded.id
         );
 
-        if (user_data[0]) {
-          return res.status(200).json({ message: "AccessToken Login Success" });
-        }
+        if (ebt_data[0]) {
+          console.log("AccessToken 유효성 검증 통과!");
+          next();
+        } else return res.status(400).json({ message: "Non User!" });
+
         // refreshToken만 있는 경우
       } else if (refreshToken) {
-        console.log("refreshToken Login!");
         const decoded = verifyToken("refresh", refreshToken);
-        const user_data = await user_ai_select(
+
+        // User 계정 DB SELECT Method. uid를 입력값으로 받음
+        const ebt_data = await user_ai_select(
           user_table,
           user_attribute,
           decoded.id
         );
-        if (user_data[0]) {
+        if (ebt_data[0]) {
           // accessToken 재발행 후 세션에 저장
           req.session.accessToken = generateToken({
-            id: user_data[0].uid,
-            email: user_data[0].Email,
+            id: ebt_data[0].uid,
+            email: ebt_data[0].Email,
           }).accessToken;
-          return res
-            .status(200)
-            .json({ message: "RefreshToken Login Success" });
-        }
-      } else next();
+
+          console.log("RefreshToken 유효성 검증 통과!");
+          next();
+        } else return res.status(400).json({ message: "Non User!" });
+      } else {
+        // accessToken 및 refreshToken 둘 다 없는 상태이므로 Login 하길 권장해야 함
+        return res.status(401).json({ message: "Login Session Expire!" });
+      }
     } catch (err) {
       console.log(err.message);
       res.status(500).json({ message: "Server Error - 500" });
