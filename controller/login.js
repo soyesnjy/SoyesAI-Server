@@ -556,8 +556,14 @@ const loginController = {
             secure: process.env.DEV_OPS !== "local",
           });
 
+          const expire = String(dateObj.setHours(dateObj.getHours() + 1));
+
           // client 전송
-          res.status(200).json({ message: "User Login Success! - 200 OK" });
+          res.status(200).json({
+            message: "User Login Success! - 200 OK",
+            refreshToken: token.refreshToken,
+            expire,
+          });
         }
       }
       // User 계정이 없는 경우 (row값이 없는 경우 실행)
