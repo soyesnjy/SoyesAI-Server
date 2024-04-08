@@ -64,6 +64,7 @@ const {
   pt_analysis_prompt,
   test_prompt_20240402,
   persona_prompt_lala_v2,
+  persona_prompt_lala_v3,
 } = require("../DB/test_prompt");
 
 // 인지행동 검사 관련
@@ -1316,7 +1317,7 @@ ${analyzeMsg}
 
       // 고정 삽입 프롬프트
       // promptArr.push(persona_prompt_lala); // 페르소나 프롬프트 삽입
-      promptArr.push(persona_prompt_lala_v2);
+      promptArr.push(persona_prompt_lala_v3);
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       const lastUserContent =
