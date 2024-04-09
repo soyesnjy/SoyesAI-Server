@@ -683,8 +683,8 @@ const loginController = {
 
         // refreshToken만 있는 경우
       } else if (refreshToken) {
-        const decoded = verifyToken("refresh", refreshToken);
         // refreshToken은 쿠키에 저장된 값이기 때문에 DB 계정이 있는지 검사
+        const decoded = verifyToken("refresh", refreshToken);
         // User 계정 DB SELECT Method. uid를 입력값으로 받음
         const ebt_data = await user_ai_select(
           user_table,
@@ -708,6 +708,84 @@ const loginController = {
     } catch (err) {
       console.log(err.message);
       res.status(500).json({ message: "Server Error - 500" });
+    }
+  },
+  // AI RefreshToken 갱신
+  postAIRefreshTokenUpdateHandler: async (req, res) => {
+    const { LoginData } = req.body;
+    console.log(req.body);
+    let parseLoginData;
+    try {
+      // 입력값 파싱
+      if (typeof LoginData === "string") {
+        parseLoginData = JSON.parse(LoginData);
+      } else parseLoginData = LoginData;
+
+      const { pUid, refreshToken } = parseLoginData;
+
+      let parsepUid = pUid;
+      let parseRefreshToken = refreshToken;
+
+      // Input 없을 경우
+      if (!parsepUid || !parseRefreshToken) {
+        return res
+          .status(400)
+          .json({ message: "Non Input Value - 400 Bad Request" });
+      }
+      // refreshToken 복호화
+      const decoded = verifyToken("refresh", parseRefreshToken);
+
+      // 유효하지 않은 refreshToken 양식일 경우
+      if (!decoded) {
+        console.log("Invalid token format - 401 UNAUTHORIZED");
+        return res.status(401).json({
+          message: "Invalid token format - 401 UNAUTHORIZED",
+        });
+      }
+
+      // decoded가 null이 아니고, 만료된 RefreshToken 복호화 ID와 입력 ID가 같을 경우
+      if (decoded.id === parsepUid) {
+        // JWT Token 발급 후 세션 저장
+        const token = generateToken({
+          id: decoded.id,
+          email: decoded.email,
+        });
+
+        // Session 내부에 accessToken 저장
+        req.session.accessToken = token.accessToken;
+        // browser Cookie에 refreshToken 저장
+        res.cookie("refreshToken", token.refreshToken, {
+          maxAge: 3600000,
+          httpOnly: true,
+          sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+          secure: process.env.DEV_OPS !== "local",
+        });
+
+        const dateObj = new Date();
+        const expire = String(dateObj.setHours(dateObj.getHours() + 1));
+
+        console.log("User RefreshToken Update Success! - 200 OK");
+        // client 전송
+        res.status(200).json({
+          message: "User RefreshToken Update Success! - 200 OK",
+          refreshToken: token.refreshToken,
+          expire,
+        });
+      }
+      // 만료된 RefreshToken 복호화 ID와 입력 ID가 다를 경우
+      else {
+        console.log(
+          "Uid Does Not Match RefreshToekn Decoding Payload ID - 404 UNAUTHORIZED"
+        );
+        // client 전송
+        res.status(401).json({
+          message:
+            "Uid Does Not Match RefreshToekn Decoding Payload ID - 401 UNAUTHORIZED",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
 };

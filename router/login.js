@@ -21,6 +21,7 @@ const {
   postAILoginHandler,
   vaildateTokenAI,
   getAILogoutHandler,
+  postAIRefreshTokenUpdateHandler,
 } = loginController;
 
 const {
@@ -64,6 +65,8 @@ router.post("/postTeacher");
 router.post("/ai", postAILoginHandler);
 // AI 일반 로그아웃
 router.get("/ai/logout", getAILogoutHandler);
+// AI RefreshToken 갱신
+router.post("/ai/updatetoken", postAIRefreshTokenUpdateHandler);
 // OAuth_url 발급
 router.post("/oauth_url", oauthUrlHandler);
 // Google OAuth AccessToken 발급
