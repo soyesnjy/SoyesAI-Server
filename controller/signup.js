@@ -86,6 +86,7 @@ const signupController = {
   postSignupAIHandler: async (req, res) => {
     const { SignUpData } = req.body;
     let parseSignUpData;
+    const regex = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/; // 한글 및 한글 자모를 포함하는 정규 표현식
     try {
       // 입력값 파싱
       if (typeof SignUpData === "string") {
@@ -99,6 +100,13 @@ const signupController = {
         return res
           .status(400)
           .json({ message: "Non Sign Up Input Value - 400 Bad Request" });
+      }
+
+      // 입력값이 한글일 경우
+      if (regex.test(pUid) || regex.test(passWard)) {
+        return res
+          .status(400)
+          .json({ message: "Non Korean Input Value - 400 Bad Request" });
       }
 
       // User Table 명시
