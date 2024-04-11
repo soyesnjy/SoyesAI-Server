@@ -9,6 +9,7 @@ const connection_AI = mysql.createConnection(dbconfig_ai);
 connection_AI.connect();
 
 const signupController = {
+  // VR 중복 체크
   dupleCheckHandler: (req, res) => {
     const { id, vrNum, type } = req.body;
 
@@ -35,6 +36,7 @@ const signupController = {
       );
     }
   },
+  // VR 회원가입
   signupHandler: (req, res) => {
     const { id, pwd, name, age, email, vrNum } = req.body;
     // 서버측 2중 보안
