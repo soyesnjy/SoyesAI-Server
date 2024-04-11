@@ -85,6 +85,7 @@ const signupController = {
   // AI 회원가입
   postSignupAIHandler: async (req, res) => {
     const { SignUpData } = req.body;
+    console.log(req.body);
     let parseSignUpData;
     const regex = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/; // 한글 및 한글 자모를 포함하는 정규 표현식
     try {
