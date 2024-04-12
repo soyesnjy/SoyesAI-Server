@@ -505,26 +505,11 @@ const openAIController = {
       const analysisPrompt = [];
       const userPrompt = [];
 
-      if (type === "Persnal") {
-        // 혹시 몰라서 성격검사용 페르소나 프롬프트를 따로 구분해둠
-        analysisPrompt.push(pt_analysis_prompt);
-        userPrompt.push({
-          role: "user",
-          content: `다음 문단은 아동의 성격검사 결과야.
-          '''
-          SOCE 즉, 관계형(S)-개방형(O)-용기형(C)-감정형(E)입니다. 
-          SOCE 유형은 다른 사람들과 어울리는 것을 좋아하고, 모험을 즐기며, 위축되지 않는 용기를 보이고, 감수성이 풍부합니다.
-          '''
-          아동의 성격검사 결과를 바탕으로 아동의 성격을 장점과 단점으로 나눠서 분석해줘. 분석이 끝나면 단점에 대한 해결 방안을 제시해줘
-          `,
-        });
-      } else {
-        analysisPrompt.push(ebt_analysis_prompt);
-        userPrompt.push({
-          role: "user",
-          content: `앞선 대화를 기반으로 ${testType[parsingType]}에 대한 아동의 심리 상태를 분석해줘. 분석이 끝나면 문제에 대한 해결 방안을 제시해줘`,
-        });
-      }
+      analysisPrompt.push(ebt_analysis_prompt);
+      userPrompt.push({
+        role: "user",
+        content: `앞선 대화를 기반으로 ${testType[parsingType]}에 대한 아동의 심리 상태를 분석해줘. 분석이 끝나면 문제에 대한 해결 방안을 제시해줘`,
+      });
 
       // 메일 관련 세팅 시작
 
@@ -640,7 +625,7 @@ ${analyzeMsg}
       res.json({ message: mailOptions.text });
 
       /* EBT Data DB 저장 */
-      if (type !== "Persnal") {
+      if (parsingType) {
         /* DB 저장 */
         const table = EBT_Table_Info[type].table;
         const attribute = EBT_Table_Info[type].attribute;
