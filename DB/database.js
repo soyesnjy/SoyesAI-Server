@@ -14,16 +14,16 @@ const users = [
 ];
 
 const dbconfig = {
-  host: "soyesdb.cbxvnkrdwevn.ap-northeast-2.rds.amazonaws.com",
+  host: process.env.DATABASE_HOST,
   user: "admin",
-  password: "soyesdeveloper1!",
+  password: process.env.DATABASE_PASSWORD,
   database: "soyesdb",
 };
 
 const dbconfig_ai = {
-  host: "soyesdb.cbxvnkrdwevn.ap-northeast-2.rds.amazonaws.com",
+  host: process.env.DATABASE_HOST,
   user: "admin",
-  password: "soyesdeveloper1!",
+  password: process.env.DATABASE_PASSWORD,
   database: "soyesAI",
 };
 
