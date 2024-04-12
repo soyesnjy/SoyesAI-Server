@@ -1572,6 +1572,7 @@ ${analyzeMsg}
         message: response.choices[0].message.content.slice(0, -1),
         emotion,
       };
+      // 대화 내역 로그
       console.log([
         ...parseMessageArr,
         { role: "assistant", content: message.message },
@@ -1580,11 +1581,11 @@ ${analyzeMsg}
       // 세션 확인 코드
       // console.log(req.session);
 
-      res.json(message);
+      res.status(200).json(message);
     } catch (err) {
       console.error(err);
-      res.json({
-        message: "Server Error",
+      res.status(500).json({
+        message: "Server Error - 500",
         emotion: 0,
       });
     }
