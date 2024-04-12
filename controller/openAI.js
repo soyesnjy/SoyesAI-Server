@@ -80,7 +80,7 @@ const {
   test_result_ment,
   cb_solution_ment,
 } = require("../DB/detect_ment_Array");
-
+// User 정서행동 2점문항 반환 (String)
 const select_soyes_AI_Ebt_Table = async (
   user_table,
   user_attr,
@@ -1294,6 +1294,8 @@ ${analyzeMsg}
     console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
+    let testClass = "",
+      testClass_cb = "";
     // let prevChat_flag = true; // 이전 대화 내역 유무
 
     // 응답에 헤더를 추가하는 메서드
@@ -1345,12 +1347,13 @@ ${analyzeMsg}
 
       /* 프롬프트 삽입 분기 */
 
-      // 심리 검사 결과 프롬프트 상시 삽입
+      /* 심리 검사 결과 프롬프트 상시 삽입 */
+      // 세션에 psy_testResult_promptArr_last 값이 없는 경우
       if (!req.session.psy_testResult_promptArr_last) {
-        // 심리 검사 결과 프롬프트 삽입
         console.log("심리 검사 결과 프롬프트 삽입");
         let psy_testResult_promptArr_last = []; // 2점을 획득한 정서행동검사 문항을 저장하는 prompt
-        // 해당 계정의 모든 정서행동검사 결과 DB에서 차출
+
+        // 해당 계정의 모든 정서행동검사 결과를 DB에서 차출
         const psy_testResult_promptArr = EBT_classArr.map(async (ebt_class) => {
           const select_Ebt_Result = await select_soyes_AI_Ebt_Table(
             EBT_ObjArr[ebt_class].table, // Table Name
@@ -1366,15 +1369,15 @@ ${analyzeMsg}
           const psy_testResult_prompt = {
             role: "system",
             content: `다음에 오는 문단은 user의 ${ebt_class} 관련 심리검사 결과입니다.
-    '''
-    ${select_Ebt_Result.testResult}
-    '''
-    위 문단이 비어있다면 ${
-      // DB Table의 값 유무에 따라 다른 프롬프트 입력
-      !select_Ebt_Result.ebt_school_data[0]
-        ? "user는 심리검사를 진행하지 않았습니다."
-        : "user의 심리검사 결과는 문제가 없습니다."
-    }`,
+            '''
+            ${select_Ebt_Result.testResult}
+            '''
+            위 문단이 비어있다면 ${
+              // DB Table의 값 유무에 따라 다른 프롬프트 입력
+              !select_Ebt_Result.ebt_school_data[0]
+                ? "user는 심리검사를 진행하지 않았습니다."
+                : "user의 심리검사 결과는 문제가 없습니다."
+            }`,
           };
           // console.log(psy_testResult_prompt);
           return psy_testResult_prompt;
@@ -1387,21 +1390,20 @@ ${analyzeMsg}
         // console.log(psy_testResult_promptArr_last);
 
         promptArr.push(...psy_testResult_promptArr_last);
-        // promptArr.push(psyResult_prompt);
-        promptArr.push(solution_prompt2); // 음악 명상 + 그림 명상 관련 솔루션 프롬프트
-
+        // 음악 명상 + 그림 명상 관련 솔루션 프롬프트
+        promptArr.push(solution_prompt2);
+        // DB 접근 최소화를 위해 세션에 psy_testResult_promptArr_last 값 저장
         req.session.psy_testResult_promptArr_last = [
           ...psy_testResult_promptArr_last,
         ];
-      } else {
+      }
+      // 세션에 psy_testResult_promptArr_last 값이 있는 경우
+      else {
         console.log("세션 저장된 심리 검사 결과 프롬프트 삽입");
         promptArr.push(...req.session.psy_testResult_promptArr_last);
-        promptArr.push(psyResult_prompt);
       }
 
-      let testClass = "",
-        testClass_cb = "";
-      // 검사 결과 분석 관련 멘트 감지
+      /* 검사 결과 분석 관련 멘트 감지 */
       if (
         !req.session.ebt_class &&
         test_result_ment.some((el) => {
@@ -1445,6 +1447,7 @@ ${analyzeMsg}
         // 검사 분야 세션 추가. 해당 세션동안 검사 결과 분석은 1회만 진행되도록 세션 데이터 설정.
         req.session.ebt_class = random_class;
       }
+      /* 인지행동 관련 멘트 감지 */
       // 인지행동 세션 데이터가 없고, 인지행동 검사 관련 멘트 감지
       else if (
         !req.session.cb_class &&
@@ -1494,6 +1497,7 @@ ${analyzeMsg}
           content: `이번 문답은 예외적으로 8문장 이내로 답변을 생성합니다.`,
         });
       }
+      /* 인지행동 세션 돌입 */
       // 인지행동 세션 데이터가 있는 경우
       else if (req.session.cb_class) {
         // 정답을 골랐을 경우
@@ -1538,9 +1542,7 @@ ${analyzeMsg}
             delete req.session.cb_wrongCnt;
           }
         }
-      }
-      // 아무런 분기도 걸리지 않을 경우
-      else promptArr.push(sentence_division_prompt);
+      } else promptArr.push(sentence_division_prompt);
 
       /*
       // 답변 횟수 카운트
@@ -1554,7 +1556,6 @@ ${analyzeMsg}
       */
 
       // 상시 삽입 프롬프트
-      // promptArr.push(sentence_division_prompt); // 문장 구분 프롬프트 삽입
       promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
 
       // console.log(promptArr);
