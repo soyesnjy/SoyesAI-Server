@@ -146,6 +146,59 @@ const select_soyes_AI_Ebt_Table = async (
     return { testResult: "", ebt_school_data: {} };
   }
 };
+// User 정서행동 결과 반환. (미검사 / 위험 / 그외) (String)
+const select_soyes_AI_Ebt_Result = async (
+  user_table,
+  user_attr,
+  danger_score,
+  parsepUid
+) => {
+  // 동기식 DB 접근 함수 1. Promise 생성 함수
+  function queryAsync(connection, query, parameters) {
+    return new Promise((resolve, reject) => {
+      connection.query(query, parameters, (error, results, fields) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+  }
+  // 프로미스 resolve 반환값 사용. (User Data return)
+  async function fetchUserData(connection, query) {
+    try {
+      let results = await queryAsync(connection, query, []);
+      // console.log(results[0]);
+      return results;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  try {
+    // "question" 포함 attribute 거르기
+    const columnAttr = Object.values(user_attr)
+      .filter((el) => el.includes("question"))
+      .join(", ");
+
+    const select_query = `SELECT ${columnAttr} FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
+    const ebt_data = await fetchUserData(connection_AI, select_query);
+    // console.log(ebt_data[0]);
+
+    if (!ebt_data[0]) return "미검사";
+
+    // 검사 스코어 합 계산
+    const ebt_score = Object.values(ebt_data[0]).reduce(
+      (acc, cur) => acc + cur
+    );
+
+    console.log(ebt_score);
+    return ebt_score >= danger_score ? "위험" : "그외";
+  } catch (err) {
+    console.log(err);
+    return { testResult: "", ebt_school_data: {} };
+  }
+};
 // User 성격 검사 유형 반환 (String)
 const select_soyes_AI_Pt_Table = async (user_table, user_attr, parsepUid) => {
   // 동기식 DB 접근 함수 1. Promise 생성 함수
@@ -184,217 +237,12 @@ const select_soyes_AI_Pt_Table = async (user_table, user_attr, parsepUid) => {
 };
 
 // Database Table Info
-const User_Table_Info = {
-  table: "soyes_ai_User",
-  attribute: {
-    pKey: "uid",
-    attr1: "Email",
-    attr2: "passWard",
-    attr3: "name",
-    attr4: "phoneNumber",
-    attr5: "oauth_type",
-    attr6: "creation_date",
-    attr7: "lastLogin_date",
-  },
-};
-const EBT_Table_Info = {
-  School: {
-    table: "soyes_ai_Ebt_School",
-    attribute: {
-      pKey: "uid",
-      attr1: "school_question_0",
-      attr2: "school_question_1",
-      attr3: "school_question_2",
-      attr4: "school_question_3",
-      attr5: "school_question_4",
-      attr6: "school_question_5",
-      attr7: "chat",
-      attr8: "date",
-    },
-  },
-  Friend: {
-    table: "soyes_ai_Ebt_Friend",
-    attribute: {
-      pKey: "uid",
-      attr1: "friend_question_0",
-      attr2: "friend_question_1",
-      attr3: "friend_question_2",
-      attr4: "friend_question_3",
-      attr5: "friend_question_4",
-      attr6: "friend_question_5",
-      attr7: "friend_question_6",
-      attr8: "friend_question_7",
-      attr9: "chat",
-      attr10: "date",
-    },
-  },
-  Family: {
-    table: "soyes_ai_Ebt_Family",
-    attribute: {
-      pKey: "uid",
-      attr1: "family_question_0",
-      attr2: "family_question_1",
-      attr3: "family_question_2",
-      attr4: "family_question_3",
-      attr5: "family_question_4",
-      attr6: "family_question_5",
-      attr7: "family_question_6",
-      attr8: "chat",
-      attr9: "date",
-    },
-  },
-  Mood: {
-    table: "soyes_ai_Ebt_Mood",
-    attribute: {
-      pKey: "uid",
-      attr1: "mood_question_0",
-      attr2: "mood_question_1",
-      attr3: "mood_question_2",
-      attr4: "chat",
-      attr5: "date",
-    },
-  },
-  Unrest: {
-    table: "soyes_ai_Ebt_Unrest",
-    attribute: {
-      pKey: "uid",
-      attr1: "unrest_question_0",
-      attr2: "unrest_question_1",
-      attr3: "unrest_question_2",
-      attr4: "unrest_question_3",
-      attr5: "unrest_question_4",
-      attr6: "unrest_question_5",
-      attr7: "chat",
-      attr8: "date",
-    },
-  },
-  Sad: {
-    table: "soyes_ai_Ebt_Sad",
-    attribute: {
-      pKey: "uid",
-      attr1: "sad_question_0",
-      attr2: "sad_question_1",
-      attr3: "sad_question_2",
-      attr4: "sad_question_3",
-      attr5: "sad_question_4",
-      attr6: "sad_question_5",
-      attr7: "sad_question_6",
-      attr8: "chat",
-      attr9: "date",
-    },
-  },
-  Health: {
-    table: "soyes_ai_Ebt_Health",
-    attribute: {
-      pKey: "uid",
-      attr1: "health_question_0",
-      attr2: "health_question_1",
-      attr3: "health_question_2",
-      attr4: "health_question_3",
-      attr5: "health_question_4",
-      attr6: "chat",
-      attr7: "date",
-    },
-  },
-  Attention: {
-    table: "soyes_ai_Ebt_Attention",
-    attribute: {
-      pKey: "uid",
-      attr1: "attention_question_0",
-      attr2: "attention_question_1",
-      attr3: "attention_question_2",
-      attr4: "attention_question_3",
-      attr5: "attention_question_4",
-      attr6: "attention_question_5",
-      attr7: "attention_question_6",
-      attr8: "chat",
-      attr9: "date",
-    },
-  },
-  Movement: {
-    table: "soyes_ai_Ebt_Movement",
-    attribute: {
-      pKey: "uid",
-      attr1: "movement_question_0",
-      attr2: "movement_question_1",
-      attr3: "movement_question_2",
-      attr4: "movement_question_3",
-      attr5: "movement_question_4",
-      attr6: "movement_question_5",
-      attr7: "movement_question_6",
-      attr8: "chat",
-      attr9: "date",
-    },
-  },
-  Angry: {
-    table: "soyes_ai_Ebt_Angry",
-    attribute: {
-      pKey: "uid",
-      attr1: "angry_question_0",
-      attr2: "angry_question_1",
-      attr3: "angry_question_2",
-      attr4: "angry_question_3",
-      attr5: "angry_question_4",
-      attr6: "angry_question_5",
-      attr7: "chat",
-      attr8: "date",
-    },
-  },
-  Self: {
-    table: "soyes_ai_Ebt_Self",
-    attribute: {
-      pKey: "uid",
-      attr1: "self_question_0",
-      attr2: "self_question_1",
-      attr3: "self_question_2",
-      attr4: "self_question_3",
-      attr5: "self_question_4",
-      attr6: "chat",
-      attr7: "date",
-    },
-  },
-  Log: {
-    table: "soyes_ai_User_Ebt_Log",
-    attribute: {
-      cKey: "uid",
-      attr1: "date",
-      attr2: "ebt_analysis",
-      attr3: "ebt_type",
-    },
-  },
-};
-const PT_Table_Info = {
-  Main: {
-    table: "soyes_ai_PT",
-    attribute: {
-      pKey: "uid",
-      attr1: "date",
-      attr2: "persanl_result",
-      attr3: "chat",
-    },
-  },
-
-  Log: {
-    table: "soyes_ai_User_Pt_Log",
-    attribute: {
-      cKey: "uid",
-      attr1: "date",
-      attr2: "persanl_result",
-      attr3: "pt_analysis",
-    },
-  },
-};
-const Consult_Log_Table_Info = {
-  Log: {
-    table: "soyes_ai_User_Consult_Log",
-    attribute: {
-      pKey: "uid",
-      attr1: "date",
-      attr2: "avarta_name",
-      attr3: "consult_log",
-    },
-  },
-};
+const {
+  User_Table_Info,
+  EBT_Table_Info,
+  PT_Table_Info,
+  Consult_Log_Table_Info,
+} = require("../DB/database_table_info");
 
 // EBT 반영 Class 정의
 const EBT_classArr = [
@@ -410,19 +258,8 @@ const EBT_classArr = [
   "Angry",
   "Self",
 ];
-const EBT_ObjArr = {
-  School: { table: "soyes_ai_Ebt_School", result: ebt_School_Result },
-  Friend: { table: "soyes_ai_Ebt_Friend", result: ebt_Friend_Result },
-  Family: { table: "soyes_ai_Ebt_Family", result: ebt_Family_Result },
-  Mood: { table: "soyes_ai_Ebt_Mood", result: ebt_Mood_Result },
-  Unrest: { table: "soyes_ai_Ebt_Unrest", result: ebt_Unrest_Result },
-  Sad: { table: "soyes_ai_Ebt_Sad", result: ebt_Sad_Result },
-  Health: { table: "soyes_ai_Ebt_Health", result: ebt_Health_Result },
-  Attention: { table: "soyes_ai_Ebt_Attention", result: ebt_Attention_Result },
-  Movement: { table: "soyes_ai_Ebt_Movement", result: ebt_Movement_Result },
-  Angry: { table: "soyes_ai_Ebt_Angry", result: ebt_Angry_Result },
-  Self: { table: "soyes_ai_Ebt_Self", result: ebt_Self_Result },
-};
+
+// AI API
 const openAIController = {
   // 감정 분석 AI
   postOpenAIEmotionAnalyze: async (req, res) => {
@@ -1019,7 +856,7 @@ ${analyzeMsg}
   postOpenAIConsultingPupu: async (req, res) => {
     const { EBTData } = req.body;
     console.log("푸푸 상담 API /consulting_emotion_pupu Path 호출");
-    console.log(EBTData);
+    // console.log(EBTData);
 
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
@@ -1047,6 +884,15 @@ ${analyzeMsg}
 
       // pUid default값 설정
       parsepUid = pUid ? pUid : "dummy";
+
+      /* EBT 결과 메서드 테스트용 ( 미검사 / 위험 / 그외 )
+      const a = await select_soyes_AI_Ebt_Result(
+        EBT_Table_Info.School.table,
+        EBT_Table_Info.School.attribute,
+        EBT_Table_Info.School.danger_score,
+        parsepUid
+      );
+      */
 
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_pupu); // 페르소나 프롬프트 삽입
@@ -1342,11 +1188,9 @@ ${analyzeMsg}
         // 해당 계정의 모든 정서행동검사 결과를 DB에서 차출
         const psy_testResult_promptArr = EBT_classArr.map(async (ebt_class) => {
           const select_Ebt_Result = await select_soyes_AI_Ebt_Table(
-            EBT_ObjArr[ebt_class].table, // Table Name
-            {
-              pKey: "uid",
-            }, // primary Key Name
-            EBT_ObjArr[ebt_class].result, // EBT Question 11가지 분야 중 1개 (Table에 따라 결정)
+            EBT_Table_Info[ebt_class].table, // Table Name
+            EBT_Table_Info[ebt_class].attribute,
+            EBT_Table_Info[ebt_class].result, // EBT Question 11가지 분야 중 1개 (Table에 따라 결정)
             parsepUid // Uid
           );
 
@@ -1580,7 +1424,7 @@ ${analyzeMsg}
   postOpenAIConsultingSoyes: async (req, res) => {
     const { EBTData } = req.body;
     console.log("소예 상담 API /consulting_emotion_soyes Path 호출");
-    console.log(EBTData);
+    // console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
@@ -1640,11 +1484,9 @@ ${analyzeMsg}
         // 해당 계정의 모든 정서행동검사 결과 DB에서 차출
         const psy_testResult_promptArr = EBT_classArr.map(async (ebt_class) => {
           const select_Ebt_Result = await select_soyes_AI_Ebt_Table(
-            EBT_ObjArr[ebt_class].table, // Table Name
-            {
-              pKey: "uid",
-            }, // primary Key Name
-            EBT_ObjArr[ebt_class].result, // EBT Question 11가지 분야 중 1개 (Table에 따라 결정)
+            EBT_Table_Info[ebt_class].table, // Table Name
+            EBT_Table_Info[ebt_class].attribute,
+            EBT_Table_Info[ebt_class].result, // EBT Question 11가지 분야 중 1개 (Table에 따라 결정)
             parsepUid // Uid
           );
 
