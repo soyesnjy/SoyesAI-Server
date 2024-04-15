@@ -29,7 +29,7 @@ app.use(
       "http://soyes.chatbot.s3-website.ap-northeast-2.amazonaws.com",
       "http://soyes.toy.com.s3-website.ap-northeast-2.amazonaws.com",
     ],
-    methods: ["GET", "POST", "OPTION"],
+    methods: ["GET", "POST", "OPTION", "DELETE"],
     credentials: true,
   })
 );
@@ -126,6 +126,9 @@ app.use("/agoraToken", agoraTokenRouter);
 // openAI 경로 라우팅
 const openAIRouter = require("./router/openAI");
 app.use("/openAI", openAIRouter);
+
+const reviewRouter = require("./router/review");
+app.use("/review", reviewRouter);
 
 // MailTest 경로 라우팅
 const mailTestRouter = require("./router/mailTest");
