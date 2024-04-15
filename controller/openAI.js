@@ -65,6 +65,7 @@ const {
   test_prompt_20240402,
   persona_prompt_lala_v2,
   persona_prompt_lala_v3,
+  persona_prompt_lala_v4,
 } = require("../DB/test_prompt");
 
 // 인지행동 검사 관련
@@ -1276,7 +1277,7 @@ ${analyzeMsg}
   postOpenAIConsultingLala: async (req, res) => {
     const { EBTData } = req.body;
     console.log("엘라 상담 API /consulting_emotion_lala Path 호출");
-    console.log(EBTData);
+    // console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     let testClass = "",
@@ -1304,7 +1305,7 @@ ${analyzeMsg}
 
       // 고정 삽입 프롬프트
       // promptArr.push(persona_prompt_lala); // 페르소나 프롬프트 삽입
-      promptArr.push(persona_prompt_lala_v3);
+      promptArr.push(persona_prompt_lala_v4);
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       const lastUserContent =
