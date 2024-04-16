@@ -34,7 +34,7 @@ const Review_Table_Info = {
 
 const reviewController = {
   // ReviewData READ
-  getReviewDataGet: (req, res) => {
+  getReviewDataRead: (req, res) => {
     console.log("ReviewData READ API 호출");
     // 클라이언트로부터 페이지 번호 받기 (기본값: 1)
     const page = req.query.page || 1;

@@ -4,10 +4,10 @@ const router = express.Router();
 const { errController } = require("../controller/index");
 const { reviewController } = require("../controller/review");
 
-const { getReviewDataGet, postReviewDataCreate, deleteReviewDataDelete } =
+const { getReviewDataRead, postReviewDataCreate, deleteReviewDataDelete } =
   reviewController;
 
-router.get("/", getReviewDataGet);
+router.get("/", getReviewDataRead);
 router.post("/", postReviewDataCreate);
 router.delete("/:id", deleteReviewDataDelete);
 
