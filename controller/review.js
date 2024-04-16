@@ -38,11 +38,11 @@ const reviewController = {
     console.log("ReviewData READ API 호출");
     // 클라이언트로부터 페이지 번호 받기 (기본값: 1)
     const page = req.query.page || 1;
-    const limit = 5; // 한 페이지에 보여줄 리뷰의 수
+    const limit = 10; // 한 페이지에 보여줄 리뷰의 수
     const offset = (page - 1) * limit;
 
     const review_table = Review_Table_Info.table;
-    const review_attribute = Review_Table_Info.attribute;
+    // const review_attribute = Review_Table_Info.attribute;
 
     // const select_column = Object.values(review_attribute).join(", ");
 
