@@ -50,14 +50,18 @@ const test_result_ment = [
 
 // 인지행동 검사 감지 멘트
 const cb_solution_ment = [
+  // 학교생활
   { text: "학교가기싫어", class: "school" },
   { text: "학교가기 싫어", class: "school" },
   { text: "학교가싫어", class: "school" },
   { text: "학교가 싫어", class: "school" },
+  // 친구관계
   { text: "친구가미워", class: "friend" },
   { text: "친구가 미워", class: "friend" },
+  // 가족관계
   { text: "부모님이무서워", class: "family" },
   { text: "부모님이 무서워", class: "family" },
+  // 그외
   { text: "그외인지", class: "etc" },
 ];
 

@@ -1235,7 +1235,6 @@ ${analyzeMsg}
 
       /* 검사 결과 분석 관련 멘트 감지 */
       if (
-        !req.session.ebt_class &&
         test_result_ment.some((el) => {
           if (lastUserContent.includes(el.text)) {
             testClass = el.class; // 검사 분야 저장
