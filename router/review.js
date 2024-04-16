@@ -4,11 +4,16 @@ const router = express.Router();
 const { errController } = require("../controller/index");
 const { reviewController } = require("../controller/review");
 
-const { getReviewDataRead, postReviewDataCreate, deleteReviewDataDelete } =
-  reviewController;
+const {
+  getReviewDataRead,
+  postReviewDataCreate,
+  deleteReviewDataDelete,
+  postReviewDataUpdate,
+} = reviewController;
 
 router.get("/", getReviewDataRead);
 router.post("/", postReviewDataCreate);
+router.post("/update", postReviewDataUpdate);
 router.delete("/:id", deleteReviewDataDelete);
 
 // 에러 메세지 처리
