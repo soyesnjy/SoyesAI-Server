@@ -26,9 +26,8 @@ const Review_Table_Info = {
   table: "soyes_ai_User_Review_Log",
   attribute: {
     cKey: "uid",
-    attr1: "date",
-    attr2: "profile_img_url",
-    attr3: "content",
+    attr1: "profile_img_url",
+    attr2: "content",
   },
 };
 
@@ -36,30 +35,38 @@ const reviewController = {
   // ReviewData READ
   getReviewDataRead: (req, res) => {
     console.log("ReviewData READ API 호출");
-    // 클라이언트로부터 페이지 번호 받기 (기본값: 1)
-    const page = req.query.page || 1;
-    const limit = 10; // 한 페이지에 보여줄 리뷰의 수
-    const offset = (page - 1) * limit;
+    try {
+      // 클라이언트로부터 페이지 번호 받기 (기본값: 1)
+      const page = req.query.page || 1;
+      const limit = 10; // 한 페이지에 보여줄 리뷰의 수
+      const offset = (page - 1) * limit;
 
-    const review_table = Review_Table_Info.table;
-    // const review_attribute = Review_Table_Info.attribute;
+      const review_table = Review_Table_Info.table;
+      // const review_attribute = Review_Table_Info.attribute;
+      // const select_column = Object.values(review_attribute).join(", ");
 
-    // const select_column = Object.values(review_attribute).join(", ");
-
-    // SQL 쿼리 준비: 최신순으로 리뷰 데이터 가져오기
-    const select_query = `SELECT * FROM ${review_table} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
-    const select_values = [limit, offset];
-    // 데이터베이스 쿼리 실행
-    connection_AI.query(select_query, select_values, (err, data) => {
-      if (err) return res.status(500).json({ message: err });
-      // 결과 반환
-      res.json({
-        page,
-        limit,
-        reviewData: data,
+      // SQL 쿼리 준비: 최신순으로 리뷰 데이터 가져오기
+      const select_query = `SELECT * FROM ${review_table} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+      const select_values = [limit, offset];
+      // 데이터베이스 쿼리 실행
+      connection_AI.query(select_query, select_values, (err, data) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        // 결과 반환
+        res.json({
+          page,
+          limit,
+          reviewData: data,
+        });
       });
-    });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ message: "Server Error - 500" });
+    }
   },
+  // ReviewData CREATE
   postReviewDataCreate: (req, res) => {
     console.log("ReviewData CREATE API 호출");
     const { ReviewData } = req.body;
@@ -73,13 +80,6 @@ const reviewController = {
       const { pUid, profile_img_url, content } = parseReviewData;
       parsepUid = pUid;
 
-      // 오늘 날짜 변환
-      const dateObj = new Date();
-      const year = dateObj.getFullYear();
-      const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
-      const day = ("0" + dateObj.getDate()).slice(-2);
-      const date = `${year}-${month}-${day}`;
-
       const review_table = Review_Table_Info.table;
       const review_attribute = Review_Table_Info.attribute;
 
@@ -91,7 +91,7 @@ const reviewController = {
         .join(", ")})`;
       // console.log(consult_insert_query);
 
-      const review_insert_value = [parsepUid, date, profile_img_url, content];
+      const review_insert_value = [parsepUid, profile_img_url, content];
       // console.log(consult_insert_value);
 
       connection_AI.query(review_insert_query, review_insert_value, (err) => {
@@ -109,6 +109,7 @@ const reviewController = {
       res.status(500).json({ message: "Server Error - 500" });
     }
   },
+  // ReviewData UPDATE
   postReviewDataUpdate: (req, res) => {
     console.log("ReviewData UPDATE API 호출");
     const { ReviewData } = req.body;
@@ -147,8 +148,8 @@ const reviewController = {
           // entry_id에 해당되는 Review가 있을 경우
           if (data[0]) {
             // Review 갱신용 Update Query
-            const review_update_query = `UPDATE ${review_table} SET ${review_attribute.attr1} = ?, ${review_attribute.attr3} = ? WHERE ${review_pKey} = ?`;
-            const review_update_value = [date, parseContent, parseEnteyID];
+            const review_update_query = `UPDATE ${review_table} SET ${review_attribute.attr2} = ? WHERE ${review_pKey} = ?`;
+            const review_update_value = [parseContent, parseEnteyID];
             // Update Query
             connection_AI.query(
               review_update_query,
@@ -178,6 +179,7 @@ const reviewController = {
       res.status(500).json({ message: "Server Error - 500" });
     }
   },
+  // ReviewData DELETE
   deleteReviewDataDelete: (req, res) => {
     console.log("ReviewData DELETE API 호출");
     const { id } = req.params;

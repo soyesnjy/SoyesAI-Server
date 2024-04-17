@@ -67,6 +67,12 @@ app.use(
 // 6. { sameSite: "strict" }일 경우 Same-Site 접근만 가능.
 // 7. 현재 설정을 적용하여 localhost 도메인에서만 session이 작동함.
 
+// 서버 실행 환경 한국 시간으로 설정
+const moment = require("moment-timezone");
+// console.log(moment().tz("Asia/Seoul").format());
+console.log(new Date().toString());
+console.log(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+
 app.get("/", (req, res) => {
   console.log(req.session);
   if (!req.session.test) req.session.test = "a";
