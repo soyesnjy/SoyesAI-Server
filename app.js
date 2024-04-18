@@ -69,9 +69,7 @@ app.use(
 
 // 서버 실행 환경 한국 시간으로 설정
 const moment = require("moment-timezone");
-// console.log(moment().tz("Asia/Seoul").format());
 console.log(new Date().toString());
-console.log(new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
 
 app.get("/", (req, res) => {
   console.log(req.session);

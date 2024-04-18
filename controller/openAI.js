@@ -146,12 +146,12 @@ const select_soyes_AI_Ebt_Table = async (
     return { testResult: "", ebt_school_data: {} };
   }
 };
-// User 정서행동 결과 반환. (미검사 / 위험 / 그외) (String)
+// User 정서행동 결과 반환 - ("NonTesting" / "danger" / "etc" / "Error")
 const select_soyes_AI_Ebt_Result = async (
-  user_table,
-  user_attr,
-  danger_score,
-  parsepUid
+  user_table, // 조회할 EBT table (11개 Class)
+  user_attr, // table Attribute
+  danger_score, // 위험 판단 점수
+  parsepUid // User ID
 ) => {
   // 동기식 DB 접근 함수 1. Promise 생성 함수
   function queryAsync(connection, query, parameters) {
@@ -176,7 +176,7 @@ const select_soyes_AI_Ebt_Result = async (
     }
   }
   try {
-    // "question" 포함 attribute 거르기
+    // "question" 문자열이 포함된 attribute 선별
     const columnAttr = Object.values(user_attr)
       .filter((el) => el.includes("question"))
       .join(", ");
@@ -185,18 +185,20 @@ const select_soyes_AI_Ebt_Result = async (
     const ebt_data = await fetchUserData(connection_AI, select_query);
     // console.log(ebt_data[0]);
 
-    if (!ebt_data[0]) return "미검사";
+    // 검사를 진행하지 않은 경우
+    if (!ebt_data[0]) return "NonTesting";
 
     // 검사 스코어 합 계산
     const ebt_score = Object.values(ebt_data[0]).reduce(
       (acc, cur) => acc + cur
     );
-
     console.log(ebt_score);
-    return ebt_score >= danger_score ? "위험" : "그외";
+
+    // danger_score 보다 높으면 "위험", 아니면 "그외" 반환
+    return ebt_score >= danger_score ? "danger" : "etc";
   } catch (err) {
     console.log(err);
-    return { testResult: "", ebt_school_data: {} };
+    return "Error";
   }
 };
 // User 성격 검사 유형 반환 (String)
