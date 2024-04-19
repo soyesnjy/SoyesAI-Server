@@ -345,6 +345,7 @@ const openAIController = {
       const analysisPrompt = [];
       const userPrompt = [];
 
+      // 정서행동 검사 분석가 페르소나
       analysisPrompt.push(ebt_analysis_prompt);
       userPrompt.push({
         role: "user",
@@ -352,9 +353,7 @@ const openAIController = {
       });
 
       // 메일 관련 세팅 시작
-
       /*
-
       // mysql query 메서드 동기식 작동 + DB 데이터 가져오기
       let yourMailAddr = "";
 
@@ -391,7 +390,6 @@ const openAIController = {
       const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${pUid}'`;
       await fetchUserData(connection_AI, select_query);
       console.log("받는사람: " + yourMailAddr);
-
       */
 
       yourMailAddr = "soyesnjy@gmail.com"; // dummy email. 받는사람
@@ -424,7 +422,7 @@ const openAIController = {
       // AI 분석
       const response = await openai.chat.completions.create({
         messages: [...analysisPrompt, ...parseMessageArr, ...userPrompt],
-        model: "gpt-4-1106-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-4-0125-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
         temperature: 1,
       });
 
@@ -689,7 +687,7 @@ ${analyzeMsg}
       // AI 분석
       const response = await openai.chat.completions.create({
         messages: [...analysisPrompt, ...userPrompt],
-        model: "gpt-4-1106-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-4-0125-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
         temperature: 1,
       });
 
