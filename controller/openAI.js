@@ -369,7 +369,7 @@ const openAIController = {
         user의 ${ebt_class} 심리 검사 결과는 '${
             EBT_Table_Info[parsingType].danger_score >=
             score.reduce((acc, cur) => acc + cur)
-              ? "위험"
+              ? "경고"
               : "양호"
           }'에 해당한다.
         다음 문단은 user의 ${ebt_class} 심리 검사 문항에 대한 응답이다.
