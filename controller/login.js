@@ -1,3 +1,5 @@
+// Redis 연결
+const redisStore = require("../DB/redisClient");
 // MySQL 접근
 const mysql = require("mysql");
 const { dbconfig, dbconfig_ai } = require("../DB/database");
@@ -475,6 +477,7 @@ const loginController = {
       } else parseLoginData = LoginData;
 
       const { pUid, passWard } = parseLoginData;
+      const sessionId = req.sessionID;
 
       let parsepUid = pUid;
       let parsePassWard = passWard;
@@ -558,6 +561,27 @@ const loginController = {
 
           const expire = String(dateObj.setHours(dateObj.getHours() + 1));
 
+          // Redis에서 기존 세션 ID 확인
+          redisStore.get(`user_session:${parsepUid}`, (err, oldSessionId) => {
+            if (oldSessionId) {
+              // 기존 세션 무효화
+              redisStore.destroy(`user_session:${parsepUid}`, (err, reply) => {
+                console.log("Previous session invalidated");
+              });
+            }
+
+            // 새 세션 ID를 사용자 ID와 연결
+            redisStore.set(
+              `user_session:${parsepUid}`,
+              sessionId,
+              (err, reply) => {
+                req.session.userId = parsepUid; // 세션에 사용자 ID 저장
+                // 로그인 처리 로직
+                console.log(`SessionID Update - ${sessionId}`);
+              }
+            );
+          });
+
           // client 전송
           res.status(200).json({
             message: "User Login Success! - 200 OK",
@@ -628,10 +652,34 @@ const loginController = {
     }
   },
   // AI 로그아웃 - 인증 삭제
-  getAILogoutHandler: (req, res) => {
+  getAILogoutHandler: async (req, res) => {
     console.log("AI Logout API 호출");
     // console.log(req.cookies);
+    const refreshToken = req.cookies.refreshToken;
     try {
+      // refreshToken 있을 경우 - Redis Sid 삭제
+      if (refreshToken) {
+        const decoded = verifyToken("refresh", refreshToken);
+        // Redis SessionID 삭제
+        redisStore.get(`user_session:${decoded.id}`, (err, oldSessionId) => {
+          if (err) {
+            console.error("Error fetching old session ID:", err);
+            return; // 에러 발생 시 추가 처리 중지
+          }
+          if (oldSessionId) {
+            console.log("1.oldSessionId: " + oldSessionId);
+            // 기존 세션 무효화
+            redisStore.destroy(`user_session:${decoded.id}`, (err) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+              console.log("RedisStore Session ID Delete Success!");
+            });
+          }
+        });
+      }
+
       // 세션 삭제
       req.session.destroy((err) => {
         if (err) console.error("세션 삭제 중 에러 발생", err);
@@ -657,6 +705,7 @@ const loginController = {
     // Session data 조회
     const accessToken = req.session.accessToken;
     const refreshToken = req.cookies.refreshToken;
+    const sessionId = req.sessionID;
 
     // User Table && attribut 명시
     const user_table = User_Table_Info.table;
@@ -667,18 +716,27 @@ const loginController = {
       if (accessToken) {
         // accessToken Decoding
         const decoded = verifyToken("access", accessToken);
-        // 1. SELECT TEST (row가 있는지 없는지 검사)
-        // User 계정 DB SELECT Method. uid를 입력값으로 받음
-        // const ebt_data = await user_ai_select(
-        //   user_table,
-        //   user_attribute,
-        //   decoded.id
-        // );
-
         // accessToken은 세션에 저장된 값이기 때문에 비교적 간단한 검사 진행
         if (decoded.id) {
-          console.log("AccessToken 유효성 검증 통과!");
-          next();
+          // Redis 중복 로그인 확인
+          redisStore.get(`user_session:${decoded.id}`, (err, prevSid) => {
+            if (err) {
+              console.log(err);
+              res.status(500).json({ message: "redisStore GET Error!" });
+            }
+            if (prevSid) {
+              if (prevSid !== sessionId) {
+                console.log("중복 로그인 계정");
+                res.status(401).json({ message: "Duplicated Session" });
+              } else {
+                console.log("AccessToken 유효성 검증 통과!");
+                next();
+              }
+            } else {
+              console.log("Redis Store prevSid 값이 없음");
+              next();
+            }
+          });
         } else return res.status(400).json({ message: "Non User!" });
 
         // refreshToken만 있는 경우
@@ -710,6 +768,27 @@ const loginController = {
       res.status(500).json({ message: "Server Error - 500" });
     }
   },
+  // AI 중복 로그인 검사
+  vaildateDupleLogin: (req, res, next) => {
+    try {
+      const sessionId = req.sessionID;
+
+      // Redis에서 기존 세션 ID 확인
+      redisStore.get(`user_session:${userId}`, (err, oldSessionId) => {
+        if (oldSessionId) {
+          // 기존 세션 무효화
+          redisStore.del(`sess:${oldSessionId}`, (err, reply) => {
+            console.log("Previous session invalidated");
+          });
+        }
+      });
+
+      next();
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
+    }
+  },
   // AI RefreshToken 갱신
   postAIRefreshTokenUpdateHandler: async (req, res) => {
     const { LoginData } = req.body;
@@ -722,6 +801,7 @@ const loginController = {
       } else parseLoginData = LoginData;
 
       const { pUid, refreshToken } = parseLoginData;
+      const sessionId = req.sessionID;
 
       let parsepUid = pUid;
       let parseRefreshToken = refreshToken;
@@ -765,6 +845,22 @@ const loginController = {
         const expire = String(dateObj.setHours(dateObj.getHours() + 1));
 
         console.log("User RefreshToken Update Success! - 200 OK");
+
+        // Redis에서 기존 세션 ID 확인
+        redisStore.get(`user_session:${pUid}`, (err, oldSessionId) => {
+          if (oldSessionId) {
+            // 기존 세션 무효화
+            redisStore.del(`sess:${oldSessionId}`, (err, reply) => {
+              console.log("Previous session invalidated");
+            });
+          }
+
+          // 새 세션 ID를 사용자 ID와 연결
+          redisStore.set(`user_session:${pUid}`, sessionId, (err, reply) => {
+            // 로그인 처리 로직
+            console.log(`SessionID Update - ${sessionId}`);
+          });
+        });
         // client 전송
         res.status(200).json({
           message: "User RefreshToken Update Success! - 200 OK",

@@ -8,6 +8,8 @@ require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
 
+const redisStore = require("./DB/redisClient");
+
 const app = express();
 const PORT = 4000;
 const PORT_https = 4040;
@@ -45,6 +47,7 @@ app.use(cookieParser("@earthworm"));
 // 세션 설정 - Cross-Site 설정 불가능. (secure 이슈)
 app.use(
   session({
+    store: redisStore,
     secret: "@earthworm",
     resave: false,
     saveUninitialized: true,

@@ -22,6 +22,7 @@ const {
   vaildateTokenAI,
   getAILogoutHandler,
   postAIRefreshTokenUpdateHandler,
+  vaildateDupleLogin,
 } = loginController;
 
 const {

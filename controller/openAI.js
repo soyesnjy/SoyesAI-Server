@@ -2,6 +2,9 @@
 const mysql = require("mysql");
 const { dbconfig_ai } = require("../DB/database");
 
+// Redis 연결
+const redisStore = require("../DB/redisClient");
+
 // AI DB 연결
 const connection_AI = mysql.createConnection(dbconfig_ai);
 connection_AI.connect();
@@ -9,7 +12,6 @@ connection_AI.connect();
 const axios = require("axios");
 
 const OpenAI = require("openai");
-
 const openai = new OpenAI({
   apiKey: process.env.API_TOKEN,
 });
@@ -905,6 +907,16 @@ ${analyzeMsg}
       }
       */
 
+      redisStore.get("test", (err, reply) => {
+        if (err) {
+          return res.status(500).send("Error retrieving data from Redis");
+        }
+        if (!reply) {
+          redisStore.set(`test`, 1);
+        } else redisStore.set(`test`, reply + 1);
+        console.log("Value: " + reply);
+      });
+
       if (typeof EBTData === "string") {
         parseEBTdata = JSON.parse(EBTData);
       } else parseEBTdata = EBTData;
@@ -1761,7 +1773,7 @@ ${analyzeMsg}
       // JSON 형식이 아니기에 res.json 사용 X
       res.end(response.data);
     } catch (error) {
-      console.error(error);
+      console.error(error.message);
       res.status(500).end("Internal Server Error");
     }
   },

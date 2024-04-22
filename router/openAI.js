@@ -35,7 +35,11 @@ router.get("/clear_cookies", getClearCookies);
 // 감정 분석
 router.post("/emotion", postOpenAIEmotionAnalyze);
 // 공감친구 모델 - 푸푸
-router.post("/consulting_emotion_pupu", postOpenAIConsultingPupu);
+router.post(
+  "/consulting_emotion_pupu",
+  vaildateTokenConsulting,
+  postOpenAIConsultingPupu
+);
 // 공부친구 모델 - 우비
 router.post("/consulting_emotion_ubi", postOpenAIConsultingUbi);
 // 정서멘토 모델 - 라라
