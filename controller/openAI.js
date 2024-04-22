@@ -888,7 +888,8 @@ ${analyzeMsg}
   postOpenAIConsultingPupu: async (req, res) => {
     const { EBTData } = req.body;
     console.log("푸푸 상담 API /consulting_emotion_pupu Path 호출");
-    // console.log(EBTData);
+
+    console.log("req.sessionID: " + req.sessionID);
 
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
