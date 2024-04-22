@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  soyes-server:
+    image: soyesnjy/njy:1
+    container_name: soyes-server-docker
+    ports:
+      - "4040:4040"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
+  redis:
+    image: redis:latest
+    container_name: myredis
+    ports:
+      - "6379:6379" # Optional: Only expose if needed externally
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
