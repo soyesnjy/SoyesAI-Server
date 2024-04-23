@@ -906,17 +906,6 @@ ${analyzeMsg}
           .json({ message: "Session Expiration" });
       }
       */
-
-      redisStore.get("test", (err, reply) => {
-        if (err) {
-          return res.status(500).send("Error retrieving data from Redis");
-        }
-        if (!reply) {
-          redisStore.set(`test`, 1);
-        } else redisStore.set(`test`, reply + 1);
-        console.log("Value: " + reply);
-      });
-
       if (typeof EBTData === "string") {
         parseEBTdata = JSON.parse(EBTData);
       } else parseEBTdata = EBTData;

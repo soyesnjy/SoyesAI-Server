@@ -575,7 +575,6 @@ const loginController = {
               `user_session:${parsepUid}`,
               sessionId,
               (err, reply) => {
-                req.session.userId = parsepUid; // 세션에 사용자 ID 저장
                 // 로그인 처리 로직
                 console.log(`SessionID Update - ${sessionId}`);
               }
@@ -658,6 +657,8 @@ const loginController = {
     const refreshToken = req.cookies.refreshToken;
     try {
       // refreshToken 있을 경우 - Redis Sid 삭제
+      // refreshToken이 없는 상태에선 반드시 로그인을 해야함.
+      // 로그인 시 자동으로 Redis SessionID는 갱신되므로 refreshToken이 있는 경우에만 Redis SessionID를 삭제한다.
       if (refreshToken) {
         const decoded = verifyToken("refresh", refreshToken);
         // Redis SessionID 삭제
@@ -744,6 +745,7 @@ const loginController = {
         // refreshToken은 쿠키에 저장된 값이기 때문에 DB 계정이 있는지 검사
         const decoded = verifyToken("refresh", refreshToken);
         // User 계정 DB SELECT Method. uid를 입력값으로 받음
+
         const ebt_data = await user_ai_select(
           user_table,
           user_attribute,
@@ -755,6 +757,16 @@ const loginController = {
             id: ebt_data[0].uid,
             email: ebt_data[0].Email,
           }).accessToken;
+
+          // Redis SessionID Update
+          redisStore.set(
+            `user_session:${ebt_data[0].uid}`,
+            sessionId,
+            (err, reply) => {
+              // 로그인 처리 로직
+              console.log(`refreshToken SessionID Update - ${sessionId}`);
+            }
+          );
 
           console.log("RefreshToken 유효성 검증 통과!");
           next();
@@ -846,21 +858,15 @@ const loginController = {
 
         console.log("User RefreshToken Update Success! - 200 OK");
 
-        // Redis에서 기존 세션 ID 확인
-        redisStore.get(`user_session:${pUid}`, (err, oldSessionId) => {
-          if (oldSessionId) {
-            // 기존 세션 무효화
-            redisStore.del(`sess:${oldSessionId}`, (err, reply) => {
-              console.log("Previous session invalidated");
-            });
-          }
-
-          // 새 세션 ID를 사용자 ID와 연결
-          redisStore.set(`user_session:${pUid}`, sessionId, (err, reply) => {
+        // Redis SessionID Update
+        redisStore.set(
+          `user_session:${decoded.id}`,
+          sessionId,
+          (err, reply) => {
             // 로그인 처리 로직
-            console.log(`SessionID Update - ${sessionId}`);
-          });
-        });
+            console.log(`App refreshToken SessionID Update - ${sessionId}`);
+          }
+        );
         // client 전송
         res.status(200).json({
           message: "User RefreshToken Update Success! - 200 OK",
