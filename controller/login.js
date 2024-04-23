@@ -858,15 +858,26 @@ const loginController = {
 
         console.log("User RefreshToken Update Success! - 200 OK");
 
-        // Redis SessionID Update
-        redisStore.set(
-          `user_session:${decoded.id}`,
-          sessionId,
-          (err, reply) => {
-            // 로그인 처리 로직
-            console.log(`App refreshToken SessionID Update - ${sessionId}`);
+        // Redis에서 기존 세션 ID 확인
+        redisStore.get(`user_session:${decoded.id}`, (err, oldSessionId) => {
+          if (oldSessionId) {
+            // 기존 세션 무효화
+            redisStore.destroy(`user_session:${decoded.id}`, (err, reply) => {
+              console.log("Previous session invalidated");
+            });
           }
-        );
+
+          // 새 세션 ID를 사용자 ID와 연결
+          redisStore.set(
+            `user_session:${parsepUid}`,
+            sessionId,
+            (err, reply) => {
+              // 로그인 처리 로직
+              console.log(`SessionID Update - ${sessionId}`);
+            }
+          );
+        });
+
         // client 전송
         res.status(200).json({
           message: "User RefreshToken Update Success! - 200 OK",
