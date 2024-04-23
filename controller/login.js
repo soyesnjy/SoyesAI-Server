@@ -189,7 +189,7 @@ const loginController = {
   oauthGoogleAccessTokenHandler: async (req, res) => {
     const { code } = req.body;
     console.log("Google OAuth AccessToken 발급 API 호출");
-
+    const sessionId = req.sessionID;
     try {
       oAuth2Client.getToken(code, (err, token) => {
         if (err) return console.error("Error retrieving access token", err);
@@ -316,6 +316,31 @@ const loginController = {
             secure: process.env.DEV_OPS !== "local",
           });
 
+          // Redis에서 기존 세션 ID 확인
+          redisStore.get(
+            `user_session:${ebt_data[0].uid}`,
+            (err, oldSessionId) => {
+              if (oldSessionId) {
+                // 기존 세션 무효화
+                redisStore.destroy(
+                  `user_session:${ebt_data[0].uid}`,
+                  (err, reply) => {
+                    console.log("Previous session invalidated");
+                  }
+                );
+              }
+              // 새 세션 ID를 사용자 ID와 연결
+              redisStore.set(
+                `user_session:${ebt_data[0].uid}`,
+                sessionId,
+                (err, reply) => {
+                  // 로그인 처리 로직
+                  console.log(`SessionID Update - ${sessionId}`);
+                }
+              );
+            }
+          );
+
           res.json({ data: response.data });
         });
       });
@@ -329,6 +354,7 @@ const loginController = {
     const { code } = req.body;
     console.log("Kakao OAuth AccessToken 발급 API 호출");
     // 현재 카카오 소셜 로그인은 사업자등록을 해두지 않았기에 닉네임 정보만 가져올 수 있습니다.
+    const sessionId = req.sessionID;
     try {
       // POST 요청으로 액세스 토큰 요청
       const tokenResponse = await axios.post(
@@ -458,6 +484,28 @@ const loginController = {
         secure: process.env.DEV_OPS !== "local",
       });
 
+      // Redis에서 기존 세션 ID 확인
+      redisStore.get(`user_session:${ebt_data[0].uid}`, (err, oldSessionId) => {
+        if (oldSessionId) {
+          // 기존 세션 무효화
+          redisStore.destroy(
+            `user_session:${ebt_data[0].uid}`,
+            (err, reply) => {
+              console.log("Previous session invalidated");
+            }
+          );
+        }
+        // 새 세션 ID를 사용자 ID와 연결
+        redisStore.set(
+          `user_session:${ebt_data[0].uid}`,
+          sessionId,
+          (err, reply) => {
+            // 로그인 처리 로직
+            console.log(`SessionID Update - ${sessionId}`);
+          }
+        );
+      });
+
       // 클라이언트에 사용자 정보 응답
       res.json({ data: response.data });
     } catch (err) {
@@ -569,7 +617,6 @@ const loginController = {
                 console.log("Previous session invalidated");
               });
             }
-
             // 새 세션 ID를 사용자 ID와 연결
             redisStore.set(
               `user_session:${parsepUid}`,
