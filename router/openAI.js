@@ -33,7 +33,7 @@ router.get("/", (req, res) => {
 // 쿠키 삭제
 router.get("/clear_cookies", getClearCookies);
 // 감정 분석
-router.post("/emotion", vaildateTokenConsulting, postOpenAIEmotionAnalyze);
+router.post("/emotion", postOpenAIEmotionAnalyze);
 // 공감친구 모델 - 푸푸
 router.post(
   "/consulting_emotion_pupu",

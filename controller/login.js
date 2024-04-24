@@ -275,7 +275,9 @@ const loginController = {
                 else console.log("OAuth User Row DB INSERT Success!");
               }
             );
-          } else {
+          }
+          // 3. UPDATE USER (row값이 있는 경우 실행)
+          else {
             // Update LastLoginDate
             try {
               const update_query = `UPDATE ${table} SET ${Object.values(
@@ -532,6 +534,7 @@ const loginController = {
 
       // Input 없을 경우
       if (!parsepUid || !parsePassWard) {
+        console.log("Non Input Value - 400 Bad Request");
         return res
           .status(400)
           .json({ message: "Non Input Value - 400 Bad Request" });
@@ -562,6 +565,7 @@ const loginController = {
       if (ebt_data[0]) {
         // Password 불일치
         if (ebt_data[0].passWard !== parsePassWard) {
+          console.log("Password is incorrect! - 202 Accepted");
           res
             .status(202)
             .json({ message: "Password is incorrect! - 202 Accepted" });
@@ -628,6 +632,7 @@ const loginController = {
             );
           });
 
+          console.log("User Login Success! - 200 OK");
           // client 전송
           res.status(200).json({
             message: "User Login Success! - 200 OK",
@@ -638,7 +643,7 @@ const loginController = {
       }
       // User 계정이 없는 경우 (row값이 없는 경우 실행)
       else {
-        // client 전송
+        console.log("Non User - 404 Not Found");
         res.status(404).json({ message: "Non User - 404 Not Found" });
       }
     } catch (err) {
@@ -768,10 +773,6 @@ const loginController = {
         if (decoded.id) {
           // Redis 중복 로그인 확인
           redisStore.get(`user_session:${decoded.id}`, (err, prevSid) => {
-            if (err) {
-              console.log(err);
-              res.status(500).json({ message: "redisStore GET Error!" });
-            }
             if (prevSid) {
               if (prevSid !== sessionId) {
                 console.log("중복 로그인 계정");
@@ -782,6 +783,15 @@ const loginController = {
               }
             } else {
               console.log("Redis Store prevSid 값이 없음");
+              // Redis SessionID Update
+              redisStore.set(
+                `user_session:${decoded.id}`,
+                sessionId,
+                (err, reply) => {
+                  // 로그인 처리 로직
+                  console.log(`refreshToken SessionID Update - ${sessionId}`);
+                }
+              );
               next();
             }
           });
