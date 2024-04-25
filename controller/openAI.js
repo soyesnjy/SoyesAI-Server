@@ -345,7 +345,7 @@ const openAIController = {
       // No type => return
       if (!type) {
         console.log("No type input value - 400");
-        res.status(400).json({ message: "No type input value - 400" });
+        return res.status(400).json({ message: "No type input value - 400" });
       }
 
       // 파싱. Client JSON 데이터
