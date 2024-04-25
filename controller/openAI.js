@@ -354,7 +354,7 @@ const openAIController = {
       // uid, type 전처리. 없는 경우 디폴트값 할당
       parsepUid = pUid ? pUid : "dummy";
       parsingType = type ? type : "default";
-
+      const scoreSum = parsingScore.reduce((acc, cur) => acc + cur);
       const analysisPrompt = [];
       const userPrompt = [];
 
@@ -369,9 +369,10 @@ const openAIController = {
           role: "user",
           content: `
         user의 ${ebt_class} 심리 검사 결과는 '${
-            EBT_Table_Info[parsingType].danger_score >=
-            score.reduce((acc, cur) => acc + cur)
+            EBT_Table_Info[parsingType].danger_score >= scoreSum
               ? "경고"
+              : EBT_Table_Info[parsingType].caution_score >= scoreSum
+              ? "주의"
               : "양호"
           }'에 해당한다.
         다음 문단은 user의 ${ebt_class} 심리 검사 문항에 대한 응답이다.

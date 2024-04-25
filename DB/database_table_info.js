@@ -41,7 +41,8 @@ const EBT_Table_Info = {
       attr8: "date",
     },
     result: ebt_School_Result, // 적용 프롬프트
-    danger_score: 8,
+    danger_score: 7.6,
+    caution_score: 6.5,
   },
   Friend: {
     table: "soyes_ai_Ebt_Friend",
@@ -59,7 +60,8 @@ const EBT_Table_Info = {
       attr10: "date",
     },
     result: ebt_Friend_Result,
-    danger_score: 10,
+    danger_score: 9.6,
+    caution_score: 8.2,
   },
   Family: {
     table: "soyes_ai_Ebt_Family",
@@ -77,6 +79,7 @@ const EBT_Table_Info = {
     },
     result: ebt_Family_Result,
     danger_score: 8,
+    caution_score: 7,
   },
   Mood: {
     table: "soyes_ai_Ebt_Mood",
@@ -90,6 +93,7 @@ const EBT_Table_Info = {
     },
     result: ebt_Mood_Result,
     danger_score: 5,
+    caution_score: 4,
   },
   Unrest: {
     table: "soyes_ai_Ebt_Unrest",
@@ -106,6 +110,7 @@ const EBT_Table_Info = {
     },
     result: ebt_Unrest_Result,
     danger_score: 10,
+    caution_score: 9,
   },
   Sad: {
     table: "soyes_ai_Ebt_Sad",
@@ -123,6 +128,7 @@ const EBT_Table_Info = {
     },
     result: ebt_Sad_Result,
     danger_score: 10,
+    caution_score: 9,
   },
   Health: {
     table: "soyes_ai_Ebt_Health",
@@ -138,6 +144,7 @@ const EBT_Table_Info = {
     },
     result: ebt_Health_Result,
     danger_score: 7,
+    caution_score: 6,
   },
   Attention: {
     table: "soyes_ai_Ebt_Attention",
@@ -155,6 +162,7 @@ const EBT_Table_Info = {
     },
     result: ebt_Attention_Result,
     danger_score: 11,
+    caution_score: 9,
   },
   Movement: {
     table: "soyes_ai_Ebt_Movement",
@@ -172,6 +180,7 @@ const EBT_Table_Info = {
     },
     result: ebt_Movement_Result,
     danger_score: 8,
+    caution_score: 7,
   },
   Angry: {
     table: "soyes_ai_Ebt_Angry",
@@ -188,6 +197,7 @@ const EBT_Table_Info = {
     },
     result: ebt_Angry_Result,
     danger_score: 8,
+    caution_score: 7,
   },
   Self: {
     table: "soyes_ai_Ebt_Self",
@@ -202,7 +212,8 @@ const EBT_Table_Info = {
       attr7: "date",
     },
     result: ebt_Self_Result,
-    danger_score: 7,
+    danger_score: 7.1,
+    caution_score: 5.9,
   },
   Log: {
     table: "soyes_ai_User_Ebt_Log",
