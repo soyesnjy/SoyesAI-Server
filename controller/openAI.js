@@ -65,6 +65,7 @@ const {
   persnal_result_prompt,
   ebt_analysis_prompt,
   ebt_analysis_prompt_v2,
+  ebt_analysis_prompt_v3,
   pt_analysis_prompt,
   test_prompt_20240402,
   persona_prompt_lala_v2,
@@ -358,36 +359,30 @@ const openAIController = {
       const analysisPrompt = [];
       const userPrompt = [];
 
-      // 정서행동 검사 분석가 페르소나 v2 - 0419
-      analysisPrompt.push(ebt_analysis_prompt_v2);
+      // 정서행동 검사 분석가 페르소나 v3 - 0425
+      analysisPrompt.push(ebt_analysis_prompt_v3);
       // 분야별 결과 해석 프롬프트
-      if (type === "School") {
-        analysisPrompt.push(ebt_Analysis[type]);
-        // 결과 해석 요청 프롬프트
-        const ebt_class = testType[parsingType];
-        userPrompt.push({
-          role: "user",
-          content: `
+
+      analysisPrompt.push(ebt_Analysis[type]);
+      // 결과 해석 요청 프롬프트
+      const ebt_class = testType[parsingType];
+      userPrompt.push({
+        role: "user",
+        content: `
         user의 ${ebt_class} 심리 검사 결과는 '${
-            EBT_Table_Info[parsingType].danger_score >= scoreSum
-              ? "경고"
-              : EBT_Table_Info[parsingType].caution_score >= scoreSum
-              ? "주의"
-              : "양호"
-          }'에 해당한다.
+          EBT_Table_Info[parsingType].danger_score >= scoreSum
+            ? "경고"
+            : EBT_Table_Info[parsingType].caution_score >= scoreSum
+            ? "주의"
+            : "양호"
+        }'에 해당한다.
         다음 문단은 user의 ${ebt_class} 심리 검사 문항에 대한 응답이다.
         '''
         ${parseMessageArr.map((el) => el.content).join("\n")}
         '''
         위 응답을 기반으로 user의 ${ebt_class}에 대해 해석하라.
         `,
-        });
-      } else {
-        userPrompt.push({
-          role: "user",
-          content: `앞선 대화를 기반으로 ${testType[parsingType]}에 대한 아동의 심리 상태를 분석해줘. 분석이 끝나면 문제에 대한 해결 방안을 제시해줘`,
-        });
-      }
+      });
 
       // 메일 관련 세팅 시작
       /*
@@ -446,17 +441,9 @@ const openAIController = {
         },
       });
       // 메일 관련 세팅 끝
-      let messages;
-
       // AI 분석
-      if (type === "School") {
-        messages = [...analysisPrompt, ...userPrompt];
-      } else {
-        messages = [...analysisPrompt, ...parseMessageArr, ...userPrompt];
-      }
-
       const response = await openai.chat.completions.create({
-        messages,
+        messages: [...analysisPrompt, ...userPrompt],
         model: "gpt-4-0125-preview", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
         temperature: 1,
       });
@@ -498,7 +485,7 @@ ${analyzeMsg}
       res.json({ message: analyzeMsg });
 
       /* EBT Data DB 저장 */
-      if (parsingType) {
+      if (parsingType !== "default") {
         /* DB 저장 */
         const table = EBT_Table_Info[type].table;
         const attribute = EBT_Table_Info[type].attribute;
