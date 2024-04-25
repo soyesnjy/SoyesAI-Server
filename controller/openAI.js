@@ -338,10 +338,15 @@ const openAIController = {
       if (typeof EBTData === "string") {
         parseEBTdata = JSON.parse(EBTData);
       } else parseEBTdata = EBTData;
+      console.log(parseEBTdata);
 
       const { messageArr, type, score, pUid } = parseEBTdata;
 
-      console.log(parseEBTdata);
+      // No type => return
+      if (!type) {
+        console.log("No type input value - 400");
+        res.status(400).json({ message: "No type input value - 400" });
+      }
 
       // 파싱. Client JSON 데이터
       if (typeof messageArr === "string") {
@@ -355,6 +360,7 @@ const openAIController = {
       // uid, type 전처리. 없는 경우 디폴트값 할당
       parsepUid = pUid ? pUid : "dummy";
       parsingType = type ? type : "default";
+
       const scoreSum = parsingScore.reduce((acc, cur) => acc + cur);
       const analysisPrompt = [];
       const userPrompt = [];
@@ -363,7 +369,7 @@ const openAIController = {
       analysisPrompt.push(ebt_analysis_prompt_v3);
       // 분야별 결과 해석 프롬프트
 
-      analysisPrompt.push(ebt_Analysis[type]);
+      analysisPrompt.push(ebt_Analysis[parsingType]);
       // 결과 해석 요청 프롬프트
       const ebt_class = testType[parsingType];
       userPrompt.push({
@@ -607,7 +613,7 @@ ${analyzeMsg}
       }
     } catch (err) {
       console.log(err);
-      res.json({ message: "Server Error" });
+      res.status(500).json({ message: "Server Error - 500" });
     }
   },
   // PT 결과 분석 및 DB 저장 및 메일 전송 API
