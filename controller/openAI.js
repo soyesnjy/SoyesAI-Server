@@ -348,6 +348,12 @@ const openAIController = {
         return res.status(400).json({ message: "No type input value - 400" });
       }
 
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
+      }
+
       // 파싱. Client JSON 데이터
       if (typeof messageArr === "string") {
         parseMessageArr = JSON.parse(messageArr);
@@ -358,8 +364,8 @@ const openAIController = {
       } else parsingScore = score;
 
       // uid, type 전처리. 없는 경우 디폴트값 할당
-      parsepUid = pUid ? pUid : "dummy";
-      parsingType = type ? type : "default";
+      parsepUid = pUid;
+      parsingType = type;
 
       const scoreSum = parsingScore.reduce((acc, cur) => acc + cur);
       const analysisPrompt = [];
