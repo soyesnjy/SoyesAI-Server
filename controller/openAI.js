@@ -345,13 +345,13 @@ const openAIController = {
       // No type => return
       if (!type) {
         console.log("No type input value - 400");
-        return res.status(400).json({ message: "No type input value - 400" });
+        return res.json({ message: "No type input value - 400" });
       }
 
       // No pUid => return
       if (!pUid) {
         console.log("No pUid input value - 400");
-        return res.status(400).json({ message: "No pUid input value - 400" });
+        return res.json({ message: "No pUid input value - 400" });
       }
 
       // 파싱. Client JSON 데이터
@@ -497,7 +497,7 @@ ${analyzeMsg}
       res.json({ message: analyzeMsg });
 
       /* EBT Data DB 저장 */
-      if (parsingType !== "default") {
+      if (parsingType) {
         /* DB 저장 */
         const table = EBT_Table_Info[type].table;
         const attribute = EBT_Table_Info[type].attribute;
