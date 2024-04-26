@@ -17,6 +17,30 @@ const openai = new OpenAI({
 });
 
 const nodemailer = require("nodemailer");
+
+// 동기식 DB 접근 함수 1. Promise 생성 함수
+function queryAsync(connection, query, parameters) {
+  return new Promise((resolve, reject) => {
+    connection.query(query, parameters, (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+}
+// 프로미스 resolve 반환값 사용. (User Data return)
+async function fetchUserData(connection, query) {
+  try {
+    let results = await queryAsync(connection, query, []);
+    // console.log(results[0]);
+    return results;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 // 심리 검사 관련
 const {
   persnal_short, // 성격검사 짧은 결과
@@ -93,28 +117,6 @@ const select_soyes_AI_Ebt_Table = async (
   ebt_Question,
   parsepUid
 ) => {
-  // 동기식 DB 접근 함수 1. Promise 생성 함수
-  function queryAsync(connection, query, parameters) {
-    return new Promise((resolve, reject) => {
-      connection.query(query, parameters, (error, results, fields) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(results);
-        }
-      });
-    });
-  }
-  // 프로미스 resolve 반환값 사용. (User Data return)
-  async function fetchUserData(connection, query) {
-    try {
-      let results = await queryAsync(connection, query, []);
-      // console.log(results[0]);
-      return results;
-    } catch (error) {
-      console.error(error);
-    }
-  }
   try {
     // console.log(user_table);
     const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
@@ -159,27 +161,6 @@ const select_soyes_AI_Ebt_Result = async (
   parsepUid // User ID
 ) => {
   // 동기식 DB 접근 함수 1. Promise 생성 함수
-  function queryAsync(connection, query, parameters) {
-    return new Promise((resolve, reject) => {
-      connection.query(query, parameters, (error, results, fields) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(results);
-        }
-      });
-    });
-  }
-  // 프로미스 resolve 반환값 사용. (User Data return)
-  async function fetchUserData(connection, query) {
-    try {
-      let results = await queryAsync(connection, query, []);
-      // console.log(results[0]);
-      return results;
-    } catch (error) {
-      console.error(error);
-    }
-  }
   try {
     // "question" 문자열이 포함된 attribute 선별
     const columnAttr = Object.values(user_attr)
@@ -208,28 +189,6 @@ const select_soyes_AI_Ebt_Result = async (
 };
 // User 성격 검사 유형 반환 (String)
 const select_soyes_AI_Pt_Table = async (user_table, user_attr, parsepUid) => {
-  // 동기식 DB 접근 함수 1. Promise 생성 함수
-  function queryAsync(connection, query, parameters) {
-    return new Promise((resolve, reject) => {
-      connection.query(query, parameters, (error, results, fields) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(results);
-        }
-      });
-    });
-  }
-  // 프로미스 resolve 반환값 사용. (User Data return)
-  async function fetchUserData(connection, query) {
-    try {
-      let results = await queryAsync(connection, query, []);
-      // console.log(results[0]);
-      return results;
-    } catch (error) {
-      console.error(error);
-    }
-  }
   try {
     // console.log(user_table);
     const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
@@ -396,11 +355,7 @@ const openAIController = {
         `,
       });
 
-      // 메일 관련 세팅 시작
       /*
-      // mysql query 메서드 동기식 작동 + DB 데이터 가져오기
-      let yourMailAddr = "";
-
       // Promise 생성 메서드
       function queryAsync(connection, query, parameters) {
         return new Promise((resolve, reject) => {
@@ -428,8 +383,8 @@ const openAIController = {
       const user_table = "soyes_ai_User";
       const user_attr = {
         pKey: "uid",
-        attr1: "email"
-      }
+        attr1: "email",
+      };
 
       const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${pUid}'`;
       await fetchUserData(connection_AI, select_query);
@@ -507,29 +462,6 @@ ${analyzeMsg}
         const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
         const day = ("0" + dateObj.getDate()).slice(-2);
         const date = `${year}-${month}-${day}`;
-
-        // 동기식 DB 접근 함수 1. Promise 생성 함수
-        function queryAsync(connection, query, parameters) {
-          return new Promise((resolve, reject) => {
-            connection.query(query, parameters, (error, results, fields) => {
-              if (error) {
-                reject(error);
-              } else {
-                resolve(results);
-              }
-            });
-          });
-        }
-        // 프로미스 resolve 반환값 사용. (User Data return)
-        async function fetchUserData(connection, query) {
-          try {
-            let results = await queryAsync(connection, query, []);
-            // console.log(results[0]);
-            return results;
-          } catch (error) {
-            console.error(error);
-          }
-        }
 
         // soyes_ai_Ebt Table 삽입
         // 1. SELECT TEST (row가 있는지 없는지 검사)
@@ -771,29 +703,6 @@ ${analyzeMsg}
       const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
       const day = ("0" + dateObj.getDate()).slice(-2);
       const date = `${year}-${month}-${day}`;
-
-      // 동기식 DB 접근 함수 1. Promise 생성 함수
-      function queryAsync(connection, query, parameters) {
-        return new Promise((resolve, reject) => {
-          connection.query(query, parameters, (error, results, fields) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(results);
-            }
-          });
-        });
-      }
-      // 프로미스 resolve 반환값 사용. (User Data return)
-      async function fetchUserData(connection, query) {
-        try {
-          let results = await queryAsync(connection, query, []);
-          // console.log(results[0]);
-          return results;
-        } catch (error) {
-          console.error(error);
-        }
-      }
 
       // soyes_ai_Pt Table 삽입
       // 1. SELECT TEST (row가 있는지 없는지 검사)
