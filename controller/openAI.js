@@ -448,6 +448,9 @@ ${analyzeMsg}
       });
       */
 
+      // 검사 결과가 갱신 되었기에 정서 결과 세션 삭제
+      delete req.session.psy_testResult_promptArr_last;
+
       // client 전송
       res.json({ message: analyzeMsg });
 
