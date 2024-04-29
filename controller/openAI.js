@@ -1466,41 +1466,25 @@ ${analyzeMsg}
       if (
         !req.session.ebt_class &&
         test_result_ment.some((el) => {
-          if (lastUserContent.includes(el)) {
-            testClass = el;
+          if (lastUserContent.includes(el.text)) {
+            testClass = el.class;
             return true;
           } else return false;
         })
       ) {
         console.log(`정서행동검사 결과 - ${testClass} 분석 프롬프트 삽입`);
-        // 분야-index 맵핑
-        const class_map = {
-          학교생활: 0,
-          친구관계: 1,
-          가족관계: 2,
-          전반적기분: 3,
-          불안: 4,
-          우울: 5,
-          신체증상: 6,
-          주의집중: 7,
-          과잉행동: 8,
-          분노: 9,
-          자기인식: 10,
-        };
         // 감지된 분야 선택
         // const random_class = EBT_classArr[class_map[testClass]];
         const random_class = testClass;
-
-        // 랜덤 1개 분야 세션 추가
-        req.session.ebt_class = random_class;
 
         // 심리 결과 분석 프롬프트
         parseMessageArr.push({
           role: "user",
           content: `마지막 질문에 대해 1문장 이내로 답변한 뒤 (이해하지 못했으면 답변하지마), 
           '너의 심리검사 결과를 봤어!'라고 언급하면서 ${random_class} 관련 심리검사 결과를 분석한 아동의 심리 상태를 5문장 이내로 설명해줘.
+          만약 심리 검사 결과를 진행하지 않았다면, 잘 모르겠다고 답변해줘.
           . 혹은 ? 같은 특수문자로 끝나는 각 마디 뒤에는 반드시 줄바꿈(\n)을 추가해줘.
-          답변 마지막에는 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
+          검사 결과가 있다면 답변 마지막에는 '검사 결과에 대해 더 궁금한점이 있니?'를 추가해줘.`,
         });
         promptArr.push({
           role: "system",
