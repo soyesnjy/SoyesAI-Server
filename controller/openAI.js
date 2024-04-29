@@ -90,6 +90,7 @@ const {
   ebt_analysis_prompt,
   ebt_analysis_prompt_v2,
   ebt_analysis_prompt_v3,
+  ebt_analysis_prompt_v4,
   pt_analysis_prompt,
   test_prompt_20240402,
   persona_prompt_lala_v2,
@@ -327,13 +328,16 @@ const openAIController = {
       parsingType = type;
 
       const scoreSum = parsingScore.reduce((acc, cur) => acc + cur);
+      const aver = EBT_Table_Info[parsingType].average;
+      const stand = EBT_Table_Info[parsingType].standard;
+      const tScore = (((scoreSum - aver) / stand) * 10 + 50).toFixed(2);
+      console.log("tScore: " + tScore);
       const analysisPrompt = [];
       const userPrompt = [];
 
-      // 정서행동 검사 분석가 페르소나 v3 - 0425
-      analysisPrompt.push(ebt_analysis_prompt_v3);
+      // 정서행동 검사 분석가 페르소나 v4 - 0429
+      analysisPrompt.push(ebt_analysis_prompt_v4);
       // 분야별 결과 해석 프롬프트
-
       analysisPrompt.push(ebt_Analysis[parsingType]);
       // 결과 해석 요청 프롬프트
       const ebt_class = testType[parsingType];
@@ -347,6 +351,7 @@ const openAIController = {
             ? "주의"
             : "양호"
         }'에 해당한다.
+        user의 T점수는 ${tScore}점이다.
         다음 문단은 user의 ${ebt_class} 심리 검사 문항에 대한 응답이다.
         '''
         ${parseMessageArr.map((el) => el.content).join("\n")}
