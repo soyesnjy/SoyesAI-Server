@@ -330,8 +330,15 @@ const openAIController = {
       const scoreSum = parsingScore.reduce((acc, cur) => acc + cur);
       const aver = EBT_Table_Info[parsingType].average;
       const stand = EBT_Table_Info[parsingType].standard;
-      const tScore = (((scoreSum - aver) / stand) * 10 + 50).toFixed(2);
+      const tScore = (((scoreSum - aver) / stand) * 10 + 50).toFixed(2); // T점수
+      const result =
+        EBT_Table_Info[parsingType].danger_score <= scoreSum
+          ? "경고"
+          : EBT_Table_Info[parsingType].caution_score <= scoreSum
+          ? "주의"
+          : "양호"; // 검사 결과
       console.log("tScore: " + tScore);
+      console.log("result: " + result);
       const analysisPrompt = [];
       const userPrompt = [];
 
@@ -344,13 +351,7 @@ const openAIController = {
       userPrompt.push({
         role: "user",
         content: `
-        user의 ${ebt_class} 심리 검사 결과는 '${
-          EBT_Table_Info[parsingType].danger_score >= scoreSum
-            ? "경고"
-            : EBT_Table_Info[parsingType].caution_score >= scoreSum
-            ? "주의"
-            : "양호"
-        }'에 해당한다.
+        user의 ${ebt_class} 심리 검사 결과는 '${result}'에 해당한다.
         user의 T점수는 ${tScore}점이다.
         다음 문단은 user의 ${ebt_class} 심리 검사 문항에 대한 응답이다.
         '''
