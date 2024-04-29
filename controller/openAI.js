@@ -1164,10 +1164,7 @@ ${analyzeMsg}
         });
 
         // console.log(psy_testResult_promptArr_last);
-
         promptArr.push(...psy_testResult_promptArr_last);
-        // 음악 명상 + 그림 명상 관련 솔루션 프롬프트
-        promptArr.push(solution_prompt2);
         // DB 접근 최소화를 위해 세션에 psy_testResult_promptArr_last 값 저장
         req.session.psy_testResult_promptArr_last = [
           ...psy_testResult_promptArr_last,
@@ -1179,6 +1176,9 @@ ${analyzeMsg}
         promptArr.push(...req.session.psy_testResult_promptArr_last);
       }
 
+      // 음악 명상 + 그림 명상 관련 솔루션 프롬프트
+      promptArr.push(solution_prompt2);
+
       /* 검사 결과 분석 관련 멘트 감지 */
       if (
         test_result_ment.some((el) => {
@@ -1189,22 +1189,9 @@ ${analyzeMsg}
         })
       ) {
         console.log(`정서행동검사 결과 - ${testClass} 분석 프롬프트 삽입`);
-        // 분야-index 맵핑
-        const class_map = {
-          school: 0,
-          friend: 1,
-          family: 2,
-          mood: 3,
-          unrest: 4,
-          sad: 5,
-          health: 6,
-          attention: 7,
-          angry: 8,
-          movement: 9,
-          self: 10,
-        };
         // 감지된 분야 선택
-        const random_class = EBT_classArr[class_map[testClass]];
+        // const random_class = EBT_classArr[class_map[testClass]];
+        const random_class = testClass;
 
         // 심리 결과 분석 프롬프트
         parseMessageArr.push({
@@ -1237,6 +1224,7 @@ ${analyzeMsg}
         console.log("인지행동 치료 프롬프트 삽입");
         let cb_testArr;
 
+        // 인지행동 문항 맵핑
         const cb_class_map = {
           school: cb_test_school,
           friend: cb_test_family,
@@ -1500,7 +1488,8 @@ ${analyzeMsg}
           자기인식: 10,
         };
         // 감지된 분야 선택
-        const random_class = EBT_classArr[class_map[testClass]];
+        // const random_class = EBT_classArr[class_map[testClass]];
+        const random_class = testClass;
 
         // 랜덤 1개 분야 세션 추가
         req.session.ebt_class = random_class;
