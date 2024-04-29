@@ -720,7 +720,7 @@ const loginController = {
             return; // 에러 발생 시 추가 처리 중지
           }
           if (oldSessionId) {
-            console.log("1.oldSessionId: " + oldSessionId);
+            console.log("oldSessionId Destroy");
             // 기존 세션 무효화
             redisStore.destroy(`user_session:${decoded.id}`, (err) => {
               if (err) {
@@ -773,9 +773,10 @@ const loginController = {
         if (decoded.id) {
           // Redis 중복 로그인 확인
           redisStore.get(`user_session:${decoded.id}`, (err, prevSid) => {
+            // Redis 저장된 sid가 있는 경우
             if (prevSid) {
               if (prevSid !== sessionId) {
-                console.log("중복 로그인 계정");
+                console.log("Duplicated Session - 401 Unauthorized");
                 res.status(401).json({ message: "Duplicated Session" });
               } else {
                 console.log("AccessToken 유효성 검증 통과!");
@@ -783,7 +784,7 @@ const loginController = {
               }
             } else {
               console.log("Redis Store prevSid 값이 없음");
-              // Redis SessionID Update
+              // Redis Sid가 없는 경우
               redisStore.set(
                 `user_session:${decoded.id}`,
                 sessionId,
