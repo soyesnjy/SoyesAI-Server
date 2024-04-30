@@ -267,7 +267,6 @@ const openAIController = {
   // EBT 결과 분석 및 DB 저장 및 메일 전송 API
   postOpenAIPsychologicalAnalysis: async (req, res) => {
     const { EBTData } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
-    console.log("EBT 테스트 결과 분석 및 메일 전송 API /analysis Path 호출");
 
     let parseEBTdata,
       parseMessageArr,
@@ -326,6 +325,10 @@ const openAIController = {
       // uid, type 전처리. 없는 경우 디폴트값 할당
       parsepUid = pUid;
       parsingType = type;
+
+      console.log(
+        `EBT 테스트 결과 분석 및 메일 전송 API /analysis Path 호출 - pUid:${parsepUid}`
+      );
 
       const scoreSum = parsingScore.reduce((acc, cur) => acc + cur);
       const aver = EBT_Table_Info[parsingType].average;
@@ -566,7 +569,6 @@ ${analyzeMsg}
   // PT 결과 분석 및 DB 저장 및 메일 전송 API
   postOpenAIPernalTestAnalysis: async (req, res) => {
     const { PTDataSend } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
-    console.log("PT 테스트 결과 분석 및 메일 전송 API /analysis_pt Path 호출");
 
     let parsePTData,
       parsePTResult,
@@ -578,12 +580,26 @@ ${analyzeMsg}
       } else parsePTData = PTDataSend;
 
       const { resultText, pUid } = parsePTData;
-
       console.log(parsePTData);
 
-      // uid, resultText 전처리. 없는 경우 디폴트값 할당
-      parsepUid = pUid ? pUid : "dummy";
-      parsePTResult = resultText ? resultText : "SOCE";
+      // No type => return
+      if (!resultText) {
+        console.log("No resultText input value - 400");
+        return res.json({ message: "No resultText input value - 400" });
+      }
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.json({ message: "No pUid input value - 400" });
+      }
+
+      parsepUid = pUid;
+      parsePTResult = resultText;
+
+      console.log(
+        `PT 테스트 결과 분석 및 메일 전송 API /analysis_pt Path 호출 - pUid: ${parsepUid}`
+      );
 
       const analysisPrompt = [];
       const userPrompt = [];
@@ -807,7 +823,6 @@ ${analyzeMsg}
   // 공감친구 모델 - 푸푸
   postOpenAIConsultingPupu: async (req, res) => {
     const { EBTData } = req.body;
-    console.log("푸푸 상담 API /consulting_emotion_pupu Path 호출");
 
     // console.log("req.sessionID: " + req.sessionID);
 
@@ -834,17 +849,16 @@ ${analyzeMsg}
         parseMessageArr = JSON.parse(messageArr);
       } else parseMessageArr = [...messageArr];
 
-      // pUid default값 설정
-      parsepUid = pUid ? pUid : "dummy";
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.json({ message: "No pUid input value - 400" });
+      }
 
-      /* EBT 결과 메서드 테스트용 ( 미검사 / 위험 / 그외 )
-      const a = await select_soyes_AI_Ebt_Result(
-        EBT_Table_Info.School.table,
-        EBT_Table_Info.School.attribute,
-        EBT_Table_Info.School.danger_score,
-        parsepUid
+      parsepUid = pUid;
+      console.log(
+        `푸푸 상담 API /consulting_emotion_pupu Path 호출 - pUid: ${parsepUid}`
       );
-      */
 
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_pupu); // 페르소나 프롬프트 삽입
@@ -972,7 +986,7 @@ ${analyzeMsg}
   // 공부친구 모델 - 우비
   postOpenAIConsultingUbi: async (req, res) => {
     const { EBTData } = req.body;
-    console.log("우비 상담 API /consulting_emotion_ubi Path 호출");
+
     console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
@@ -989,8 +1003,16 @@ ${analyzeMsg}
         parseMessageArr = JSON.parse(messageArr);
       } else parseMessageArr = [...messageArr];
 
-      parsepUid = pUid ? pUid : "dummy";
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.json({ message: "No pUid input value - 400" });
+      }
 
+      parsepUid = pUid;
+      console.log(
+        `우비 상담 API /consulting_emotion_ubi Path 호출 - pUid: ${parsepUid}`
+      );
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_ubi); // 페르소나 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
@@ -1074,7 +1096,6 @@ ${analyzeMsg}
   // 정서멘토 모델 - 엘라
   postOpenAIConsultingLala: async (req, res) => {
     const { EBTData } = req.body;
-    console.log("엘라 상담 API /consulting_emotion_lala Path 호출");
     // console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
@@ -1097,9 +1118,17 @@ ${analyzeMsg}
         parseMessageArr = JSON.parse(messageArr);
       } else parseMessageArr = [...messageArr];
 
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.json({ message: "No pUid input value - 400" });
+      }
+
       // pUid default값 설정
-      parsepUid = pUid ? pUid : "dummy";
-      // console.log(parsepUid);
+      parsepUid = pUid;
+      console.log(
+        `엘라 상담 API /consulting_emotion_lala Path 호출 - pUid: ${parsepUid}`
+      );
 
       // 고정 삽입 프롬프트
       // promptArr.push(persona_prompt_lala); // 페르소나 프롬프트 삽입
@@ -1362,7 +1391,6 @@ ${analyzeMsg}
   // 전문상담사 모델 - 소예
   postOpenAIConsultingSoyes: async (req, res) => {
     const { EBTData } = req.body;
-    console.log("소예 상담 API /consulting_emotion_soyes Path 호출");
     // console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
@@ -1382,10 +1410,16 @@ ${analyzeMsg}
         parseMessageArr = JSON.parse(messageArr);
       } else parseMessageArr = [...messageArr];
 
-      // pUid default값 설정
-      parsepUid = pUid ? pUid : "dummy";
-      // console.log(parsepUid);
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.json({ message: "No pUid input value - 400" });
+      }
 
+      parsepUid = pUid;
+      console.log(
+        `소예 상담 API /consulting_emotion_soyes Path 호출 - pUid: ${parsepUid}`
+      );
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_soyes); // 페르소나 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
@@ -1549,8 +1583,6 @@ ${analyzeMsg}
   // 달력 관련 데이터 반환
   postOpenAIMypageCalendarData: async (req, res) => {
     const { EBTData } = req.body;
-
-    console.log("달력 데이터 반환 API /openAI/calendar Path 호출");
     let parseEBTdata, parsepUid; // Parsing 변수
 
     try {
@@ -1560,9 +1592,16 @@ ${analyzeMsg}
       } else parseEBTdata = EBTData;
 
       const { pUid } = parseEBTdata;
-
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.json({ message: "No pUid input value - 400" });
+      }
       // pUid default값 설정
-      parsepUid = pUid ? pUid : "dummy";
+      parsepUid = pUid;
+      console.log(
+        `달력 데이터 반환 API /openAI/calendar Path 호출 - pUid: ${parsepUid}`
+      );
 
       // DB 조회 => User Table + User EBT Table JOIN 후 관련 데이터 전달
       const user_table = User_Table_Info.table;
@@ -1672,18 +1711,20 @@ ${analyzeMsg}
       const { messageArr, avarta, pUid } = parseEBTdata;
       console.log(parseEBTdata);
 
-      // pUid 없는 경우
-      if (!pUid) return res.json({ message: "Non pUid" });
-
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.json({ message: "No pUid input value - 400" });
+      }
+      parsepUid = pUid;
+      console.log(
+        `상담 로그 저장 API /consulting_emotion_log Path 호출 - pUid: ${parsepUid}`
+      );
       // 문답 5회 미만일 경우 return
       if (messageArr.length <= 8) {
-        console.log("messageArr Not enough length");
-        res.json({ message: "messageArr Not enough length" });
-        return;
+        console.log(`messageArr Not enough length - pUid: ${parsepUid}`);
+        return res.json({ message: "messageArr Not enough length" });
       }
-
-      // uid 전처리. 없는 경우 디폴트값 할당
-      parsepUid = pUid ? pUid : "dummy";
 
       // 오늘 날짜 변환
       const dateObj = new Date();

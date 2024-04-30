@@ -518,7 +518,6 @@ const loginController = {
   // AI 로그인 - 인증
   postAILoginHandler: async (req, res) => {
     const { LoginData } = req.body;
-    console.log(req.body);
     let parseLoginData;
     try {
       // 입력값 파싱
@@ -540,8 +539,9 @@ const loginController = {
           .json({ message: "Non Input Value - 400 Bad Request" });
       }
 
-      /* User DB 조회 */
+      console.log(`User Login Access - pUid: ${parsepUid}`);
 
+      /* User DB 조회 */
       // User Table && attribut 명시
       const user_table = User_Table_Info.table;
       const user_attribute = User_Table_Info.attribute;
@@ -565,8 +565,10 @@ const loginController = {
       if (ebt_data[0]) {
         // Password 불일치
         if (ebt_data[0].passWard !== parsePassWard) {
-          console.log("Password is incorrect! - 202 Accepted");
-          res
+          console.log(
+            `Password is incorrect! - 202 Accepted (pUid: ${parsepUid})`
+          );
+          return res
             .status(202)
             .json({ message: "Password is incorrect! - 202 Accepted" });
         }
@@ -632,9 +634,9 @@ const loginController = {
             );
           });
 
-          console.log("User Login Success! - 200 OK");
+          console.log(`User Login Success! - 200 OK (pUid: ${parsepUid})`);
           // client 전송
-          res.status(200).json({
+          return res.status(200).json({
             message: "User Login Success! - 200 OK",
             refreshToken: token.refreshToken,
             expire,
@@ -643,19 +645,20 @@ const loginController = {
       }
       // User 계정이 없는 경우 (row값이 없는 경우 실행)
       else {
-        console.log("Non User - 404 Not Found");
-        res.status(404).json({ message: "Non User - 404 Not Found" });
+        console.log(`Non User - 404 Not Found (pUid: ${parsepUid})`);
+        return res.status(404).json({ message: "Non User - 404 Not Found" });
       }
     } catch (err) {
       console.error(err);
-      res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
+      return res
+        .status(500)
+        .json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
   // AI JWT 토큰 유효성 검사 - 로그인
   vaildateTokenAI: async (req, res, next) => {
     console.log("AI JWT 토큰 유효성 검사 API 호출 /login/ai");
     const { LoginData } = req.body;
-    // console.log(req.body);
     // Session data 조회
     const accessToken = req.session.accessToken;
     const refreshToken = req.cookies.refreshToken;
