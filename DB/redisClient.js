@@ -6,7 +6,7 @@ const redisClient = redis.createClient({
   url:
     process.env.DEV_OPS === "local"
       ? "redis://soyeskids.co.kr:6379"
-      : "redis://172.18.0.3:6379",
+      : "redis://172.18.0.3:6379", // docker network IPv4 Address
 });
 
 redisClient.connect().catch(console.error);
