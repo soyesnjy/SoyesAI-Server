@@ -513,7 +513,7 @@ const loginController = {
       res.json({ data: response.data });
     } catch (err) {
       console.error(err.message);
-      res.json({ data: "Fail" });
+      res.status(500).json({ data: "Fail" });
     }
   },
   // AI 로그인 - 인증
