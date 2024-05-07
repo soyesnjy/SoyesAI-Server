@@ -135,6 +135,9 @@ app.use("/openAI", openAIRouter);
 const reviewRouter = require("./router/review");
 app.use("/review", reviewRouter);
 
+const kakaoPayRouter = require("./router/kakaoPay");
+app.use("/kakaopay", kakaoPayRouter);
+
 // MailTest 경로 라우팅
 const mailTestRouter = require("./router/mailTest");
 app.use("/mailtest", mailTestRouter);
