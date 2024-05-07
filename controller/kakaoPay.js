@@ -47,6 +47,7 @@ const kakaoPayController = {
       } else parseInput = readyData;
 
       // console.log(parseInput);
+      console.log(process.env.KAKAO_PAY_SERCET_KEY);
 
       const response = await axios.post(
         `https://open-api.kakaopay.com/online/v1/payment/ready`,
