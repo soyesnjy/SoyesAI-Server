@@ -359,6 +359,8 @@ const loginController = {
     const sessionId = req.sessionID;
     let parseUid = "",
       parseEmail = "";
+
+    console.log("KAKAO_REST_API_KEY: " + process.env.KAKAO_REST_API_KEY);
     try {
       // POST 요청으로 액세스 토큰 요청
       const tokenResponse = await axios.post(
