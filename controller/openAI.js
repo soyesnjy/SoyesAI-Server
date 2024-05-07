@@ -92,6 +92,7 @@ const {
   ebt_analysis_prompt_v3,
   ebt_analysis_prompt_v4,
   ebt_analysis_prompt_v5,
+  ebt_analysis_prompt_v6,
   pt_analysis_prompt,
   test_prompt_20240402,
   persona_prompt_lala_v2,
@@ -331,23 +332,25 @@ const openAIController = {
         `EBT 테스트 결과 분석 및 메일 전송 API /analysis Path 호출 - pUid:${parsepUid}`
       );
 
+      // T점수 계산
       const scoreSum = parsingScore.reduce((acc, cur) => acc + cur);
       const aver = EBT_Table_Info[parsingType].average;
       const stand = EBT_Table_Info[parsingType].standard;
-      const tScore = (((scoreSum - aver) / stand) * 10 + 50).toFixed(2); // T점수
+      const tScore = (((scoreSum - aver) / stand) * 10 + 50).toFixed(2);
+      // 검사 결과
       const result =
         EBT_Table_Info[parsingType].danger_score <= scoreSum
           ? "경고"
           : EBT_Table_Info[parsingType].caution_score <= scoreSum
           ? "주의"
-          : "양호"; // 검사 결과
+          : "양호";
       console.log("tScore: " + tScore);
       console.log("result: " + result);
       const analysisPrompt = [];
       const userPrompt = [];
 
-      // 정서행동 검사 분석가 페르소나 v5 - 0501
-      analysisPrompt.push(ebt_analysis_prompt_v5);
+      // 정서행동 검사 분석가 페르소나 v6 - 0507
+      analysisPrompt.push(ebt_analysis_prompt_v6);
       // 분야별 결과 해석 프롬프트
       analysisPrompt.push(ebt_Analysis[parsingType]);
       // 결과 해석 요청 프롬프트
@@ -399,14 +402,13 @@ const openAIController = {
       const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${pUid}'`;
       await fetchUserData(connection_AI, select_query);
       console.log("받는사람: " + yourMailAddr);
-      */
 
       yourMailAddr = "soyesnjy@gmail.com"; // dummy email. 받는사람
-
+      
       // 보내는 사람 계정 로그인
       const myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
       const myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
-
+ 
       const transporter = nodemailer.createTransport({
         service: "gmail", // 사용할 이메일 서비스
         // host: "smtp.gmail.com",
@@ -417,7 +419,8 @@ const openAIController = {
           pass: myMailPwd, // 이메일 비밀번호
         },
       });
-      // 메일 관련 세팅 끝
+      */
+
       // AI 분석
       const response = await openai.chat.completions.create({
         messages: [...analysisPrompt, ...userPrompt],
@@ -428,6 +431,8 @@ const openAIController = {
       const message = { message: response.choices[0].message.content };
       // AI 분석 내용 보기좋게 정리
       const analyzeMsg = message.message.split(". ").join(".\n");
+      // client 전송
+      res.json({ message: analyzeMsg });
 
       // 메일 제목 및 내용 + 보내는사람 + 받는사람
       const mailOptions = {
@@ -460,10 +465,6 @@ ${analyzeMsg}
 
       // 검사 결과가 갱신 되었기에 정서 결과 세션 삭제
       delete req.session.psy_testResult_promptArr_last;
-
-      // client 전송
-      res.json({ message: analyzeMsg });
-
       /* EBT Data DB 저장 */
       if (parsingType) {
         /* DB 저장 */
