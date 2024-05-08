@@ -63,7 +63,7 @@ const kakaoPayController = {
       // console.log(response.data);
       return res.json({ data: response.data });
     } catch (err) {
-      console.error(err);
+      console.error(err.response.data);
       res.status(500).json({ message: "Server Error - 500" });
     }
   },
