@@ -26,6 +26,36 @@ const User_Table_Info = {
     attr7: "lastLogin_date",
   },
 };
+const Plan_Table_Info = {
+  Plan: {
+    table: "soyes_ai_User_Plan",
+    attribute: {
+      pKey: "uid",
+      attr1: "expirationDate",
+      attr2: "plan_status",
+    },
+  },
+  Info: {
+    table: "soyes_ai_Plan_Info",
+    attribute: {
+      pKey: "plan_id",
+      attr1: "plan_name",
+      attr2: "plan_period",
+      attr3: "plan_price",
+    },
+  },
+  Log: {
+    table: "soyes_ai_Plan_Log",
+    attribute: {
+      cKey: "uid",
+      attr1: "plan_id",
+      attr2: "pay_type",
+      attr3: "pay_number",
+      attr4: "pay_amount",
+      attr5: "pay_tax_free_amount",
+    },
+  },
+};
 const EBT_Table_Info = {
   School: {
     table: "soyes_ai_Ebt_School",
@@ -282,6 +312,7 @@ const Consult_Log_Table_Info = {
 
 module.exports = {
   User_Table_Info,
+  Plan_Table_Info,
   EBT_Table_Info,
   PT_Table_Info,
   Consult_Log_Table_Info,

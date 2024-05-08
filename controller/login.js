@@ -26,19 +26,8 @@ const { google } = require("googleapis");
 // kakao OAuth 관련
 const axios = require("axios");
 
-const User_Table_Info = {
-  table: "soyes_ai_User",
-  attribute: {
-    pKey: "uid",
-    attr1: "Email",
-    attr2: "passWard",
-    attr3: "name",
-    attr4: "phoneNumber",
-    attr5: "oauth_type",
-    attr6: "creation_date",
-    attr7: "lastLogin_date",
-  },
-};
+// Database Table Info
+const { User_Table_Info } = require("../DB/database_table_info");
 
 const user_ai_select = async (user_table, user_attribute, parsepUid) => {
   /* User DB 조회 */
