@@ -42,7 +42,7 @@ function addDays(
   date = moment().tz("Asia/Seoul").format("YYYY-MM-DD HH:mm:ss")
 ) {
   const result = new Date(date);
-  result.setHours(result.getHours() + 9);
+  if (process.env.DEV_OPS === "local") result.setHours(result.getHours() + 9);
   result.setDate(result.getDate() + days);
   return result;
 }
