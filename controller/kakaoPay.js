@@ -1,3 +1,4 @@
+const redisStore = require("../DB/redisClient");
 // MySQL 접근
 const mysql = require("mysql");
 const { dbconfig, dbconfig_ai } = require("../DB/database");
@@ -110,8 +111,9 @@ const kakaoPayController = {
       const { tid, partner_order_id, payment_method_type, amount } =
         response.data;
 
+      // 결제 성공 - DB 만료일 처리
       if (response.status === 200) {
-        console.log("KakaoPay Approve Success!");
+        console.log(`KakaoPay Approve Success! - ${parsepUid}`);
         res.status(200).json({ message: "KakaoPay Approve Success!" });
 
         // TODO DB 관련 처리
@@ -179,9 +181,21 @@ const kakaoPayController = {
           connection_AI.query(
             update_query,
             update_value,
-            (error, rows, fields) => {
+            async (error, rows, fields) => {
               if (error) console.log(error);
-              else console.log("User Plan DB UPDATE Success!");
+              else {
+                // const key = `user:expiry:${parsepUid}`;
+                // Redis expiry 갱신
+                await redisStore.set(
+                  `user:expiry:${parsepUid}`,
+                  update_expirationDate_value,
+                  (err, reply) => {
+                    // 로그인 처리 로직
+                    console.log(`User Plan Redis Update - ${parsepUid}`);
+                  }
+                );
+                console.log("User Plan DB UPDATE Success!");
+              }
             }
           );
         }
@@ -212,9 +226,20 @@ const kakaoPayController = {
           connection_AI.query(
             insert_query,
             insert_value,
-            (error, rows, fields) => {
+            async (error, rows, fields) => {
               if (error) console.log(error);
-              else console.log("User Plan DB INSERT Success!");
+              else {
+                // Redis expiry 갱신
+                await redisStore.set(
+                  `user:expiry:${parsepUid}`,
+                  insert_expirationDate_value,
+                  (err, reply) => {
+                    // 로그인 처리 로직
+                    console.log(`User Plan Redis Insert - ${parsepUid}`);
+                  }
+                );
+                console.log("User Plan DB INSERT Success!");
+              }
             }
           );
         }
