@@ -758,52 +758,61 @@ const loginController = {
     const user_attribute = User_Table_Info.attribute;
 
     try {
-      // accessToken이 있는 경우
+      // accessToken이 있는 경우 - accessToken은 세션에 저장된 값이기 때문에 비교적 간단한 검사 진행
       if (accessToken) {
         // accessToken Decoding
         const decoded = verifyToken("access", accessToken);
-        // accessToken은 세션에 저장된 값이기 때문에 비교적 간단한 검사 진행
         if (decoded.id) {
           // Redis 중복 로그인 확인
           redisStore.get(`user_session:${decoded.id}`, (err, prevSid) => {
             // Redis 저장된 sid가 있는 경우
             if (prevSid) {
+              // 현재 Sid와 Redis Sid가 다른 경우 - 중복 로그인
               if (prevSid !== sessionId) {
                 console.log("Duplicated Session - 401 Unauthorized");
-                res.status(401).json({ message: "Duplicated Session" });
-              } else {
-                console.log("AccessToken 유효성 검증 통과!");
-                next();
+                return res
+                  .status(401)
+                  .json({ message: "Duplicated Session - 401 Unauthorized" });
               }
-            } else {
+              // Sid 일치 - 유효성 검증 통과
+              console.log("AccessToken 유효성 검증 통과!");
+              next();
+            }
+            // Redis에 저장된 Sid가 없는 경우 - 첫 로그인 OR Redis 자동 삭제
+            else {
               console.log("Redis Store prevSid 값이 없음");
-              // Redis Sid가 없는 경우
+              // Redis Sid를 현재 Sid로 갱신
               redisStore.set(
                 `user_session:${decoded.id}`,
                 sessionId,
                 (err, reply) => {
                   // 로그인 처리 로직
-                  console.log(`refreshToken SessionID Update - ${sessionId}`);
+                  console.log(`AccessToken SessionID Update - ${sessionId}`);
                 }
               );
               next();
             }
           });
-        } else return res.status(400).json({ message: "Non User!" });
-
-        // refreshToken만 있는 경우
-      } else if (refreshToken) {
-        // refreshToken은 쿠키에 저장된 값이기 때문에 DB 계정이 있는지 검사
+        }
+        // AccessToken에 id 값이 없는 경우 - 유효한(서버 발급) 토큰이 아닌 경우
+        else {
+          console.log(`Invaild AccessToken`);
+          return res.status(400).json({ message: "Invaild AccessToken - 400" });
+        }
+      }
+      // refreshToken만 있는 경우 - User Table 조회
+      else if (refreshToken) {
+        // refreshToken 복호화
         const decoded = verifyToken("refresh", refreshToken);
-        // User 계정 DB SELECT Method. uid를 입력값으로 받음
-
+        // User Table 조회
         const ebt_data = await user_ai_select(
           user_table,
           user_attribute,
           decoded.id
         );
+        // User가 존재할 경우
         if (ebt_data[0]) {
-          // accessToken 재발행 후 세션에 저장
+          // Token 재발행 후 세션에 저장
           req.session.accessToken = generateToken({
             id: ebt_data[0].uid,
             email: ebt_data[0].Email,
@@ -818,13 +827,21 @@ const loginController = {
               console.log(`refreshToken SessionID Update - ${sessionId}`);
             }
           );
-
-          console.log("RefreshToken 유효성 검증 통과!");
+          console.log("RefreshToken 유효성 검증 통과");
           next();
-        } else return res.status(400).json({ message: "Non User!" });
-      } else {
-        // accessToken 및 refreshToken 둘 다 없는 상태이므로 Login 하길 권장해야 함
-        return res.status(401).json({ message: "Login Session Expire!" });
+        }
+        // User가 없는 경우
+        else {
+          console.log("RefreshToken Non User! - 400");
+          return res
+            .status(400)
+            .json({ message: "RefreshToken Non User! - 400" });
+        }
+      }
+      // Token 미발급 상태 - 로그인 권장
+      else {
+        console.log("Login Session Expire! - 401");
+        return res.status(401).json({ message: "Login Session Expire! - 401" });
       }
     } catch (err) {
       console.log(err.message);
