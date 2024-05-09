@@ -25,7 +25,7 @@ const {
 } = openAIController;
 
 // 토큰 유효성 검사 미들웨어
-const { vaildateTokenConsulting } = loginController;
+const { vaildateTokenConsulting, vaildatePlan } = loginController;
 
 router.get("/", (req, res) => {
   res.send("Welcome to the GPT API");
@@ -38,6 +38,7 @@ router.post("/emotion", postOpenAIEmotionAnalyze);
 router.post(
   "/consulting_emotion_pupu",
   vaildateTokenConsulting,
+  vaildatePlan,
   postOpenAIConsultingPupu
 );
 // 공부친구 모델 - 우비

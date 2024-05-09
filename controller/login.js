@@ -10,7 +10,9 @@ connection.connect();
 const connection_AI = mysql.createConnection(dbconfig_ai);
 connection_AI.connect();
 // connection.end(); // 언제쓰지?
+
 const { users } = require("../DB/database");
+const moment = require("moment-timezone");
 
 const { generateToken, verifyToken } = require("../controller/tokenFnc");
 
@@ -27,7 +29,10 @@ const { google } = require("googleapis");
 const axios = require("axios");
 
 // Database Table Info
-const { User_Table_Info } = require("../DB/database_table_info");
+const {
+  User_Table_Info,
+  Plan_Table_Info,
+} = require("../DB/database_table_info");
 
 const user_ai_select = async (user_table, user_attribute, parsepUid) => {
   /* User DB 조회 */
@@ -54,11 +59,10 @@ const user_ai_select = async (user_table, user_attribute, parsepUid) => {
     }
   }
 
-  // 1. SELECT TEST (row가 있는지 없는지 검사)
   const select_query = `SELECT * FROM ${user_table} WHERE ${user_attribute.pKey}='${parsepUid}'`;
-  const ebt_data = await fetchUserData(connection_AI, select_query);
+  const select_data = await fetchUserData(connection_AI, select_query);
 
-  return ebt_data;
+  return select_data;
 };
 
 const loginController = {
@@ -174,7 +178,7 @@ const loginController = {
       res.json({ data: "Non " });
     }
   },
-  // Google OAuth AccessToken 발급
+  // AI Google OAuth 로그인 - AccessToken 발급
   oauthGoogleAccessTokenHandler: async (req, res) => {
     const { code } = req.body;
     console.log("Google OAuth AccessToken 발급 API 호출");
@@ -338,7 +342,7 @@ const loginController = {
       res.status(500).json({ data: "Server Error!" });
     }
   },
-  // Kakao OAuth AccessToken 발급
+  // AI Kakao OAuth 로그인 - AccessToken 발급
   oauthKakaoAccessTokenHandler: async (req, res) => {
     const { code } = req.body;
     console.log("Kakao OAuth AccessToken 발급 API 호출");
@@ -505,7 +509,7 @@ const loginController = {
       res.status(500).json({ data: "Server Error!" });
     }
   },
-  // AI 로그인 - 인증
+  // AI Guest 로그인 - 인증
   postAILoginHandler: async (req, res) => {
     const { LoginData } = req.body;
     let parseLoginData;
@@ -645,56 +649,6 @@ const loginController = {
         .json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
-  // AI JWT 토큰 유효성 검사 - 로그인
-  vaildateTokenAI: async (req, res, next) => {
-    console.log("AI JWT 토큰 유효성 검사 API 호출 /login/ai");
-    const { LoginData } = req.body;
-    // Session data 조회
-    const accessToken = req.session.accessToken;
-    const refreshToken = req.cookies.refreshToken;
-
-    let parseLoginData;
-    try {
-      // 입력값 파싱
-      if (typeof LoginData === "string") {
-        parseLoginData = JSON.parse(LoginData);
-      } else parseLoginData = LoginData;
-
-      const { pUid } = parseLoginData;
-
-      let parsepUid = pUid;
-
-      // accessToken이 있는 경우
-      if (accessToken) {
-        // accessToken Decoding
-        const decoded = verifyToken("access", accessToken);
-        // DB 계정과 입력 id가 같을 경우 인가
-        if (decoded.id === parsepUid) {
-          console.log("accessToken Login Success!");
-          return res.status(200).json({ message: "AccessToken Login Success" });
-        }
-        // refreshToken만 있는 경우
-      } else if (refreshToken) {
-        // refreshToken Decoding
-        const decoded = verifyToken("refresh", refreshToken);
-        if (decoded.id === parsepUid) {
-          console.log("refreshToken Login Success!");
-          // accessToken 재발행 후 세션에 저장
-          req.session.accessToken = generateToken({
-            id: decoded.id,
-            email: decoded.email,
-          }).accessToken;
-          return res
-            .status(200)
-            .json({ message: "RefreshToken Login Success" });
-        }
-      }
-      next();
-    } catch (err) {
-      console.log(err);
-      res.status(500).json({ message: "Server Error - 500" });
-    }
-  },
   // AI 로그아웃 - 인증 삭제
   getAILogoutHandler: async (req, res) => {
     console.log("AI Logout API 호출");
@@ -745,9 +699,8 @@ const loginController = {
       res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
-  // AI JWT 토큰 유효성 검사 - 서비스 이용 (Test)
+  // (Middle Ware) AI JWT 토큰 유효성 검사 - 서비스 이용
   vaildateTokenConsulting: async (req, res, next) => {
-    console.log("AI JWT 토큰 유효성 검사 API 호출");
     // Session data 조회
     const accessToken = req.session.accessToken;
     const refreshToken = req.cookies.refreshToken;
@@ -769,13 +722,15 @@ const loginController = {
             if (prevSid) {
               // 현재 Sid와 Redis Sid가 다른 경우 - 중복 로그인
               if (prevSid !== sessionId) {
-                console.log("Duplicated Session - 401 Unauthorized");
+                console.log(
+                  `Duplicated Session 401 Unauthorized - ${decoded.id}`
+                );
                 return res
                   .status(401)
                   .json({ message: "Duplicated Session - 401 Unauthorized" });
               }
               // Sid 일치 - 유효성 검증 통과
-              console.log("AccessToken 유효성 검증 통과!");
+              console.log(`AccessToken 유효성 검증 통과! - ${decoded.id}`);
               next();
             }
             // Redis에 저장된 Sid가 없는 경우 - 첫 로그인 OR Redis 자동 삭제
@@ -824,15 +779,15 @@ const loginController = {
             sessionId,
             (err, reply) => {
               // 로그인 처리 로직
-              console.log(`refreshToken SessionID Update - ${sessionId}`);
+              // console.log(`refreshToken SessionID Update - ${sessionId}`);
             }
           );
-          console.log("RefreshToken 유효성 검증 통과");
+          console.log(`RefreshToken 유효성 검증 통과! - ${decoded.id}`);
           next();
         }
-        // User가 없는 경우
+        // User가 없는 경우 - 해킹 시도
         else {
-          console.log("RefreshToken Non User! - 400");
+          console.log(`RefreshToken Non User! 400 - ${decoded.id}`);
           return res
             .status(400)
             .json({ message: "RefreshToken Non User! - 400" });
@@ -848,28 +803,87 @@ const loginController = {
       res.status(500).json({ message: "Server Error - 500" });
     }
   },
-  // AI 중복 로그인 검사 (Regercy)
-  vaildateDupleLogin: (req, res, next) => {
+  // (Middle Ware) AI Plan 유효성 검사 - 서비스 이용
+  vaildatePlan: async (req, res, next) => {
+    const accessToken = req.session.accessToken;
+    const refreshToken = req.cookies.refreshToken;
+
+    const user_plan_table = Plan_Table_Info["Plan"].table;
+    const user_plan_attribute = Plan_Table_Info["Plan"].attribute;
+
+    let parseUid = "",
+      decoded;
     try {
-      const sessionId = req.sessionID;
+      // 0. Token 값을 통한 uid 조회
+      if (accessToken) decoded = verifyToken("access", accessToken);
+      else if (refreshToken) decoded = verifyToken("refresh", refreshToken);
+      else
+        return res.status(401).json({ message: "Login Session Expire! - 401" });
 
-      // Redis에서 기존 세션 ID 확인
-      redisStore.get(`user_session:${userId}`, (err, oldSessionId) => {
-        if (oldSessionId) {
-          // 기존 세션 무효화
-          redisStore.del(`sess:${oldSessionId}`, (err, reply) => {
-            console.log("Previous session invalidated");
-          });
+      parseUid = decoded.id;
+      const today = moment().tz("Asia/Seoul").format("YYYY-MM-DD HH:mm:ss");
+
+      // 1. User Redis expiry 조회
+      let userExpiryDate = await redisStore.get(
+        `user:expiry:${parseUid}`,
+        (err, data) => data
+      );
+      // console.log("userExpiryDate: " + userExpiryDate);
+
+      // 2. User Redis expiry 값이 있는 경우 - 오늘 날짜와 expiry 값 비교
+      if (userExpiryDate) {
+        // 2-1. 만료되지 않은 경우 - next();
+        if (new Date(userExpiryDate) >= new Date(today)) {
+          console.log(`Plan 유효성 검증 통과! - ${parseUid}`);
+          next();
         }
-      });
-
-      next();
+        // 2-2. 만료된 경우 - 접근 제한 (만료된 유저)
+        else {
+          console.log(`Expired User 401 - ${parseUid}`);
+          return res.status(401).json({ message: "Expired User - 401" });
+        }
+      }
+      // 3. User Redis expiry 값이 없는 경우
+      else {
+        // 3-0. User_Plan 테이블에 해당 유저가 있는지 조회
+        const user_plan_data = await user_ai_select(
+          user_plan_table,
+          user_plan_attribute,
+          parseUid
+        );
+        // console.log(user_plan_data[0]);
+        // 3-1. User Plan이 있는 경우 - Redis expiry 데이터 갱신 후 만료 여부 판단
+        if (user_plan_data[0]) {
+          const { expirationDate } = user_plan_data[0];
+          // Redis expiry 데이터 갱신
+          await redisStore.set(
+            `user:expiry:${parseUid}`,
+            expirationDate,
+            (err, reply) => {
+              console.log(`User Plan Redis Update - ${parseUid}`);
+            }
+          );
+          // 만료 여부 판단
+          if (new Date(expirationDate) >= new Date(today)) {
+            console.log(`Plan 유효성 검증 통과! - ${parseUid}`);
+            next();
+          } else {
+            console.log(`Expired User 401 - ${parseUid}`);
+            return res.status(401).json({ message: "Expired User - 401" });
+          }
+        }
+        // 3-2. User Plan이 없는 경우 - 접근 제한 (미결제 유저)
+        else {
+          console.log(`Unpaid User 401 - ${parseUid}`);
+          return res.status(401).json({ message: "Unpaid User - 401" });
+        }
+      }
     } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
+      console.log(err.message);
+      res.status(500).json({ message: "Server Error - 500" });
     }
   },
-  // AI RefreshToken 갱신
+  // (App) AI RefreshToken 갱신
   postAIRefreshTokenUpdateHandler: async (req, res) => {
     const { LoginData } = req.body;
     console.log(req.body);
@@ -1117,6 +1131,77 @@ const loginController_Regercy = {
         } else res.json("NonUser");
       }
     );
+  },
+  // AI 중복 로그인 검사 (Regercy)
+  vaildateDupleLogin: (req, res, next) => {
+    try {
+      const sessionId = req.sessionID;
+
+      // Redis에서 기존 세션 ID 확인
+      redisStore.get(`user_session:${userId}`, (err, oldSessionId) => {
+        if (oldSessionId) {
+          // 기존 세션 무효화
+          redisStore.del(`sess:${oldSessionId}`, (err, reply) => {
+            console.log("Previous session invalidated");
+          });
+        }
+      });
+
+      next();
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
+    }
+  },
+  // AI JWT 토큰 유효성 검사 - 로그인 (Regercy)
+  vaildateTokenAI: async (req, res, next) => {
+    console.log("AI JWT 토큰 유효성 검사 API 호출 /login/ai");
+    const { LoginData } = req.body;
+    // Session data 조회
+    const accessToken = req.session.accessToken;
+    const refreshToken = req.cookies.refreshToken;
+
+    let parseLoginData;
+    try {
+      // 입력값 파싱
+      if (typeof LoginData === "string") {
+        parseLoginData = JSON.parse(LoginData);
+      } else parseLoginData = LoginData;
+
+      const { pUid } = parseLoginData;
+
+      let parsepUid = pUid;
+
+      // accessToken이 있는 경우
+      if (accessToken) {
+        // accessToken Decoding
+        const decoded = verifyToken("access", accessToken);
+        // DB 계정과 입력 id가 같을 경우 인가
+        if (decoded.id === parsepUid) {
+          console.log("accessToken Login Success!");
+          return res.status(200).json({ message: "AccessToken Login Success" });
+        }
+        // refreshToken만 있는 경우
+      } else if (refreshToken) {
+        // refreshToken Decoding
+        const decoded = verifyToken("refresh", refreshToken);
+        if (decoded.id === parsepUid) {
+          console.log("refreshToken Login Success!");
+          // accessToken 재발행 후 세션에 저장
+          req.session.accessToken = generateToken({
+            id: decoded.id,
+            email: decoded.email,
+          }).accessToken;
+          return res
+            .status(200)
+            .json({ message: "RefreshToken Login Success" });
+        }
+      }
+      next();
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ message: "Server Error - 500" });
+    }
   },
 };
 

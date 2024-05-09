@@ -19,10 +19,8 @@ const {
   oauthKakaoAccessTokenHandler,
   // AI 일반 로그인
   postAILoginHandler,
-  vaildateTokenAI,
   getAILogoutHandler,
   postAIRefreshTokenUpdateHandler,
-  vaildateDupleLogin,
 } = loginController;
 
 const {
