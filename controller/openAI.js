@@ -1701,8 +1701,6 @@ ${analyzeMsg}
   // 상담 로그 저장 API
   postOpenAIConsultingLogSave: async (req, res) => {
     const { EBTData } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
-    console.log("상담 로그 저장 API /consulting_emotion_log Path 호출");
-
     let parseEBTdata, parsepUid;
     try {
       // 파싱. Client JSON 데이터
@@ -1711,12 +1709,12 @@ ${analyzeMsg}
       } else parseEBTdata = EBTData;
 
       const { messageArr, avarta, pUid } = parseEBTdata;
-      console.log(parseEBTdata);
+      // console.log(parseEBTdata);
 
       // No pUid => return
       if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.json({ message: "No pUid input value - 400" });
+        console.log("Non pUid input value - 400");
+        return res.json({ message: "Non pUid input value - 400" });
       }
       parsepUid = pUid;
       console.log(
@@ -1727,13 +1725,6 @@ ${analyzeMsg}
         console.log(`messageArr Not enough length - pUid: ${parsepUid}`);
         return res.json({ message: "messageArr Not enough length" });
       }
-
-      // 오늘 날짜 변환
-      const dateObj = new Date();
-      const year = dateObj.getFullYear();
-      const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
-      const day = ("0" + dateObj.getDate()).slice(-2);
-      const date = `${year}-${month}-${day}`;
 
       /* Consult_Log DB 저장 */
       const consult_log_table = Consult_Log_Table_Info["Log"].table;
@@ -1749,7 +1740,6 @@ ${analyzeMsg}
 
       const consult_insert_value = [
         parsepUid,
-        date,
         avarta,
         JSON.stringify(messageArr),
       ];
@@ -1759,7 +1749,7 @@ ${analyzeMsg}
         if (err) {
           console.log("Consulting_Log DB Save Fail!");
           console.log("Err sqlMessage: " + err.sqlMessage);
-          res.json({ message: "Err sqlMessage: " + err.sqlMessage });
+          res.json({ message: "Consulting_Log DB Save Fail!" });
         } else {
           console.log("Consulting_Log DB Save Success!");
           res.status(200).json({ message: "Consulting_Log DB Save Success!" });

@@ -303,9 +303,8 @@ const Consult_Log_Table_Info = {
     table: "soyes_ai_User_Consult_Log",
     attribute: {
       pKey: "uid",
-      attr1: "date",
-      attr2: "avarta_name",
-      attr3: "consult_log",
+      attr1: "avarta_name",
+      attr2: "consult_log",
     },
   },
 };
