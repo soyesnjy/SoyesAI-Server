@@ -275,7 +275,9 @@ const openAIController = {
       parsingScore,
       parsingType,
       parsepUid,
-      yourMailAddr = "";
+      yourMailAddr = "",
+      myMailAddr = "",
+      myMailPwd = "";
 
     // 테스트 타입 객체. 추후 검사를 늘림에 따라 추가 될 예정
     const testType = {
@@ -406,9 +408,9 @@ const openAIController = {
       yourMailAddr = "soyesnjy@gmail.com"; // dummy email. 받는사람
       
       // 보내는 사람 계정 로그인
-      const myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
-      const myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
- 
+      myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
+      myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
+
       const transporter = nodemailer.createTransport({
         service: "gmail", // 사용할 이메일 서비스
         // host: "smtp.gmail.com",
