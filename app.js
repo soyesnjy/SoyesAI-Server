@@ -76,7 +76,7 @@ const moment = require("moment-timezone");
 console.log(new Date().toString());
 
 app.get("/", (req, res) => {
-  console.log("GET Refresh!");
+  // console.log("GET Refresh!");
   res.status(200).json({ text: "Hello World!" });
 });
 
