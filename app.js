@@ -76,8 +76,8 @@ const moment = require("moment-timezone");
 console.log(new Date().toString());
 
 app.get("/", (req, res) => {
-  // console.log("Docker Logs 확인용 주석444");
-  res.status(200).json("Hello World!");
+  console.log("GET Refresh!");
+  res.status(200).json({ text: "Hello World!" });
 });
 
 // 라우팅 모듈을 가져와 app.use() 시킬 수 있다
