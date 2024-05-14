@@ -77,11 +77,11 @@ console.log(new Date().toString());
 
 app.get("/", (req, res) => {
   const responseData = { text: "Hello World!" };
-  const responseString = JSON.stringify(responseData);
-  console.log(
-    "Response Data Length:",
-    Buffer.byteLength(responseString, "utf8")
-  );
+  // const responseString = JSON.stringify(responseData);
+  // console.log(
+  //   "Response Data Length:",
+  //   Buffer.byteLength(responseString, "utf8")
+  // );
   res.status(200).json(responseData);
 });
 
