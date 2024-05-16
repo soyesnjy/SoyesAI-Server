@@ -98,6 +98,7 @@ const {
   persona_prompt_lala_v2,
   persona_prompt_lala_v3,
   persona_prompt_lala_v4,
+  persona_prompt_lala_v5,
 } = require("../DB/test_prompt");
 
 // 인지행동 검사 관련
@@ -1157,7 +1158,7 @@ ${analyzeMsg}
       );
 
       // 고정 삽입 프롬프트
-      promptArr.push(persona_prompt_lala_v4); // 엘라 페르소나
+      promptArr.push(persona_prompt_lala_v5); // 엘라 페르소나
       promptArr.push(info_prompt); // 유저관련 정보
 
       // const lastUserContent =
@@ -1183,7 +1184,6 @@ ${analyzeMsg}
       //   return;
       // }
 
-      /* 프롬프트 삽입 분기
       // 심리 검사 결과 프롬프트 상시 삽입
       // 세션에 psy_testResult_promptArr_last 값이 없는 경우
       if (!req.session.psy_testResult_promptArr_last) {
@@ -1211,6 +1211,7 @@ ${analyzeMsg}
         promptArr.push(...req.session.psy_testResult_promptArr_last);
       }
 
+      /* 
       // 검사 결과 분석 관련 멘트 감지
       if (
         test_result_ment.some((el) => {
