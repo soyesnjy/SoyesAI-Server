@@ -22,6 +22,7 @@ const {
   postOpenAIPernalTestAnalysis,
   getClearCookies,
   postOpenAIConsultingLogSave,
+  postOpenAIUserEBTResultData,
 } = openAIController;
 
 // 토큰 유효성 검사 미들웨어
@@ -57,6 +58,8 @@ router.post("/analysis_pt", postOpenAIPernalTestAnalysis);
 
 // 달력 데이터 반환
 router.post("/calendar", postOpenAIMypageCalendarData);
+// User EBT 데이터 반환
+router.post("/ebtresult", postOpenAIUserEBTResultData);
 // Clova Voice Data 반환
 router.post("/tts", postClovaVoiceTTS);
 
