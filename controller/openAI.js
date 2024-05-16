@@ -177,8 +177,8 @@ const select_soyes_AI_Ebt_Result = async (inputTable, parsepUid) => {
     if (!ebt_data[0])
       return {
         testStatus: false,
-        scoreSum: -99,
-        tScore: -999.99,
+        scoreSum: 99,
+        tScore: 999.99,
         result: "NonTesting",
       };
 
@@ -1814,7 +1814,9 @@ ${analyzeMsg}
       });
       // console.log(returnArr);
 
-      return res.json({ message: returnArr });
+      return res.json({
+        message: returnArr.sort((a, b) => b.tScore - a.tScore),
+      });
     } catch (err) {
       console.error(err);
       res.json({
