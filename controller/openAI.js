@@ -168,10 +168,6 @@ const select_soyes_AI_Ebt_Result = async (inputTable, parsepUid) => {
       average,
       standard,
     } = inputTable;
-    // "question" 문자열이 포함된 attribute 선별
-    // const columnAttr = Object.values(user_attr)
-    //   .filter((el) => el.includes("question"))
-    //   .join(", ");
 
     const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`; // Select Query
     const ebt_data = await fetchUserData(connection_AI, select_query);
@@ -182,7 +178,7 @@ const select_soyes_AI_Ebt_Result = async (inputTable, parsepUid) => {
       return {
         testStatus: false,
         scoreSum: -99,
-        tScore: -999,
+        tScore: -999.99,
         result: "NonTesting",
       };
 
@@ -206,7 +202,7 @@ const select_soyes_AI_Ebt_Result = async (inputTable, parsepUid) => {
     return {
       testStatus: true,
       scoreSum,
-      tScore,
+      tScore: Number(tScore),
       result,
       // analyisResult: JSON.parse(ebt_data[0].chat).text,
     };
