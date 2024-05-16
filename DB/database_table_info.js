@@ -1,16 +1,4 @@
-const {
-  ebt_School_Result,
-  ebt_Friend_Result,
-  ebt_Family_Result,
-  ebt_Mood_Result,
-  ebt_Unrest_Result,
-  ebt_Sad_Result,
-  ebt_Health_Result,
-  ebt_Attention_Result,
-  ebt_Movement_Result,
-  ebt_Angry_Result,
-  ebt_Self_Result,
-} = require("../DB/psy_test");
+const { ebt_Result, ebt_Consulting, ebt_Solution } = require("../DB/psy_test");
 
 // Database Table Info
 const User_Table_Info = {
@@ -70,7 +58,9 @@ const EBT_Table_Info = {
       attr7: "chat",
       attr8: "date",
     },
-    result: ebt_School_Result, // 적용 프롬프트
+    result: ebt_Result["School"], // 적용 프롬프트
+    consult: ebt_Consulting["School"], // 적용 프롬프트
+    solution: ebt_Solution["School"], // 적용 프롬프트
     danger_score: 7.6,
     caution_score: 6.5,
     average: 3.053449951,
@@ -91,7 +81,9 @@ const EBT_Table_Info = {
       attr9: "chat",
       attr10: "date",
     },
-    result: ebt_Friend_Result,
+    result: ebt_Result["Friend"], // 적용 프롬프트
+    consult: ebt_Consulting["Friend"], // 적용 프롬프트
+    solution: ebt_Solution["Friend"], // 적용 프롬프트
     danger_score: 9.6,
     caution_score: 8.2,
     average: 4.1379981,
@@ -111,7 +103,9 @@ const EBT_Table_Info = {
       attr8: "chat",
       attr9: "date",
     },
-    result: ebt_Family_Result,
+    result: ebt_Result["Family"], // 적용 프롬프트
+    consult: ebt_Consulting["Family"], // 적용 프롬프트
+    solution: ebt_Solution["Family"], // 적용 프롬프트
     danger_score: 8,
     caution_score: 7,
     average: 3,
@@ -127,7 +121,9 @@ const EBT_Table_Info = {
       attr4: "chat",
       attr5: "date",
     },
-    result: ebt_Mood_Result,
+    result: ebt_Result["Mood"], // 적용 프롬프트
+    consult: ebt_Consulting["Mood"], // 적용 프롬프트
+    solution: ebt_Solution["Mood"], // 적용 프롬프트
     danger_score: 5,
     caution_score: 4,
     average: 2,
@@ -146,7 +142,9 @@ const EBT_Table_Info = {
       attr7: "chat",
       attr8: "date",
     },
-    result: ebt_Unrest_Result,
+    result: ebt_Result["Unrest"], // 적용 프롬프트
+    consult: ebt_Consulting["Unrest"], // 적용 프롬프트
+    solution: ebt_Solution["Unrest"], // 적용 프롬프트
     danger_score: 10,
     caution_score: 9,
     average: 5,
@@ -166,7 +164,9 @@ const EBT_Table_Info = {
       attr8: "chat",
       attr9: "date",
     },
-    result: ebt_Sad_Result,
+    result: ebt_Result["Sad"], // 적용 프롬프트
+    consult: ebt_Consulting["Sad"], // 적용 프롬프트
+    solution: ebt_Solution["Sad"], // 적용 프롬프트
     danger_score: 10,
     caution_score: 9,
     average: 5,
@@ -184,7 +184,9 @@ const EBT_Table_Info = {
       attr6: "chat",
       attr7: "date",
     },
-    result: ebt_Health_Result,
+    result: ebt_Result["Health"], // 적용 프롬프트
+    consult: ebt_Consulting["Health"], // 적용 프롬프트
+    solution: ebt_Solution["Health"], // 적용 프롬프트
     danger_score: 7,
     caution_score: 6,
     average: 3,
@@ -204,7 +206,9 @@ const EBT_Table_Info = {
       attr8: "chat",
       attr9: "date",
     },
-    result: ebt_Attention_Result,
+    result: ebt_Result["Attention"], // 적용 프롬프트
+    consult: ebt_Consulting["Attention"], // 적용 프롬프트
+    solution: ebt_Solution["Attention"], // 적용 프롬프트
     danger_score: 11,
     caution_score: 9,
     average: 5,
@@ -224,7 +228,9 @@ const EBT_Table_Info = {
       attr8: "chat",
       attr9: "date",
     },
-    result: ebt_Movement_Result,
+    result: ebt_Result["Movement"], // 적용 프롬프트
+    consult: ebt_Consulting["Movement"], // 적용 프롬프트
+    solution: ebt_Solution["Movement"], // 적용 프롬프트
     danger_score: 8,
     caution_score: 7,
     average: 3,
@@ -243,7 +249,9 @@ const EBT_Table_Info = {
       attr7: "chat",
       attr8: "date",
     },
-    result: ebt_Angry_Result,
+    result: ebt_Result["Angry"], // 적용 프롬프트
+    consult: ebt_Consulting["Angry"], // 적용 프롬프트
+    solution: ebt_Solution["Angry"], // 적용 프롬프트
     danger_score: 8,
     caution_score: 7,
     average: 3,
@@ -261,7 +269,9 @@ const EBT_Table_Info = {
       attr6: "chat",
       attr7: "date",
     },
-    result: ebt_Self_Result,
+    result: ebt_Result["Self"], // 적용 프롬프트
+    consult: ebt_Consulting["Self"], // 적용 프롬프트
+    solution: ebt_Solution["Self"], // 적용 프롬프트
     danger_score: 7.1,
     caution_score: 5.9,
     average: 2.54907677,
