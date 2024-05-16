@@ -1799,7 +1799,8 @@ ${analyzeMsg}
     const { EBTData } = req.body;
     let parseEBTdata,
       parsepUid,
-      returnArr = {}; // Parsing 변수
+      returnObj = {},
+      returnArr = [];
 
     try {
       // json 파싱
@@ -1819,7 +1820,7 @@ ${analyzeMsg}
         `User 정서행동 검사 결과 반환 API /openAI/ebtresult Path 호출 - pUid: ${parsepUid}`
       );
 
-      // EBT DB 조회
+      // EBT DB에서 차출 - Obj
       await Promise.all(
         EBT_classArr.map(async (ebt_class) => {
           // 분야별 값 조회
@@ -1827,15 +1828,30 @@ ${analyzeMsg}
             EBT_Table_Info[ebt_class],
             parsepUid // Uid
           );
-          returnArr[ebt_class] = { ...select_Ebt_Result };
+          returnObj[ebt_class] = { ...select_Ebt_Result };
         })
       );
+      // console.log(returnObj);
+
+      // EBT DB에서 차출 - Arr
+      const ebtResultArr = EBT_classArr.map(async (ebt_class) => {
+        const select_Ebt_Result = await select_soyes_AI_Ebt_Result(
+          EBT_Table_Info[ebt_class],
+          parsepUid // Uid
+        );
+        return { ebt_class, ...select_Ebt_Result };
+      });
+      // map method는 pending 상태의 promise를 반환하므로 Promise.all method를 사용하여 resolve 상태가 되기를 기다려준다.
+      await Promise.all(ebtResultArr).then((result) => {
+        returnArr = [...result]; // resolve 상태로 반환된 prompt 배열을 psy_testResult_promptArr_last 변수에 복사
+      });
       // console.log(returnArr);
-      return res.json(returnArr);
+
+      return res.json({ message: returnArr });
     } catch (err) {
       console.error(err);
       res.json({
-        data: "Server Error",
+        message: "Server Error",
       });
     }
   },
