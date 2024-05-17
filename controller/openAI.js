@@ -1125,6 +1125,7 @@ ${analyzeMsg}
     // console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
+    let userPrompt = []; // 삽입 User Prompt Array
     let testClass = "",
       testClass_cb = "";
 
@@ -1184,31 +1185,25 @@ ${analyzeMsg}
       //   return;
       // }
 
-      // 심리 검사 결과 프롬프트 상시 삽입
-      // 세션에 psy_testResult_promptArr_last 값이 없는 경우
-      if (!req.session.psy_testResult_promptArr_last) {
-        console.log("심리 검사 결과 프롬프트 삽입");
-        let psy_testResult_promptArr_last = []; // 2점을 획득한 정서행동검사 문항을 저장하는 prompt
-
+      // 대화 5회 미만 - 심리 상담 프롬프트 삽입
+      if (parseMessageArr.length <= 7) {
+        console.log("심리 상담 프롬프트 삽입");
         // consult prompt
-        psy_testResult_promptArr_last.push(
-          EBT_Table_Info[type || "School"].consult
-        );
-        // solution prompt
-        psy_testResult_promptArr_last.push(
-          EBT_Table_Info[type || "School"].solution
-        );
-
-        promptArr.push(...psy_testResult_promptArr_last);
-        // DB 접근 최소화를 위해 세션에 psy_testResult_promptArr_last 값 저장
-        req.session.psy_testResult_promptArr_last = [
-          ...psy_testResult_promptArr_last,
-        ];
+        promptArr.push(EBT_Table_Info[type || "School"].consult);
       }
-      // 세션에 psy_testResult_promptArr_last 값이 있는 경우
+      // 대화 5회 - 심리 상담 프롬프트 삽입 + 심리 상태 분석 프롬프트 삽입
+      else if (parseMessageArr.length === 9) {
+        console.log("심리 요약 프롬프트 삽입");
+        promptArr.push(EBT_Table_Info[type || "School"].consult);
+        userPrompt.push({
+          role: "user",
+          content: `지금까지 대화를 기반으로 네가 파악한 user의 심리 상태를 요약해줘.`,
+        });
+      }
+      // 대화 5회 초과 - 심리 솔루션 프롬프트 삽입
       else {
-        console.log("세션 저장된 심리 검사 결과 프롬프트 삽입");
-        promptArr.push(...req.session.psy_testResult_promptArr_last);
+        console.log("심리 솔루션 프롬프트 삽입");
+        promptArr.push(EBT_Table_Info[type || "School"].solution);
       }
 
       /* 
@@ -1347,7 +1342,7 @@ ${analyzeMsg}
       // console.log(promptArr);
 
       const response = await openai.chat.completions.create({
-        messages: [...promptArr, ...parseMessageArr],
+        messages: [...promptArr, ...parseMessageArr, ...userPrompt],
         model: "gpt-4-turbo", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
