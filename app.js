@@ -75,6 +75,16 @@ app.use(
 const moment = require("moment-timezone");
 console.log(new Date().toString());
 
+const responseBodyLogger = (req, res, next) => {
+  const oldSend = res.send;
+  res.send = function (data) {
+    console.log(`Response body: ${data}`);
+    oldSend.apply(res, arguments);
+  };
+  next();
+};
+app.use(responseBodyLogger);
+
 app.get("/", (req, res) => {
   const responseData = { text: "Hello World!" };
   // const responseString = JSON.stringify(responseData);
