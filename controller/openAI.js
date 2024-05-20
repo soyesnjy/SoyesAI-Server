@@ -1122,7 +1122,7 @@ ${analyzeMsg}
   // 정서멘토 모델 - 엘라
   postOpenAIConsultingLala: async (req, res) => {
     const { EBTData } = req.body;
-    // console.log(EBTData);
+    console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     let userPrompt = []; // 삽입 User Prompt Array
