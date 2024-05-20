@@ -143,8 +143,6 @@ const EBT_Table_Info = {
       attr8: "date",
     },
     result: ebt_Result["Unrest"], // 적용 프롬프트
-    consult: ebt_Consulting["Unrest"], // 적용 프롬프트
-    solution: ebt_Solution["Unrest"], // 적용 프롬프트
     danger_score: 10,
     caution_score: 9,
     average: 5,
@@ -165,8 +163,6 @@ const EBT_Table_Info = {
       attr9: "date",
     },
     result: ebt_Result["Sad"], // 적용 프롬프트
-    consult: ebt_Consulting["Sad"], // 적용 프롬프트
-    solution: ebt_Solution["Sad"], // 적용 프롬프트
     danger_score: 10,
     caution_score: 9,
     average: 5,
@@ -207,8 +203,6 @@ const EBT_Table_Info = {
       attr9: "date",
     },
     result: ebt_Result["Attention"], // 적용 프롬프트
-    consult: ebt_Consulting["Attention"], // 적용 프롬프트
-    solution: ebt_Solution["Attention"], // 적용 프롬프트
     danger_score: 11,
     caution_score: 9,
     average: 5,
@@ -229,8 +223,6 @@ const EBT_Table_Info = {
       attr9: "date",
     },
     result: ebt_Result["Movement"], // 적용 프롬프트
-    consult: ebt_Consulting["Movement"], // 적용 프롬프트
-    solution: ebt_Solution["Movement"], // 적용 프롬프트
     danger_score: 8,
     caution_score: 7,
     average: 3,
@@ -250,8 +242,6 @@ const EBT_Table_Info = {
       attr8: "date",
     },
     result: ebt_Result["Angry"], // 적용 프롬프트
-    consult: ebt_Consulting["Angry"], // 적용 프롬프트
-    solution: ebt_Solution["Angry"], // 적용 프롬프트
     danger_score: 8,
     caution_score: 7,
     average: 3,

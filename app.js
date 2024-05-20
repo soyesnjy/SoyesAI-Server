@@ -92,7 +92,7 @@ app.get("/", (req, res) => {
   //   "Response Data Length:",
   //   Buffer.byteLength(responseString, "utf8")
   // );
-  res.status(200).json(37);
+  res.status(200).json(responseData);
 });
 
 // 라우팅 모듈을 가져와 app.use() 시킬 수 있다
