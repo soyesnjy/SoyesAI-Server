@@ -87,7 +87,7 @@ const responseBodyLogger = (req, res, next) => {
   };
   next();
 };
-app.use(responseBodyLogger);
+// app.use(responseBodyLogger);
 
 app.get("/", (req, res) => {
   res.status(200).json({ text: "Hello World!" });
