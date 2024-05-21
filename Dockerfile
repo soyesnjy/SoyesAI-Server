@@ -18,7 +18,7 @@ RUN npm install pm2 -g
 COPY . .
 
 # 애플리케이션이 사용할 포트를 명시합니다.
-EXPOSE 4040
+# EXPOSE 4040
 
 # 애플리케이션을 pm2로 실행합니다.
 CMD ["pm2-runtime", "start", "app.js"]
