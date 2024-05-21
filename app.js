@@ -7,6 +7,7 @@ require("dotenv").config();
 // app은 기본 express() 인스턴스 생성.
 const express = require("express");
 const session = require("express-session");
+const compression = require("compression");
 
 const redisStore = require("./DB/redisClient");
 
@@ -75,24 +76,12 @@ app.use(
 const moment = require("moment-timezone");
 console.log(new Date().toString());
 
-// const responseBodyLogger = (req, res, next) => {
-//   const oldSend = res.send;
-//   res.send = function (data) {
-//     console.log(`Response body: ${data}`);
-//     oldSend.apply(res, arguments);
-//   };
-//   next();
-// };
-// app.use(responseBodyLogger);
+// 응답 압축을 사용하는 경우
+app.use(compression());
 
 app.get("/", (req, res) => {
-  const responseData = { text: "Hello World!" };
-  // const responseString = JSON.stringify(responseData);
-  // console.log(
-  //   "Response Data Length:",
-  //   Buffer.byteLength(responseString, "utf8")
-  // );
-  res.status(200).json(responseData);
+  res.status(200).json({ text: "Hello World!" });
+  res.end();
 });
 
 // 라우팅 모듈을 가져와 app.use() 시킬 수 있다
