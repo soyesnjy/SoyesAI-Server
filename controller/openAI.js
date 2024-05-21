@@ -463,14 +463,7 @@ const openAIController = {
         from: myMailAddr,
         to: yourMailAddr,
         subject: "정서행동 검사 AI 상담 분석 결과입니다",
-        text: `
-안녕하세요? 소예키즈 AI 상담사입니다.
-귀하의 상담 내용에 대한 AI 분석 결과를 안내드립니다.
-
-${analyzeMsg}
-
-이상입니다. 감사합니다!
-        `,
+        text: `${analyzeMsg}`,
         // attachments : 'logo.png' // 이미지 첨부 속성
       };
 
@@ -717,14 +710,7 @@ ${analyzeMsg}
         from: myMailAddr,
         to: yourMailAddr,
         subject: "성격 검사 AI 상담 분석 결과입니다",
-        text: `
-안녕하세요? 소예키즈 AI 상담사입니다.
-귀하의 상담 내용에 대한 AI 분석 결과를 안내드립니다.
-
-${analyzeMsg}
-
-이상입니다. 감사합니다!
-        `,
+        text: `${analyzeMsg}`,
         // attachments : 'logo.png' // 이미지 첨부 속성
       };
 
