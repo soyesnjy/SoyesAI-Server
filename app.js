@@ -79,6 +79,16 @@ console.log(new Date().toString());
 // 응답 압축을 사용하는 경우
 app.use(compression());
 
+const responseBodyLogger = (req, res, next) => {
+  const oldSend = res.send;
+  res.send = function (data) {
+    console.log(`Response body: ${data}`);
+    oldSend.apply(res, arguments);
+  };
+  next();
+};
+app.use(responseBodyLogger);
+
 app.get("/", (req, res) => {
   res.status(200).json({ text: "Hello World!" });
   res.end();
