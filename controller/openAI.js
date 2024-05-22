@@ -393,30 +393,6 @@ const openAIController = {
       });
 
       /*
-      // Promise 생성 메서드
-      function queryAsync(connection, query, parameters) {
-        return new Promise((resolve, reject) => {
-          connection.query(query, parameters, (error, results, fields) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(results);
-            }
-          });
-        });
-      }
-
-      // 프로미스 resolve 반환값 사용. (User Data return)
-      async function fetchUserData(connection, query) {
-        try {
-          let results = await queryAsync(connection, query, []);
-          // console.log(results[0]);
-          yourMailAddr = results[0].email; // Select email
-        } catch (error) {
-          console.error(error);
-        }
-      }
-
       const user_table = "soyes_ai_User";
       const user_attr = {
         pKey: "uid",
@@ -448,7 +424,7 @@ const openAIController = {
       // AI 분석
       const response = await openai.chat.completions.create({
         messages: [...analysisPrompt, ...userPrompt],
-        model: "gpt-4-turbo", // gpt-4-0125-preview, gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
         temperature: 1,
       });
 
@@ -636,47 +612,36 @@ const openAIController = {
           `,
       });
 
-      // 메일 관련 세팅 시작
       /*
-      // mysql query 메서드 동기식 작동 + DB 데이터 가져오기
-      let yourMailAddr = "";
-
-      // Promise 생성 메서드
-      function queryAsync(connection, query, parameters) {
-        return new Promise((resolve, reject) => {
-          connection.query(query, parameters, (error, results, fields) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(results);
-            }
-          });
-        });
-      }
-
-      // 프로미스 resolve 반환값 사용. (User Data return)
-      async function fetchUserData(connection, query) {
-        try {
-          let results = await queryAsync(connection, query, []);
-          // console.log(results[0]);
-          yourMailAddr = results[0].email; // Select email
-        } catch (error) {
-          console.error(error);
-        }
-      }
-
       const user_table = "soyes_ai_User";
       const user_attr = {
         pKey: "uid",
-        attr1: "email"
-      }
+        attr1: "email",
+      };
 
       const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${pUid}'`;
       await fetchUserData(connection_AI, select_query);
       console.log("받는사람: " + yourMailAddr);
-      */
 
       yourMailAddr = "soyesnjy@gmail.com"; // dummy email. 받는사람
+      
+      // 보내는 사람 계정 로그인
+      myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
+      myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail", // 사용할 이메일 서비스
+        // host: "smtp.gmail.com",
+        // port: 587,
+        // secure: false,
+        auth: {
+          user: myMailAddr, // 보내는 이메일 주소
+          pass: myMailPwd, // 이메일 비밀번호
+        },
+      });
+      
+      yourMailAddr = "soyesnjy@gmail.com"; // dummy email. 받는사람
+      */
 
       // 보내는 사람 계정 로그인
       const myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
@@ -697,7 +662,7 @@ const openAIController = {
       // AI 분석
       const response = await openai.chat.completions.create({
         messages: [...analysisPrompt, ...userPrompt],
-        model: "gpt-4-turbo", // gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-4o", // gpt-4-turbo, gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
         temperature: 1,
       });
 
@@ -969,7 +934,7 @@ const openAIController = {
 
       const response = await openai.chat.completions.create({
         messages: [...promptArr, ...parseMessageArr],
-        model: "gpt-4-turbo", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
       let emotion = parseInt(response.choices[0].message.content.slice(-1));
@@ -1082,7 +1047,7 @@ const openAIController = {
 
       const response = await openai.chat.completions.create({
         messages: [...promptArr, ...parseMessageArr],
-        model: "gpt-4-turbo", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-4o", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
       let emotion = parseInt(response.choices[0].message.content.slice(-1));
@@ -1108,7 +1073,7 @@ const openAIController = {
   // 정서멘토 모델 - 엘라
   postOpenAIConsultingLala: async (req, res) => {
     const { EBTData } = req.body;
-    console.log(EBTData);
+    // console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     let userPrompt = []; // 삽입 User Prompt Array
@@ -1329,14 +1294,17 @@ const openAIController = {
 
       const response = await openai.chat.completions.create({
         messages: [...promptArr, ...parseMessageArr, ...userPrompt],
-        model: "gpt-4-turbo", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
       let emotion = parseInt(response.choices[0].message.content.slice(-1));
       console.log("emotion: " + emotion);
 
       const message = {
-        message: response.choices[0].message.content.slice(0, -1),
+        message:
+          typeof emotion === "number"
+            ? response.choices[0].message.content.slice(0, -1)
+            : response.choices[0].message.content,
         emotion,
       };
       // 대화 내역 로그
@@ -1519,7 +1487,7 @@ const openAIController = {
 
       const response = await openai.chat.completions.create({
         messages: [...promptArr, ...parseMessageArr],
-        model: "gpt-4-turbo", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-4o", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
       let emotion = parseInt(response.choices[0].message.content.slice(-1));
