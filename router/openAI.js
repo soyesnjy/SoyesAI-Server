@@ -23,7 +23,6 @@ const {
   getClearCookies,
   postOpenAIConsultingLogSave,
   postOpenAIUserEBTResultData,
-  getYoutubeContent,
 } = openAIController;
 
 // 토큰 유효성 검사 미들웨어
@@ -63,8 +62,6 @@ router.post("/calendar", postOpenAIMypageCalendarData);
 router.post("/ebtresult", postOpenAIUserEBTResultData);
 // Clova Voice Data 반환
 router.post("/tts", postClovaVoiceTTS);
-
-router.get("/youtube/:id", getYoutubeContent);
 
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);

@@ -171,7 +171,7 @@ const loginController = {
       });
 
       // console.log(authUrl);
-      // res.redirect(authUrl);
+
       res.json({ data: authUrl });
     } catch (err) {
       console.error(err);
