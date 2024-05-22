@@ -1077,8 +1077,8 @@ const openAIController = {
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     let userPrompt = []; // 삽입 User Prompt Array
-    let testClass = "",
-      testClass_cb = "";
+    // let testClass = "",
+    //   testClass_cb = "";
 
     try {
       if (typeof EBTData === "string") {
@@ -1136,23 +1136,22 @@ const openAIController = {
       //   return;
       // }
 
-      // 대화 5회 미만 - 심리 상담 프롬프트 삽입
-      if (parseMessageArr.length <= 7) {
-        console.log("심리 상담 프롬프트 삽입");
-        // consult prompt
-        promptArr.push(EBT_Table_Info[type || "School"].consult);
-      }
-      // 대화 5회 - 심리 상담 프롬프트 삽입 + 심리 상태 분석 프롬프트 삽입
-      else if (parseMessageArr.length === 9) {
+      // 상시 - 심리 상담 프롬프트 삽입
+      // consult prompt
+      console.log("심리 상담 프롬프트 삽입");
+      promptArr.push(EBT_Table_Info[type || "School"].consult);
+
+      // 대화 6회 - 심리 상담 프롬프트 삽입 + 심리 상태 분석 프롬프트 삽입
+      if (parseMessageArr.length === 11) {
         console.log("심리 요약 프롬프트 삽입");
-        promptArr.push(EBT_Table_Info[type || "School"].consult);
+        // promptArr.push(EBT_Table_Info[type || "School"].consult);
         userPrompt.push({
           role: "user",
           content: `지금까지 대화를 기반으로 네가 파악한 user의 심리 상태를 요약해줘.`,
         });
       }
-      // 대화 5회 초과 - 심리 솔루션 프롬프트 삽입
-      else {
+      // 대화 6회 초과 - 심리 솔루션 프롬프트 삽입
+      if (parseMessageArr.length > 11) {
         console.log("심리 솔루션 프롬프트 삽입");
         promptArr.push(EBT_Table_Info[type || "School"].solution);
       }
@@ -1310,7 +1309,8 @@ const openAIController = {
       // 대화 내역 로그
       console.log([
         ...parseMessageArr,
-        { role: "assistant", content: message.message },
+        { role: "assistant", content: response.choices[0].message.content },
+        // response.choices[0].message.content,
       ]);
 
       return res.status(200).json(message);
