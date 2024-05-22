@@ -17,6 +17,20 @@ const openai = new OpenAI({
 });
 
 const nodemailer = require("nodemailer");
+// 구글 권한 관련
+const { google } = require("googleapis");
+const path = require("path");
+
+const keyFilePath = path.join("src/disco-light-417705-941098b7c8c3.json");
+const auth = new google.auth.JWT({
+  keyFile: keyFilePath,
+  scopes: ["https://www.googleapis.com/auth/youtube.force-ssl"],
+});
+
+const youtube = google.youtube({
+  version: "v3",
+  auth,
+});
 
 // 동기식 DB 접근 함수 1. Promise 생성 함수
 function queryAsync(connection, query, parameters) {
@@ -1772,6 +1786,25 @@ const openAIController = {
       res.json({
         message: "Server Error",
       });
+    }
+  },
+  // getYoutubeContent API
+  getYoutubeContent: async (req, res) => {
+    const videoId = req.params.id;
+    try {
+      const response = await youtube.videos.list({
+        id: videoId,
+        part: "snippet,player",
+      });
+      if (response.data.items && response.data.items.length > 0) {
+        const videoData = response.data.items[0];
+        res.json(videoData);
+      } else {
+        res.status(404).send("Video not found");
+      }
+    } catch (error) {
+      console.error("Error fetching video data:", error);
+      res.status(500).send("Internal Server Error");
     }
   },
 };
