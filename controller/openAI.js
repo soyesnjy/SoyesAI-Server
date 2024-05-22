@@ -19,11 +19,17 @@ const openai = new OpenAI({
 const nodemailer = require("nodemailer");
 // 구글 권한 관련
 const { google } = require("googleapis");
-const path = require("path");
 
-const keyFilePath = path.join("src/disco-light-417705-941098b7c8c3.json");
+// 환경 변수에서 인증 정보를 가져옵니다.
+const serviceAccount = {
+  private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+  client_email: process.env.GOOGLE_CLIENT_EMAIL,
+  project_id: process.env.GOOGLE_PROJECT_ID,
+};
+
 const auth = new google.auth.JWT({
-  keyFile: keyFilePath,
+  email: serviceAccount.client_email,
+  key: serviceAccount.private_key,
   scopes: ["https://www.googleapis.com/auth/youtube.force-ssl"],
 });
 
@@ -1786,6 +1792,25 @@ const openAIController = {
       res.json({
         message: "Server Error",
       });
+    }
+  },
+  // getYoutubeContent API
+  getYoutubeContent: async (req, res) => {
+    const videoId = req.params.id;
+    try {
+      const response = await youtube.videos.list({
+        id: videoId,
+        part: "snippet,player",
+      });
+      if (response.data.items && response.data.items.length > 0) {
+        const videoData = response.data.items[0];
+        res.json(videoData);
+      } else {
+        res.status(404).send("Video not found");
+      }
+    } catch (error) {
+      console.error("Error fetching video data:", error);
+      res.status(500).send("Internal Server Error");
     }
   },
 };
