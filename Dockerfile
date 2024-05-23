@@ -12,7 +12,7 @@ COPY package*.json ./
 RUN npm install
 
 # # pm2를 글로벌로 설치합니다.
-# RUN npm install pm2 -g
+RUN npm install pm2 -g
 
 # 애플리케이션 소스를 복사합니다.
 COPY . .
@@ -21,7 +21,7 @@ COPY . .
 # EXPOSE 4000
 
 # 애플리케이션을 Node.js로 직접 실행합니다.
-CMD ["node", "app.js"]
+# CMD ["node", "app.js"]
 
 # # 애플리케이션을 pm2로 실행합니다.
-# CMD ["pm2-runtime", "start", "app.js"]
+CMD ["pm2-runtime", "start", "app.js"]
