@@ -27,11 +27,11 @@ app.use(
       "https://soyeskids.co.kr:4040",
       "https://soyes-ai-project.vercel.app",
       "https://www.soyeskids.store",
-      "http://127.0.0.1:53298",
       "http://localhost:3000",
-      "http://d1rq5xi9hzhyrc.cloudfront.net",
-      "http://soyes.chatbot.s3-website.ap-northeast-2.amazonaws.com",
-      "http://soyes.toy.com.s3-website.ap-northeast-2.amazonaws.com",
+      // "http://127.0.0.1:53298",
+      // "http://d1rq5xi9hzhyrc.cloudfront.net",
+      // "http://soyes.chatbot.s3-website.ap-northeast-2.amazonaws.com",
+      // "http://soyes.toy.com.s3-website.ap-northeast-2.amazonaws.com",
     ],
     methods: ["GET", "POST", "OPTION", "DELETE"],
     credentials: true,
@@ -49,7 +49,7 @@ app.use(cookieParser("@earthworm"));
 // 세션 설정 - Cross-Site 설정 불가능. (secure 이슈)
 app.use(
   session({
-    store: redisStore,
+    // store: redisStore,
     secret: "@earthworm",
     resave: false,
     saveUninitialized: true,

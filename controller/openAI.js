@@ -20,7 +20,7 @@ const nodemailer = require("nodemailer");
 // 구글 권한 관련
 const { google } = require("googleapis");
 
-// 환경 변수에서 인증 정보를 가져옵니다.
+// GCP IAM 서비스 계정 인증
 const serviceAccount = {
   private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
   client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -1796,17 +1796,24 @@ const openAIController = {
   },
   // getYoutubeContent API
   getYoutubeContent: async (req, res) => {
+    // 영상 식별 번호 파라미터
     const videoId = req.params.id;
     try {
+      // 식별 번호 없는 요청 처리
+      if (!videoId) return res.status(404).send("Video Number not Input");
+      // 영상 리스트 가져오기
       const response = await youtube.videos.list({
         id: videoId,
         part: "snippet,player",
       });
+      // 영상 O
       if (response.data.items && response.data.items.length > 0) {
         const videoData = response.data.items[0];
-        res.json(videoData);
-      } else {
-        res.status(404).send("Video not found");
+        return res.status(200).json(videoData);
+      }
+      // 영상 X
+      else {
+        return res.status(404).send("Video not found");
       }
     } catch (error) {
       console.error("Error fetching video data:", error);
