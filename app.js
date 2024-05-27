@@ -9,7 +9,7 @@ const express = require("express");
 const session = require("express-session");
 const compression = require("compression");
 
-const redisStore = require("./DB/redisClient");
+// const redisStore = require("./DB/redisClient");
 
 const app = express();
 const PORT = 4000;
@@ -49,7 +49,7 @@ app.use(cookieParser("@earthworm"));
 // 세션 설정 - Cross-Site 설정 불가능. (secure 이슈)
 app.use(
   session({
-    // store: redisStore,
+    // store: redisStore, // redis 서버에 현재 SID가 key:value 형태로 저장됨
     secret: "@earthworm",
     resave: false,
     saveUninitialized: true,

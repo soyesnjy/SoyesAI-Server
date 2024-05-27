@@ -1734,7 +1734,7 @@ const openAIController = {
     const { EBTData } = req.body;
     let parseEBTdata,
       parsepUid,
-      returnObj = {},
+      // returnObj = {},
       returnArr = [];
 
     try {
@@ -1747,7 +1747,7 @@ const openAIController = {
       // No pUid => return
       if (!pUid) {
         console.log("No pUid input value - 400");
-        return res.json({ message: "No pUid input value - 400" });
+        return res.status(400).json({ message: "No pUid input value - 400" });
       }
       // pUid default값 설정
       parsepUid = pUid;
@@ -1780,7 +1780,7 @@ const openAIController = {
       });
       // map method는 pending 상태의 promise를 반환하므로 Promise.all method를 사용하여 resolve 상태가 되기를 기다려준다.
       await Promise.all(ebtResultArr).then((result) => {
-        returnArr = [...result]; // resolve 상태로 반환된 prompt 배열을 psy_testResult_promptArr_last 변수에 복사
+        returnArr = [...result]; // resolve 상태로 반환된 배열을 returnArr 변수에 복사
       });
       // console.log(returnArr);
 
@@ -1789,8 +1789,8 @@ const openAIController = {
       });
     } catch (err) {
       console.error(err);
-      res.json({
-        message: "Server Error",
+      res.status(500).json({
+        message: "Server Error - 500",
       });
     }
   },
