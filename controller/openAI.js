@@ -26,13 +26,11 @@ const serviceAccount = {
   client_email: process.env.GOOGLE_CLIENT_EMAIL,
   project_id: process.env.GOOGLE_PROJECT_ID,
 };
-
 const auth = new google.auth.JWT({
   email: serviceAccount.client_email,
   key: serviceAccount.private_key,
   scopes: ["https://www.googleapis.com/auth/youtube.force-ssl"],
 });
-
 const youtube = google.youtube({
   version: "v3",
   auth,
@@ -230,6 +228,37 @@ const select_soyes_AI_Ebt_Result = async (inputTable, parsepUid) => {
   } catch (err) {
     console.log(err);
     return "Error";
+  }
+};
+// User 정서행동 결과 분석 반환
+const select_soyes_AI_Ebt_Analyis = async (inputTable, parsepUid) => {
+  // 동기식 DB 접근 함수 1. Promise 생성 함수
+  try {
+    const {
+      table, // 조회할 EBT table
+      attribute, // table Attribute
+    } = inputTable;
+
+    const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`; // Select Query
+    const ebt_data = await fetchUserData(connection_AI, select_query);
+    // console.log(ebt_data[0]);
+
+    // 검사를 진행하지 않은 경우
+    if (!ebt_data[0])
+      return {
+        analyisResult: "NonTesting",
+      };
+    const chat = JSON.parse(ebt_data[0].chat).text;
+    // console.log("chat: " + chat);
+
+    return {
+      analyisResult: chat,
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      analyisResult: "select_soyes_AI_Ebt_Analyis Error",
+    };
   }
 };
 // User 성격 검사 유형 반환 (String)
@@ -1158,20 +1187,54 @@ const openAIController = {
 
       // 상시 - 심리 상담 프롬프트 삽입
       // consult prompt
-      console.log("심리 상담 프롬프트 삽입");
-      promptArr.push(EBT_Table_Info[type || "School"].consult);
 
-      // 대화 6회 - 심리 상담 프롬프트 삽입 + 심리 상태 분석 프롬프트 삽입
-      if (parseMessageArr.length === 11) {
-        console.log("심리 요약 프롬프트 삽입");
-        // promptArr.push(EBT_Table_Info[type || "School"].consult);
+      // 대화 6회 미만 - 심리 상담 프롬프트 삽입
+      if (parseMessageArr.length < 11) {
+        console.log("심리 상담 프롬프트 삽입");
+        promptArr.push(EBT_Table_Info[type || "School"].consult);
+      }
+      // 대화 6회 - 심리 상담 프롬프트 + 심리 상태 분석 프롬프트 삽입
+      else if (parseMessageArr.length === 11) {
+        console.log("심리 상담 프롬프트 + 심리 요약 프롬프트 삽입");
+
+        // User EBT 학교생활 결과
+        let user_EBT_School = await select_soyes_AI_Ebt_Analyis(
+          EBT_Table_Info["School"],
+          parsepUid
+        );
+        // User EBT 주의집중 결과
+        let user_EBT_Attention = await select_soyes_AI_Ebt_Analyis(
+          EBT_Table_Info["Attention"],
+          parsepUid
+        );
+
+        promptArr.push(EBT_Table_Info[type || "School"].consult);
         userPrompt.push({
           role: "user",
-          content: `지금까지 대화를 기반으로 네가 파악한 user의 심리 상태를 요약해줘.`,
+          content: `아래는 유저의 정서행동검사 학교생활 및 주의집중 영역 결과야.
+          '''
+          학교생활: {
+            ${
+              user_EBT_School === "NonTesting"
+                ? "'정서행동검사 - 학교생활'을 실시하지 않았습니다."
+                : user_EBT_School
+            }
+          }
+          
+          주의집중{
+            ${
+              user_EBT_Attention === "NonTesting"
+                ? "'정서행동검사 - 주의집중'을 실시하지 않았습니다."
+                : user_EBT_Attention
+            }
+          }
+          '''
+          지금까지 대화를 기반으로 네가 파악한 user의 심리 상태를 요약해줘.
+          `,
         });
       }
       // 대화 6회 초과 - 심리 솔루션 프롬프트 삽입
-      if (parseMessageArr.length > 11) {
+      else {
         console.log("심리 솔루션 프롬프트 삽입");
         promptArr.push(EBT_Table_Info[type || "School"].solution);
       }
@@ -1818,6 +1881,39 @@ const openAIController = {
     } catch (error) {
       console.error("Error fetching video data:", error);
       res.status(500).send("Internal Server Error");
+    }
+  },
+  // 상담 Solution 반환
+  postOpenAIConsultSolutionData: async (req, res) => {
+    const { EBTData } = req.body;
+    let parseEBTdata, parsepUid;
+
+    try {
+      // json 파싱
+      if (typeof EBTData === "string") {
+        parseEBTdata = JSON.parse(EBTData);
+      } else parseEBTdata = EBTData;
+
+      const { pUid } = parseEBTdata;
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
+      }
+
+      parsepUid = pUid;
+      console.log(
+        `User 상담 Solution 반환 API /openAI/solution Path 호출 - pUid: ${parsepUid}`
+      );
+
+      return res.json({
+        message: "success",
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "Server Error - 500",
+      });
     }
   },
 };

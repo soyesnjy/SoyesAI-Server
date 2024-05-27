@@ -24,6 +24,7 @@ const {
   postOpenAIConsultingLogSave,
   postOpenAIUserEBTResultData,
   getYoutubeContent,
+  postOpenAIConsultSolutionData,
 } = openAIController;
 
 // 토큰 유효성 검사 미들웨어
@@ -63,8 +64,10 @@ router.post("/calendar", postOpenAIMypageCalendarData);
 router.post("/ebtresult", postOpenAIUserEBTResultData);
 // Clova Voice Data 반환
 router.post("/tts", postClovaVoiceTTS);
-// Clova Voice Data 반환
+// Youtube Video 반환
 router.get("/youtube/:id", getYoutubeContent);
+// solution 반환
+router.post("/solution", postOpenAIConsultSolutionData);
 
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);
