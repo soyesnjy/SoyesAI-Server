@@ -298,7 +298,15 @@ const PT_Table_Info = {
     },
   },
 };
-const Consult_Log_Table_Info = {
+const Consult_Table_Info = {
+  Analysis: {
+    table: "soyes_ai_User_Consult_Analysis",
+    attribute: {
+      pKey: "uid",
+      attr1: "ella_psycho_analysis",
+      attr2: "ubi_psycho_analysis",
+    },
+  },
   Log: {
     table: "soyes_ai_User_Consult_Log",
     attribute: {
@@ -314,5 +322,5 @@ module.exports = {
   Plan_Table_Info,
   EBT_Table_Info,
   PT_Table_Info,
-  Consult_Log_Table_Info,
+  Consult_Table_Info,
 };
