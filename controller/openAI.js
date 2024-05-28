@@ -281,7 +281,7 @@ const {
   User_Table_Info,
   EBT_Table_Info,
   PT_Table_Info,
-  Consult_Log_Table_Info,
+  Consult_Table_Info,
 } = require("../DB/database_table_info");
 
 // EBT 반영 Class 정의
@@ -1396,6 +1396,22 @@ const openAIController = {
         // response.choices[0].message.content,
       ]);
 
+      // 심리 분석 DB 저장
+      if (parseMessageArr.length === 11) {
+        const user_table = Consult_Table_Info["Analysis"].table;
+        const user_attribute = Consult_Table_Info["Analysis"].attribute;
+
+        // DB에 Row가 없을 경우 INSERT, 있으면 지정한 속성만 UPDATE
+        const duple_query = `INSERT INTO ${user_table} (${user_attribute.pKey}, ${user_attribute.attr1}) VALUES (?, ?) ON DUPLICATE KEY UPDATE
+          ${user_attribute.attr1} = VALUES(${user_attribute.attr1});`;
+
+        const duple_value = [parsepUid, JSON.stringify(message)];
+
+        connection_AI.query(duple_query, duple_value, (error, rows, fields) => {
+          if (error) console.log(error);
+          else console.log("Ella Consult Analysis UPDATE Success!");
+        });
+      }
       return res.status(200).json(message);
     } catch (err) {
       console.error(err);
@@ -1742,8 +1758,8 @@ const openAIController = {
       }
 
       /* Consult_Log DB 저장 */
-      const consult_log_table = Consult_Log_Table_Info["Log"].table;
-      const consult_log_attribute = Consult_Log_Table_Info["Log"].attribute;
+      const consult_log_table = Consult_Table_Info["Log"].table;
+      const consult_log_attribute = Consult_Table_Info["Log"].attribute;
 
       // Consult_Log DB 저장
       const consult_insert_query = `INSERT INTO ${consult_log_table} (${Object.values(
