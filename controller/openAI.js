@@ -1396,14 +1396,14 @@ const openAIController = {
         // response.choices[0].message.content,
       ]);
 
-      // 심리 분석 DB 저장
+      // 엘라 심리 분석 DB 저장
       if (parseMessageArr.length === 11) {
-        const user_table = Consult_Table_Info["Analysis"].table;
-        const user_attribute = Consult_Table_Info["Analysis"].attribute;
+        const table = Consult_Table_Info["Analysis"].table;
+        const attribute = Consult_Table_Info["Analysis"].attribute;
 
         // DB에 Row가 없을 경우 INSERT, 있으면 지정한 속성만 UPDATE
-        const duple_query = `INSERT INTO ${user_table} (${user_attribute.pKey}, ${user_attribute.attr1}) VALUES (?, ?) ON DUPLICATE KEY UPDATE
-          ${user_attribute.attr1} = VALUES(${user_attribute.attr1});`;
+        const duple_query = `INSERT INTO ${table} (${attribute.pKey}, ${attribute.attr1}) VALUES (?, ?) ON DUPLICATE KEY UPDATE
+          ${attribute.attr1} = VALUES(${attribute.attr1});`;
 
         const duple_value = [parsepUid, JSON.stringify(message)];
 

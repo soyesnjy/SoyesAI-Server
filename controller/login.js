@@ -329,7 +329,7 @@ const loginController = {
               sessionId,
               (err, reply) => {
                 // 로그인 처리 로직
-                console.log(`SessionID Update - ${sessionId}`);
+                console.log(`[${parseUid}] SessionID Update - ${sessionId}`);
               }
             );
           });
@@ -498,7 +498,7 @@ const loginController = {
         // 새 세션 ID를 사용자 ID와 연결
         redisStore.set(`user_session:${parseUid}`, sessionId, (err, reply) => {
           // 로그인 처리 로직
-          console.log(`SessionID Update - ${sessionId}`);
+          console.log(`[${parseUid}] SessionID Update - ${sessionId}`);
         });
       });
 
@@ -623,7 +623,7 @@ const loginController = {
               sessionId,
               (err, reply) => {
                 // 로그인 처리 로직
-                console.log(`SessionID Update - ${sessionId}`);
+                console.log(`[${parsepUid}] SessionID Update - ${sessionId}`);
               }
             );
           });
