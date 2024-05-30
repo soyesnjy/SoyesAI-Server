@@ -316,6 +316,14 @@ const Consult_Table_Info = {
     },
   },
 };
+const Review_Table_Info = {
+  table: "soyes_ai_User_Review_Log",
+  attribute: {
+    cKey: "uid",
+    attr1: "profile_img_url",
+    attr2: "content",
+  },
+};
 
 module.exports = {
   User_Table_Info,
@@ -323,4 +331,5 @@ module.exports = {
   EBT_Table_Info,
   PT_Table_Info,
   Consult_Table_Info,
+  Review_Table_Info,
 };

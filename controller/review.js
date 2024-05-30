@@ -8,28 +8,7 @@ connection.connect();
 const connection_AI = mysql.createConnection(dbconfig_ai);
 connection_AI.connect();
 
-const User_Table_Info = {
-  table: "soyes_ai_User",
-  attribute: {
-    pKey: "uid",
-    attr1: "Email",
-    attr2: "passWard",
-    attr3: "name",
-    attr4: "phoneNumber",
-    attr5: "oauth_type",
-    attr6: "creation_date",
-    attr7: "lastLogin_date",
-  },
-};
-
-const Review_Table_Info = {
-  table: "soyes_ai_User_Review_Log",
-  attribute: {
-    cKey: "uid",
-    attr1: "profile_img_url",
-    attr2: "content",
-  },
-};
+const { Review_Table_Info } = require("../DB/database_table_info");
 
 const reviewController = {
   // ReviewData READ
