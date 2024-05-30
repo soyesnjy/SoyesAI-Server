@@ -1143,10 +1143,6 @@ const openAIController = {
       } else parseEBTdata = EBTData;
 
       const { messageArr, pUid, type } = parseEBTdata;
-      // messageArr가 문자열일 경우 json 파싱
-      if (typeof messageArr === "string") {
-        parseMessageArr = JSON.parse(messageArr);
-      } else parseMessageArr = [...messageArr];
 
       // No pUid => return
       if (!pUid) {
@@ -1158,6 +1154,16 @@ const openAIController = {
         console.log("No type input value - 400");
         return res.json({ message: "No type input value - 400" });
       }
+      // No type => return
+      if (!messageArr) {
+        console.log("No messageArr input value - 400");
+        return res.json({ message: "No messageArr input value - 400" });
+      }
+
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
 
       // pUid default값 설정
       parsepUid = pUid;
@@ -1423,7 +1429,7 @@ const openAIController = {
     } catch (err) {
       console.error(err);
       return res.status(500).json({
-        message: "Server Error - 500",
+        message: "Server Error - 500 Bad Gateway",
         emotion: 0,
       });
     }
