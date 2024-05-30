@@ -372,7 +372,7 @@ const openAIController = {
       if (typeof EBTData === "string") {
         parseEBTdata = JSON.parse(EBTData);
       } else parseEBTdata = EBTData;
-      console.log(parseEBTdata);
+      // console.log(parseEBTdata);
 
       const { messageArr, type, score, pUid } = parseEBTdata;
 
@@ -388,6 +388,18 @@ const openAIController = {
         return res.json({ message: "No pUid input value - 400" });
       }
 
+      // No messageArr => return
+      if (!messageArr) {
+        console.log("No messageArr input value - 400");
+        return res.json({ message: "No messageArr input value - 400" });
+      }
+
+      // No score => return
+      if (!score) {
+        console.log("No score input value - 400");
+        return res.json({ message: "No score input value - 400" });
+      }
+
       // 파싱. Client JSON 데이터
       if (typeof messageArr === "string") {
         parseMessageArr = JSON.parse(messageArr);
@@ -396,10 +408,6 @@ const openAIController = {
       if (typeof score === "string") {
         parsingScore = JSON.parse(score);
       } else parsingScore = score;
-
-      // uid, type 전처리. 없는 경우 디폴트값 할당
-      parsepUid = pUid;
-      parsingType = type;
 
       console.log(
         `EBT 테스트 결과 분석 및 메일 전송 API /analysis Path 호출 - pUid:${parsepUid}`
@@ -492,17 +500,17 @@ const openAIController = {
         // attachments : 'logo.png' // 이미지 첨부 속성
       };
 
-      /* 메일 전송 봉인
       // 메일 전송 (비동기)
-      transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          console.log("Mail Send Fail!");
-          res.json("Mail Send Fail!");
-        } else {
-          console.log("Mail Send Success!");
-          console.log(info.envelope);
-        }
-      });
+      /* 메일 전송 봉인
+        transporter.sendMail(mailOptions, function (error, info) {
+          if (error) {
+            console.log("Mail Send Fail!");
+            res.json("Mail Send Fail!");
+          } else {
+            console.log("Mail Send Success!");
+            console.log(info.envelope);
+          }
+        });
       */
 
       // 검사 결과가 갱신 되었기에 정서 결과 세션 삭제
@@ -510,8 +518,8 @@ const openAIController = {
       /* EBT Data DB 저장 */
       if (parsingType) {
         /* DB 저장 */
-        const table = EBT_Table_Info[type].table;
-        const attribute = EBT_Table_Info[type].attribute;
+        const table = EBT_Table_Info[parsingType].table;
+        const attribute = EBT_Table_Info[parsingType].attribute;
         // 오늘 날짜 변환
         const dateObj = new Date();
         const year = dateObj.getFullYear();
@@ -607,7 +615,7 @@ const openAIController = {
       }
     } catch (err) {
       console.log(err);
-      res.status(500).json({ message: "Server Error - 500" });
+      res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
   // PT 결과 분석 및 DB 저장 및 메일 전송 API
@@ -1145,12 +1153,11 @@ const openAIController = {
         console.log("No pUid input value - 400");
         return res.json({ message: "No pUid input value - 400" });
       }
-
       // No type => return
-      // if (!type) {
-      //   console.log("No type input value - 400");
-      //   return res.json({ message: "No type input value - 400" });
-      // }
+      if (!type) {
+        console.log("No type input value - 400");
+        return res.json({ message: "No type input value - 400" });
+      }
 
       // pUid default값 설정
       parsepUid = pUid;
@@ -1899,10 +1906,10 @@ const openAIController = {
       res.status(500).send("Internal Server Error");
     }
   },
-  // 상담 Solution 반환
+  // 상담 Solution 반환 API
   postOpenAIConsultSolutionData: async (req, res) => {
     const { EBTData } = req.body;
-    let parseEBTdata, parsepUid;
+    let parseEBTdata, parsepUid, matching_solution;
 
     try {
       // json 파싱
@@ -1910,7 +1917,7 @@ const openAIController = {
         parseEBTdata = JSON.parse(EBTData);
       } else parseEBTdata = EBTData;
 
-      const { pUid } = parseEBTdata;
+      const { pUid, messageArr, avarta } = parseEBTdata;
       // No pUid => return
       if (!pUid) {
         console.log("No pUid input value - 400");
@@ -1921,6 +1928,8 @@ const openAIController = {
       console.log(
         `User 상담 Solution 반환 API /openAI/solution Path 호출 - pUid: ${parsepUid}`
       );
+
+      // # TODO 솔루션 매칭
 
       return res.json({
         message: "success",
