@@ -1,9 +1,7 @@
 // MySQL 접근
 const mysql = require("mysql");
-const { dbconfig, dbconfig_ai } = require("../DB/database");
-// Tips DB 연결
-const connection = mysql.createConnection(dbconfig);
-connection.connect();
+const { dbconfig_ai } = require("../DB/database");
+
 // AI DB 연결
 const connection_AI = mysql.createConnection(dbconfig_ai);
 connection_AI.connect();
