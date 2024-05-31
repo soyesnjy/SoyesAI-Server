@@ -34,31 +34,30 @@ const {
   Plan_Table_Info,
 } = require("../DB/database_table_info");
 
-const user_ai_select = async (user_table, user_attribute, parsepUid) => {
-  /* User DB 조회 */
-  // 동기식 DB 접근 함수 1. Promise 생성 함수
-  function queryAsync(connection, query, parameters) {
-    return new Promise((resolve, reject) => {
-      connection.query(query, parameters, (error, results, fields) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(results);
-        }
-      });
+// 동기식 DB 접근 함수 1. Promise 생성 함수
+function queryAsync(connection, query, parameters) {
+  return new Promise((resolve, reject) => {
+    connection.query(query, parameters, (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results);
+      }
     });
+  });
+}
+// 프로미스 resolve 반환값 사용. (User Data return)
+async function fetchUserData(connection, query) {
+  try {
+    let results = await queryAsync(connection, query, []);
+    // console.log(results[0]);
+    return results;
+  } catch (error) {
+    console.error(error);
   }
-  // 프로미스 resolve 반환값 사용. (User Data return)
-  async function fetchUserData(connection, query) {
-    try {
-      let results = await queryAsync(connection, query, []);
-      // console.log(results[0]);
-      return results;
-    } catch (error) {
-      console.error(error);
-    }
-  }
+}
 
+const user_ai_select = async (user_table, user_attribute, parsepUid) => {
   const select_query = `SELECT * FROM ${user_table} WHERE ${user_attribute.pKey}='${parsepUid}'`;
   const select_data = await fetchUserData(connection_AI, select_query);
 
@@ -212,29 +211,7 @@ const loginController = {
           const day = ("0" + dateObj.getDate()).slice(-2);
           const date = `${year}-${month}-${day}`;
 
-          // DB 계정 생성 코드 추가 예정
-          // 동기식 DB 접근 함수 1. Promise 생성 함수
-          function queryAsync(connection, query, parameters) {
-            return new Promise((resolve, reject) => {
-              connection.query(query, parameters, (error, results, fields) => {
-                if (error) {
-                  reject(error);
-                } else {
-                  resolve(results);
-                }
-              });
-            });
-          }
-          // 프로미스 resolve 반환값 사용. (User Data return)
-          async function fetchUserData(connection, query) {
-            try {
-              let results = await queryAsync(connection, query, []);
-              // console.log(results[0]);
-              return results;
-            } catch (error) {
-              console.error(error);
-            }
-          }
+          // DB 계정 생성
 
           // 1. SELECT USER (row가 있는지 없는지 검사)
           const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${response.data.id}'`;
@@ -393,29 +370,7 @@ const loginController = {
       const day = ("0" + dateObj.getDate()).slice(-2);
       const date = `${year}-${month}-${day}`;
 
-      // DB 계정 생성 코드 추가 예정
-      // 동기식 DB 접근 함수 1. Promise 생성 함수
-      function queryAsync(connection, query, parameters) {
-        return new Promise((resolve, reject) => {
-          connection.query(query, parameters, (error, results, fields) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(results);
-            }
-          });
-        });
-      }
-      // 프로미스 resolve 반환값 사용. (User Data return)
-      async function fetchUserData(connection, query) {
-        try {
-          let results = await queryAsync(connection, query, []);
-          // console.log(results[0]);
-          return results;
-        } catch (error) {
-          console.error(error);
-        }
-      }
+      // DB 계정 생성
 
       // 1. SELECT USER (row가 있는지 없는지 검사)
       const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${response.data.id}'`;
