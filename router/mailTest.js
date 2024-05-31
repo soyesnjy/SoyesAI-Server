@@ -2,11 +2,11 @@
 const express = require("express");
 const router = express.Router();
 const { errController } = require("../controller/index");
-const { mailController } = require("../controller/index");
+// const { mailController } = require("../controller/index");
 
-const { postSendMail } = mailController;
+// const { postSendMail } = mailController;
 
-router.get("/", postSendMail);
+// router.get("/", postSendMail);
 
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);

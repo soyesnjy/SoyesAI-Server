@@ -851,7 +851,7 @@ const openAIController = {
       });
     } catch (err) {
       console.log(err);
-      res.json({ message: "Server Error" });
+      res.json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
   // 공감친구 모델 - 푸푸
