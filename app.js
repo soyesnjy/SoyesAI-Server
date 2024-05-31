@@ -8,7 +8,6 @@ require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
 const compression = require("compression");
-
 // const redisStore = require("./DB/redisClient");
 
 const app = express();
@@ -39,8 +38,8 @@ app.use(
 );
 
 // BodyParser 추가. post, put 요청의 req.body 구문 해석 기능 제공.
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // cookie-parser 추가.
 const cookieParser = require("cookie-parser");

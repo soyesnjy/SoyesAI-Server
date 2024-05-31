@@ -1,3 +1,5 @@
+// stream 데이터 처리
+const stream = require("stream");
 // MySQL 접근
 const mysql = require("mysql");
 const { dbconfig_ai } = require("../DB/database");
@@ -26,15 +28,25 @@ const serviceAccount = {
   client_email: process.env.GOOGLE_CLIENT_EMAIL,
   project_id: process.env.GOOGLE_PROJECT_ID,
 };
-const auth = new google.auth.JWT({
+
+const auth_youtube = new google.auth.JWT({
   email: serviceAccount.client_email,
   key: serviceAccount.private_key,
   scopes: ["https://www.googleapis.com/auth/youtube.force-ssl"],
 });
+
+const auth_google_drive = new google.auth.JWT({
+  email: serviceAccount.client_email,
+  key: serviceAccount.private_key,
+  scopes: ["https://www.googleapis.com/auth/drive.file"],
+});
+
 const youtube = google.youtube({
   version: "v3",
-  auth,
+  auth_youtube,
 });
+
+const drive = google.drive({ version: "v3", auth: auth_google_drive });
 
 // 동기식 DB 접근 함수 1. Promise 생성 함수
 function queryAsync(connection, query, parameters) {
@@ -132,6 +144,7 @@ const {
   test_result_ment,
   cb_solution_ment,
 } = require("../DB/detect_ment_Array");
+
 // User 정서행동 2점문항 반환 (String)
 const select_soyes_AI_Ebt_Table = async (
   user_table,
@@ -1945,6 +1958,60 @@ const openAIController = {
       res.status(500).json({
         message: "Server Error - 500",
       });
+    }
+  },
+
+  // Google Drive 파일 업로드 API
+  postOpenAIGoogleDriveUpload: async (req, res) => {
+    console.log("Google Drive 파일 업로드 API 호출");
+    try {
+      const { name, mimeType, data } = req.body;
+
+      const bufferStream = new stream.PassThrough();
+      bufferStream.end(Buffer.from(data, "base64"));
+
+      const fileMetadata = {
+        name: name,
+      };
+
+      const media = {
+        mimeType: mimeType,
+        body: bufferStream,
+      };
+
+      const file = await drive.files.create({
+        resource: fileMetadata,
+        media: media,
+        fields: "id, webViewLink, webContentLink",
+      });
+
+      // 파일을 Public으로 설정
+      await drive.permissions.create({
+        fileId: file.data.id,
+        requestBody: {
+          role: "reader",
+          type: "anyone",
+        },
+      });
+
+      // Public URL을 가져오기 위해 파일 정보를 다시 가져옴
+      const updatedFile = await drive.files.get({
+        fileId: file.data.id,
+        fields: "id, webViewLink, webContentLink",
+      });
+
+      // 이미지 URL 생성
+      const imageUrl = `https://drive.google.com/uc?id=${file.data.id}`;
+
+      res.send({
+        message: "File uploaded and shared successfully",
+        webViewLink: updatedFile.data.webViewLink,
+        webContentLink: updatedFile.data.webContentLink,
+        imageUrl: imageUrl,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(error.message);
     }
   },
 };

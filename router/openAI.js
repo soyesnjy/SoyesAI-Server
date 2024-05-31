@@ -25,6 +25,7 @@ const {
   postOpenAIUserEBTResultData,
   getYoutubeContent,
   postOpenAIConsultSolutionData,
+  postOpenAIGoogleDriveUpload,
 } = openAIController;
 
 // 토큰 유효성 검사 미들웨어
@@ -69,6 +70,8 @@ router.post("/tts", postClovaVoiceTTS);
 router.get("/youtube/:id", getYoutubeContent);
 // 쿠키 삭제
 router.get("/clear_cookies", getClearCookies);
+// 이미지 업로드 (Google Drive)
+router.post("/upload", postOpenAIGoogleDriveUpload);
 
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);
