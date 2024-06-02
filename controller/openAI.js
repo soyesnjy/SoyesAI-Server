@@ -43,7 +43,7 @@ const auth_google_drive = new google.auth.JWT({
 
 const youtube = google.youtube({
   version: "v3",
-  auth_youtube,
+  auth: auth_youtube,
 });
 
 const drive = google.drive({ version: "v3", auth: auth_google_drive });
@@ -421,6 +421,9 @@ const openAIController = {
       if (typeof score === "string") {
         parsingScore = JSON.parse(score);
       } else parsingScore = score;
+
+      parsingType = type;
+      parsepUid = pUid;
 
       console.log(
         `EBT 테스트 결과 분석 및 메일 전송 API /analysis Path 호출 - pUid:${parsepUid}`
