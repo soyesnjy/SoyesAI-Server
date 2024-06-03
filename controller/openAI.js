@@ -48,6 +48,7 @@ const youtube = google.youtube({
 
 const drive = google.drive({ version: "v3", auth: auth_google_drive });
 
+// google drive 파일 전체 조회 메서드
 async function listFiles() {
   try {
     const res = await drive.files.list({
@@ -68,7 +69,9 @@ async function listFiles() {
     console.error(`An error occurred: ${error}`);
   }
 }
+// listFiles();
 
+// google drive 파일 전체 삭제 메서드
 async function deleteAllFiles() {
   try {
     // 파일 목록 가져오기
@@ -101,11 +104,7 @@ async function deleteAllFiles() {
     console.error("An error occurred while deleting files:", error.message);
   }
 }
-
-// 파일 삭제 실행
 // deleteAllFiles();
-
-// listFiles();
 
 // 동기식 DB 접근 함수 1. Promise 생성 함수
 function queryAsync(connection, query, parameters) {
@@ -2024,9 +2023,9 @@ const openAIController = {
   },
   // Google Drive 파일 업로드 API
   postOpenAIGoogleDriveUpload: async (req, res) => {
-    console.log("Google Drive 파일 업로드 API 호출");
     try {
-      const { name, mimeType, data } = req.body;
+      const { name, mimeType, data, pUid } = req.body;
+      console.log(`Google Drive 파일 업로드 API 호출 - Uid:${pUid}`);
 
       const bufferStream = new stream.PassThrough();
       bufferStream.end(Buffer.from(data, "base64"));

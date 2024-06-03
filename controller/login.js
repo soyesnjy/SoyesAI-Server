@@ -150,7 +150,7 @@ const loginController = {
       ],
 
       // 다른 플랫폼의 OAuth 추가 대비
-      kakao: ["https://www.kakaoapis.com/auth/userinfo.profile"],
+      // kakao: ["https://www.kakaoapis.com/auth/userinfo.profile"],
       default: [
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/userinfo.email",
