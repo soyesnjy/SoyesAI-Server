@@ -48,6 +48,65 @@ const youtube = google.youtube({
 
 const drive = google.drive({ version: "v3", auth: auth_google_drive });
 
+async function listFiles() {
+  try {
+    const res = await drive.files.list({
+      pageSize: 10,
+      fields: "nextPageToken, files(id, name)",
+    });
+
+    const files = res.data.files;
+    if (files.length) {
+      console.log("Files:");
+      files.map((file) => {
+        console.log(`${file.name} (${file.id})`);
+      });
+    } else {
+      console.log("No files found.");
+    }
+  } catch (error) {
+    console.error(`An error occurred: ${error}`);
+  }
+}
+
+async function deleteAllFiles() {
+  try {
+    // 파일 목록 가져오기
+    const res = await drive.files.list({
+      pageSize: 1000, // 한 번에 최대 1000개의 파일 가져오기
+      fields: "files(id, name)",
+    });
+
+    const files = res.data.files;
+    if (files.length === 0) {
+      console.log("No files found.");
+      return;
+    }
+
+    // 파일 삭제
+    for (const file of files) {
+      try {
+        await drive.files.delete({ fileId: file.id });
+        console.log(`Deleted file: ${file.name} (${file.id})`);
+      } catch (error) {
+        console.error(
+          `Failed to delete file: ${file.name} (${file.id})`,
+          error.message
+        );
+      }
+    }
+
+    console.log("All files deleted successfully.");
+  } catch (error) {
+    console.error("An error occurred while deleting files:", error.message);
+  }
+}
+
+// 파일 삭제 실행
+// deleteAllFiles();
+
+// listFiles();
+
 // 동기식 DB 접근 함수 1. Promise 생성 함수
 function queryAsync(connection, query, parameters) {
   return new Promise((resolve, reject) => {
@@ -1963,7 +2022,6 @@ const openAIController = {
       });
     }
   },
-
   // Google Drive 파일 업로드 API
   postOpenAIGoogleDriveUpload: async (req, res) => {
     console.log("Google Drive 파일 업로드 API 호출");
@@ -1982,6 +2040,7 @@ const openAIController = {
         body: bufferStream,
       };
 
+      // 파일 업로드
       const file = await drive.files.create({
         resource: fileMetadata,
         media: media,
@@ -1997,6 +2056,17 @@ const openAIController = {
         },
       });
 
+      // soyesnjy@gmail.com 계정에게 파일 공유 설정 (writer 권한)
+      await drive.permissions.create({
+        fileId: file.data.id,
+        requestBody: {
+          role: "writer", // owner 권한으로 설정
+          type: "user",
+          emailAddress: "soyesnjy@gmail.com",
+        },
+        // transferOwnership: true,
+      });
+
       // Public URL을 가져오기 위해 파일 정보를 다시 가져옴
       const updatedFile = await drive.files.get({
         fileId: file.data.id,
@@ -2004,8 +2074,9 @@ const openAIController = {
       });
 
       // 이미지 URL 생성
-      const imageUrl = `https://drive.google.com/uc?id=${file.data.id}`;
+      const imageUrl = `https://drive.google.com/uc?export=view&id=${file.data.id}`;
 
+      console.log("File uploaded and shared successfully");
       res.send({
         message: "File uploaded and shared successfully",
         webViewLink: updatedFile.data.webViewLink,
