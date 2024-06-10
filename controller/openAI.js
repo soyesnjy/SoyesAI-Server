@@ -38,7 +38,7 @@ const auth_youtube = new google.auth.JWT({
 const auth_google_drive = new google.auth.JWT({
   email: serviceAccount.client_email,
   key: serviceAccount.private_key,
-  scopes: ["https://www.googleapis.com/auth/drive.file"],
+  scopes: ["https://www.googleapis.com/auth/drive"],
 });
 
 const youtube = google.youtube({
@@ -1285,39 +1285,44 @@ const openAIController = {
         console.log("심리 상담 프롬프트 + 심리 요약 프롬프트 삽입");
 
         // User EBT 학교생활 결과
-        let user_EBT_School = await select_soyes_AI_Ebt_Analyis(
-          EBT_Table_Info["School"],
-          parsepUid
-        );
-        // User EBT 주의집중 결과
-        let user_EBT_Attention = await select_soyes_AI_Ebt_Analyis(
-          EBT_Table_Info["Attention"],
-          parsepUid
-        );
+        // let user_EBT_School = await select_soyes_AI_Ebt_Analyis(
+        //   EBT_Table_Info["School"],
+        //   parsepUid
+        // );
+        // // User EBT 주의집중 결과
+        // let user_EBT_Attention = await select_soyes_AI_Ebt_Analyis(
+        //   EBT_Table_Info["Attention"],
+        //   parsepUid
+        // );
 
         promptArr.push(EBT_Table_Info[type || "School"].consult);
+        // userPrompt.push({
+        //   role: "user",
+        //   content: `아래는 유저의 정서행동검사 학교생활 및 주의집중 영역 결과야.
+        //   '''
+        //   학교생활: {
+        //     ${
+        //       user_EBT_School === "NonTesting"
+        //         ? "'정서행동검사 - 학교생활'을 실시하지 않았습니다."
+        //         : user_EBT_School
+        //     }
+        //   }
+
+        //   주의집중{
+        //     ${
+        //       user_EBT_Attention === "NonTesting"
+        //         ? "'정서행동검사 - 주의집중'을 실시하지 않았습니다."
+        //         : user_EBT_Attention
+        //     }
+        //   }
+        //   '''
+        //   지금까지 대화를 기반으로 네가 파악한 user의 심리 상태를 요약해줘.
+        //   `,
+        // });
+
         userPrompt.push({
           role: "user",
-          content: `아래는 유저의 정서행동검사 학교생활 및 주의집중 영역 결과야.
-          '''
-          학교생활: {
-            ${
-              user_EBT_School === "NonTesting"
-                ? "'정서행동검사 - 학교생활'을 실시하지 않았습니다."
-                : user_EBT_School
-            }
-          }
-          
-          주의집중{
-            ${
-              user_EBT_Attention === "NonTesting"
-                ? "'정서행동검사 - 주의집중'을 실시하지 않았습니다."
-                : user_EBT_Attention
-            }
-          }
-          '''
-          지금까지 대화를 기반으로 네가 파악한 user의 심리 상태를 요약해줘.
-          `,
+          content: `지금까지 대화를 기반으로 네가 파악한 user의 심리 상태를 요약해줘.`,
         });
       }
       // 대화 6회 초과 - 심리 솔루션 프롬프트 삽입
@@ -2059,11 +2064,11 @@ const openAIController = {
       await drive.permissions.create({
         fileId: file.data.id,
         requestBody: {
-          role: "writer", // owner 권한으로 설정
+          role: "writer",
           type: "user",
           emailAddress: "soyesnjy@gmail.com",
         },
-        // transferOwnership: true,
+        // transferOwnership: true, // role:'owner' 일 경우
       });
 
       // Public URL을 가져오기 위해 파일 정보를 다시 가져옴
