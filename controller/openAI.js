@@ -1277,12 +1277,12 @@ const openAIController = {
       // consult prompt
 
       // 대화 7회 미만 - 심리 상담 프롬프트 삽입
-      if (parseMessageArr.length < 13) {
+      if (parseMessageArr.length < 11) {
         console.log("심리 상담 프롬프트 삽입");
         promptArr.push(EBT_Table_Info[type || "School"].consult);
       }
       // 대화 7회 - 심리 상담 프롬프트 + 심리 상태 분석 프롬프트 삽입
-      else if (parseMessageArr.length === 13) {
+      else if (parseMessageArr.length === 11) {
         console.log("심리 상담 프롬프트 + 심리 요약 프롬프트 삽입");
 
         // User EBT 학교생활 결과
@@ -1327,7 +1327,7 @@ const openAIController = {
         });
       }
       // 대화 8회 - 음악추천 강제 (임시)
-      else if (parseMessageArr.length === 15) {
+      else if (parseMessageArr.length === 13) {
         console.log("음악추천 강제");
         // promptArr.push(EBT_Table_Info[type || "School"].solution);
         // userPrompt.push({
