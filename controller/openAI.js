@@ -1276,12 +1276,12 @@ const openAIController = {
       // 상시 - 심리 상담 프롬프트 삽입
       // consult prompt
 
-      // 대화 7회 미만 - 심리 상담 프롬프트 삽입
+      // 대화 6회 미만 - 심리 상담 프롬프트 삽입
       if (parseMessageArr.length < 11) {
         console.log("심리 상담 프롬프트 삽입");
         promptArr.push(EBT_Table_Info[type || "School"].consult);
       }
-      // 대화 7회 - 심리 상담 프롬프트 + 심리 상태 분석 프롬프트 삽입
+      // 대화 6회 - 심리 상담 프롬프트 + 심리 상태 분석 프롬프트 삽입
       else if (parseMessageArr.length === 11) {
         console.log("심리 상담 프롬프트 + 심리 요약 프롬프트 삽입");
 
@@ -1326,14 +1326,9 @@ const openAIController = {
           content: `지금까지 대화를 기반으로 네가 파악한 user의 심리 상태를 요약해줘.`,
         });
       }
-      // 대화 8회 - 음악추천 강제 (임시)
+      // 대화 7회 - 음악추천 강제 (임시)
       else if (parseMessageArr.length === 13) {
         console.log("음악추천 강제");
-        // promptArr.push(EBT_Table_Info[type || "School"].solution);
-        // userPrompt.push({
-        //   role: "user",
-        //   content: `User에게 음악 명상을 추천해줘.`,
-        // });
         const message = {
           message: "일단 음악을 들으며 편안한 마음을 가져보자",
           emotion: 0,
@@ -2052,26 +2047,24 @@ const openAIController = {
       });
 
       /* 
-      
       학업/성적: [cognitive, diary, meditation],
       대인관계: [cognitive, diary, balance, emotion, interpersonal],
       가족관계: [cognitive, diary, balance, interpersonal],
       기분/불안: [cognitive, diary, balance, meditation, emotion],
       신체 증상: [cognitive, diary, meditation, emotion],
       자기이해: [cognitive, diary],
-      
       */
 
       const solution = response.choices[0].message.content;
       const message = {
         solution,
-        solutionIndex: Math.floor(Math.random() * 6) + 1, // default Index
+        solutionIndex: Math.floor(Math.random() * 7) + 1, // default Index
       };
       //console.log(message);
 
       // meditation
       // if (solution && solution.includes("meditation")) {
-      //   message.solutionIndex = Math.floor(Math.random() * 6) + 1;
+      //   message.solutionIndex = Math.floor(Math.random() * 7) + 1;
       //   return res.status(200).json(message);
       // }
 
@@ -2107,7 +2100,7 @@ const openAIController = {
       //   return res.status(200).json(message);
       // }
 
-      // Default
+      // Default - 추후 삭제 예정
       message.solution = "music";
       return res.status(200).json(message);
     } catch (err) {
