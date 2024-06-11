@@ -1330,10 +1330,15 @@ const openAIController = {
       else if (parseMessageArr.length === 15) {
         console.log("음악추천 강제");
         // promptArr.push(EBT_Table_Info[type || "School"].solution);
-        userPrompt.push({
-          role: "user",
-          content: `User에게 음악 명상을 추천해줘.`,
-        });
+        // userPrompt.push({
+        //   role: "user",
+        //   content: `User에게 음악 명상을 추천해줘.`,
+        // });
+        const message = {
+          message: "일단 음악을 들으며 편안한 마음을 가져보자",
+          emotion: 0,
+        };
+        return res.status(200).json(message);
       }
       // 대화 8회 초과 - 심리 솔루션 프롬프트 삽입
       else {
