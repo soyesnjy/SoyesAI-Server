@@ -598,6 +598,29 @@ const pt_analysis_prompt = {
     `,
 };
 
+const solution_matching_persona_prompt = {
+  role: "system",
+  content: `
+  컨텐츠는 반드시 아래 명시한 법칙에 의해 추천되어야 합니다.
+  '''
+  assistant는 user와 나눈 대화를 분석하여 적절한 컨텐츠를 추천합니다.
+  아래는 6가지 카테고리에 매칭되는 컨텐츠들입니다.
+
+  {
+    학업/성적: [cognitive, diary, meditation],
+    대인관계: [cognitive, diary, balance, emotion, interpersonal],
+    가족관계: [cognitive, diary, balance, interpersonal],
+    기분/불안: [cognitive, diary, balance, meditation, emotion],
+    신체 증상: [cognitive, diary, meditation, emotion],
+    자기이해: [cognitive, diary],
+  }
+  
+  매칭되는 컨텐츠들 중, 1개를 랜덤으로 추천합니다. 
+  반드시 영단어 1개의 텍스트만 생성합니다.
+  '''
+  `,
+};
+
 // 주석 처리~
 
 module.exports = {
@@ -632,4 +655,5 @@ module.exports = {
   persona_prompt_lala_v3,
   persona_prompt_lala_v4,
   persona_prompt_lala_v5,
+  solution_matching_persona_prompt,
 };

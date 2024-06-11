@@ -62,8 +62,9 @@ router.post("/consulting_emotion_log", postOpenAIConsultingLogSave);
 router.post("/calendar", postOpenAIMypageCalendarData);
 // User EBT 데이터 반환
 router.post("/ebtresult", postOpenAIUserEBTResultData);
-// solution 반환
+// 상담 solution 반환
 router.post("/solution", postOpenAIConsultSolutionData);
+
 // Clova Voice Data 반환
 router.post("/tts", postClovaVoiceTTS);
 // Youtube Video 반환

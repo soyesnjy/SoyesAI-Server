@@ -187,6 +187,7 @@ const {
   persona_prompt_lala_v3,
   persona_prompt_lala_v4,
   persona_prompt_lala_v5,
+  solution_matching_persona_prompt,
 } = require("../DB/test_prompt");
 
 // 인지행동 검사 관련
@@ -1275,13 +1276,13 @@ const openAIController = {
       // 상시 - 심리 상담 프롬프트 삽입
       // consult prompt
 
-      // 대화 6회 미만 - 심리 상담 프롬프트 삽입
-      if (parseMessageArr.length < 11) {
+      // 대화 7회 미만 - 심리 상담 프롬프트 삽입
+      if (parseMessageArr.length < 13) {
         console.log("심리 상담 프롬프트 삽입");
         promptArr.push(EBT_Table_Info[type || "School"].consult);
       }
-      // 대화 6회 - 심리 상담 프롬프트 + 심리 상태 분석 프롬프트 삽입
-      else if (parseMessageArr.length === 11) {
+      // 대화 7회 - 심리 상담 프롬프트 + 심리 상태 분석 프롬프트 삽입
+      else if (parseMessageArr.length === 13) {
         console.log("심리 상담 프롬프트 + 심리 요약 프롬프트 삽입");
 
         // User EBT 학교생활 결과
@@ -1325,7 +1326,16 @@ const openAIController = {
           content: `지금까지 대화를 기반으로 네가 파악한 user의 심리 상태를 요약해줘.`,
         });
       }
-      // 대화 6회 초과 - 심리 솔루션 프롬프트 삽입
+      // 대화 8회 - 음악추천 강제 (임시)
+      else if (parseMessageArr.length === 15) {
+        console.log("음악추천 강제");
+        // promptArr.push(EBT_Table_Info[type || "School"].solution);
+        userPrompt.push({
+          role: "user",
+          content: `User에게 음악 명상을 추천해줘.`,
+        });
+      }
+      // 대화 8회 초과 - 심리 솔루션 프롬프트 삽입
       else {
         console.log("심리 솔루션 프롬프트 삽입");
         promptArr.push(EBT_Table_Info[type || "School"].solution);
@@ -1462,7 +1472,7 @@ const openAIController = {
       */
 
       // 상시 삽입 프롬프트
-      promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
+      // promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
 
       // console.log(promptArr);
 
@@ -1471,15 +1481,12 @@ const openAIController = {
         model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
-      let emotion = parseInt(response.choices[0].message.content.slice(-1));
-      console.log("emotion: " + emotion);
+      // let emotion = parseInt(response.choices[0].message.content.slice(-1));
+      // console.log("emotion: " + emotion);
 
       const message = {
-        message:
-          typeof emotion === "number"
-            ? response.choices[0].message.content.slice(0, -1)
-            : response.choices[0].message.content,
-        emotion,
+        message: response.choices[0].message.content,
+        emotion: 0,
       };
       // 대화 내역 로그
       console.log([
@@ -1994,7 +2001,9 @@ const openAIController = {
   // 상담 Solution 반환 API
   postOpenAIConsultSolutionData: async (req, res) => {
     const { EBTData } = req.body;
-    let parseEBTdata, parsepUid, matching_solution;
+    let parseEBTdata, parseMessageArr, parsepUid, parseType;
+    let promptArr = []; // 삽입 Prompt Array
+    let userPrompt = []; // 삽입 User Prompt Array
 
     try {
       // json 파싱
@@ -2002,23 +2011,100 @@ const openAIController = {
         parseEBTdata = JSON.parse(EBTData);
       } else parseEBTdata = EBTData;
 
-      const { pUid, messageArr, avarta } = parseEBTdata;
+      const { pUid, messageArr, type, avarta } = parseEBTdata;
       // No pUid => return
       if (!pUid) {
         console.log("No pUid input value - 400");
         return res.status(400).json({ message: "No pUid input value - 400" });
       }
 
+      if (!type) {
+        console.log("No type input value - 400");
+        return res.json({ message: "No type input value - 400" });
+      }
+
       parsepUid = pUid;
+      parseType = type;
       console.log(
         `User 상담 Solution 반환 API /openAI/solution Path 호출 - pUid: ${parsepUid}`
       );
 
-      // # TODO 솔루션 매칭
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
 
-      return res.json({
-        message: "success",
+      // # TODO 솔루션 매칭
+      promptArr.push(solution_matching_persona_prompt); // 솔루션 페르소나
+      userPrompt.push({
+        role: "user",
+        content: `대화 내용을 기반으로 적절한 컨텐츠를 1단어로 추천해줘`,
       });
+
+      const response = await openai.chat.completions.create({
+        messages: [...promptArr, ...parseMessageArr, ...userPrompt],
+        model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      });
+
+      /* 
+      
+      학업/성적: [cognitive, diary, meditation],
+      대인관계: [cognitive, diary, balance, emotion, interpersonal],
+      가족관계: [cognitive, diary, balance, interpersonal],
+      기분/불안: [cognitive, diary, balance, meditation, emotion],
+      신체 증상: [cognitive, diary, meditation, emotion],
+      자기이해: [cognitive, diary],
+      
+      */
+
+      const solution = response.choices[0].message.content;
+      const message = {
+        solution,
+        solutionIndex: Math.floor(Math.random() * 6) + 1, // default Index
+      };
+      //console.log(message);
+
+      // meditation
+      // if (solution && solution.includes("meditation")) {
+      //   message.solutionIndex = Math.floor(Math.random() * 6) + 1;
+      //   return res.status(200).json(message);
+      // }
+
+      // # TODO
+      // cognitive
+      // if (solution && solution.includes("cognitive")) {
+      //   message.solutionIndex = Math.floor(Math.random() * 6);
+      //   return res.status(200).json(message);
+      // }
+
+      // # TODO
+      // diary
+      // if (solution && solution.includes("diary")) {
+      //   message.solutionNumber = Math.floor(Math.random() * 21);
+      //   return res.status(200).json(message);
+      // }
+
+      // balance
+      // if (solution && solution.includes("balance")) {
+      //   message.solutionNumber = Math.floor(Math.random() * 21);
+      //   return res.status(200).json(message);
+      // }
+
+      // emotion
+      // if (solution && solution.includes("emotion")) {
+      //   message.solutionNumber = Math.floor(Math.random() * 21);
+      //   return res.status(200).json(message);
+      // }
+
+      // interpersonal
+      // if (solution && solution.includes("interpersonal")) {
+      //   message.solutionNumber = Math.floor(Math.random() * 21);
+      //   return res.status(200).json(message);
+      // }
+
+      // Default
+      message.solution = "music";
+      return res.status(200).json(message);
     } catch (err) {
       console.error(err);
       res.status(500).json({
@@ -2036,11 +2122,11 @@ const openAIController = {
       bufferStream.end(Buffer.from(data, "base64"));
 
       const fileMetadata = {
-        name: name,
+        name,
       };
 
       const media = {
-        mimeType: mimeType,
+        mimeType,
         body: bufferStream,
       };
 
