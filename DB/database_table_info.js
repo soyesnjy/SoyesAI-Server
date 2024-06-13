@@ -46,6 +46,7 @@ const Plan_Table_Info = {
 };
 const EBT_Table_Info = {
   School: {
+    ebtClass: "School",
     table: "soyes_ai_Ebt_School",
     attribute: {
       pKey: "uid",
@@ -67,6 +68,7 @@ const EBT_Table_Info = {
     standard: 2.268902495,
   },
   Friend: {
+    ebtClass: "Friend",
     table: "soyes_ai_Ebt_Friend",
     attribute: {
       pKey: "uid",
@@ -90,6 +92,7 @@ const EBT_Table_Info = {
     standard: 2.718721,
   },
   Family: {
+    ebtClass: "Family",
     table: "soyes_ai_Ebt_Family",
     attribute: {
       pKey: "uid",
@@ -112,6 +115,7 @@ const EBT_Table_Info = {
     standard: 3,
   },
   Mood: {
+    ebtClass: "Mood",
     table: "soyes_ai_Ebt_Mood",
     attribute: {
       pKey: "uid",
@@ -130,6 +134,7 @@ const EBT_Table_Info = {
     standard: 1,
   },
   Unrest: {
+    ebtClass: "Unrest",
     table: "soyes_ai_Ebt_Unrest",
     attribute: {
       pKey: "uid",
@@ -149,6 +154,7 @@ const EBT_Table_Info = {
     standard: 3,
   },
   Sad: {
+    ebtClass: "Sad",
     table: "soyes_ai_Ebt_Sad",
     attribute: {
       pKey: "uid",
@@ -169,6 +175,7 @@ const EBT_Table_Info = {
     standard: 3,
   },
   Health: {
+    ebtClass: "Health",
     table: "soyes_ai_Ebt_Health",
     attribute: {
       pKey: "uid",
@@ -189,6 +196,7 @@ const EBT_Table_Info = {
     standard: 2,
   },
   Attention: {
+    ebtClass: "Attention",
     table: "soyes_ai_Ebt_Attention",
     attribute: {
       pKey: "uid",
@@ -209,6 +217,7 @@ const EBT_Table_Info = {
     standard: 3,
   },
   Movement: {
+    ebtClass: "Movement",
     table: "soyes_ai_Ebt_Movement",
     attribute: {
       pKey: "uid",
@@ -229,6 +238,7 @@ const EBT_Table_Info = {
     standard: 2,
   },
   Angry: {
+    ebtClass: "Angry",
     table: "soyes_ai_Ebt_Angry",
     attribute: {
       pKey: "uid",
@@ -248,6 +258,7 @@ const EBT_Table_Info = {
     standard: 2,
   },
   Self: {
+    ebtClass: "Self",
     table: "soyes_ai_Ebt_Self",
     attribute: {
       pKey: "uid",

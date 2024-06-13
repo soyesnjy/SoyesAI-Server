@@ -307,6 +307,7 @@ const select_soyes_AI_Ebt_Analyis = async (inputTable, parsepUid) => {
   // 동기식 DB 접근 함수 1. Promise 생성 함수
   try {
     const {
+      ebtClass,
       table, // 조회할 EBT table
       attribute, // table Attribute
     } = inputTable;
@@ -318,13 +319,15 @@ const select_soyes_AI_Ebt_Analyis = async (inputTable, parsepUid) => {
     // 검사를 진행하지 않은 경우
     if (!ebt_data[0])
       return {
+        ebtClass: "NonTesting",
         analyisResult: "NonTesting",
       };
-    const chat = JSON.parse(ebt_data[0].chat).text;
+    const analyisResult = JSON.parse(ebt_data[0].chat).text;
     // console.log("chat: " + chat);
 
     return {
-      analyisResult: chat,
+      ebtClass,
+      analyisResult,
     };
   } catch (err) {
     console.log(err);
@@ -1250,6 +1253,8 @@ const openAIController = {
       promptArr.push(persona_prompt_lala_v5); // 엘라 페르소나
       promptArr.push(info_prompt); // 유저관련 정보
 
+      // console.log(tmp);
+
       // const lastUserContent =
       //   parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
 
@@ -1279,51 +1284,55 @@ const openAIController = {
       // 대화 6회 미만 - 심리 상담 프롬프트 삽입
       if (parseMessageArr.length < 11) {
         console.log("심리 상담 프롬프트 삽입");
-        promptArr.push(EBT_Table_Info[type || "School"].consult);
+        promptArr.push(EBT_Table_Info[type].consult);
       }
       // 대화 6회 - 심리 상담 프롬프트 + 심리 상태 분석 프롬프트 삽입
       else if (parseMessageArr.length === 11) {
         console.log("심리 상담 프롬프트 + 심리 요약 프롬프트 삽입");
+        promptArr.push(EBT_Table_Info[type].consult);
+        // 비교 분석용 EBT class 맵
+        const compareTypeMap = {
+          School: ["School", "Attention"], // 학업/성적 상담은 School, Attention 분석과 비교하여 해석.
+          Friend: ["Friend", "Movement"],
+          Family: ["Family"],
+          Mood: ["Mood", "Unrest", "Sad", "Angry"],
+          Health: ["Health"],
+          Self: ["Self"],
+        };
 
-        // User EBT 학교생활 결과
-        // let user_EBT_School = await select_soyes_AI_Ebt_Analyis(
-        //   EBT_Table_Info["School"],
-        //   parsepUid
-        // );
-        // // User EBT 주의집중 결과
-        // let user_EBT_Attention = await select_soyes_AI_Ebt_Analyis(
-        //   EBT_Table_Info["Attention"],
-        //   parsepUid
-        // );
+        let resolvedCompareEbtAnalysis; // EBT 분석을 담을 배열
 
-        promptArr.push(EBT_Table_Info[type || "School"].consult);
-        // userPrompt.push({
-        //   role: "user",
-        //   content: `아래는 유저의 정서행동검사 학교생활 및 주의집중 영역 결과야.
-        //   '''
-        //   학교생활: {
-        //     ${
-        //       user_EBT_School === "NonTesting"
-        //         ? "'정서행동검사 - 학교생활'을 실시하지 않았습니다."
-        //         : user_EBT_School
-        //     }
-        //   }
-
-        //   주의집중{
-        //     ${
-        //       user_EBT_Attention === "NonTesting"
-        //         ? "'정서행동검사 - 주의집중'을 실시하지 않았습니다."
-        //         : user_EBT_Attention
-        //     }
-        //   }
-        //   '''
-        //   지금까지 대화를 기반으로 네가 파악한 user의 심리 상태를 요약해줘.
-        //   `,
-        // });
-
+        // compareTypeMap에 맵핑되는 분야의 검사 결과를 DB에서 조회
+        const compareEbtAnalysis = await compareTypeMap[type].map(
+          async (ebtClass) => {
+            return await select_soyes_AI_Ebt_Analyis(
+              EBT_Table_Info[ebtClass],
+              parsepUid
+            );
+          }
+        );
+        // Promise Pending 대기
+        await Promise.all(compareEbtAnalysis).then((data) => {
+          resolvedCompareEbtAnalysis = [...data]; // resolve 상태로 반환된 prompt 배열을 psy_testResult_promptArr_last 변수에 복사
+        });
+        // userPrompt 명령 추가
         userPrompt.push({
           role: "user",
-          content: `지금까지 대화를 기반으로 네가 파악한 user의 심리 상태를 요약해줘.`,
+          content: `아래는 user의 정서행동검사 결과야.
+          '''
+          ${resolvedCompareEbtAnalysis.map((data) => {
+            const { ebtClass, analyisResult } = data;
+            return `
+            ${ebtClass}: { ${
+              analyisResult === "NonTesting"
+                ? `'정서행동검사 - ${analyisResult}'을 실시하지 않았습니다.`
+                : analyisResult
+            }}
+            `;
+          })}
+          '''
+          지금까지 대화를 기반으로 user의 심리 상태를 3문장으로 요약하고, 위 정서행동검사 결과와 비교하여 2문장으로 해석해줘.
+            `,
         });
       }
       // 대화 7회 - 음악추천 강제 (임시)
@@ -1489,11 +1498,11 @@ const openAIController = {
         emotion: 0,
       };
       // 대화 내역 로그
-      console.log([
-        ...parseMessageArr,
-        { role: "assistant", content: response.choices[0].message.content },
-        // response.choices[0].message.content,
-      ]);
+      // console.log([
+      //   ...parseMessageArr,
+      //   { role: "assistant", content: response.choices[0].message.content },
+      //   // response.choices[0].message.content,
+      // ]);
 
       // 엘라 심리 분석 DB 저장
       if (parseMessageArr.length === 11) {
