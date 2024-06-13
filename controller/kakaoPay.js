@@ -1,10 +1,11 @@
+// redis 서버 접속
 const redisStore = require("../DB/redisClient");
 // MySQL 접근
 const mysql = require("mysql");
 const { dbconfig, dbconfig_ai } = require("../DB/database");
-// Tips DB 연결
-const connection = mysql.createConnection(dbconfig);
-connection.connect();
+// // Tips DB 연결
+// const connection = mysql.createConnection(dbconfig);
+// connection.connect();
 // AI DB 연결
 const connection_AI = mysql.createConnection(dbconfig_ai);
 connection_AI.connect();

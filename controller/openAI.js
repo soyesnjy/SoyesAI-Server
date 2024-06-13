@@ -2058,43 +2058,43 @@ const openAIController = {
       const solution = response.choices[0].message.content;
       const message = {
         solution,
-        solutionIndex: Math.floor(Math.random() * 7) + 1, // default Index
+        solutionIndex: Math.floor(Math.random() * 7) + 1, // default Index [1 ~ 7]
       };
       //console.log(message);
 
-      // meditation
+      // meditation (명상 관련 컨텐츠 처리)
       // if (solution && solution.includes("meditation")) {
       //   message.solutionIndex = Math.floor(Math.random() * 7) + 1;
       //   return res.status(200).json(message);
       // }
 
       // # TODO
-      // cognitive
+      // cognitive (인지행동 관련 컨텐츠 처리)
       // if (solution && solution.includes("cognitive")) {
       //   message.solutionIndex = Math.floor(Math.random() * 6);
       //   return res.status(200).json(message);
       // }
 
       // # TODO
-      // diary
+      // diary (일기 관련 컨텐츠 처리)
       // if (solution && solution.includes("diary")) {
       //   message.solutionNumber = Math.floor(Math.random() * 21);
       //   return res.status(200).json(message);
       // }
 
-      // balance
+      // balance (밸런스게임 관련 컨텐츠 처리)
       // if (solution && solution.includes("balance")) {
       //   message.solutionNumber = Math.floor(Math.random() * 21);
       //   return res.status(200).json(message);
       // }
 
-      // emotion
+      // emotion (정서조절기능 관련 컨텐츠 처리)
       // if (solution && solution.includes("emotion")) {
       //   message.solutionNumber = Math.floor(Math.random() * 21);
       //   return res.status(200).json(message);
       // }
 
-      // interpersonal
+      // interpersonal (대인관계훈련 관련 컨텐츠 처리)
       // if (solution && solution.includes("interpersonal")) {
       //   message.solutionNumber = Math.floor(Math.random() * 21);
       //   return res.status(200).json(message);

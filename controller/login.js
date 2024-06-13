@@ -14,7 +14,49 @@ connection_AI.connect();
 const { users } = require("../DB/database");
 const moment = require("moment-timezone");
 
-const { generateToken, verifyToken } = require("../controller/tokenFnc");
+// JWT 관련
+const { sign, verify } = require("jsonwebtoken");
+// JWT 토큰 생성
+const generateToken = (user) => {
+  const payload = {
+    id: user.id,
+    email: user.email,
+  };
+  let result = {
+    accessToken: sign(payload, process.env.ACCESS_SECRET, {
+      expiresIn: "1d", // 1일간 유효한 토큰을 발행합니다.
+    }),
+    refreshToken: sign(payload, process.env.REFRESH_SECRET, {
+      expiresIn: "7d", // 일주일간 유효한 토큰을 발행합니다.
+    }),
+  };
+
+  return result;
+};
+// JWT 토큰 검증
+const verifyToken = (type, token) => {
+  let secretKey, decoded;
+  // access, refresh에 따라 비밀키 선택
+  switch (type) {
+    case "access":
+      secretKey = process.env.ACCESS_SECRET;
+      break;
+    case "refresh":
+      secretKey = process.env.REFRESH_SECRET;
+      break;
+    default:
+      return null;
+  }
+
+  try {
+    // 토큰을 비밀키로 복호화
+    decoded = verify(token, secretKey);
+  } catch (err) {
+    console.log(`JWT Error: ${err.message}`);
+    return null;
+  }
+  return decoded;
+};
 
 // google OAuth2Client 설정
 const { OAuth2Client } = require("google-auth-library");

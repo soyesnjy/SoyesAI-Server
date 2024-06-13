@@ -1,6 +1,6 @@
 const { ebt_Result, ebt_Consulting, ebt_Solution } = require("../DB/psy_test");
 
-// Database Table Info
+// SoyesAI Database Table Info
 const User_Table_Info = {
   table: "soyes_ai_User",
   attribute: {
