@@ -1360,8 +1360,7 @@ const openAIController = {
         if (req.session.solution?.solutionClass === "meditation") {
           console.log(`명상일 경우 고정 멘트 반환`);
           const message = {
-            message:
-              "좋아! 그럼 명상에 집중해보자! 못배운 친구야! 분명 부모님이 널 낳고 콘돔 200박스를 샀을거야!",
+            message: "좋아! 그럼 명상에 집중해보자!",
             emotion: 0,
           };
           return res.status(200).json(message);
