@@ -2067,37 +2067,29 @@ const openAIController = {
       };
       //console.log(message);
 
-      // meditation (명상 관련 컨텐츠 처리)
-      // if (solution && solution.includes("meditation")) {
-      //   message.solutionIndex = Math.floor(Math.random() * 7) + 1;
-      //   return res.status(200).json(message);
-      // }
-
-      // # TODO
-      // cognitive (인지행동 관련 컨텐츠 처리)
-      // if (solution && solution.includes("cognitive")) {
-      //   message.solutionIndex = Math.floor(Math.random() * 6);
-      //   return res.status(200).json(message);
-      // }
-
-      // # TODO
-      // diary (일기 관련 컨텐츠 처리)
-      // if (solution && solution.includes("diary")) {
-      //   message.solutionNumber = Math.floor(Math.random() * 21);
-      //   return res.status(200).json(message);
-      // }
-
-      // balance (밸런스게임 관련 컨텐츠 처리)
-      // if (solution && solution.includes("balance")) {
-      //   message.solutionNumber = Math.floor(Math.random() * 21);
-      //   return res.status(200).json(message);
-      // }
-
-      // emotion (정서조절기능 관련 컨텐츠 처리)
-      // if (solution && solution.includes("emotion")) {
-      //   message.solutionNumber = Math.floor(Math.random() * 21);
-      //   return res.status(200).json(message);
-      // }
+      switch (message.solution) {
+        case "meditation":
+          console.log(message.solution);
+          break;
+        case "cognitive":
+          console.log(message.solution);
+          break;
+        case "diary":
+          console.log(message.solution);
+          break;
+        case "balance":
+          console.log(message.solution);
+          break;
+        case "emotion":
+          console.log(message.solution);
+          break;
+        case "interpersonal":
+          console.log(message.solution);
+          break;
+        default:
+          console.log(message.solution);
+          break;
+      }
 
       // interpersonal (대인관계훈련 관련 컨텐츠 처리)
       // if (solution && solution.includes("interpersonal")) {
@@ -2105,7 +2097,7 @@ const openAIController = {
       //   return res.status(200).json(message);
       // }
 
-      // Default - 추후 삭제 예정
+      // Default Solution - 추후 삭제 예정
       message.solution = "meditation";
       return res.status(200).json(message);
     } catch (err) {
