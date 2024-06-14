@@ -1332,9 +1332,10 @@ const openAIController = {
       }
       // 대화 7회 - 음악추천 강제 (임시)
       else if (parseMessageArr.length === 13) {
-        console.log("음악추천 강제");
+        console.log("컨텐츠추천 강제");
         const message = {
-          message: "일단 음악을 들으며 편안한 마음을 가져보자",
+          message:
+            '$"그전에 {solution}을 들으며 {value}을 가져보자. 들어볼래?"',
           emotion: 0,
         };
         return res.status(200).json(message);
