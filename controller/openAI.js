@@ -1253,8 +1253,6 @@ const openAIController = {
       promptArr.push(persona_prompt_lala_v5); // 엘라 페르소나
       promptArr.push(info_prompt); // 유저관련 정보
 
-      // console.log(tmp);
-
       // const lastUserContent =
       //   parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
 
@@ -1277,9 +1275,6 @@ const openAIController = {
 
       //   return;
       // }
-
-      // 상시 - 심리 상담 프롬프트 삽입
-      // consult prompt
 
       // 대화 6회 미만 - 심리 상담 프롬프트 삽입
       if (parseMessageArr.length < 11) {
@@ -1347,7 +1342,7 @@ const openAIController = {
       // 대화 8회 초과 - 심리 솔루션 프롬프트 삽입
       else {
         console.log("심리 솔루션 프롬프트 삽입");
-        promptArr.push(EBT_Table_Info[type || "School"].solution);
+        promptArr.push(EBT_Table_Info[type].solution);
       }
 
       /* 
@@ -2110,7 +2105,7 @@ const openAIController = {
       // }
 
       // Default - 추후 삭제 예정
-      message.solution = "music";
+      message.solution = "meditation";
       return res.status(200).json(message);
     } catch (err) {
       console.error(err);
