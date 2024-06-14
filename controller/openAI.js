@@ -2097,7 +2097,10 @@ const openAIController = {
       console.log(message.solution);
       switch (message.solution) {
         case "meditation":
-          message.solutionIndex = Math.floor(Math.random() * 7) + 1;
+          req.session.solution = {
+            solutionClass: "meditation",
+            // prompt: cognitive_prompt[parseType],
+          };
           break;
         case "cognitive":
           req.session.solution = {
