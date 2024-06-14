@@ -204,6 +204,12 @@ const {
   cb_solution_ment,
 } = require("../DB/detect_ment_Array");
 
+const {
+  cognitive_prompt,
+  diary_prompt,
+  balance_prompt,
+} = require("../DB/solution_prompt");
+
 // User 정서행동 2점문항 반환 (String)
 const select_soyes_AI_Ebt_Table = async (
   user_table,
@@ -1330,20 +1336,29 @@ const openAIController = {
             `,
         });
       }
-      // 대화 7회 - 음악추천 강제 (임시)
+      // 대화 7회 - 더미 데이터 반환
       else if (parseMessageArr.length === 13) {
-        console.log("컨텐츠추천 강제");
+        console.log("컨텐츠 추천 강제");
         const message = {
-          message:
-            "`그전에 ${solution}을 들으며 ${value}을 가져보자. 들어볼래?`",
+          message: "Dummy Message",
           emotion: 0,
         };
         return res.status(200).json(message);
       }
       // 대화 8회 초과 - 심리 솔루션 프롬프트 삽입
       else {
-        console.log("심리 솔루션 프롬프트 삽입");
-        promptArr.push(EBT_Table_Info[type].solution);
+        console.log(
+          `심리 솔루션 프롬프트 삽입 - solution:${req.session.solution?.solutionClass}`
+        );
+        // 유저 마지막 멘트
+        const lastUserContent =
+          parseMessageArr[parseMessageArr.length - 1].content;
+        // 유저 마지막 멘트가 false인 경우: 현재 솔루션을 진행하지 않겠다는 의미이므로 세션 삭제
+        if (lastUserContent.includes("false")) delete req.session.solution;
+
+        req.session.solution
+          ? promptArr.push(req.session.solution.prompt)
+          : promptArr.push(EBT_Table_Info[type].solution);
       }
 
       /* 
@@ -1515,6 +1530,9 @@ const openAIController = {
           if (error) console.log(error);
           else console.log("Ella Consult Analysis UPDATE Success!");
         });
+
+        // 엘라 유저 분석 내용 Session 저장
+        req.session.ella_analysis = message.message;
       }
       return res.status(200).json(message);
     } catch (err) {
@@ -2066,37 +2084,44 @@ const openAIController = {
         solutionIndex: Math.floor(Math.random() * 7) + 1, // default Index [1 ~ 7]
       };
       //console.log(message);
-
+      console.log(message.solution);
       switch (message.solution) {
         case "meditation":
-          console.log(message.solution);
+          message.solutionIndex = Math.floor(Math.random() * 7) + 1;
           break;
         case "cognitive":
-          console.log(message.solution);
+          req.session.solution = {
+            solutionClass: "cognitive",
+            prompt: cognitive_prompt[parseType],
+          };
           break;
         case "diary":
-          console.log(message.solution);
+          req.session.solution = {
+            solutionClass: "diary",
+            prompt: diary_prompt,
+          };
           break;
         case "balance":
-          console.log(message.solution);
+          req.session.solution = {
+            solutionClass: "balance",
+            prompt: balance_prompt,
+          };
           break;
         case "emotion":
-          console.log(message.solution);
+          // req.session.solution = {
+          //   solutionClass: "emotion",
+          //   prompt: emotion_prompt,
+          // };
           break;
         case "interpersonal":
-          console.log(message.solution);
+          // req.session.solution = {
+          //   solutionClass: "interpersonal",
+          //   prompt: interpersonal_prompt,
+          // };
           break;
         default:
-          console.log(message.solution);
           break;
       }
-
-      // interpersonal (대인관계훈련 관련 컨텐츠 처리)
-      // if (solution && solution.includes("interpersonal")) {
-      //   message.solutionNumber = Math.floor(Math.random() * 21);
-      //   return res.status(200).json(message);
-      // }
-
       // Default Solution - 추후 삭제 예정
       message.solution = "meditation";
       return res.status(200).json(message);
