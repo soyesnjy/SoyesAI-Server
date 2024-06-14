@@ -1353,6 +1353,7 @@ const openAIController = {
         // 유저 마지막 멘트
         const lastUserContent =
           parseMessageArr[parseMessageArr.length - 1].content;
+        console.log(lastUserContent);
         // 유저 마지막 멘트가 false인 경우: 현재 솔루션을 진행하지 않겠다는 의미이므로 세션 삭제
         if (lastUserContent.includes("false")) delete req.session.solution;
 
@@ -2093,6 +2094,8 @@ const openAIController = {
         solution,
         solutionIndex: Math.floor(Math.random() * 7) + 1, // default Index [1 ~ 7]
       };
+      // 솔루션 임시 meditation 고정값
+      message.solution = "meditation";
       //console.log(message);
       console.log(message.solution);
       switch (message.solution) {
@@ -2136,7 +2139,6 @@ const openAIController = {
           break;
       }
       // Default Solution - 추후 삭제 예정
-      message.solution = "meditation";
       return res.status(200).json(message);
     } catch (err) {
       console.error(err);
