@@ -1335,7 +1335,7 @@ const openAIController = {
         console.log("컨텐츠추천 강제");
         const message = {
           message:
-            '$"그전에 {solution}을 들으며 {value}을 가져보자. 들어볼래?"',
+            "`그전에 ${solution}을 들으며 ${value}을 가져보자. 들어볼래?`",
           emotion: 0,
         };
         return res.status(200).json(message);
