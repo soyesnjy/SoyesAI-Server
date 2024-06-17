@@ -2121,7 +2121,7 @@ const openAIController = {
       const solution = response.choices[0].message.content;
       const message = {
         solution,
-        solutionIndex: Math.floor(Math.random() * 7) + 1, // default Index [1 ~ 7]
+        solutionIndex: (Math.floor(Math.random() * 700) % 7) + 1, // default Index [1 ~ 7]
       };
       // #### 솔루션 임시 meditation 고정값 ####
       message.solution = "meditation";
