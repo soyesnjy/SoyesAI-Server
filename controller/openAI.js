@@ -1367,7 +1367,7 @@ const openAIController = {
               emotion: 0,
             };
             // 컨텐츠 종류에 따른 고정 멘트 반환
-            switch (req.session?.solution.solutionClass) {
+            switch (req.session?.solution?.solutionClass) {
               // 명상
               case "meditation":
                 console.log(`명상 고정 멘트 반환`);
@@ -1383,7 +1383,7 @@ const openAIController = {
               // 디폴트(명상)
               default:
                 console.log(`디폴트 멘트 반환`);
-                message.message = "좋아! 그럼 명상에 집중해보자!";
+                message.message = "좋아! 그럼 디폴트에 집중해보자!";
                 delete req.session.solution;
                 return res.status(200).json(message);
             }
