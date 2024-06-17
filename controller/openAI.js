@@ -1336,9 +1336,9 @@ const openAIController = {
             `,
         });
       }
-      // 대화 7회 - 더미 데이터 반환
-      else if (parseMessageArr.length === 13) {
-        console.log("컨텐츠 추천 강제");
+      // 대화 7회 - 더미 데이터 반환 (7회마다)
+      else if ((parseMessageArr.length + 1) % 14 === 0) {
+        console.log("더미 데이터 반환 (클라이언트의 솔루션 획득 시점)");
         const message = {
           message: "Dummy Message",
           emotion: 0,
