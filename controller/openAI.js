@@ -1392,9 +1392,10 @@ const openAIController = {
           else delete req.session.solution;
         }
 
-        req.session.solution
-          ? promptArr.push(req.session.solution.prompt)
-          : promptArr.push(EBT_Table_Info[type].solution);
+        // 8회 이후의 답변은 막아두기
+        // req.session.solution
+        //   ? promptArr.push(req.session.solution.prompt)
+        //   : promptArr.push(EBT_Table_Info[type].solution);
       }
 
       /* 
