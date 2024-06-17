@@ -1367,7 +1367,7 @@ const openAIController = {
               emotion: 0,
             };
             // 컨텐츠 종류에 따른 고정 멘트 반환
-            switch (message.solution.solutionClass) {
+            switch (req.session?.solution.solutionClass) {
               // 명상
               case "meditation":
                 console.log(`명상 고정 멘트 반환`);
@@ -2119,7 +2119,7 @@ const openAIController = {
         solution,
         solutionIndex: Math.floor(Math.random() * 7) + 1, // default Index [1 ~ 7]
       };
-      // 솔루션 임시 meditation 고정값
+      // #### 솔루션 임시 meditation 고정값 ####
       message.solution = "meditation";
       //console.log(message);
       console.log(message.solution);
