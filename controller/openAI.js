@@ -1391,6 +1391,9 @@ const openAIController = {
           // 컨텐츠를 안할 경우
           else delete req.session.solution;
         }
+        // 세션에 솔루션 관련 프롬프트가 있는 경우는 삽입
+        if (req.session.solution?.prompt)
+          promptArr.push(req.session.solution.prompt);
 
         // 8회 이후의 답변은 막아두기
         // req.session.solution
