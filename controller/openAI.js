@@ -1354,18 +1354,42 @@ const openAIController = {
         const lastUserContent =
           parseMessageArr[parseMessageArr.length - 1].content;
         // console.log(lastUserContent);
-        // 유저 마지막 멘트가 false인 경우: 현재 솔루션을 진행하지 않겠다는 의미이므로 세션 삭제
-        if (lastUserContent.includes("false")) delete req.session.solution;
 
-        if (req.session.solution?.solutionClass === "meditation") {
-          console.log(`명상 고정 멘트 반환`);
-          const message = {
-            message: "좋아! 그럼 명상에 집중해보자!",
-            emotion: 0,
-          };
-          delete req.session.solution;
-
-          return res.status(200).json(message);
+        // 컨텐츠 실시 여부 선택 세션
+        if (
+          lastUserContent.includes("false") ||
+          lastUserContent.includes("true")
+        ) {
+          // 컨텐츠를 실시할 경우
+          if (lastUserContent.includes("true")) {
+            let message = {
+              message: "좋아! 그럼 명상에 집중해보자!",
+              emotion: 0,
+            };
+            // 컨텐츠 종류에 따른 고정 멘트 반환
+            switch (message.solution.solutionClass) {
+              // 명상
+              case "meditation":
+                console.log(`명상 고정 멘트 반환`);
+                message.message = "좋아! 그럼 명상에 집중해보자!";
+                delete req.session.solution;
+                return res.status(200).json(message);
+              // 인지행동
+              case "cognitive":
+                console.log(`인지행동 고정 멘트 반환`);
+                message.message = "좋아! 그럼 문제에 집중해보자!";
+                delete req.session.solution;
+                return res.status(200).json(message);
+              // 디폴트(명상)
+              default:
+                console.log(`디폴트 멘트 반환`);
+                message.message = "좋아! 그럼 명상에 집중해보자!";
+                delete req.session.solution;
+                return res.status(200).json(message);
+            }
+          }
+          // 컨텐츠를 안할 경우
+          else delete req.session.solution;
         }
 
         req.session.solution
