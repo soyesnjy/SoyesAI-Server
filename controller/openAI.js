@@ -1288,7 +1288,7 @@ const openAIController = {
         promptArr.push(EBT_Table_Info[type].consult);
       }
       // 대화 6회 - 심리 상담 프롬프트 + 심리 상태 분석 프롬프트 삽입
-      else if (parseMessageArr.length === 11) {
+      else if ((parseMessageArr.length + 1) % 12 === 0) {
         console.log("심리 상담 프롬프트 + 심리 요약 프롬프트 삽입");
         promptArr.push(EBT_Table_Info[type].consult);
         // 비교 분석용 EBT class 맵
@@ -1345,7 +1345,7 @@ const openAIController = {
         };
         return res.status(200).json(message);
       }
-      // 대화 8회 초과 - 심리 솔루션 프롬프트 삽입
+      // 대화 8회 초과 - 심리 솔루션 프롬프트 삽입 || 기본 상담 프롬프트 삽입
       else {
         console.log(
           `심리 솔루션 프롬프트 삽입 - solution:${req.session.solution?.solutionClass}`
@@ -1399,6 +1399,9 @@ const openAIController = {
         // req.session.solution
         //   ? promptArr.push(req.session.solution.prompt)
         //   : promptArr.push(EBT_Table_Info[type].solution);
+
+        // 솔루션 세션이 아닌 경우 기본 상담 프롬프트 삽입
+        promptArr.push(EBT_Table_Info[type].consult);
       }
 
       /* 
@@ -2123,6 +2126,7 @@ const openAIController = {
         solution,
         solutionIndex: (Math.floor(Math.random() * 700) % 7) + 1, // default Index [1 ~ 7]
       };
+      console.log(message.solutionIndex);
       // #### 솔루션 임시 meditation 고정값 ####
       message.solution = "meditation";
       //console.log(message);
