@@ -45,8 +45,8 @@ router.post("/analysis_pt", postOpenAIPernalTestAnalysis);
 // 공감친구 모델 - 푸푸
 router.post(
   "/consulting_emotion_pupu",
-  vaildateTokenConsulting,
-  vaildatePlan,
+  // vaildateTokenConsulting,
+  // vaildatePlan,
   postOpenAIConsultingPupu
 );
 // 공부친구 모델 - 우비

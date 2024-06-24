@@ -188,6 +188,7 @@ const {
   persona_prompt_lala_v4,
   persona_prompt_lala_v5,
   solution_matching_persona_prompt,
+  persona_prompt_pupu_v2,
 } = require("../DB/test_prompt");
 
 // 인지행동 검사 관련
@@ -979,7 +980,7 @@ const openAIController = {
       );
 
       // 고정 삽입 프롬프트
-      promptArr.push(persona_prompt_pupu); // 페르소나 프롬프트 삽입
+      promptArr.push(persona_prompt_pupu_v2); // 페르소나 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       const lastUserContent =
@@ -1005,29 +1006,27 @@ const openAIController = {
         return;
       }
 
-      // 유저 성격검사 결과 DB에서 가져오기
-      const pt_result = await select_soyes_AI_Pt_Table(
-        PT_Table_Info["Main"].table,
-        PT_Table_Info["Main"].attribute,
-        parsepUid
-      );
-
-      console.log(`성격검사 결과: ${pt_result}`);
-      // promptArr.push(persnal_result_prompt[pt_result]);
-
-      promptArr.push({
-        role: "system",
-        content: `다음 문단은 'user'의 성격검사 결과입니다.
-        '''
-        ${
-          pt_result !== "default"
-            ? `'user'는 성격검사 결과 ${pt_result} 유형에 해당됩니다. ${pt_result} 유형은 ${persnal_short["IFPE"]}`
-            : "user는 성격검사를 진행하지 않았습니다."
-        }
-        '''
-        'assistant'는 'user'의 성격 유형을 알고있습니다. 
-        `,
-      });
+      // // 유저 성격검사 결과 DB에서 가져오기
+      // const pt_result = await select_soyes_AI_Pt_Table(
+      //   PT_Table_Info["Main"].table,
+      //   PT_Table_Info["Main"].attribute,
+      //   parsepUid
+      // );
+      // console.log(`성격검사 결과: ${pt_result}`);
+      // // promptArr.push(persnal_result_prompt[pt_result]);
+      // promptArr.push({
+      //   role: "system",
+      //   content: `다음 문단은 'user'의 성격검사 결과입니다.
+      //   '''
+      //   ${
+      //     pt_result !== "default"
+      //       ? `'user'는 성격검사 결과 ${pt_result} 유형에 해당됩니다. ${pt_result} 유형은 ${persnal_short["IFPE"]}`
+      //       : "user는 성격검사를 진행하지 않았습니다."
+      //   }
+      //   '''
+      //   'assistant'는 'user'의 성격 유형을 알고있습니다.
+      //   `,
+      // });
 
       // if (parseMessageArr.length === 1 && prevChat_flag) {
       //   // 이전 대화 프롬프트 삽입
@@ -1051,9 +1050,9 @@ const openAIController = {
 
       // 상시 삽입 프롬프트
 
-      promptArr.push(solution_prompt2); // 음악 명상 + 그림 명상 관련 솔루션 프롬프트
-      promptArr.push(common_prompt); // 공통 프롬프트 삽입
-      promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
+      // promptArr.push(solution_prompt2); // 음악 명상 + 그림 명상 관련 솔루션 프롬프트
+      // promptArr.push(common_prompt); // 공통 프롬프트 삽입
+      // promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
 
       // console.log(promptArr);
 
@@ -1075,21 +1074,21 @@ const openAIController = {
 
       const response = await openai.chat.completions.create({
         messages: [...promptArr, ...parseMessageArr],
-        model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "ft:gpt-3.5-turbo-1106:personal::9dYars0I", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
-      let emotion = parseInt(response.choices[0].message.content.slice(-1));
+      // let emotion = parseInt(response.choices[0].message.content.slice(-1));
 
       const message = {
-        message: response.choices[0].message.content.slice(0, -1),
-        emotion,
+        message: response.choices[0].message.content,
+        emotion: 1,
       };
 
       // Log 출력
-      console.log([
-        ...parseMessageArr,
-        { role: "assistant", content: message.message },
-      ]);
+      // console.log([
+      //   ...parseMessageArr,
+      //   { role: "assistant", content: message.message },
+      // ]);
 
       // Client 반환
       res.status(200).json(message);
@@ -1355,7 +1354,7 @@ const openAIController = {
           parseMessageArr[parseMessageArr.length - 1].content;
         // console.log(lastUserContent);
 
-        // 컨텐츠 실시 여부 선택 세션
+        // 컨텐츠 실시 여부 선택 세션 - 9*n회 문답에서 실시
         if (
           lastUserContent.includes("false") ||
           lastUserContent.includes("true")
@@ -1388,7 +1387,7 @@ const openAIController = {
                 return res.status(200).json(message);
             }
           }
-          // 컨텐츠를 안할 경우
+          // 컨텐츠를 안할 경우 - 솔루션 세션 삭제
           else delete req.session.solution;
         }
         // 세션에 솔루션 관련 프롬프트가 있는 경우는 삽입
@@ -2126,11 +2125,12 @@ const openAIController = {
         solution,
         solutionIndex: (Math.floor(Math.random() * 700) % 7) + 1, // default Index [1 ~ 7]
       };
-      console.log(message.solutionIndex);
+
       // #### 솔루션 임시 meditation 고정값 ####
+      console.log(message.solutionIndex);
       message.solution = "meditation";
+
       //console.log(message);
-      console.log(message.solution);
       switch (message.solution) {
         case "meditation":
           req.session.solution = {
