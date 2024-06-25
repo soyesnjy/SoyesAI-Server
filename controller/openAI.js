@@ -1777,10 +1777,10 @@ const openAIController = {
       });
     }
   },
-  // 달력 관련 데이터 반환
+  // 달력 관련 데이터 반환 (Date 단위)
   postOpenAIMypageCalendarData: async (req, res) => {
     const { EBTData } = req.body;
-    let parseEBTdata, parsepUid; // Parsing 변수
+    let parseEBTdata, parsepUid, parseDate; // Parsing 변수
 
     try {
       // json 파싱
@@ -1788,7 +1788,7 @@ const openAIController = {
         parseEBTdata = JSON.parse(EBTData);
       } else parseEBTdata = EBTData;
 
-      const { pUid } = parseEBTdata;
+      const { pUid, date } = parseEBTdata;
       // No pUid => return
       if (!pUid) {
         console.log("No pUid input value - 400");
@@ -1796,6 +1796,8 @@ const openAIController = {
       }
       // pUid default값 설정
       parsepUid = pUid;
+      parseDate = date;
+
       console.log(
         `달력 데이터 반환 API /openAI/calendar Path 호출 - pUid: ${parsepUid}`
       );
@@ -1806,33 +1808,11 @@ const openAIController = {
       const ebt_log_attribute = EBT_Table_Info["Log"].attribute;
       const pt_log_table = PT_Table_Info["Log"].table;
       const pt_log_attribute = PT_Table_Info["Log"].attribute;
-
-      // DB 계정 생성 코드 추가 예정
-      // 동기식 DB 접근 함수 1. Promise 생성 함수
-      function queryAsync(connection, query, parameters) {
-        return new Promise((resolve, reject) => {
-          connection.query(query, parameters, (error, results, fields) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(results);
-            }
-          });
-        });
-      }
-      // 프로미스 resolve 반환값 사용. (User Data return)
-      async function fetchUserData(connection, query) {
-        try {
-          let results = await queryAsync(connection, query, []);
-          // console.log(results[0]);
-          return results;
-        } catch (error) {
-          console.error(error);
-        }
-      }
+      const consult_log_table = Consult_Table_Info["Log"].table;
+      const consult_log_attribute = Consult_Table_Info["Log"].attribute;
 
       // 1. SELECT USER JOIN EBT_Log
-      const select_ebt_join_query = `SELECT ${ebt_log_table}.${ebt_log_attribute.attr1}, ${ebt_log_table}.${ebt_log_attribute.attr2}, ${ebt_log_table}.${ebt_log_attribute.attr3} FROM ${user_table} JOIN ${ebt_log_table} ON ${user_table}.uid = ${ebt_log_table}.uid WHERE ${user_table}.uid = '${pUid}';`;
+      const select_ebt_join_query = `SELECT ${ebt_log_table}.${ebt_log_attribute.attr2}, ${ebt_log_table}.${ebt_log_attribute.attr3} FROM ${ebt_log_table} WHERE uid = '${parsepUid}' AND created_at LIKE '${parseDate}%';`;
 
       const ebt_join_data = await fetchUserData(
         connection_AI,
@@ -1840,13 +1820,61 @@ const openAIController = {
       );
       // console.log(ebt_join_data);
 
-      // 2. SELECT USER JOIN PT_Log
-      const select_pt_join_query = `SELECT ${pt_log_table}.${pt_log_attribute.attr1}, ${pt_log_table}.${pt_log_attribute.attr2}, ${pt_log_table}.${pt_log_attribute.attr3} FROM ${user_table} JOIN ${pt_log_table} ON ${user_table}.uid = ${pt_log_table}.uid WHERE ${user_table}.uid = '${pUid}';`;
+      // 2. SELECT USER PT_Log
+      const select_pt_join_query = `SELECT ${pt_log_table}.${pt_log_attribute.attr2}, ${pt_log_table}.${pt_log_attribute.attr3} FROM ${pt_log_table} WHERE uid = '${parsepUid}' AND created_at LIKE '${parseDate}%';`;
 
       const pt_join_data = await fetchUserData(
         connection_AI,
         select_pt_join_query
       );
+
+      // 3. SELECT USER Consult_Log
+      const select_consult_join_query = `SELECT ${consult_log_table}.${consult_log_attribute.attr1}, ${consult_log_table}.${consult_log_attribute.attr2} FROM ${consult_log_table} WHERE uid = '${parsepUid}' AND created_at LIKE '${parseDate}%';`;
+
+      const consult_join_data = await fetchUserData(
+        connection_AI,
+        select_consult_join_query
+      );
+
+      // 프론트 데이터값 참조
+      // const userInfoArr = [
+      //   {
+      //     title: '성격검사',
+      //     type: 'pt_data',
+      //     iconSrc: '/src/Content_IMG/Icon_IMG/Icon_요가명상.png',
+      //     playIconSrc: '/src/Content_IMG/Frame_재생버튼.png',
+      //   },
+      //   {
+      //     title: '정서행동검사',
+      //     type: 'ebt_data',
+      //     iconSrc: '/src/Content_IMG/Icon_IMG/Icon_요가명상.png',
+      //     playIconSrc: '/src/Content_IMG/Frame_재생버튼.png',
+      //   },
+      //   {
+      //     title: '심리상담',
+      //     type: 'consult_data',
+      //     iconSrc: '/src/Content_IMG/Icon_IMG/Icon_요가명상.png',
+      //     playIconSrc: '/src/Content_IMG/Frame_재생버튼.png',
+      //   },
+      //   {
+      //     title: '콘텐츠',
+      //     type: 'content_data',
+      //     iconSrc: '/src/Content_IMG/Icon_IMG/Icon_요가명상.png',
+      //     playIconSrc: '/src/Content_IMG/Frame_재생버튼.png',
+      //   },
+      //   {
+      //     title: '엘라상담',
+      //     type: 'ella_data',
+      //     iconSrc: '/src/Content_IMG/Icon_IMG/Icon_요가명상.png',
+      //     playIconSrc: '/src/Content_IMG/Frame_재생버튼.png',
+      //   },
+      //   {
+      //     title: '명상',
+      //     type: 'meditation_data',
+      //     iconSrc: '/src/Content_IMG/Icon_IMG/Icon_요가명상.png',
+      //     playIconSrc: '/src/Content_IMG/Frame_재생버튼.png',
+      //   },
+      // ];
 
       res.json({
         ebt_data: ebt_join_data.map((el) => {
@@ -1854,6 +1882,10 @@ const openAIController = {
         }),
         pt_data: pt_join_data.map((el) => {
           return { ...el, pt_analysis: JSON.parse(el.pt_analysis).text };
+        }),
+        // 값을 파싱해서 사용해야함!
+        consult_data: consult_join_data.map((el) => {
+          return { ...el };
         }),
       });
     } catch (err) {
