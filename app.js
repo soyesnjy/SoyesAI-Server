@@ -112,21 +112,21 @@ app.use("/signup", signupRouter);
 // 채팅 웹소켓 서버 라우팅
 const chatRouter = require("./router/chat");
 app.use(chatRouter);
-// 유니티 채팅 웹소켓 서버 라우팅
-const unityChatRouter = require("./router/unityChat");
-app.use(unityChatRouter);
-// 유니티 채팅 웹소켓 서버 라우팅2
-const unityChatRouter2 = require("./router/unityChat2");
-app.use(unityChatRouter2);
-// 유니티 채팅 웹소켓 서버 라우팅3
-const unityChatRouter3 = require("./router/unityChat3");
-app.use(unityChatRouter3);
-// 유니티 채팅 웹소켓 서버 라우팅4
-const unityChatRouter4 = require("./router/unityChat4");
-app.use(unityChatRouter4);
-// 유니티 채팅 웹소켓 서버 라우팅5
-const unityChatRouter5 = require("./router/unityChat5");
-app.use(unityChatRouter5);
+// // 유니티 채팅 웹소켓 서버 라우팅
+// const unityChatRouter = require("./router/unityChat");
+// app.use(unityChatRouter);
+// // 유니티 채팅 웹소켓 서버 라우팅2
+// const unityChatRouter2 = require("./router/unityChat2");
+// app.use(unityChatRouter2);
+// // 유니티 채팅 웹소켓 서버 라우팅3
+// const unityChatRouter3 = require("./router/unityChat3");
+// app.use(unityChatRouter3);
+// // 유니티 채팅 웹소켓 서버 라우팅4
+// const unityChatRouter4 = require("./router/unityChat4");
+// app.use(unityChatRouter4);
+// // 유니티 채팅 웹소켓 서버 라우팅5
+// const unityChatRouter5 = require("./router/unityChat5");
+// app.use(unityChatRouter5);
 // test 경로 라우팅
 const testRouter = require("./router/test");
 app.use("/test", testRouter);
