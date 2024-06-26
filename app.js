@@ -110,8 +110,8 @@ app.use("/signup", signupRouter);
 
 // Tips
 // 채팅 웹소켓 서버 라우팅
-const chatRouter = require("./router/chat");
-app.use(chatRouter);
+// const chatRouter = require("./router/chat");
+// app.use(chatRouter);
 // // 유니티 채팅 웹소켓 서버 라우팅
 // const unityChatRouter = require("./router/unityChat");
 // app.use(unityChatRouter);
