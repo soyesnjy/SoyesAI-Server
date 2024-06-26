@@ -12,7 +12,7 @@ const compression = require("compression");
 
 const app = express();
 const PORT = 4000;
-const PORT_https = 4040;
+const PORT_https = 5050;
 
 // 서버와 동일한 url을 브라우저에 입력하면 src 폴더 내부의 html 파일 실행.
 const path = require("path");
