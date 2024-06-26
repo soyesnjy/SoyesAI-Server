@@ -1580,7 +1580,7 @@ const openAIController = {
     } catch (err) {
       console.error(err);
       return res.status(500).json({
-        message: "Server Error - 500 Bad Gateway",
+        message: "Server Error - 500 Bad Gateway" + err.message,
         emotion: 0,
       });
     }
@@ -1940,8 +1940,8 @@ const openAIController = {
 
       // No pUid => return
       if (!pUid) {
-        console.log("Non pUid input value - 400");
-        return res.json({ message: "Non pUid input value - 400" });
+        console.log("Non pUid input value - 404");
+        return res.status(404).json({ message: "Non pUid input value - 404" });
       }
       parsepUid = pUid;
       console.log(
@@ -1950,7 +1950,9 @@ const openAIController = {
       // 문답 5회 미만일 경우 return
       if (messageArr.length <= 8) {
         console.log(`messageArr Not enough length - pUid: ${parsepUid}`);
-        return res.json({ message: "messageArr Not enough length" });
+        return res
+          .status(201)
+          .json({ message: "messageArr Not enough length" });
       }
 
       /* Consult_Log DB 저장 */
@@ -1984,7 +1986,9 @@ const openAIController = {
       });
     } catch (err) {
       console.log(err);
-      res.json({ message: "Consulting_Log DB Save Fail!" });
+      res
+        .status(500)
+        .json({ message: "Consulting_Log DB Save Fail!" + err.message });
     }
   },
   // ClearCookies API
