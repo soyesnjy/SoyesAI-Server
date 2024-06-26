@@ -77,7 +77,8 @@ console.log(new Date().toString());
 // 응답 압축
 app.use(compression());
 
-console.log("SoyesAI Server Start!!!");
+// console.log("jenkins용 주석");
+
 // const responseBodyLogger = (req, res, next) => {
 //   const oldSend = res.send;
 //   res.send = function (data) {
