@@ -421,9 +421,9 @@ const openAIController = {
   },
   // EBT 결과 분석 및 DB 저장 및 메일 전송 API
   postOpenAIPsychologicalAnalysis: async (req, res) => {
-    const { EBTData } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
+    const { data } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
 
-    let parseEBTdata,
+    let parseData,
       parseMessageArr,
       parsingScore,
       parsingType,
@@ -451,35 +451,33 @@ const openAIController = {
 
     try {
       // 파싱. Client JSON 데이터
-      if (typeof EBTData === "string") {
-        parseEBTdata = JSON.parse(EBTData);
-      } else parseEBTdata = EBTData;
-      // console.log(parseEBTdata);
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+      // console.log(parseData);
 
-      const { messageArr, type, score, pUid } = parseEBTdata;
-
+      const { messageArr, type, score, pUid } = parseData;
       // No type => return
       if (!type) {
-        console.log("No type input value - 400");
-        return res.json({ message: "No type input value - 400" });
+        console.log("No type input value - 404");
+        return res.status(404).json({ message: "No type input value - 404" });
       }
-
       // No pUid => return
       if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.json({ message: "No pUid input value - 400" });
+        console.log("No pUid input value - 404");
+        return res.status(404).json({ message: "No pUid input value - 404" });
       }
-
       // No messageArr => return
       if (!messageArr) {
-        console.log("No messageArr input value - 400");
-        return res.json({ message: "No messageArr input value - 400" });
+        console.log("No messageArr input value - 404");
+        return res
+          .status(404)
+          .json({ message: "No messageArr input value - 404" });
       }
-
       // No score => return
       if (!score) {
-        console.log("No score input value - 400");
-        return res.json({ message: "No score input value - 400" });
+        console.log("No score input value - 404");
+        return res.status(404).json({ message: "No score input value - 404" });
       }
 
       // 파싱. Client JSON 데이터
@@ -705,30 +703,29 @@ const openAIController = {
   },
   // PT 결과 분석 및 DB 저장 및 메일 전송 API
   postOpenAIPernalTestAnalysis: async (req, res) => {
-    const { PTDataSend } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
+    const { data } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
 
     let parsePTData,
       parsePTResult,
       yourMailAddr = "";
     try {
       // 파싱. Client JSON 데이터
-      if (typeof PTDataSend === "string") {
-        parsePTData = JSON.parse(PTDataSend);
-      } else parsePTData = PTDataSend;
+      if (typeof data === "string") {
+        parsePTData = JSON.parse(data);
+      } else parsePTData = data;
 
       const { resultText, pUid } = parsePTData;
-      console.log(parsePTData);
-
       // No type => return
       if (!resultText) {
-        console.log("No resultText input value - 400");
-        return res.json({ message: "No resultText input value - 400" });
+        console.log("No resultText input value - 404");
+        return res
+          .status(404)
+          .json({ message: "No resultText input value - 404" });
       }
-
       // No pUid => return
       if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.json({ message: "No pUid input value - 400" });
+        console.log("No pUid input value - 404");
+        return res.status(404).json({ message: "No pUid input value - 404" });
       }
 
       parsepUid = pUid;
@@ -835,7 +832,7 @@ const openAIController = {
       */
 
       // client 전송
-      res.json({ message: mailOptions.text });
+      res.status(200).json({ message: mailOptions.text });
 
       /* PT Data DB 저장 */
       const pt_table = PT_Table_Info["Main"].table;
@@ -941,10 +938,8 @@ const openAIController = {
   },
   // 공감친구 모델 - 푸푸
   postOpenAIConsultingPupu: async (req, res) => {
-    const { EBTData } = req.body;
-
+    const { data } = req.body;
     // console.log("req.sessionID: " + req.sessionID);
-
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
@@ -958,9 +953,9 @@ const openAIController = {
           .json({ message: "Session Expiration" });
       }
       */
-      if (typeof EBTData === "string") {
-        parseEBTdata = JSON.parse(EBTData);
-      } else parseEBTdata = EBTData;
+      if (typeof data === "string") {
+        parseEBTdata = JSON.parse(data);
+      } else parseEBTdata = data;
 
       const { messageArr, pUid } = parseEBTdata;
       // messageArr가 문자열일 경우 json 파싱
@@ -970,8 +965,8 @@ const openAIController = {
 
       // No pUid => return
       if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.json({ message: "No pUid input value - 400" });
+        console.log("No pUid input value - 404");
+        return res.status(404).json({ message: "No pUid input value - 404" });
       }
 
       parsepUid = pUid;
@@ -1102,17 +1097,17 @@ const openAIController = {
   },
   // 공부친구 모델 - 우비
   postOpenAIConsultingUbi: async (req, res) => {
-    const { EBTData } = req.body;
+    const { data } = req.body;
 
-    console.log(EBTData);
+    // console.log(data);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
     // console.log(messageArr);
     try {
-      if (typeof EBTData === "string") {
-        parseEBTdata = JSON.parse(EBTData);
-      } else parseEBTdata = EBTData;
+      if (typeof data === "string") {
+        parseEBTdata = JSON.parse(data);
+      } else parseEBTdata = data;
 
       const { messageArr, pUid } = parseEBTdata;
       // messageArr가 문자열일 경우 json 파싱
@@ -1122,8 +1117,8 @@ const openAIController = {
 
       // No pUid => return
       if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.json({ message: "No pUid input value - 400" });
+        console.log("No pUid input value - 404");
+        return res.status(404).json({ message: "No pUid input value - 404" });
       }
 
       parsepUid = pUid;
@@ -1201,7 +1196,7 @@ const openAIController = {
         ...parseMessageArr,
         { role: "assistant", content: message.message },
       ]);
-      res.json(message);
+      res.status(200).json(message);
     } catch (err) {
       console.error(err);
       res.json({
@@ -1212,7 +1207,7 @@ const openAIController = {
   },
   // 정서멘토 모델 - 엘라
   postOpenAIConsultingLala: async (req, res) => {
-    const { EBTData } = req.body;
+    const { data } = req.body;
     // console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
@@ -1221,26 +1216,28 @@ const openAIController = {
     //   testClass_cb = "";
 
     try {
-      if (typeof EBTData === "string") {
-        parseEBTdata = JSON.parse(EBTData);
-      } else parseEBTdata = EBTData;
+      if (typeof data === "string") {
+        parseEBTdata = JSON.parse(data);
+      } else parseEBTdata = data;
 
       const { messageArr, pUid, type } = parseEBTdata;
 
       // No pUid => return
       if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.json({ message: "No pUid input value - 400" });
+        console.log("No pUid input value - 404");
+        return res.status(404).json({ message: "No pUid input value - 404" });
       }
       // No type => return
       if (!type) {
-        console.log("No type input value - 400");
-        return res.json({ message: "No type input value - 400" });
+        console.log("No type input value - 404");
+        return res.status(404).json({ message: "No type input value - 404" });
       }
       // No type => return
       if (!messageArr) {
-        console.log("No messageArr input value - 400");
-        return res.json({ message: "No messageArr input value - 400" });
+        console.log("No messageArr input value - 404");
+        return res
+          .status(404)
+          .json({ message: "No messageArr input value - 404" });
       }
 
       // messageArr가 문자열일 경우 json 파싱
@@ -1258,28 +1255,9 @@ const openAIController = {
       promptArr.push(persona_prompt_lala_v5); // 엘라 페르소나
       promptArr.push(info_prompt); // 유저관련 정보
 
+      // 유저 마지막 멘트
       // const lastUserContent =
-      //   parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
-
-      // NO REQ 질문 처리. 10초 이상 질문이 없을 경우 Client 측에서 'NO REQUEST' 메시지를 담은 요청을 보냄. 그에 대한 처리
-      // if (lastUserContent.includes("NO REQ")) {
-      //   console.log("NO REQUEST 전달");
-      //   parseMessageArr.pop(); // 'NO REQUEST 질문 삭제'
-      //   parseMessageArr.push(no_req_prompt);
-      //   promptArr.push(sentence_division_prompt);
-
-      //   const response = await openai.chat.completions.create({
-      //     messages: [...promptArr, ...parseMessageArr],
-      //     model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-      //   });
-
-      //   res.json({
-      //     message: response.choices[0].message.content,
-      //     emotion: 0,
-      //   });
-
-      //   return;
-      // }
+      //   parseMessageArr[parseMessageArr.length - 1].content;
 
       // 대화 6회 미만 - 심리 상담 프롬프트 삽입
       if (parseMessageArr.length < 11) {
@@ -1587,7 +1565,7 @@ const openAIController = {
   },
   // 전문상담사 모델 - 소예
   postOpenAIConsultingSoyes: async (req, res) => {
-    const { EBTData } = req.body;
+    const { data } = req.body;
     // console.log(EBTData);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
@@ -1597,9 +1575,9 @@ const openAIController = {
     // res.header("Test_Header", "Success Header");
 
     try {
-      if (typeof EBTData === "string") {
-        parseEBTdata = JSON.parse(EBTData);
-      } else parseEBTdata = EBTData;
+      if (typeof data === "string") {
+        parseEBTdata = JSON.parse(data);
+      } else parseEBTdata = data;
 
       const { messageArr, pUid } = parseEBTdata;
       // messageArr가 문자열일 경우 json 파싱
@@ -1609,8 +1587,8 @@ const openAIController = {
 
       // No pUid => return
       if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.json({ message: "No pUid input value - 400" });
+        console.log("No pUid input value - 404");
+        return res.status(404).json({ message: "No pUid input value - 404" });
       }
 
       parsepUid = pUid;
@@ -1623,26 +1601,6 @@ const openAIController = {
 
       const lastUserContent =
         parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
-
-      // NO REQ 질문 처리. 10초 이상 질문이 없을 경우 Client 측에서 'NO REQUEST' 메시지를 담은 요청을 보냄. 그에 대한 처리
-      if (lastUserContent.includes("NO REQ")) {
-        console.log("NO REQUEST 전달");
-        parseMessageArr.pop(); // 'NO REQUEST 질문 삭제'
-        parseMessageArr.push(no_req_prompt);
-        promptArr.push(sentence_division_prompt);
-
-        const response = await openai.chat.completions.create({
-          messages: [...promptArr, ...parseMessageArr],
-          model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-        });
-
-        res.json({
-          message: response.choices[0].message.content,
-          emotion: 0,
-        });
-
-        return;
-      }
 
       /* 프롬프트 삽입 분기 */
 
@@ -1768,7 +1726,7 @@ const openAIController = {
       // 세션 확인 코드
       // console.log(req.session);
 
-      res.json(message);
+      res.status(200).json(message);
     } catch (err) {
       console.error(err);
       res.json({
@@ -1779,20 +1737,20 @@ const openAIController = {
   },
   // 달력 관련 데이터 반환 (Date 단위)
   postOpenAIMypageCalendarData: async (req, res) => {
-    const { EBTData } = req.body;
+    const { data } = req.body;
     let parseEBTdata, parsepUid, parseDate; // Parsing 변수
 
     try {
       // json 파싱
-      if (typeof EBTData === "string") {
-        parseEBTdata = JSON.parse(EBTData);
-      } else parseEBTdata = EBTData;
+      if (typeof data === "string") {
+        parseEBTdata = JSON.parse(data);
+      } else parseEBTdata = data;
 
       const { pUid, date } = parseEBTdata;
       // No pUid => return
       if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.json({ message: "No pUid input value - 400" });
+        console.log("No pUid input value - 404");
+        return res.status(404).json({ message: "No pUid input value - 404" });
       }
       // pUid default값 설정
       parsepUid = pUid;
@@ -1803,7 +1761,7 @@ const openAIController = {
       );
 
       // DB 조회 => User Table + User EBT Table JOIN 후 관련 데이터 전달
-      const user_table = User_Table_Info.table;
+      // const user_table = User_Table_Info.table;
       const ebt_log_table = EBT_Table_Info["Log"].table;
       const ebt_log_attribute = EBT_Table_Info["Log"].attribute;
       const pt_log_table = PT_Table_Info["Log"].table;
@@ -1876,7 +1834,7 @@ const openAIController = {
       //   },
       // ];
 
-      res.json({
+      res.status(200).json({
         ebt_data: ebt_join_data.map((el) => {
           return { ...el, ebt_analysis: JSON.parse(el.ebt_analysis).text };
         }),
@@ -1927,13 +1885,13 @@ const openAIController = {
   },
   // 상담 로그 저장 API
   postOpenAIConsultingLogSave: async (req, res) => {
-    const { EBTData } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
+    const { data } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
     let parseEBTdata, parsepUid;
     try {
       // 파싱. Client JSON 데이터
-      if (typeof EBTData === "string") {
-        parseEBTdata = JSON.parse(EBTData);
-      } else parseEBTdata = EBTData;
+      if (typeof data === "string") {
+        parseEBTdata = JSON.parse(data);
+      } else parseEBTdata = data;
 
       const { messageArr, avarta, pUid } = parseEBTdata;
       // console.log(parseEBTdata);
@@ -1978,7 +1936,6 @@ const openAIController = {
         if (err) {
           console.log("Consulting_Log DB Save Fail!");
           console.log("Err sqlMessage: " + err.sqlMessage);
-          res.json({ message: "Consulting_Log DB Save Fail!" });
         } else {
           console.log("Consulting_Log DB Save Success!");
           res.status(200).json({ message: "Consulting_Log DB Save Success!" });
@@ -2010,23 +1967,22 @@ const openAIController = {
   },
   // User 정서행동 검사 결과 반환
   postOpenAIUserEBTResultData: async (req, res) => {
-    const { EBTData } = req.body;
+    const { data } = req.body;
     let parseEBTdata,
       parsepUid,
-      // returnObj = {},
       returnArr = [];
 
     try {
       // json 파싱
-      if (typeof EBTData === "string") {
-        parseEBTdata = JSON.parse(EBTData);
-      } else parseEBTdata = EBTData;
+      if (typeof data === "string") {
+        parseEBTdata = JSON.parse(data);
+      } else parseEBTdata = data;
 
       const { pUid } = parseEBTdata;
       // No pUid => return
       if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.status(400).json({ message: "No pUid input value - 400" });
+        console.log("No pUid input value - 404");
+        return res.status(404).json({ message: "No pUid input value - 404" });
       }
       // pUid default값 설정
       parsepUid = pUid;
@@ -2063,7 +2019,7 @@ const openAIController = {
       });
       // console.log(returnArr);
 
-      return res.json({
+      return res.status(200).json({
         message: returnArr.sort((a, b) => b.tScore - a.tScore),
       });
     } catch (err) {
@@ -2101,27 +2057,27 @@ const openAIController = {
   },
   // 상담 Solution 반환 API
   postOpenAIConsultSolutionData: async (req, res) => {
-    const { EBTData } = req.body;
+    const { data } = req.body;
     let parseEBTdata, parseMessageArr, parsepUid, parseType;
     let promptArr = []; // 삽입 Prompt Array
     let userPrompt = []; // 삽입 User Prompt Array
 
     try {
       // json 파싱
-      if (typeof EBTData === "string") {
-        parseEBTdata = JSON.parse(EBTData);
-      } else parseEBTdata = EBTData;
+      if (typeof data === "string") {
+        parseEBTdata = JSON.parse(data);
+      } else parseEBTdata = data;
 
       const { pUid, messageArr, type, avarta } = parseEBTdata;
       // No pUid => return
       if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.status(400).json({ message: "No pUid input value - 400" });
+        console.log("No pUid input value - 404");
+        return res.status(404).json({ message: "No pUid input value - 404" });
       }
 
       if (!type) {
-        console.log("No type input value - 400");
-        return res.json({ message: "No type input value - 400" });
+        console.log("No type input value - 404");
+        return res.status(404).json({ message: "No type input value - 404" });
       }
 
       parsepUid = pUid;
