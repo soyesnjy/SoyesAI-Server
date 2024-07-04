@@ -21,6 +21,7 @@ const {
   postAILoginHandler,
   getAILogoutHandler,
   postAIRefreshTokenUpdateHandler,
+  postSocialAppLoginHandler,
 } = loginController;
 
 const {
@@ -62,6 +63,8 @@ router.post("/postTeacher");
 
 // AI 일반 로그인
 router.post("/ai", postAILoginHandler);
+// AI 소셜 로그인
+router.post("/social", postSocialAppLoginHandler);
 // AI 일반 로그아웃
 router.get("/ai/logout", getAILogoutHandler);
 // AI RefreshToken 갱신
