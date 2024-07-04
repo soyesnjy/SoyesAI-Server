@@ -385,14 +385,21 @@ const EBT_classArr = [
 const openAIController = {
   // 감정 분석 AI
   postOpenAIEmotionAnalyze: async (req, res) => {
-    const { messageArr } = req.body;
+    const { data } = req.body;
     console.log("감정 분석 API /emotion Path 호출");
     // console.log(req.body);
     // console.log(typeof messageArr);
 
-    let parseMessageArr;
+    let parseData, parseMessageArr;
 
     try {
+      // 파싱. Client JSON 데이터
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { messageArr } = parseData;
+
       // messageArr가 문자열일 경우 json 파싱
       if (typeof messageArr === "string") {
         parseMessageArr = JSON.parse(messageArr);
