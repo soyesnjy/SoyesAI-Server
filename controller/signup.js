@@ -94,8 +94,7 @@ const signupController = {
         parseSignUpData = JSON.parse(data);
       } else parseSignUpData = data;
 
-      const { pUid, Email, passWard, type, name, phoneNumber } =
-        parseSignUpData;
+      const { pUid, Email, passWard, name, phoneNumber } = parseSignUpData;
 
       // Input 없을 경우
       if (!pUid || !passWard) {
@@ -148,7 +147,7 @@ const signupController = {
           passWard,
           name || null,
           phoneNumber || null,
-          type || "guest",
+          "guest",
           date,
           date,
         ];
