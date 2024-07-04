@@ -508,13 +508,13 @@ const loginController = {
   },
   // AI Guest 로그인 - 인증
   postAILoginHandler: async (req, res) => {
-    const { LoginData } = req.body;
+    const { data } = req.body;
     let parseLoginData;
     try {
       // 입력값 파싱
-      if (typeof LoginData === "string") {
-        parseLoginData = JSON.parse(LoginData);
-      } else parseLoginData = LoginData;
+      if (typeof data === "string") {
+        parseLoginData = JSON.parse(data);
+      } else parseLoginData = data;
 
       const { pUid, passWard } = parseLoginData;
       const sessionId = req.sessionID;
@@ -882,14 +882,14 @@ const loginController = {
   },
   // (App) AI RefreshToken 갱신
   postAIRefreshTokenUpdateHandler: async (req, res) => {
-    const { LoginData } = req.body;
+    const { data } = req.body;
     console.log(req.body);
     let parseLoginData;
     try {
       // 입력값 파싱
-      if (typeof LoginData === "string") {
-        parseLoginData = JSON.parse(LoginData);
-      } else parseLoginData = LoginData;
+      if (typeof data === "string") {
+        parseLoginData = JSON.parse(data);
+      } else parseLoginData = data;
 
       const { pUid, refreshToken } = parseLoginData;
       const sessionId = req.sessionID;

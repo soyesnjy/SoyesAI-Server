@@ -1105,7 +1105,6 @@ const openAIController = {
   // 공부친구 모델 - 우비
   postOpenAIConsultingUbi: async (req, res) => {
     const { data } = req.body;
-
     // console.log(data);
     let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
@@ -1746,7 +1745,6 @@ const openAIController = {
   postOpenAIMypageCalendarData: async (req, res) => {
     const { data } = req.body;
     let parseEBTdata, parsepUid, parseDate; // Parsing 변수
-
     try {
       // json 파싱
       if (typeof data === "string") {
@@ -1863,9 +1861,7 @@ const openAIController = {
   // Clova Voice API 사용
   postClovaVoiceTTS: async (req, res) => {
     console.log("ClovaVoiceTTS API /openAI/tts Path 호출");
-
     const api_url = "https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts";
-
     try {
       const response = await axios.post(api_url, req.body, {
         responseType: "arraybuffer", // Clova 음성 데이터를 arraybuffer로 받음
