@@ -84,17 +84,18 @@ const signupController = {
   },
   // AI 회원가입
   postSignupAIHandler: async (req, res) => {
-    const { SignUpData } = req.body;
-    console.log(req.body);
+    const { data } = req.body;
+    // console.log(req.body);
     let parseSignUpData;
     const regex = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/; // 한글 및 한글 자모를 포함하는 정규 표현식
     try {
       // 입력값 파싱
-      if (typeof SignUpData === "string") {
-        parseSignUpData = JSON.parse(SignUpData);
-      } else parseSignUpData = SignUpData;
+      if (typeof data === "string") {
+        parseSignUpData = JSON.parse(data);
+      } else parseSignUpData = data;
 
-      const { pUid, Email, passWard, name, phoneNumber } = parseSignUpData;
+      const { pUid, Email, passWard, type, name, phoneNumber } =
+        parseSignUpData;
 
       // Input 없을 경우
       if (!pUid || !passWard) {
@@ -141,23 +142,23 @@ const signupController = {
           .join(", ")})`;
         // console.log(insert_query);
 
-        // INSERT Value 명시
-        const insert_value_obj = {
-          pKey: pUid,
-          attr1: Email ? Email : null,
-          attr2: passWard,
-          attr3: name ? name : null,
-          attr4: phoneNumber ? phoneNumber : null,
-          attr5: "guest",
-          attr6: date,
-          attr7: date,
-        };
+        const insert_value = [
+          pUid,
+          Email || null,
+          passWard,
+          name || null,
+          phoneNumber || null,
+          type || "guest",
+          date,
+          date,
+        ];
+
         // console.log(insert_value);
 
         // 계정 생성 (비동기 처리)
         connection_AI.query(
           insert_query,
-          Object.values(insert_value_obj),
+          insert_value,
           (error, rows, fields) => {
             if (error) {
               console.log(error);
