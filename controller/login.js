@@ -178,11 +178,9 @@ const loginController = {
 
     res.json("Token LogOut Success");
   },
-  // OAuth URL 발급
+  // Google OAuth URL 발급
   oauthUrlHandler: (req, res) => {
-    const { oauthType } = req.body;
     console.log("OAuth URL 발급 API 호출");
-    console.log("type: " + oauthType);
 
     // SCOPE 설정. 유저 정보를 어디까지 가져올지 결정
     const scopeMap = {
@@ -200,11 +198,10 @@ const loginController = {
     };
 
     try {
-      if (!oauthType) {
-        res.json({ data: "" });
-        return;
-      }
-      const SCOPES = [...scopeMap[oauthType]];
+      const SCOPES = [
+        "https://www.googleapis.com/auth/userinfo.profile", // 기본 프로필
+        "https://www.googleapis.com/auth/userinfo.email", // 이메일
+      ];
 
       const authUrl = oAuth2Client.generateAuthUrl({
         access_type: "offline", // 필요한 경우
@@ -212,11 +209,24 @@ const loginController = {
       });
 
       // console.log(authUrl);
-
-      res.json({ data: authUrl });
+      res.status(200).json({ url: authUrl });
     } catch (err) {
       console.error(err);
-      res.json({ data: "Non " });
+      res.status(500).json({ url: "Non" });
+    }
+  },
+  // Kakao OAuth URL 발급
+  oauthKakaoUrlHandler: (req, res) => {
+    try {
+      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${
+        process.env.KAKAO_REST_API_KEY
+      }&redirect_uri=${process.env.REDIRECT_URL}&state=${Math.random()
+        .toString(36)
+        .substring(7)}`;
+      return res.status(200).json({ url: kakaoAuthUrl });
+    } catch (err) {
+      console.error(err);
+      res.json({ data: err });
     }
   },
   // AI Google OAuth 로그인 - AccessToken 발급

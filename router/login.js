@@ -15,6 +15,7 @@ const {
   tokenLogoutHandler,
   // OAuth
   oauthUrlHandler,
+  oauthKakaoUrlHandler,
   oauthGoogleAccessTokenHandler,
   oauthKakaoAccessTokenHandler,
   // AI 일반 로그인
@@ -69,11 +70,15 @@ router.post("/ai/social", postSocialAppLoginHandler);
 router.get("/ai/logout", getAILogoutHandler);
 // AI RefreshToken 갱신
 router.post("/ai/updatetoken", postAIRefreshTokenUpdateHandler);
-// OAuth_url 발급
-router.post("/oauth_url", oauthUrlHandler);
-// Google OAuth AccessToken 발급
+
+// Google OAuth_url 발급
+router.get("/oauth_url", oauthUrlHandler);
+// Google OAuth Approve
 router.post("/oauth_token/google", oauthGoogleAccessTokenHandler);
-// Kakao OAuth AccessToken 발급
+
+// Kakao OAuth_url 발급
+router.get("/oauth_url/kakao", oauthKakaoUrlHandler);
+// Kakao OAuth Approve
 router.post("/oauth_token/kakao", oauthKakaoAccessTokenHandler);
 
 // 에러 메세지 처리
