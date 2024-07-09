@@ -16,6 +16,7 @@ const {
   // OAuth
   oauthUrlHandler,
   oauthKakaoUrlHandler,
+  oauthKakaoRedirectUrlHandler,
   oauthGoogleAccessTokenHandler,
   oauthKakaoAccessTokenHandler,
   // AI 일반 로그인
@@ -78,6 +79,8 @@ router.post("/oauth_token/google", oauthGoogleAccessTokenHandler);
 
 // Kakao OAuth_url 발급
 router.get("/oauth_url/kakao", oauthKakaoUrlHandler);
+// Kakao OAuth Redirect Url
+router.get("/oauth_rediret_url/kakao", oauthKakaoRedirectUrlHandler);
 // Kakao OAuth Approve
 router.post("/oauth_token/kakao", oauthKakaoAccessTokenHandler);
 
