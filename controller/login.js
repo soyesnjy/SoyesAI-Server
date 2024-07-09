@@ -181,22 +181,6 @@ const loginController = {
   // Google OAuth URL 발급
   oauthUrlHandler: (req, res) => {
     console.log("OAuth URL 발급 API 호출");
-
-    // SCOPE 설정. 유저 정보를 어디까지 가져올지 결정
-    const scopeMap = {
-      google: [
-        "https://www.googleapis.com/auth/userinfo.profile", // 기본 프로필
-        "https://www.googleapis.com/auth/userinfo.email", // 이메일
-      ],
-
-      // 다른 플랫폼의 OAuth 추가 대비
-      // kakao: ["https://www.kakaoapis.com/auth/userinfo.profile"],
-      default: [
-        "https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/userinfo.email",
-      ],
-    };
-
     try {
       const SCOPES = [
         "https://www.googleapis.com/auth/userinfo.profile", // 기본 프로필
@@ -226,7 +210,7 @@ const loginController = {
       return res.status(200).json({ url: kakaoAuthUrl });
     } catch (err) {
       console.error(err);
-      res.json({ data: err });
+      res.json({ url: "Server Error" });
     }
   },
   // AI Google OAuth 로그인 - AccessToken 발급
@@ -373,15 +357,20 @@ const loginController = {
   },
   // AI Kakao OAuth 로그인 - AccessToken 발급
   oauthKakaoAccessTokenHandler: async (req, res) => {
-    const { code } = req.body;
+    const { data } = req.body;
     console.log("Kakao OAuth AccessToken 발급 API 호출");
     // 현재 카카오 소셜 로그인은 사업자등록을 해두지 않았기에 닉네임 정보만 가져올 수 있습니다.
     const sessionId = req.sessionID;
     let parseUid = "",
-      parseEmail = "";
+      parseEmail = "",
+      parseData;
 
-    // console.log("KAKAO_REST_API_KEY: " + process.env.KAKAO_REST_API_KEY);
     try {
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { code } = parseData;
       // POST 요청으로 액세스 토큰 요청
       const tokenResponse = await axios.post(
         "https://kauth.kakao.com/oauth/token",
