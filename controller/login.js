@@ -803,43 +803,10 @@ const loginController = {
   postSocialAppLoginHandler: async (req, res) => {
     const { data, code } = req.body;
     console.log("Kakao OAuth App Login API 호출");
-    // 현재 카카오 소셜 로그인은 사업자등록을 해두지 않았기에 닉네임 정보만 가져올 수 있습니다.
+    // 현재 카카오 소셜 로그인은 사업자등록을 해두지 않았기에 닉네임 + KakaoEmail 정보만 가져올 수 있습니다.
     const sessionId = req.sessionID;
-    let parseData;
-
-    // console.log("KAKAO_REST_API_KEY: " + process.env.KAKAO_REST_API_KEY);
+    let parseData, parsepUid;
     try {
-      // POST 요청으로 액세스 토큰 요청
-      // const tokenResponse = await axios.post(
-      //   "https://kauth.kakao.com/oauth/token",
-      //   null,
-      //   {
-      //     params: {
-      //       grant_type: "authorization_code",
-      //       client_id: process.env.KAKAO_REST_API_KEY, // 카카오 개발자 콘솔에서 발급받은 REST API 키
-      //       redirect_uri: `${process.env.REDIRECT_URL}?type=kakao`, // 카카오 개발자 콘솔에 등록한 리디렉션 URI
-      //       code: code, // 클라이언트로부터 받은 권한 코드
-      //     },
-      //     headers: {
-      //       "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
-      //     },
-      //   }
-      // );
-      // const response = await axios.get("https://kapi.kakao.com/v2/user/me", {
-      //   headers: {
-      //     Authorization: `Bearer ${tokenResponse.data.access_token}`,
-      //     "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
-      //   },
-      // });
-
-      // 성공적으로 사용자 정보를 받아옴
-      // console.log(response.data);
-
-      // // DB 계정 생성 파트
-      // const { id } = response.data;
-      // const { email } = response.data.kakao_account;
-      // 파싱. Client JSON 데이터
-
       if (typeof data === "string") {
         parseData = JSON.parse(data);
       } else parseData = data;
@@ -855,6 +822,8 @@ const loginController = {
         return res.status(404).json({ message: "Non type input value - 404" });
       }
 
+      parsepUid = pUid;
+
       // 유저 테이블
       const table = User_Table_Info.table;
       const attribute = User_Table_Info.attribute;
@@ -867,105 +836,86 @@ const loginController = {
 
       // DB 관련 처리
       // 1. SELECT USER (row가 있는지 없는지 검사)
-      const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${pUid}'`;
+      const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`;
       const select_data = await fetchUserData(connection_AI, select_query);
 
-      // 2. INSERT USER (row값이 없는 경우 실행)
-      if (!select_data[0]) {
-        const insert_query = `INSERT INTO ${table} (${Object.values(
-          attribute
-        ).join(", ")}) VALUES (${Object.values(attribute)
-          .map((el) => "?")
-          .join(", ")})`;
-        // console.log(insert_query);
-
-        const insert_value = [
-          pUid,
-          Email || null,
-          null,
-          name || null,
-          phoneNumber || null,
-          type,
-          date,
-          date,
-        ];
-        // console.log(insert_value);
-
-        // 계정 생성 쿼리 임시 주석
-        connection_AI.query(
-          insert_query,
-          insert_value,
-          (error, rows, fields) => {
-            if (error) console.log(error);
-            else {
-              console.log("Kakao OAuth User Row DB INSERT Success!");
-              // 클라이언트에 사용자 정보 응답
-              res.status(200).json({
-                message: "Kakao OAuth User Row DB INSERT && Login Success!",
-              });
-            }
-          }
-        );
-      }
-      // 3. Update Login Date (row값이 있는 경우 실행)
-      else {
-        // 마지막 로그인 날짜 Update
-        const update_query = `UPDATE ${table} SET ${Object.values(attribute)
+      // User 계정이 있는 경우 (row값이 있는 경우 실행)
+      if (select_data[0]) {
+        // 최종 로그인 날짜 갱신
+        const update_query = `UPDATE ${user_table} SET ${Object.values(
+          user_attribute
+        )
           .filter((el) => el === "lastLogin_date")
           .map((el) => {
             return `${el} = ?`;
           })
-          .join(", ")} WHERE ${attribute.pKey} = ?`;
+          .join(", ")} WHERE ${user_attribute.pKey} = ?`;
         // console.log(update_query);
 
-        const update_value = [date, pUid];
+        const update_value = [date, parsepUid];
         // console.log(update_value);
 
         connection_AI.query(
           update_query,
           update_value,
           (error, rows, fields) => {
-            if (error) console.log(error);
-            else {
-              console.log("KaKao OAuth User Loing Success!");
-              // 클라이언트에 사용자 정보 응답
-              res
-                .status(200)
-                .json({ message: "KaKao OAuth User Loing Success!" });
-            }
+            if (error)
+              console.log("User Login Date UPDATE Fail: " + error.sqlMessage);
+            else console.log("User Login Date UPDATE Success!");
           }
         );
-      }
 
-      // JWT Token 발급 후 세션 저장
-      const token = generateToken({
-        id: pUid,
-        email: Email,
-      });
-      // Session 내부에 accessToken 저장
-      req.session.accessToken = token.accessToken;
-      // browser Cookie에 refreshToken 저장
-      res.cookie("refreshToken", token.refreshToken, {
-        maxAge: 3600000,
-        httpOnly: true,
-        sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
-        secure: process.env.DEV_OPS !== "local",
-      });
-
-      // Redis에서 기존 세션 ID 확인
-      redisStore.get(`user_session:${pUid}`, (err, oldSessionId) => {
-        if (oldSessionId) {
-          // 기존 세션 무효화
-          redisStore.destroy(`user_session:${pUid}`, (err, reply) => {
-            console.log("Previous session invalidated");
-          });
-        }
-        // 새 세션 ID를 사용자 ID와 연결
-        redisStore.set(`user_session:${pUid}`, sessionId, (err, reply) => {
-          // 로그인 처리 로직
-          console.log(`[${pUid}] SessionID Update - ${sessionId}`);
+        // JWT Token 발급 후 세션 저장
+        const token = generateToken({
+          id: select_data[0].uid,
+          email: select_data[0].Email,
         });
-      });
+
+        // Session 내부에 accessToken 저장
+        req.session.accessToken = token.accessToken;
+        // browser Cookie에 refreshToken 저장
+        res.cookie("refreshToken", token.refreshToken, {
+          maxAge: 3600000,
+          httpOnly: true,
+          sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+          secure: process.env.DEV_OPS !== "local",
+        });
+
+        // 토큰 만료일 (1시간)
+        const expire = String(dateObj.setHours(dateObj.getHours() + 1));
+
+        // Redis에서 기존 세션 ID 확인
+        redisStore.get(`user_session:${parsepUid}`, (err, oldSessionId) => {
+          if (oldSessionId) {
+            // 기존 세션 무효화
+            redisStore.destroy(`user_session:${parsepUid}`, (err, reply) => {
+              console.log("Previous session invalidated");
+            });
+          }
+          // 새 세션 ID를 사용자 ID와 연결
+          redisStore.set(
+            `user_session:${parsepUid}`,
+            sessionId,
+            (err, reply) => {
+              // 로그인 처리 로직
+              console.log(`[${parsepUid}] SessionID Update - ${sessionId}`);
+            }
+          );
+        });
+
+        console.log(`User Login Success! - 200 OK (pUid: ${parsepUid})`);
+        // client 전송
+        return res.status(200).json({
+          message: "User Social Login Success! - 200 OK",
+          refreshToken: token.refreshToken,
+          expire,
+        });
+      }
+      // User 계정이 없는 경우 (row값이 없는 경우 실행)
+      else {
+        console.log(`Non User - 404 Not Found (pUid: ${parsepUid})`);
+        return res.status(404).json({ message: "Non User - 404 Not Found" });
+      }
     } catch (err) {
       console.error(err.message);
       res.status(500).json({ data: "Server Error!" });
