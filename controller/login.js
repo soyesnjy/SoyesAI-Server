@@ -218,7 +218,7 @@ const loginController = {
     const query = req.query;
     const { code } = query;
     console.log("Kakao OAuth Redirect Url API 호출");
-    console.log(code);
+    // console.log(code);
     const sessionId = req.sessionID;
     let parseUid = "",
       parseEmail = "";
@@ -242,7 +242,7 @@ const loginController = {
         }
       );
 
-      console.log(tokenResponse);
+      // console.log(tokenResponse);
 
       const response = await axios.get("https://kapi.kakao.com/v2/user/me", {
         headers: {
@@ -294,7 +294,10 @@ const loginController = {
           insert_query,
           insert_value,
           (error, rows, fields) => {
-            if (error) console.log(error);
+            if (error)
+              console.log(
+                "Kakao OAuth User Row DB INSERT: " + error.sqlMessage
+              );
             else console.log("Kakao OAuth User Row DB INSERT Success!");
           }
         );
@@ -317,7 +320,10 @@ const loginController = {
           update_query,
           update_value,
           (error, rows, fields) => {
-            if (error) console.log(error);
+            if (error)
+              console.log(
+                "KaKao OAuth User Data UPDATE Fail: " + error.sqlMessage
+              );
             else console.log("KaKao OAuth User Data UPDATE Success!");
           }
         );
