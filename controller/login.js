@@ -825,8 +825,8 @@ const loginController = {
       parsepUid = pUid;
 
       // 유저 테이블
-      const table = User_Table_Info.table;
-      const attribute = User_Table_Info.attribute;
+      const user_table = User_Table_Info.table;
+      const user_attribute = User_Table_Info.attribute;
       // 오늘 날짜 변환
       const dateObj = new Date();
       const year = dateObj.getFullYear();
@@ -836,7 +836,7 @@ const loginController = {
 
       // DB 관련 처리
       // 1. SELECT USER (row가 있는지 없는지 검사)
-      const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`;
+      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attribute.pKey}='${parsepUid}'`;
       const select_data = await fetchUserData(connection_AI, select_query);
 
       // User 계정이 있는 경우 (row값이 있는 경우 실행)
