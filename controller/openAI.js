@@ -579,7 +579,7 @@ const openAIController = {
       // AI 분석 내용 보기좋게 정리
       const analyzeMsg = message.message.split(". ").join(".\n");
       // client 전송
-      res.json({ message: analyzeMsg });
+      res.json({ message: analyzeMsg, result });
 
       // 메일 제목 및 내용 + 보내는사람 + 받는사람
       const mailOptions = {
