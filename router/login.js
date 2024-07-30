@@ -17,6 +17,7 @@ const {
   oauthUrlHandler,
   oauthKakaoUrlHandler,
   oauthKakaoRedirectUrlHandler,
+  oauthGoogleRedirectUrlHandler,
   oauthGoogleAccessTokenHandler,
   oauthKakaoAccessTokenHandler,
   // AI 일반 로그인
@@ -73,15 +74,18 @@ router.get("/ai/logout", getAILogoutHandler);
 router.post("/ai/updatetoken", postAIRefreshTokenUpdateHandler);
 
 // Google OAuth_url 발급
-router.get("/oauth_url", oauthUrlHandler);
-// Google OAuth Approve
-router.post("/oauth_token/google", oauthGoogleAccessTokenHandler);
+router.get("/oauth_url/google", oauthUrlHandler);
+// Google OAuth Redirect Url
+router.get("/oauth_rediret_url/google", oauthGoogleRedirectUrlHandler);
 
 // Kakao OAuth_url 발급
 router.get("/oauth_url/kakao", oauthKakaoUrlHandler);
 // Kakao OAuth Redirect Url
 router.get("/oauth_rediret_url/kakao", oauthKakaoRedirectUrlHandler);
-// Kakao OAuth Approve
+
+// Google OAuth Approve (Regercy)
+router.post("/oauth_token/google", oauthGoogleAccessTokenHandler);
+// Kakao OAuth Approve (Regercy)
 router.post("/oauth_token/kakao", oauthKakaoAccessTokenHandler);
 
 // 에러 메세지 처리
