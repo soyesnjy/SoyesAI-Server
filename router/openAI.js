@@ -26,6 +26,9 @@ const {
   getYoutubeContent,
   postOpenAIConsultSolutionData,
   postOpenAIGoogleDriveUpload,
+  postOpenAITraningElla,
+  postOpenAIMoodDataSave,
+  postOpenAIMoodDataLoad,
 } = openAIController;
 
 // 토큰 유효성 검사 미들웨어
@@ -57,6 +60,13 @@ router.post("/consulting_emotion_lala", postOpenAIConsultingLala);
 router.post("/consulting_emotion_soyes", postOpenAIConsultingSoyes);
 // 상담 내역 저장
 router.post("/consulting_emotion_log", postOpenAIConsultingLogSave);
+
+// 기분훈련 모델 - 엘라
+router.post("/training_mood_ella", postOpenAITraningElla);
+// 기분훈련 데이터 Save
+router.post("/training_mood_ella/save", postOpenAIMoodDataSave);
+// 기분훈련 데이터 Load
+router.post("/training_mood_ella/load", postOpenAIMoodDataLoad);
 
 // 달력 데이터 반환
 router.post("/calendar", postOpenAIMypageCalendarData);
