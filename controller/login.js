@@ -975,7 +975,7 @@ const loginController = {
         secure: process.env.DEV_OPS !== "local",
       });
 
-      const expire = String(new Date().setHours(new Date().getHours() + 1));
+      const expire = new Date(new Date().setHours(new Date().getHours() + 10));
 
       // 중복 로그인 제한 처리 - Redis에서 기존 세션 ID 확인
       redisStore.get(`user_session:${parsepUid}`, (err, oldSessionId) => {
