@@ -25,6 +25,7 @@ const {
   getAILogoutHandler,
   postAIRefreshTokenUpdateHandler,
   postSocialAppLoginHandler,
+  postAIGuestLoginHandler, // Guest Login API
 } = loginController;
 
 const {
@@ -66,6 +67,8 @@ router.post("/postTeacher");
 
 // AI 일반 로그인
 router.post("/ai", postAILoginHandler);
+// AI Guest 로그인
+router.get("/ai/guest", postAIGuestLoginHandler);
 // AI 소셜 로그인
 router.post("/ai/social", postSocialAppLoginHandler);
 // AI 일반 로그아웃

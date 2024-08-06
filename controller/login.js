@@ -336,6 +336,7 @@ const loginController = {
 
           // res.json({ data: response.data });
 
+          // ejs 파일을 활용한 서버 html 렌더링 후 클라이언트 전송
           res.render("userInfo", {
             data: JSON.stringify({ data: response.data }),
           });
@@ -509,7 +510,8 @@ const loginController = {
 
       // 클라이언트에 사용자 정보 응답
       // res.json({ data: response.data });
-      // console.log(response.data);
+
+      // ejs 파일을 활용한 서버 html 렌더링 후 클라이언트 전송
       res.render("userInfo", {
         data: JSON.stringify({ data: response.data }),
       });
@@ -810,7 +812,7 @@ const loginController = {
       res.status(500).json({ data: "Server Error!" });
     }
   },
-  // AI Guest 로그인 - 인증
+  // AI 일반 로그인 - 인증
   postAILoginHandler: async (req, res) => {
     const { data } = req.body;
     let parseLoginData;
@@ -943,6 +945,60 @@ const loginController = {
         console.log(`Non User - 404 Not Found (pUid: ${parsepUid})`);
         return res.status(404).json({ message: "Non User - 404 Not Found" });
       }
+    } catch (err) {
+      console.error(err);
+      return res
+        .status(500)
+        .json({ message: "Server Error - 500 Bad Gateway" });
+    }
+  },
+  // AI Guest 로그인
+  postAIGuestLoginHandler: async (req, res) => {
+    try {
+      let parsepUid = "dummy";
+      const sessionId = req.sessionID;
+      console.log(`Developer Guest Login Access`);
+
+      // dummy 계정 JWT Token 발급 후 세션 저장
+      const token = generateToken({
+        id: "dummy",
+        email: "dummy@naver.com",
+      });
+
+      // Server Session accessToken 저장
+      req.session.accessToken = token.accessToken;
+      // Client Cookie refreshToken 저장
+      res.cookie("refreshToken", token.refreshToken, {
+        maxAge: 3600000,
+        httpOnly: true,
+        sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+        secure: process.env.DEV_OPS !== "local",
+      });
+
+      const expire = String(new Date().setHours(new Date().getHours() + 1));
+
+      // 중복 로그인 제한 처리 - Redis에서 기존 세션 ID 확인
+      redisStore.get(`user_session:${parsepUid}`, (err, oldSessionId) => {
+        if (oldSessionId) {
+          // 기존 세션 무효화
+          redisStore.destroy(`user_session:${parsepUid}`, (err, reply) => {
+            console.log("Previous session invalidated");
+          });
+        }
+        // 새 세션 ID를 사용자 ID와 연결
+        redisStore.set(`user_session:${parsepUid}`, sessionId, (err, reply) => {
+          // 로그인 처리 로직
+          console.log(`[${parsepUid}] SessionID Update - ${sessionId}`);
+        });
+      });
+
+      // client 전송
+      return res.status(200).json({
+        pUid: parsepUid,
+        message: "User Login Success! - 200 OK",
+        refreshToken: token.refreshToken,
+        expire,
+      });
     } catch (err) {
       console.error(err);
       return res
