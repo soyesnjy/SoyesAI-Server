@@ -189,6 +189,7 @@ const {
   persona_prompt_lala_v5,
   solution_matching_persona_prompt,
   persona_prompt_pupu_v2,
+  persona_prompt_pupu_v4,
 } = require("../DB/test_prompt");
 
 // 인지행동 검사 관련
@@ -943,8 +944,7 @@ const openAIController = {
   // 공감친구 모델 - 푸푸
   postOpenAIConsultingPupu: async (req, res) => {
     const { data } = req.body;
-    // console.log("req.sessionID: " + req.sessionID);
-    let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
+    let parseData, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
     // let prevChat_flag = true; // 이전 대화 내역 유무
     // console.log(`accessAuth: ${req.session.accessAuth}`);
@@ -958,10 +958,11 @@ const openAIController = {
       }
       */
       if (typeof data === "string") {
-        parseEBTdata = JSON.parse(data);
-      } else parseEBTdata = data;
+        parseData = JSON.parse(data);
+      } else parseData = data;
 
-      const { messageArr, pUid } = parseEBTdata;
+      const { messageArr, pUid } = parseData;
+      console.log(parseData);
       // messageArr가 문자열일 경우 json 파싱
       if (typeof messageArr === "string") {
         parseMessageArr = JSON.parse(messageArr);
@@ -979,31 +980,31 @@ const openAIController = {
       );
 
       // 고정 삽입 프롬프트
-      promptArr.push(persona_prompt_pupu_v2); // 페르소나 프롬프트 삽입
+      promptArr.push(persona_prompt_pupu_v4); // 페르소나 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
-      const lastUserContent =
-        parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
+      // const lastUserContent =
+      //   parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
 
-      // NO REQ 질문 처리. 10초 이상 질문이 없을 경우 Client 측에서 'NO REQUEST' 메시지를 담은 요청을 보냄. 그에 대한 처리
-      if (lastUserContent.includes("NO REQ")) {
-        console.log("NO REQUEST 전달");
+      // // NO REQ 질문 처리. 10초 이상 질문이 없을 경우 Client 측에서 'NO REQUEST' 메시지를 담은 요청을 보냄. 그에 대한 처리
+      // if (lastUserContent.includes("NO REQ")) {
+      //   console.log("NO REQUEST 전달");
 
-        parseMessageArr.push(no_req_prompt);
-        promptArr.push(sentence_division_prompt);
+      //   parseMessageArr.push(no_req_prompt);
+      //   promptArr.push(sentence_division_prompt);
 
-        const response = await openai.chat.completions.create({
-          messages: [...promptArr, ...parseMessageArr],
-          model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-        });
+      //   const response = await openai.chat.completions.create({
+      //     messages: [...promptArr, ...parseMessageArr],
+      //     model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      //   });
 
-        res.json({
-          message: response.choices[0].message.content,
-          emotion: 0,
-        });
+      //   res.json({
+      //     message: response.choices[0].message.content,
+      //     emotion: 0,
+      //   });
 
-        return;
-      }
+      //   return;
+      // }
 
       // // 유저 성격검사 결과 DB에서 가져오기
       // const pt_result = await select_soyes_AI_Pt_Table(
