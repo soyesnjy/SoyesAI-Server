@@ -278,6 +278,7 @@ const select_soyes_AI_Ebt_Result = async (inputTable, parsepUid) => {
         scoreSum: 99,
         tScore: 999.99,
         result: "NonTesting",
+        content: "검사를 진행하지 않았구나!",
       };
 
     // 검사 스코어 합 + T점수 계산
@@ -292,17 +293,13 @@ const select_soyes_AI_Ebt_Result = async (inputTable, parsepUid) => {
         : caution_score <= scoreSum
         ? "주의"
         : "양호";
-    // console.log("scoreSum: " + scoreSum);
-    // console.log("tScore: " + tScore);
-    // console.log("chat: " + ebt_data[0].chat);
-
     // danger_score 보다 높으면 "위험", 아니면 "그외" 반환
     return {
       testStatus: true,
       scoreSum,
       tScore: Number(tScore),
       result,
-      // analyisResult: JSON.parse(ebt_data[0].chat).text,
+      content: JSON.parse(ebt_data[0].chat).text,
     };
   } catch (err) {
     console.log(err);
@@ -2114,17 +2111,17 @@ Todo List가 아니라고 판단되면 제외한다.
   // User 정서행동 검사 결과 반환
   postOpenAIUserEBTResultData: async (req, res) => {
     const { data } = req.body;
-    let parseEBTdata,
+    let parseData,
       parsepUid,
       returnArr = [];
 
     try {
       // json 파싱
       if (typeof data === "string") {
-        parseEBTdata = JSON.parse(data);
-      } else parseEBTdata = data;
+        parseData = JSON.parse(data);
+      } else parseData = data;
 
-      const { pUid } = parseEBTdata;
+      const { pUid, contentKey } = parseData;
       // No pUid => return
       if (!pUid) {
         console.log("No pUid input value - 404");
@@ -2157,6 +2154,8 @@ Todo List가 아니라고 판단되면 제외한다.
           EBT_Table_Info[ebt_class],
           parsepUid // Uid
         );
+        // contentKey 값이 입력되지 않을 경우 analysisResult 속성 삭제
+        if (!contentKey) delete select_Ebt_Result.content;
         return { ebt_class, ...select_Ebt_Result };
       });
       // map method는 pending 상태의 promise를 반환하므로 Promise.all method를 사용하여 resolve 상태가 되기를 기다려준다.
