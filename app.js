@@ -93,12 +93,12 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "/views"));
 
 app.get("/", (req, res) => {
-  // res.status(200).json({ text: "Hello World!" });
+  res.status(200).json({ text: "Hello World!" });
 
-  res.render("index", {
-    title: "Home Page",
-    message: "Welcome to the home page!",
-  });
+  // res.render("index", {
+  //   title: "Home Page",
+  //   message: "Welcome to the home page!",
+  // });
   // res.end();
 });
 

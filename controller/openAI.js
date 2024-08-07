@@ -2166,7 +2166,8 @@ Todo List가 아니라고 판단되면 제외한다.
       // console.log(returnArr);
 
       return res.status(200).json({
-        message: returnArr.sort((a, b) => b.tScore - a.tScore),
+        message: "User EBT Result Return Success!",
+        data: returnArr.sort((a, b) => b.tScore - a.tScore),
       });
     } catch (err) {
       console.error(err);
