@@ -52,6 +52,12 @@ const verifyToken = (type, token) => {
     // 토큰을 비밀키로 복호화
     decoded = verify(token, secretKey);
   } catch (err) {
+    // 토큰 만료 에러
+    if (err.name === "TokenExpiredError") {
+      console.log("JWT Error: Token has expired.");
+      return "expired";
+    }
+
     console.log(`JWT Error: ${err.message}`);
     return null;
   }
@@ -114,12 +120,20 @@ const loginController = {
     // accessToken이 있는 경우
     if (accessToken) {
       const decoded = verifyToken("access", accessToken);
+      // 토큰 만료
+      if (decoded === "expired")
+        return res.status(401).json({ message: "Token has expired" });
+
       if (users.find((user) => user.id === decoded.id)) {
         res.json({ message: "AccessToken Login Success" });
       }
       // refreshToken만 있는 경우
     } else if (refreshToken) {
       const decoded = verifyToken("refresh", refreshToken);
+      // 토큰 만료
+      if (decoded === "expired")
+        return res.status(401).json({ message: "Token has expired" });
+
       if (users.find((user) => user.id === decoded.id)) {
         // accessToken 생성 후 세션에 저장
         req.session.accessToken = generateToken({
@@ -338,7 +352,10 @@ const loginController = {
 
           // ejs 파일을 활용한 서버 html 렌더링 후 클라이언트 전송
           res.render("userInfo", {
-            data: JSON.stringify({ data: response.data }),
+            data: JSON.stringify({
+              data: response.data,
+              refreshToken: token.refreshToken,
+            }),
           });
         });
       });
@@ -513,7 +530,10 @@ const loginController = {
 
       // ejs 파일을 활용한 서버 html 렌더링 후 클라이언트 전송
       res.render("userInfo", {
-        data: JSON.stringify({ data: response.data }),
+        data: JSON.stringify({
+          data: response.data,
+          refreshToken: token.refreshToken,
+        }),
       });
     } catch (err) {
       console.error(err.message);
@@ -822,19 +842,27 @@ const loginController = {
         parseLoginData = JSON.parse(data);
       } else parseLoginData = data;
 
-      const { pUid, passWard } = parseLoginData;
+      const { pUid, passWord } = parseLoginData;
       const sessionId = req.sessionID;
 
-      let parsepUid = pUid;
-      let parsePassWard = passWard;
-
-      // Input 없을 경우
-      if (!parsepUid || !parsePassWard) {
-        console.log("Non Input Value - 400 Bad Request");
+      // pUid 없을 경우
+      if (!pUid) {
+        console.log("Non pUid Value - 400 Bad Request");
         return res
           .status(400)
-          .json({ message: "Non Input Value - 400 Bad Request" });
+          .json({ message: "Non pUid Value - 400 Bad Request" });
       }
+
+      // passWord 없을 경우
+      if (!passWord) {
+        console.log("Non passWord Value - 400 Bad Request");
+        return res
+          .status(400)
+          .json({ message: "Non passWord Value - 400 Bad Request" });
+      }
+
+      let parsepUid = pUid;
+      let parsePassWard = passWord;
 
       console.log(`User Login Access - pUid: ${parsepUid}`);
 
@@ -936,7 +964,7 @@ const loginController = {
           return res.status(200).json({
             message: "User Login Success! - 200 OK",
             refreshToken: token.refreshToken,
-            expire,
+            // expire,
           });
         }
       }
@@ -975,7 +1003,7 @@ const loginController = {
         secure: process.env.DEV_OPS !== "local",
       });
 
-      const expire = new Date(new Date().setHours(new Date().getHours() + 10));
+      // const expire = new Date(new Date().setHours(new Date().getHours() + 10));
 
       // 중복 로그인 제한 처리 - Redis에서 기존 세션 ID 확인
       redisStore.get(`user_session:${parsepUid}`, (err, oldSessionId) => {
@@ -997,7 +1025,7 @@ const loginController = {
         pUid: parsepUid,
         message: "User Login Success! - 200 OK",
         refreshToken: token.refreshToken,
-        expire,
+        // expire,
       });
     } catch (err) {
       console.error(err);
@@ -1139,24 +1167,27 @@ const loginController = {
       // 로그인 시 자동으로 Redis SessionID는 갱신되므로 refreshToken이 있는 경우에만 Redis SessionID를 삭제한다.
       if (refreshToken) {
         const decoded = verifyToken("refresh", refreshToken);
-        // Redis SessionID 삭제
-        redisStore.get(`user_session:${decoded.id}`, (err, oldSessionId) => {
-          if (err) {
-            console.error("Error fetching old session ID:", err);
-            return; // 에러 발생 시 추가 처리 중지
-          }
-          if (oldSessionId) {
-            console.log("oldSessionId Destroy");
-            // 기존 세션 무효화
-            redisStore.destroy(`user_session:${decoded.id}`, (err) => {
-              if (err) {
-                console.error(err);
-                return;
-              }
-              console.log("RedisStore Session ID Delete Success!");
-            });
-          }
-        });
+        // refreshToken이 만료되지 않은 경우
+        if (decoded !== "expired") {
+          // Redis SessionID 삭제
+          redisStore.get(`user_session:${decoded.id}`, (err, oldSessionId) => {
+            if (err) {
+              console.error("Error fetching old session ID:", err);
+              return; // 에러 발생 시 추가 처리 중지
+            }
+            if (oldSessionId) {
+              console.log("oldSessionId Destroy");
+              // 기존 세션 무효화
+              redisStore.destroy(`user_session:${decoded.id}`, (err) => {
+                if (err) {
+                  console.error(err);
+                  return;
+                }
+                console.log("RedisStore Session ID Delete Success!");
+              });
+            }
+          });
+        }
       }
 
       // 세션 삭제
@@ -1194,6 +1225,9 @@ const loginController = {
       if (accessToken) {
         // accessToken Decoding
         const decoded = verifyToken("access", accessToken);
+        // 토큰 만료
+        if (decoded === "expired")
+          return res.status(401).json({ message: "Token has expired - 401" });
         if (decoded.id) {
           // Redis 중복 로그인 확인
           redisStore.get(`user_session:${decoded.id}`, (err, prevSid) => {
@@ -1238,6 +1272,9 @@ const loginController = {
       else if (refreshToken) {
         // refreshToken 복호화
         const decoded = verifyToken("refresh", refreshToken);
+        // 토큰 만료
+        if (decoded === "expired")
+          return res.status(401).json({ message: "Token has expired - 401" });
         // User Table 조회
         const ebt_data = await user_ai_select(
           user_table,
@@ -1298,6 +1335,10 @@ const loginController = {
       else if (refreshToken) decoded = verifyToken("refresh", refreshToken);
       else
         return res.status(401).json({ message: "Login Session Expire! - 401" });
+
+      // 토큰 만료
+      if (decoded === "expired")
+        return res.status(401).json({ message: "Token has expired - 401" });
 
       parseUid = decoded.id;
       const today = moment().tz("Asia/Seoul").format("YYYY-MM-DD HH:mm:ss");
@@ -1363,9 +1404,9 @@ const loginController = {
     }
   },
   // (App) AI RefreshToken 갱신
-  postAIRefreshTokenUpdateHandler: async (req, res) => {
+  postAIRefreshTokenCertHandler: async (req, res) => {
     const { data } = req.body;
-    console.log(req.body);
+    // console.log(data);
     let parseLoginData;
     try {
       // 입력값 파싱
@@ -1376,18 +1417,30 @@ const loginController = {
       const { pUid, refreshToken } = parseLoginData;
       const sessionId = req.sessionID;
 
+      // None pUid
+      if (!pUid) {
+        return res
+          .status(404)
+          .json({ message: "Non pUid Value - 404 Bad Request" });
+      }
+
+      // None refreshToken
+      if (!refreshToken) {
+        return res
+          .status(404)
+          .json({ message: "Non refreshToken Value - 404 Bad Request" });
+      }
+
       let parsepUid = pUid;
       let parseRefreshToken = refreshToken;
 
-      // Input 없을 경우
-      if (!parsepUid || !parseRefreshToken) {
-        return res
-          .status(400)
-          .json({ message: "Non Input Value - 400 Bad Request" });
-      }
       // refreshToken 복호화
       const decoded = verifyToken("refresh", parseRefreshToken);
 
+      if (decoded === "expired")
+        return res.status(401).json({
+          message: "Token has expired - 401 UNAUTHORIZED",
+        });
       // 유효하지 않은 refreshToken 양식일 경우
       if (!decoded) {
         console.log("Invalid token format - 401 UNAUTHORIZED");
@@ -1398,7 +1451,12 @@ const loginController = {
 
       // decoded가 null이 아니고, 만료된 RefreshToken 복호화 ID와 입력 ID가 같을 경우
       if (decoded.id === parsepUid) {
-        // JWT Token 발급 후 세션 저장
+        // 토큰 인증
+        return res.status(200).json({
+          message: "User RefreshToken Certification Success! - 200 OK",
+        });
+
+        // JWT Token 재발급 후 세션 저장
         const token = generateToken({
           id: decoded.id,
           email: decoded.email,
@@ -1414,8 +1472,8 @@ const loginController = {
           secure: process.env.DEV_OPS !== "local",
         });
 
-        const dateObj = new Date();
-        const expire = String(dateObj.setHours(dateObj.getHours() + 1));
+        // const dateObj = new Date();
+        // const expire = String(dateObj.setHours(dateObj.getHours() + 1));
 
         console.log("User RefreshToken Update Success! - 200 OK");
 
@@ -1440,16 +1498,16 @@ const loginController = {
         });
 
         // client 전송
-        res.status(200).json({
-          message: "User RefreshToken Update Success! - 200 OK",
+        return res.status(200).json({
+          message: "User RefreshToken Certification Success! - 200 OK",
           refreshToken: token.refreshToken,
-          expire,
+          // expire,
         });
       }
       // 만료된 RefreshToken 복호화 ID와 입력 ID가 다를 경우
       else {
         console.log(
-          "Uid Does Not Match RefreshToekn Decoding Payload ID - 404 UNAUTHORIZED"
+          "Uid Does Not Match RefreshToekn Decoding Payload ID - 401 UNAUTHORIZED"
         );
         // client 전송
         res.status(401).json({

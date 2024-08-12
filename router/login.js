@@ -23,7 +23,7 @@ const {
   // AI 일반 로그인
   postAILoginHandler,
   getAILogoutHandler,
-  postAIRefreshTokenUpdateHandler,
+  postAIRefreshTokenCertHandler,
   postSocialAppLoginHandler,
   postAIGuestLoginHandler, // Guest Login API
 } = loginController;
@@ -74,7 +74,7 @@ router.post("/ai/social", postSocialAppLoginHandler);
 // AI 일반 로그아웃
 router.get("/ai/logout", getAILogoutHandler);
 // AI RefreshToken 갱신
-router.post("/ai/updatetoken", postAIRefreshTokenUpdateHandler);
+router.post("/ai/certificationtoken", postAIRefreshTokenCertHandler);
 
 // Google OAuth_url 발급
 router.get("/oauth_url/google", oauthUrlHandler);
