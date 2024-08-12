@@ -1403,7 +1403,7 @@ const loginController = {
       res.status(500).json({ message: "Server Error - 500" });
     }
   },
-  // (App) AI RefreshToken 갱신
+  // (App) AI RefreshToken 인증
   postAIRefreshTokenCertHandler: async (req, res) => {
     const { data } = req.body;
     // console.log(data);
@@ -1417,13 +1417,6 @@ const loginController = {
       const { pUid, refreshToken } = parseLoginData;
       const sessionId = req.sessionID;
 
-      // None pUid
-      if (!pUid) {
-        return res
-          .status(404)
-          .json({ message: "Non pUid Value - 404 Bad Request" });
-      }
-
       // None refreshToken
       if (!refreshToken) {
         return res
@@ -1431,7 +1424,7 @@ const loginController = {
           .json({ message: "Non refreshToken Value - 404 Bad Request" });
       }
 
-      let parsepUid = pUid;
+      // let parsepUid = pUid;
       let parseRefreshToken = refreshToken;
 
       // refreshToken 복호화
@@ -1449,11 +1442,12 @@ const loginController = {
         });
       }
 
-      // decoded가 null이 아니고, 만료된 RefreshToken 복호화 ID와 입력 ID가 같을 경우
-      if (decoded.id === parsepUid) {
+      // decoded 값이 있는 경우
+      if (decoded.id) {
         // 토큰 인증
         return res.status(200).json({
           message: "User RefreshToken Certification Success! - 200 OK",
+          pUid: decoded.id,
         });
 
         // JWT Token 재발급 후 세션 저장
