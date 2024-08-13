@@ -27,7 +27,7 @@ const generateToken = (user) => {
       expiresIn: "1d", // 1일간 유효한 토큰을 발행합니다.
     }),
     refreshToken: sign(payload, process.env.REFRESH_SECRET, {
-      expiresIn: "60s", // 일주일간 유효한 토큰을 발행합니다.
+      expiresIn: "7d", // 일주일간 유효한 토큰을 발행합니다.
     }),
   };
 
