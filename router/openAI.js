@@ -41,39 +41,79 @@ router.get("/", (req, res) => {
 router.post("/emotion", postOpenAIEmotionAnalyze);
 
 // EBT 결과 분석
-router.post("/analysis", postOpenAIPsychologicalAnalysis);
+router.post(
+  "/analysis",
+  vaildateTokenConsulting,
+  postOpenAIPsychologicalAnalysis
+);
 // PT 결과 분석
-router.post("/analysis_pt", postOpenAIPernalTestAnalysis);
+router.post(
+  "/analysis_pt",
+  vaildateTokenConsulting,
+  postOpenAIPernalTestAnalysis
+);
 
 // 공감친구 모델 - 푸푸
 router.post(
   "/consulting_emotion_pupu",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   // vaildatePlan,
   postOpenAIConsultingPupu
 );
 // 공부친구 모델 - 우비
-router.post("/consulting_emotion_ubi", postOpenAIConsultingUbi);
+router.post(
+  "/consulting_emotion_ubi",
+  vaildateTokenConsulting,
+  postOpenAIConsultingUbi
+);
 // 정서멘토 모델 - 라라
-router.post("/consulting_emotion_lala", postOpenAIConsultingLala);
+router.post(
+  "/consulting_emotion_lala",
+  vaildateTokenConsulting,
+  postOpenAIConsultingLala
+);
 // 전문상담사 모델 - 소예
-router.post("/consulting_emotion_soyes", postOpenAIConsultingSoyes);
+router.post(
+  "/consulting_emotion_soyes",
+  vaildateTokenConsulting,
+  postOpenAIConsultingSoyes
+);
 // 상담 내역 저장
-router.post("/consulting_emotion_log", postOpenAIConsultingLogSave);
+router.post(
+  "/consulting_emotion_log",
+  vaildateTokenConsulting,
+  postOpenAIConsultingLogSave
+);
 
 // 기분훈련 모델 - 엘라
-router.post("/training_mood_ella", postOpenAITraningElla);
+router.post(
+  "/training_mood_ella",
+  vaildateTokenConsulting,
+  postOpenAITraningElla
+);
 // 기분훈련 데이터 Save
-router.post("/training_mood_ella/save", postOpenAIMoodDataSave);
+router.post(
+  "/training_mood_ella/save",
+  vaildateTokenConsulting,
+  postOpenAIMoodDataSave
+);
 // 기분훈련 데이터 Load
-router.post("/training_mood_ella/load", postOpenAIMoodDataLoad);
+router.post(
+  "/training_mood_ella/load",
+  vaildateTokenConsulting,
+  postOpenAIMoodDataLoad
+);
 
 // 달력 데이터 반환
-router.post("/calendar", postOpenAIMypageCalendarData);
+router.post("/calendar", vaildateTokenConsulting, postOpenAIMypageCalendarData);
 // User EBT 데이터 반환
-router.post("/ebtresult", postOpenAIUserEBTResultData);
+router.post("/ebtresult", vaildateTokenConsulting, postOpenAIUserEBTResultData);
 // 상담 solution 반환
-router.post("/solution", postOpenAIConsultSolutionData);
+router.post(
+  "/solution",
+  vaildateTokenConsulting,
+  postOpenAIConsultSolutionData
+);
 
 // Clova Voice Data 반환
 router.post("/tts", postClovaVoiceTTS);

@@ -18,8 +18,6 @@ const {
   oauthKakaoUrlHandler,
   oauthKakaoRedirectUrlHandler,
   oauthGoogleRedirectUrlHandler,
-  oauthGoogleAccessTokenHandler,
-  oauthKakaoAccessTokenHandler,
   // AI 일반 로그인
   postAILoginHandler,
   getAILogoutHandler,
@@ -42,6 +40,9 @@ const {
   postUsersHandler,
   postUserHandler,
   postTeacherHandler,
+  // 소셜 로그인 핸들러
+  oauthGoogleAccessTokenHandler,
+  oauthKakaoAccessTokenHandler,
 } = loginController_Regercy;
 
 // 쿠키
@@ -49,21 +50,21 @@ const {
 // router.get("/logout", CookieLogoutHandler);
 
 // 세션
-router.post("/", vaildateSession, sessionLoginHandler);
-router.get("/logout", sessionLogoutHandler);
+// router.post("/", vaildateSession, sessionLoginHandler);
+// router.get("/logout", sessionLogoutHandler);
 
 // 토큰
 // router.post("/", tokenLoginHandler);
 // router.get("/logout", tokenLogoutHandler);
 
 // 유저 정보 반환
-router.get("/getUser", getUserHandler);
+// router.get("/getUser", getUserHandler);
 // 조건부 선생 정보 반환
-router.post("/postUsers", postUsersHandler);
+// router.post("/postUsers", postUsersHandler);
 // 조건부 유저 정보 반환
-router.post("/postUser", postUserHandler);
+// router.post("/postUser", postUserHandler);
 // 조건부 선생 정보 반환
-router.post("/postTeacher");
+// router.post("/postTeacher");
 
 // AI 일반 로그인
 router.post("/ai", postAILoginHandler);
@@ -86,10 +87,10 @@ router.get("/oauth_url/kakao", oauthKakaoUrlHandler);
 // Kakao OAuth Redirect Url
 router.get("/oauth_rediret_url/kakao", oauthKakaoRedirectUrlHandler);
 
-// Google OAuth Approve (Regercy)
-router.post("/oauth_token/google", oauthGoogleAccessTokenHandler);
-// Kakao OAuth Approve (Regercy)
-router.post("/oauth_token/kakao", oauthKakaoAccessTokenHandler);
+// (Regercy) Google OAuth Approve
+// router.post("/oauth_token/google", oauthGoogleAccessTokenHandler);
+// (Regercy) Kakao OAuth Approve
+// router.post("/oauth_token/kakao", oauthKakaoAccessTokenHandler);
 
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);
