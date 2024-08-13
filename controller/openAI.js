@@ -643,7 +643,7 @@ const openAIController = {
             update_query,
             update_value,
             (error, rows, fields) => {
-              if (error) console.log(error);
+              if (err) console.log("Err sqlMessage: " + err.sqlMessage);
               else console.log("AI Analysis Data DB UPDATE Success!");
             }
           );
@@ -669,7 +669,7 @@ const openAIController = {
             insert_query,
             insert_value,
             (error, rows, fields) => {
-              if (error) console.log(error);
+              if (err) console.log("Err sqlMessage: " + err.sqlMessage);
               else console.log("AI Analysis Data DB INSERT Success!");
             }
           );
