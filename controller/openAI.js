@@ -642,9 +642,11 @@ const openAIController = {
           connection_AI.query(
             update_query,
             update_value,
-            (error, rows, fields) => {
-              if (err) console.log("Err sqlMessage: " + err.sqlMessage);
-              else console.log("AI Analysis Data DB UPDATE Success!");
+            (err, rows, fields) => {
+              if (err) {
+                console.log("AI Analysis Data DB UPDATE Fail!");
+                console.log("Err sqlMessage: " + err.sqlMessage);
+              } else console.log("AI Analysis Data DB UPDATE Success!");
             }
           );
         }
@@ -668,9 +670,11 @@ const openAIController = {
           connection_AI.query(
             insert_query,
             insert_value,
-            (error, rows, fields) => {
-              if (err) console.log("Err sqlMessage: " + err.sqlMessage);
-              else console.log("AI Analysis Data DB INSERT Success!");
+            (err, rows, fields) => {
+              if (err) {
+                console.log("AI Analysis Data DB INSERT Fail!");
+                console.log("Err sqlMessage: " + err.sqlMessage);
+              } else console.log("AI Analysis Data DB INSERT Success!");
             }
           );
         }
@@ -3331,5 +3335,5 @@ const openAIController_Regercy = {
 
 module.exports = {
   openAIController,
-  openAIController_Regercy,
+  // openAIController_Regercy,
 };

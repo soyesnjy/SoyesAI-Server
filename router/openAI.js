@@ -5,7 +5,7 @@ const { errController } = require("../controller/index");
 // const { openAIController } = require("../controller/index");
 const {
   openAIController,
-  openAIController_Regercy, // 레거시 코드
+  // openAIController_Regercy, // 레거시 코드
 } = require("../controller/openAI");
 
 const { loginController } = require("../controller/login");
