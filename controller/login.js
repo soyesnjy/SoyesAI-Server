@@ -984,7 +984,7 @@ const loginController = {
         return res.status(404).json({ message: "No pUid input value - 404" });
       }
 
-      console.log(`RefreshToken Check API 호출 - pUid:${pUid}`);
+      console.log(`RefreshToken Vaild Check Middle Ware - pUid:${pUid}`);
 
       // #기능 잠금# accessToken이 있는 경우 - accessToken은 세션에 저장된 값이기 때문에 비교적 간단한 검사 진행
       if (false) {
@@ -1199,7 +1199,7 @@ const loginController = {
   // (App) AI RefreshToken 인증
   postAIRefreshTokenCertHandler: async (req, res) => {
     const { data } = req.body;
-    console.log(data);
+    // console.log(data);
     let parseLoginData;
     try {
       // 입력값 파싱
