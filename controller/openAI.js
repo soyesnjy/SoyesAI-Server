@@ -1078,7 +1078,7 @@ const openAIController = {
 
       const response = await openai.chat.completions.create({
         messages: [...promptArr, ...parseMessageArr],
-        model: "ft:gpt-3.5-turbo-1106:personal::9dYars0I", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        model: "gpt-4o", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
       // let emotion = parseInt(response.choices[0].message.content.slice(-1));
