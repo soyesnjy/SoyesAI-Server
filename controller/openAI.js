@@ -966,7 +966,7 @@ const openAIController = {
       } else parseData = data;
 
       const { messageArr, pUid } = parseData;
-      console.log(parseData);
+      // console.log(parseData);
       // messageArr가 문자열일 경우 json 파싱
       if (typeof messageArr === "string") {
         parseMessageArr = JSON.parse(messageArr);

@@ -956,6 +956,8 @@ const loginController = {
   },
   // (Middle Ware) AI JWT 토큰 유효성 검사 - 서비스 이용
   vaildateTokenConsulting: async (req, res, next) => {
+    const { data } = req.body;
+    // console.log(data);
     // Session data 조회
     const accessToken = req.session.accessToken;
     const refreshToken = req.cookies.refreshToken;
@@ -967,8 +969,23 @@ const loginController = {
     const user_table = User_Table_Info.table;
     const user_attribute = User_Table_Info.attribute;
 
+    let parseData;
     try {
-      console.log("RefreshToken Check API 호출");
+      // 파싱. Client JSON 데이터
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { pUid } = parseData;
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 404");
+        return res.status(404).json({ message: "No pUid input value - 404" });
+      }
+
+      console.log(`RefreshToken Check API 호출 - pUid:${pUid}`);
+
       // #기능 잠금# accessToken이 있는 경우 - accessToken은 세션에 저장된 값이기 때문에 비교적 간단한 검사 진행
       if (false) {
         console.log("AccessToken Check!");
@@ -1042,6 +1059,14 @@ const loginController = {
             secure: process.env.DEV_OPS !== "local",
           });
           return res.status(401).json({ message: "Token has expired - 401" });
+        }
+        // 입력 pUid와 토큰 해석 id와 일치하지 않는 경우
+        if (pUid !== decoded.id) {
+          console.log("Input Payload pUid Not Match RefreshToken Decoded pUid");
+          return res.status(401).json({
+            message:
+              "Input Payload pUid Not Match RefreshToken Decoded pUid - 401",
+          });
         }
         // User Table 조회
         const ebt_data = await user_ai_select(
