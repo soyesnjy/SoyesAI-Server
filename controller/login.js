@@ -319,33 +319,33 @@ const loginController = {
           });
 
           // Session 내부에 accessToken 저장
-          req.session.accessToken = token.accessToken;
+          // req.session.accessToken = token.accessToken;
           // browser Cookie에 refreshToken 저장
-          res.cookie("refreshToken", token.refreshToken, {
-            maxAge: 24 * 60 * 60 * 1000,
-            httpOnly: true,
-            sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
-            secure: process.env.DEV_OPS !== "local",
-          });
+          // res.cookie("refreshToken", token.refreshToken, {
+          //   maxAge: 24 * 60 * 60 * 1000,
+          //   httpOnly: true,
+          //   sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+          //   secure: process.env.DEV_OPS !== "local",
+          // });
 
           // Redis에서 기존 세션 ID 확인
-          redisStore.get(`user_session:${parseUid}`, (err, oldSessionId) => {
-            if (oldSessionId) {
-              // 기존 세션 무효화
-              redisStore.destroy(`user_session:${parseUid}`, (err, reply) => {
-                console.log("Previous session invalidated");
-              });
-            }
-            // 새 세션 ID를 사용자 ID와 연결
-            redisStore.set(
-              `user_session:${parseUid}`,
-              sessionId,
-              (err, reply) => {
-                // 로그인 처리 로직
-                console.log(`[${parseUid}] SessionID Update - ${sessionId}`);
-              }
-            );
-          });
+          // redisStore.get(`user_session:${parseUid}`, (err, oldSessionId) => {
+          //   if (oldSessionId) {
+          //     // 기존 세션 무효화
+          //     redisStore.destroy(`user_session:${parseUid}`, (err, reply) => {
+          //       console.log("Previous session invalidated");
+          //     });
+          //   }
+          //   // 새 세션 ID를 사용자 ID와 연결
+          //   redisStore.set(
+          //     `user_session:${parseUid}`,
+          //     sessionId,
+          //     (err, reply) => {
+          //       // 로그인 처리 로직
+          //       console.log(`[${parseUid}] SessionID Update - ${sessionId}`);
+          //     }
+          //   );
+          // });
 
           // res.json({ data: response.data });
 
@@ -500,29 +500,29 @@ const loginController = {
       });
 
       // Session 내부에 accessToken 저장
-      req.session.accessToken = token.accessToken;
+      // req.session.accessToken = token.accessToken;
       // browser Cookie에 refreshToken 저장
-      res.cookie("refreshToken", token.refreshToken, {
-        maxAge: 24 * 60 * 60 * 1000,
-        httpOnly: true,
-        sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
-        secure: process.env.DEV_OPS !== "local",
-      });
+      // res.cookie("refreshToken", token.refreshToken, {
+      //   maxAge: 24 * 60 * 60 * 1000,
+      //   httpOnly: true,
+      //   sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+      //   secure: process.env.DEV_OPS !== "local",
+      // });
 
       // Redis에서 기존 세션 ID 확인
-      redisStore.get(`user_session:${parseUid}`, (err, oldSessionId) => {
-        if (oldSessionId) {
-          // 기존 세션 무효화
-          redisStore.destroy(`user_session:${parseUid}`, (err, reply) => {
-            console.log("Previous session invalidated");
-          });
-        }
-        // 새 세션 ID를 사용자 ID와 연결
-        redisStore.set(`user_session:${parseUid}`, sessionId, (err, reply) => {
-          // 로그인 처리 로직
-          console.log(`[${parseUid}] SessionID Update - ${sessionId}`);
-        });
-      });
+      // redisStore.get(`user_session:${parseUid}`, (err, oldSessionId) => {
+      //   if (oldSessionId) {
+      //     // 기존 세션 무효화
+      //     redisStore.destroy(`user_session:${parseUid}`, (err, reply) => {
+      //       console.log("Previous session invalidated");
+      //     });
+      //   }
+      //   // 새 세션 ID를 사용자 ID와 연결
+      //   redisStore.set(`user_session:${parseUid}`, sessionId, (err, reply) => {
+      //     // 로그인 처리 로직
+      //     console.log(`[${parseUid}] SessionID Update - ${sessionId}`);
+      //   });
+      // });
 
       // 클라이언트에 사용자 정보 응답
       // res.json({ data: response.data });
@@ -699,9 +699,10 @@ const loginController = {
       const minutes = ("0" + dateObj.getMinutes()).slice(-2);
       const seconds = ("0" + dateObj.getSeconds()).slice(-2);
       const milliseconds = ("00" + dateObj.getMilliseconds()).slice(-3);
-      const date = `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
+      const date = `${year}-${month}-${day}`;
+      const guestDate = `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
 
-      let parsepUid = `guest${date}`;
+      let parsepUid = `guest${guestDate}`;
       const sessionId = req.sessionID;
       console.log(`Developer Guest Login Access - pUid: ${parsepUid}`);
 
@@ -709,10 +710,18 @@ const loginController = {
       const attribute = User_Table_Info.attribute;
 
       // DB에 Row가 없을 경우 INSERT, 있으면 지정한 속성만 UPDATE
-      const insert_query = `INSERT INTO ${table} (${attribute.pKey}, ${attribute.attr1}) VALUES (?, ?) ON DUPLICATE KEY UPDATE
-      ${attribute.attr1} = VALUES(${attribute.attr1});`;
+      const insert_query = `INSERT INTO ${table} (${attribute.pKey}, ${attribute.attr1}, ${attribute.attr5}, ${attribute.attr6}, ${attribute.attr7}) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE
+      ${attribute.attr7} = VALUES(${attribute.attr7});`;
+      console.log(insert_query);
 
-      const insert_value = [parsepUid, `${parsepUid}@google.com`];
+      const insert_value = [
+        parsepUid, // uid
+        `${parsepUid}@google.com`, // email
+        "guest", // oauth_type
+        date, // creation_date
+        date, // lastLogin_date
+      ];
+      console.log(insert_value);
 
       connection_AI.query(insert_query, insert_value, (error, rows, fields) => {
         if (error) {
@@ -1239,6 +1248,34 @@ const loginController = {
             }
           );
         });
+
+        // User Table 로그인 날짜 갱신
+        const dateObj = new Date();
+        const year = dateObj.getFullYear();
+        const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+        const day = ("0" + dateObj.getDate()).slice(-2);
+        const date = `${year}-${month}-${day}`;
+
+        const table = User_Table_Info.table;
+        const attribute = User_Table_Info.attribute;
+
+        const update_query = `UPDATE ${table} SET ${attribute.attr7} = ? WHERE ${attribute.pKey} = ?`;
+        // console.log(update_query);
+
+        const update_value = [date, decoded.id];
+        // console.log(update_value);
+
+        connection_AI.query(
+          update_query,
+          update_value,
+          (error, rows, fields) => {
+            if (error) {
+              console.log(error.sqlMessage);
+              return res.status(404).json({ message: error.sqlMessage });
+            }
+            console.log("User Last Login Log Update Success!");
+          }
+        );
 
         // 토큰 인증
         return res.status(200).json({
