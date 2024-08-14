@@ -194,7 +194,7 @@ const loginController = {
   },
   // Google OAuth URL 발급
   oauthUrlHandler: (req, res) => {
-    console.log("OAuth URL 발급 API 호출");
+    console.log("Google OAuth URL 발급 API 호출");
     try {
       const SCOPES = [
         "https://www.googleapis.com/auth/userinfo.profile", // 기본 프로필
@@ -365,6 +365,7 @@ const loginController = {
   },
   // Kakao OAuth URL 발급
   oauthKakaoUrlHandler: (req, res) => {
+    console.log("Kakao OAuth URL 발급 API 호출");
     try {
       const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${
         process.env.KAKAO_REST_API_KEY
@@ -704,7 +705,7 @@ const loginController = {
 
       let parsepUid = `guest${guestDate}`;
       const sessionId = req.sessionID;
-      console.log(`Developer Guest Login Access - pUid: ${parsepUid}`);
+      console.log(`Guest Login API 호출! - pUid: ${parsepUid}`);
 
       const table = User_Table_Info.table;
       const attribute = User_Table_Info.attribute;
@@ -712,7 +713,7 @@ const loginController = {
       // DB에 Row가 없을 경우 INSERT, 있으면 지정한 속성만 UPDATE
       const insert_query = `INSERT INTO ${table} (${attribute.pKey}, ${attribute.attr1}, ${attribute.attr5}, ${attribute.attr6}, ${attribute.attr7}) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE
       ${attribute.attr7} = VALUES(${attribute.attr7});`;
-      console.log(insert_query);
+      // console.log(insert_query);
 
       const insert_value = [
         parsepUid, // uid
@@ -721,7 +722,7 @@ const loginController = {
         date, // creation_date
         date, // lastLogin_date
       ];
-      console.log(insert_value);
+      // console.log(insert_value);
 
       connection_AI.query(insert_query, insert_value, (error, rows, fields) => {
         if (error) {
@@ -749,7 +750,7 @@ const loginController = {
           if (oldSessionId) {
             // 기존 세션 무효화
             redisStore.destroy(`user_session:${parsepUid}`, (err, reply) => {
-              console.log("Previous session invalidated");
+              // console.log("Previous session invalidated");
             });
           }
           // 새 세션 ID를 사용자 ID와 연결
@@ -758,7 +759,7 @@ const loginController = {
             sessionId,
             (err, reply) => {
               // 로그인 처리 로직
-              console.log(`[${parsepUid}] SessionID Update - ${sessionId}`);
+              // console.log(`[${parsepUid}] SessionID Update - ${sessionId}`);
             }
           );
         });
@@ -960,13 +961,14 @@ const loginController = {
     const refreshToken = req.cookies.refreshToken;
     const sessionId = req.sessionID;
 
-    console.log(refreshToken);
+    // console.log(refreshToken);
 
     // User Table && attribut 명시
     const user_table = User_Table_Info.table;
     const user_attribute = User_Table_Info.attribute;
 
     try {
+      console.log("RefreshToken Check API 호출");
       // #기능 잠금# accessToken이 있는 경우 - accessToken은 세션에 저장된 값이기 때문에 비교적 간단한 검사 진행
       if (false) {
         console.log("AccessToken Check!");
@@ -1026,11 +1028,11 @@ const loginController = {
       }
       // refreshToken만 있는 경우 - User Table 조회
       else if (refreshToken) {
-        console.log("RefreshToken Check!");
         // refreshToken 복호화
         const decoded = verifyToken("refresh", refreshToken);
         // 토큰 만료
         if (decoded === "expired") {
+          console.log(`RefreshToken 만료! - ${decoded.id}`);
           // 만료된 토큰 데이터 삭제
           req.session.destroy((err) => {
             if (err) console.error("세션 삭제 중 에러 발생", err);
@@ -1236,7 +1238,7 @@ const loginController = {
           if (oldSessionId) {
             // 기존 세션 무효화
             redisStore.destroy(`user_session:${decoded.id}`, (err, reply) => {
-              console.log("Previous session invalidated");
+              // console.log("Previous session invalidated");
             });
           }
 
@@ -1246,7 +1248,7 @@ const loginController = {
             sessionId,
             (err, reply) => {
               // 로그인 처리 로직
-              console.log(`SessionID Update - ${sessionId}`);
+              // console.log(`SessionID Update - ${sessionId}`);
             }
           );
         });
@@ -1275,7 +1277,7 @@ const loginController = {
               console.log(error.sqlMessage);
               return res.status(404).json({ message: error.sqlMessage });
             }
-            console.log("User Last Login Log Update Success!");
+            // console.log("User Last Login Log Update Success!");
           }
         );
 
