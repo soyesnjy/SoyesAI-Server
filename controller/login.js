@@ -1172,7 +1172,7 @@ const loginController = {
   // (App) AI RefreshToken 인증
   postAIRefreshTokenCertHandler: async (req, res) => {
     const { data } = req.body;
-    // console.log(data);
+    console.log(data);
     let parseLoginData;
     try {
       // 입력값 파싱
@@ -1195,6 +1195,8 @@ const loginController = {
 
       // refreshToken 복호화
       const decoded = verifyToken("refresh", parseRefreshToken);
+
+      console.log(`RefreshToken 인증 API 호출 - pUid: ${decoded.id}`);
 
       if (decoded === "expired")
         return res.status(401).json({
