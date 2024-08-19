@@ -181,6 +181,7 @@ const {
   ebt_analysis_prompt_v4,
   ebt_analysis_prompt_v5,
   ebt_analysis_prompt_v6,
+  ebt_analysis_prompt_v8,
   pt_analysis_prompt,
   test_prompt_20240402,
   persona_prompt_lala_v2,
@@ -518,8 +519,8 @@ const openAIController = {
       const analysisPrompt = [];
       const userPrompt = [];
 
-      // 정서행동 검사 분석가 페르소나 v6 - 0507
-      analysisPrompt.push(ebt_analysis_prompt_v6);
+      // 정서행동 검사 분석가 페르소나 v8 - 0819
+      analysisPrompt.push(ebt_analysis_prompt_v8);
       // 분야별 결과 해석 프롬프트
       analysisPrompt.push(ebt_Analysis[parsingType]);
       // 결과 해석 요청 프롬프트
@@ -939,6 +940,78 @@ const openAIController = {
           console.log("PT Analysis Data DB Save Fail!");
           console.log("Err sqlMessage: " + err.sqlMessage);
         } else console.log("AI Analysis Data LOG DB INSERT Success!");
+      });
+    } catch (err) {
+      console.log(err);
+      res.json({ message: "Server Error - 500 Bad Gateway" });
+    }
+  },
+  // PT 결과 저장 API
+  postOpenAIPernalTestSave: async (req, res) => {
+    const { data } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
+
+    let parsePTData, parsePTResult;
+    try {
+      // 파싱. Client JSON 데이터
+      if (typeof data === "string") {
+        parsePTData = JSON.parse(data);
+      } else parsePTData = data;
+
+      const { resultText, pUid } = parsePTData;
+      // No type => return
+      if (!resultText) {
+        console.log("No resultText input value - 404");
+        return res
+          .status(404)
+          .json({ message: "No resultText input value - 404" });
+      }
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 404");
+        return res.status(404).json({ message: "No pUid input value - 404" });
+      }
+
+      parsepUid = pUid;
+      parsePTResult = resultText;
+
+      console.log(`PT 테스트 결과 저장 API 호출 - pUid: ${parsepUid}`);
+
+      // 오늘 날짜 변환
+      const dateObj = new Date();
+      const year = dateObj.getFullYear();
+      const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+      const day = ("0" + dateObj.getDate()).slice(-2);
+      const date = `${year}-${month}-${day}`;
+
+      /* PT_Log DB 저장 */
+      const pt_log_table = PT_Table_Info["Log"].table;
+      const pt_log_attribute = PT_Table_Info["Log"].attribute;
+      // PT_Log DB 저장
+      const pt_insert_query = `INSERT INTO ${pt_log_table} (${Object.values(
+        pt_log_attribute
+      ).join(", ")}) VALUES (${Object.values(pt_log_attribute)
+        .map((el) => "?")
+        .join(", ")})`;
+      // console.log(insert_query);
+
+      const pt_insert_value = [
+        parsepUid,
+        date,
+        resultText,
+        JSON.stringify({ ...mailOptions, date }),
+      ];
+      // console.log(insert_value);
+
+      connection_AI.query(pt_insert_query, pt_insert_value, (err) => {
+        if (err) {
+          console.log("PT Analysis Data DB Save Fail!");
+          console.log("Err sqlMessage: " + err.sqlMessage);
+        }
+        console.log("AI Analysis Data LOG DB INSERT Success!");
+        // client 전송
+        return res
+          .status(200)
+          .json({ message: "AI Analysis Data LOG DB INSERT Success!" });
       });
     } catch (err) {
       console.log(err);
