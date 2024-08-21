@@ -5,6 +5,7 @@ const { errController } = require("../controller/index");
 // const { openAIController } = require("../controller/index");
 const {
   openAIController,
+  ellaMoodController,
   // openAIController_Regercy, // 레거시 코드
 } = require("../controller/openAI");
 
@@ -15,7 +16,6 @@ const {
   postOpenAIPsychologicalAnalysis,
   postOpenAIConsultingPupu,
   postOpenAIConsultingUbi,
-  postOpenAIConsultingLala,
   postOpenAIConsultingSoyes,
   postOpenAIMypageCalendarData,
   postClovaVoiceTTS,
@@ -26,10 +26,14 @@ const {
   getYoutubeContent,
   postOpenAIConsultSolutionData,
   postOpenAIGoogleDriveUpload,
-  postOpenAITraningElla,
+  postOpenAIMypageData,
+} = openAIController;
+
+const {
+  postOpenAIEllaMoodTraning,
   postOpenAIMoodDataSave,
   postOpenAIMoodDataLoad,
-} = openAIController;
+} = ellaMoodController;
 
 // 토큰 유효성 검사 미들웨어
 const { vaildateTokenConsulting, vaildatePlan } = loginController;
@@ -66,12 +70,14 @@ router.post(
   vaildateTokenConsulting,
   postOpenAIConsultingUbi
 );
-// 정서멘토 모델 - 라라
-router.post(
-  "/consulting_emotion_lala",
-  vaildateTokenConsulting,
-  postOpenAIConsultingLala
-);
+
+// (Legacy) 정서멘토 모델 - 라라
+// router.post(
+//   "/consulting_emotion_lala",
+//   vaildateTokenConsulting,
+//   postOpenAIConsultingLala
+// );
+
 // 전문상담사 모델 - 소예
 router.post(
   "/consulting_emotion_soyes",
@@ -89,7 +95,7 @@ router.post(
 router.post(
   "/training_mood_ella",
   vaildateTokenConsulting,
-  postOpenAITraningElla
+  postOpenAIEllaMoodTraning
 );
 // 기분훈련 데이터 Save
 router.post(
@@ -106,8 +112,12 @@ router.post(
 
 // 달력 데이터 반환
 router.post("/calendar", vaildateTokenConsulting, postOpenAIMypageCalendarData);
-// User EBT 데이터 반환
+
+// 마이페이지 데이터 반환
+router.post("/mypage", postOpenAIMypageData);
+// User EBT 결과(11종) 데이터 반환
 router.post("/ebtresult", vaildateTokenConsulting, postOpenAIUserEBTResultData);
+
 // 상담 solution 반환
 router.post(
   "/solution",
