@@ -980,8 +980,8 @@ const loginController = {
 
       // No pUid => return
       if (!pUid) {
-        console.log("No pUid input value - 404");
-        return res.status(404).json({ message: "No pUid input value - 404" });
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
       }
 
       console.log(`RefreshToken Vaild Check Middle Ware - pUid:${pUid}`);
