@@ -1847,6 +1847,7 @@ const openAIController = {
   // 상담 로그 저장 API
   postOpenAIConsultingLogSave: async (req, res) => {
     const { data } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
+    // console.log(data);
     let parseEBTdata, parsepUid;
     try {
       // 파싱. Client JSON 데이터
@@ -1854,13 +1855,13 @@ const openAIController = {
         parseEBTdata = JSON.parse(data);
       } else parseEBTdata = data;
 
-      const { messageArr, avarta, pUid } = parseEBTdata;
+      const { messageArr, avartar, pUid } = parseEBTdata;
       // console.log(parseEBTdata);
 
       // No pUid => return
       if (!pUid) {
-        console.log("Non pUid input value - 404");
-        return res.status(404).json({ message: "Non pUid input value - 404" });
+        console.log("Non pUid input value - 400");
+        return res.status(400).json({ message: "Non pUid input value - 400" });
       }
       parsepUid = pUid;
       console.log(
@@ -1874,34 +1875,74 @@ const openAIController = {
           .json({ message: "messageArr Not enough length" });
       }
 
-      /* Consult_Log DB 저장 */
-      const consult_log_table = Consult_Table_Info["Log"].table;
-      const consult_log_attribute = Consult_Table_Info["Log"].attribute;
+      const analysisPrompt = [];
+      const userPrompt = [];
 
-      // Consult_Log DB 저장
-      const consult_insert_query = `INSERT INTO ${consult_log_table} (${Object.values(
-        consult_log_attribute
-      ).join(", ")}) VALUES (${Object.values(consult_log_attribute)
-        .map((el) => "?")
-        .join(", ")})`;
-      // console.log(consult_insert_query);
-
-      const consult_insert_value = [
-        parsepUid,
-        avarta,
-        JSON.stringify(messageArr),
-      ];
-      // console.log(consult_insert_value);
-
-      connection_AI.query(consult_insert_query, consult_insert_value, (err) => {
-        if (err) {
-          console.log("Consulting_Log DB Save Fail!");
-          console.log("Err sqlMessage: " + err.sqlMessage);
-        } else {
-          console.log("Consulting_Log DB Save Success!");
-          res.status(200).json({ message: "Consulting_Log DB Save Success!" });
-        }
+      // 푸푸 페르소나 프롬프트 삽입
+      analysisPrompt.push({
+        role: "system",
+        content: `assistant의 이름은 '푸푸'이다. '푸푸'는 풍부한 상담기술을 갖고, 6-12세(유치원~초등학생) 아이들 눈높이에 맞게 초등학교 6학년 수준의 언어로 말하는 상담사이다. 푸푸는 반말을 사용한다.
+      푸푸는 다음 형식으로 분석을 제공한다.
+      1) 상담 키워드를 3가지로 요약한다.
+      2) 유저가 사용한 감정 단어를 파악한다.
+      3) 사용된 전체 감정 단어 중 상세한 감정 단어의 비율만 '정서 인식 **%'의 형식으로 제시한다.`,
       });
+
+      // 상담 분석 명령 프롬프트 삽입
+      userPrompt.push({
+        role: "user",
+        content: `상담이 종료되었어. 상담 내용을 100자 이내로 분석해줘`,
+      });
+
+      // AI 분석
+      const response = await openai.chat.completions.create({
+        messages: [...analysisPrompt, ...messageArr, ...userPrompt],
+        model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      });
+
+      const message = { message: response.choices[0].message.content };
+      // AI 분석 내용 보기좋게 정리
+      const analyzeMsg = message.message.split(". ").join(".\n");
+
+      messageArr.push({ role: "assistant", content: analyzeMsg });
+
+      // console.log(analyzeMsg);
+
+      /* Consult_Log DB 저장 */
+      if (true) {
+        const consult_log_table = Consult_Table_Info["Log"].table;
+        const consult_log_attribute = Consult_Table_Info["Log"].attribute;
+
+        // Consult_Log DB 저장
+        const consult_insert_query = `INSERT INTO ${consult_log_table} (${Object.values(
+          consult_log_attribute
+        ).join(", ")}) VALUES (${Object.values(consult_log_attribute)
+          .map((el) => "?")
+          .join(", ")})`;
+        // console.log(consult_insert_query);
+
+        const consult_insert_value = [
+          parsepUid,
+          avartar,
+          JSON.stringify(messageArr),
+        ];
+        // console.log(consult_insert_value);
+
+        connection_AI.query(
+          consult_insert_query,
+          consult_insert_value,
+          (err) => {
+            if (err) {
+              console.log("Err sqlMessage: " + err.sqlMessage);
+            } else {
+              console.log(`Consulting_Log DB Save Success! - ${parsepUid}`);
+              res
+                .status(200)
+                .json({ message: "Consulting_Log DB Save Success!" });
+            }
+          }
+        );
+      }
     } catch (err) {
       console.log(err);
       res

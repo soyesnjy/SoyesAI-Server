@@ -87,7 +87,7 @@ router.post(
 // 상담 내역 저장
 router.post(
   "/consulting_emotion_log",
-  vaildateTokenConsulting,
+  // vaildateTokenConsulting,
   postOpenAIConsultingLogSave
 );
 
