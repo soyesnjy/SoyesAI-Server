@@ -22,6 +22,7 @@ const {
   postOpenAIPernalTestAnalysis,
   getClearCookies,
   postOpenAIConsultingLogSave,
+  postOpenAIConsultingLogLoad,
   postOpenAIUserEBTResultData,
   getYoutubeContent,
   postOpenAIConsultSolutionData,
@@ -84,11 +85,18 @@ router.post(
   vaildateTokenConsulting,
   postOpenAIConsultingSoyes
 );
-// 상담 내역 저장
+// 상담 내역 Save
 router.post(
   "/consulting_emotion_log",
   // vaildateTokenConsulting,
   postOpenAIConsultingLogSave
+);
+
+// 상담 내역 Load
+router.post(
+  "/consulting_emotion_log_load",
+  // vaildateTokenConsulting,
+  postOpenAIConsultingLogLoad
 );
 
 // 기분훈련 모델 - 엘라

@@ -357,9 +357,11 @@ const Consult_Table_Info = {
   Log: {
     table: "soyes_ai_User_Consult_Log",
     attribute: {
-      pKey: "uid",
+      pKey: "entry_id",
+      cKey: "uid",
       attr1: "avarta_name",
       attr2: "consult_log",
+      created_at: "created_at",
     },
   },
 };

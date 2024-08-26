@@ -214,6 +214,14 @@ const {
   balance_prompt,
 } = require("../DB/solution_prompt");
 
+// Database Table Info
+const {
+  User_Table_Info,
+  EBT_Table_Info,
+  PT_Table_Info,
+  Consult_Table_Info,
+} = require("../DB/database_table_info");
+
 // User 정서행동 2점문항 반환 (String)
 // const select_soyes_AI_Ebt_Table = async (
 //   user_table,
@@ -418,13 +426,35 @@ const select_soyesAI_EbtResult_v2 = async (keyValue, contentKey, parsepUid) => {
   }
 };
 
-// Database Table Info
-const {
-  User_Table_Info,
-  EBT_Table_Info,
-  PT_Table_Info,
-  Consult_Table_Info,
-} = require("../DB/database_table_info");
+const select_soyesAI_Consult_Log = async (keyValue, parsepUid) => {
+  try {
+    // New EBT Table
+    const table = Consult_Table_Info["Log"].table;
+    const { pKey, cKey, created_at } = Consult_Table_Info["Log"].attribute;
+
+    // 조건부 Select Query
+    const select_query = keyValue
+      ? `SELECT * FROM ${table} WHERE (${pKey} ='${keyValue}')` // keyValue 값으로 조회하는 경우
+      : `SELECT * FROM ${table} WHERE (${cKey} ='${parsepUid}') ORDER BY ${created_at} DESC LIMIT 1`; // 가장 최근 검사 결과를 조회하는 경우
+
+    // const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`; // Select Query
+    const ebt_data = await fetchUserData(connection_AI, select_query);
+    // console.log(ebt_data[0]);
+
+    // 검사를 진행하지 않은 경우
+    if (!ebt_data[0]) return [];
+
+    //console.log(ebt_data[0].consult_log);
+    const resultArr = JSON.parse(ebt_data[0].consult_log);
+
+    // console.log(resultArr);
+
+    return resultArr;
+  } catch (err) {
+    console.log(err);
+    return "Error";
+  }
+};
 
 // EBT 반영 Class 정의
 const EBT_classArr = [
@@ -1625,12 +1655,14 @@ const openAIController = {
       );
 
       // 3. SELECT USER Consult_Log
-      const select_consult_join_query = `SELECT ${consult_log_table}.${consult_log_attribute.attr1}, ${consult_log_table}.${consult_log_attribute.attr2} FROM ${consult_log_table} WHERE uid = '${parsepUid}' AND created_at LIKE '${parseDate}%';`;
+      const select_consult_join_query = `SELECT * FROM ${consult_log_table} WHERE uid = '${parsepUid}' AND created_at LIKE '${parseDate}%';`;
 
       const consult_join_data = await fetchUserData(
         connection_AI,
         select_consult_join_query
       );
+
+      console.log(consult_join_data);
 
       // 프론트 데이터값 참조
       // const userInfoArr = [
@@ -1726,8 +1758,8 @@ const openAIController = {
       const pt_log_attribute = PT_Table_Info["Log"].attribute;
 
       // Consult Table Key
-      // const consult_log_table = Consult_Table_Info["Log"].table;
-      // const consult_log_attribute = Consult_Table_Info["Log"].attribute;
+      const consult_log_table = Consult_Table_Info["Log"].table;
+      const consult_log_attribute = Consult_Table_Info["Log"].attribute;
 
       // 1. SELECT USER JOIN EBT_Log
       const select_ebt_join_query = `SELECT ${pKey}, ${updated_at} FROM ${ebt_log_table} WHERE uid = '${parsepUid}' AND ${status} = '1' ORDER BY ${created_at} DESC LIMIT 5;`;
@@ -1747,12 +1779,14 @@ const openAIController = {
       );
 
       // 3. SELECT USER Consult_Log
-      // const select_consult_join_query = `SELECT ${consult_log_table}.${consult_log_attribute.attr1}, ${consult_log_table}.${consult_log_attribute.attr2} FROM ${consult_log_table} WHERE uid = '${parsepUid}' AND created_at LIKE '${parseDate}%' ORDER BY created_at DESC;`;
+      const select_consult_join_query = `SELECT * FROM ${consult_log_table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 5;`;
 
-      // const consult_join_data = await fetchUserData(
-      //   connection_AI,
-      //   select_consult_join_query
-      // );
+      const consult_join_data = await fetchUserData(
+        connection_AI,
+        select_consult_join_query
+      );
+
+      // console.log(consult_join_data);
 
       // 프론트 데이터값 참조
       // const userInfoArr = [
@@ -1808,6 +1842,12 @@ const openAIController = {
             date: el.created_at,
           };
         }),
+        pupu_data: consult_join_data.map((el) => {
+          return {
+            id: el.entry_id,
+            date: el.created_at,
+          };
+        }),
       });
     } catch (err) {
       console.error(err);
@@ -1844,7 +1884,7 @@ const openAIController = {
       res.status(500).end("Internal Server Error");
     }
   },
-  // 상담 로그 저장 API
+  // 상담 로그 Save API
   postOpenAIConsultingLogSave: async (req, res) => {
     const { data } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
     // console.log(data);
@@ -1914,11 +1954,7 @@ const openAIController = {
         const consult_log_attribute = Consult_Table_Info["Log"].attribute;
 
         // Consult_Log DB 저장
-        const consult_insert_query = `INSERT INTO ${consult_log_table} (${Object.values(
-          consult_log_attribute
-        ).join(", ")}) VALUES (${Object.values(consult_log_attribute)
-          .map((el) => "?")
-          .join(", ")})`;
+        const consult_insert_query = `INSERT INTO ${consult_log_table} (${consult_log_attribute.cKey}, ${consult_log_attribute.attr1}, ${consult_log_attribute.attr2}) VALUES (?, ?, ?)`;
         // console.log(consult_insert_query);
 
         const consult_insert_value = [
@@ -1948,6 +1984,55 @@ const openAIController = {
       res
         .status(500)
         .json({ message: "Consulting_Log DB Save Fail!" + err.message });
+    }
+  },
+  // 상담 로그 Load API
+  postOpenAIConsultingLogLoad: async (req, res) => {
+    const { data } = req.body;
+    let parseEBTdata, parsepUid;
+
+    try {
+      // json 파싱
+      if (typeof data === "string") {
+        parseEBTdata = JSON.parse(data);
+      } else parseEBTdata = data;
+
+      const { pUid, pKeyValue } = parseEBTdata;
+      // contentKey: AI 분석 결과 반환 트리거
+      // keyValue: Consult_Log Table Row Primary Key. 마이페이지 결과보기 버튼에 할당 후 전달받을 예정
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
+      }
+      // pUid default값 설정
+      parsepUid = pUid;
+      console.log(
+        `상담 로그 Load API /openAI/consulting_emotion_log_load Path 호출 - pUid: ${parsepUid}`
+      );
+
+      const resultArr = await select_soyesAI_Consult_Log(pKeyValue, parsepUid);
+
+      // 정서행동검사 완료 데이터가 없을 경우
+      if (!resultArr.length) {
+        return res.status(200).json({
+          message: "User Non Have EBT Result",
+          data: [],
+        });
+      }
+
+      // console.log(resultArr);
+
+      return res.status(200).json({
+        message: "User Consult Data Return Success!",
+        data: resultArr,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "Server Error - 500",
+      });
     }
   },
   // ClearCookies API
