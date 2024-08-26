@@ -11,8 +11,8 @@ const compression = require("compression");
 // const redisStore = require("./DB/redisClient");
 
 const app = express();
-const PORT = 5000;
-const PORT_https = 5050;
+const PORT = process.env.PORT_LOCAL;
+const PORT_https = process.env.PORT_OPS;
 
 // 서버와 동일한 url을 브라우저에 입력하면 src 폴더 내부의 html 파일 실행.
 const path = require("path");
