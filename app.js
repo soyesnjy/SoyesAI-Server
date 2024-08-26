@@ -95,6 +95,7 @@ app.set("views", path.join(__dirname, "/views"));
 app.get("/", (req, res) => {
   // Jenkins Test용 주석
   // Jenkins Test용 주석2
+  // Jenkins Test용 주석3
   res.status(200).json({ text: "Hello World!" });
 
   // res.render("index", {
