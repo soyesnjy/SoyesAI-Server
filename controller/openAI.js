@@ -873,15 +873,15 @@ const openAIController = {
       const { resultText, pUid } = parsePTData;
       // No type => return
       if (!resultText) {
-        console.log("No resultText input value - 404");
+        console.log("No resultText input value - 400");
         return res
-          .status(404)
-          .json({ message: "No resultText input value - 404" });
+          .status(400)
+          .json({ message: "No resultText input value - 400" });
       }
       // No pUid => return
       if (!pUid) {
-        console.log("No pUid input value - 404");
-        return res.status(404).json({ message: "No pUid input value - 404" });
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
       }
 
       parsepUid = pUid;
