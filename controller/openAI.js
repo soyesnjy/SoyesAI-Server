@@ -891,21 +891,21 @@ const openAIController = {
         `PT 테스트 결과 분석 및 메일 전송 API /analysis_pt Path 호출 - pUid: ${parsepUid}`
       );
 
-      const analysisPrompt = [];
-      const userPrompt = [];
+      // const analysisPrompt = [];
+      // const userPrompt = [];
 
       // 성격 검사용 프롬프트 구분
-      analysisPrompt.push(pt_analysis_prompt);
-      userPrompt.push({
-        role: "user",
-        content: `다음 문단은 아동의 성격검사 결과야.
-          '''
-          아동의 성격 검사 유형은 ${parsePTResult}입니다.
-          ${parsePTResult} 유형은 ${persnal_short[parsePTResult]}
-          '''
-          아동의 성격검사 결과를 바탕으로 아동의 성격을 장점과 단점으로 나눠서 분석해줘. 분석이 끝나면 단점에 대한 해결 방안을 제시해줘
-          `,
-      });
+      // analysisPrompt.push(pt_analysis_prompt);
+      // userPrompt.push({
+      //   role: "user",
+      //   content: `다음 문단은 아동의 성격검사 결과야.
+      //     '''
+      //     아동의 성격 검사 유형은 ${parsePTResult}입니다.
+      //     ${parsePTResult} 유형은 ${persnal_short[parsePTResult]}
+      //     '''
+      //     아동의 성격검사 결과를 바탕으로 아동의 성격을 장점과 단점으로 나눠서 분석해줘. 분석이 끝나면 단점에 대한 해결 방안을 제시해줘
+      //     `,
+      // });
 
       /*
       const user_table = "soyes_ai_User";
@@ -952,19 +952,21 @@ const openAIController = {
           pass: myMailPwd, // 이메일 비밀번호
         },
       });
+
       // 메일 관련 세팅 끝
 
       // AI 분석
-      const response = await openai.chat.completions.create({
-        messages: [...analysisPrompt, ...userPrompt],
-        model: "gpt-4o", // gpt-4-turbo, gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-        temperature: 1,
-      });
+      // const response = await openai.chat.completions.create({
+      //   messages: [...analysisPrompt, ...userPrompt],
+      //   model: "gpt-4o", // gpt-4-turbo, gpt-4-1106-preview, gpt-3.5-turbo-1106, gpt-3.5-turbo-instruct(Regercy), ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      //   temperature: 1,
+      // });
 
-      const message = { message: response.choices[0].message.content };
+      // const message = { message: response.choices[0].message.content };
       // AI 분석 내용 보기좋게 정리
-      const analyzeMsg = message.message.split(". ").join(".\n");
-
+      // const analyzeMsg = message.message.split(". ").join(".\n");
+      const message = { message: "" };
+      const analyzeMsg = message;
       // 메일 제목 및 내용 + 보내는사람 + 받는사람
       const mailOptions = {
         from: myMailAddr,
@@ -988,11 +990,11 @@ const openAIController = {
       */
 
       // client 전송
-      res.status(200).json({ message: mailOptions.text });
+      // res.status(200).json({ message: "PT Test DB Insert Success!" });
 
-      /* PT Data DB 저장 */
-      const pt_table = PT_Table_Info["Main"].table;
-      const pt_attribute = PT_Table_Info["Main"].attribute;
+      // /* PT Data DB 저장 */
+      // const pt_table = PT_Table_Info["Main"].table;
+      // const pt_attribute = PT_Table_Info["Main"].attribute;
 
       // 오늘 날짜 변환
       const dateObj = new Date();
@@ -1001,46 +1003,75 @@ const openAIController = {
       const day = ("0" + dateObj.getDate()).slice(-2);
       const date = `${year}-${month}-${day}`;
 
-      // soyes_ai_Pt Table 삽입
-      // 1. SELECT TEST (row가 있는지 없는지 검사)
-      const select_query = `SELECT * FROM ${pt_table} WHERE ${pt_attribute.pKey}='${parsepUid}'`;
-      const ebt_data = await fetchUserData(connection_AI, select_query);
+      // // soyes_ai_Pt Table 삽입
+      // // 1. SELECT TEST (row가 있는지 없는지 검사)
+      // const select_query = `SELECT * FROM ${pt_table} WHERE ${pt_attribute.pKey}='${parsepUid}'`;
+      // const ebt_data = await fetchUserData(connection_AI, select_query);
 
-      // 2. UPDATE TEST (row값이 있는 경우 실행)
-      if (ebt_data[0]) {
-        const update_query = `UPDATE ${pt_table} SET ${Object.values(
-          pt_attribute
-        )
-          .filter((el) => el !== "uid")
-          .map((el) => {
-            return `${el} = ?`;
-          })
-          .join(", ")} WHERE ${pt_attribute.pKey} = ?`;
-        // console.log(update_query);
+      // // 2. UPDATE TEST (row값이 있는 경우 실행)
+      // if (ebt_data[0]) {
+      //   const update_query = `UPDATE ${pt_table} SET ${Object.values(
+      //     pt_attribute
+      //   )
+      //     .filter((el) => el !== "uid")
+      //     .map((el) => {
+      //       return `${el} = ?`;
+      //     })
+      //     .join(", ")} WHERE ${pt_attribute.pKey} = ?`;
+      //   // console.log(update_query);
 
-        const update_value = [
-          date,
-          parsePTResult,
-          JSON.stringify({ ...mailOptions, date }),
-          parsepUid,
-        ];
+      //   const update_value = [
+      //     date,
+      //     parsePTResult,
+      //     JSON.stringify({ ...mailOptions, date }),
+      //     parsepUid,
+      //   ];
 
-        // console.log(update_value);
+      //   // console.log(update_value);
 
-        connection_AI.query(
-          update_query,
-          update_value,
-          (error, rows, fields) => {
-            if (error) console.log(error);
-            else console.log("PT TEST Analysis Data DB UPDATE Success!");
-          }
-        );
-      }
-      // 3. INSERT TEST (row값이 없는 경우 실행)
-      else {
-        const pt_insert_query = `INSERT INTO ${pt_table} (${Object.values(
-          pt_attribute
-        ).join(", ")}) VALUES (${Object.values(pt_attribute)
+      //   connection_AI.query(
+      //     update_query,
+      //     update_value,
+      //     (error, rows, fields) => {
+      //       if (error) console.log(error);
+      //       else console.log("PT TEST Analysis Data DB UPDATE Success!");
+      //     }
+      //   );
+      // }
+      // // 3. INSERT TEST (row값이 없는 경우 실행)
+      // else {
+      //   const pt_insert_query = `INSERT INTO ${pt_table} (${Object.values(
+      //     pt_attribute
+      //   ).join(", ")}) VALUES (${Object.values(pt_attribute)
+      //     .map((el) => "?")
+      //     .join(", ")})`;
+      //   // console.log(insert_query);
+
+      //   const pt_insert_value = [
+      //     parsepUid,
+      //     date,
+      //     resultText,
+      //     JSON.stringify({ ...mailOptions, date }),
+      //   ];
+
+      //   connection_AI.query(
+      //     pt_insert_query,
+      //     pt_insert_value,
+      //     (error, rows, fields) => {
+      //       if (error) console.log(error);
+      //       else console.log("PT TEST Analysis Data DB INSERT Success!");
+      //     }
+      //   );
+      // }
+
+      /* PT_Log DB 저장 */
+      if (true) {
+        const pt_log_table = PT_Table_Info["Log"].table;
+        const pt_log_attribute = PT_Table_Info["Log"].attribute;
+        // PT_Log DB 저장
+        const pt_insert_query = `INSERT INTO ${pt_log_table} (${Object.values(
+          pt_log_attribute
+        ).join(", ")}) VALUES (${Object.values(pt_log_attribute)
           .map((el) => "?")
           .join(", ")})`;
         // console.log(insert_query);
@@ -1051,42 +1082,21 @@ const openAIController = {
           resultText,
           JSON.stringify({ ...mailOptions, date }),
         ];
+        // console.log(insert_value);
 
-        connection_AI.query(
-          pt_insert_query,
-          pt_insert_value,
-          (error, rows, fields) => {
-            if (error) console.log(error);
-            else console.log("PT TEST Analysis Data DB INSERT Success!");
+        connection_AI.query(pt_insert_query, pt_insert_value, (err) => {
+          if (err) {
+            console.log("PT Analysis Data DB Save Fail!");
+            console.log("Err sqlMessage: " + err.sqlMessage);
+            res
+              .status(400)
+              .json({ message: "Err sqlMessage: " + err.sqlMessage });
+          } else {
+            console.log("AI Analysis Data LOG DB INSERT Success!");
+            res.status(200).json({ message: "PT Test DB Insert Success!" });
           }
-        );
+        });
       }
-
-      /* PT_Log DB 저장 */
-      const pt_log_table = PT_Table_Info["Log"].table;
-      const pt_log_attribute = PT_Table_Info["Log"].attribute;
-      // PT_Log DB 저장
-      const pt_insert_query = `INSERT INTO ${pt_log_table} (${Object.values(
-        pt_log_attribute
-      ).join(", ")}) VALUES (${Object.values(pt_attribute)
-        .map((el) => "?")
-        .join(", ")})`;
-      // console.log(insert_query);
-
-      const pt_insert_value = [
-        parsepUid,
-        date,
-        resultText,
-        JSON.stringify({ ...mailOptions, date }),
-      ];
-      // console.log(insert_value);
-
-      connection_AI.query(pt_insert_query, pt_insert_value, (err) => {
-        if (err) {
-          console.log("PT Analysis Data DB Save Fail!");
-          console.log("Err sqlMessage: " + err.sqlMessage);
-        } else console.log("AI Analysis Data LOG DB INSERT Success!");
-      });
     } catch (err) {
       console.log(err);
       res.json({ message: "Server Error - 500 Bad Gateway" });
