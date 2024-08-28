@@ -1840,7 +1840,7 @@ const openAIController = {
 
       // console.log(pt_join_data);
 
-      function convertToKoreanTime(utcString) {
+      function convertToKoreanDate(utcString) {
         // 입력된 UTC 시간을 Date 객체로 변환
         const date = new Date(utcString);
 
@@ -1850,24 +1850,17 @@ const openAIController = {
           year: "numeric",
           month: "numeric",
           day: "numeric",
-          hour: "numeric",
-          minute: "numeric",
-          second: "numeric",
-          hour12: false, // 24시간 형식 사용
         };
 
-        // 한국 시간대로 변환된 날짜를 받아옴
-        const koreanDateString = date.toLocaleString("ko-KR", options);
+        // 한국 시간대로 변환된 날짜를 받아옴 (시간 정보는 제외)
+        const koreanDateString = date.toLocaleDateString("ko-KR", options);
 
-        // 'YYYY. M. D. H시 MM분 SS초' 형식을 직접 사용하여 결과 출력
+        // 'YYYY. M. D.' 형식을 'YYYY년 M월 D일' 형식으로 변환
         const formattedDate = koreanDateString
           .replace(".", "년")
           .replace(".", "월")
           .replace(".", "일")
-          .replace(" ", " ")
-          .replace(":", "시 ")
-          .replace(":", "분 ")
-          .concat("");
+          .trim();
 
         return formattedDate;
       }
@@ -1881,7 +1874,7 @@ const openAIController = {
           .map((el) => {
             return {
               id: el.ebt_id,
-              date: convertToKoreanTime(el.ebt_updated_at),
+              date: convertToKoreanDate(el.ebt_updated_at),
             };
           }),
         pt_data: pt_join_data
@@ -1889,7 +1882,7 @@ const openAIController = {
           .map((el) => {
             return {
               result: el.persanl_result,
-              date: convertToKoreanTime(el.created_at),
+              date: convertToKoreanDate(el.created_at),
             };
           }),
         pupu_data: consult_join_data
@@ -1897,7 +1890,7 @@ const openAIController = {
           .map((el) => {
             return {
               id: el.entry_id,
-              date: convertToKoreanTime(el.created_at),
+              date: convertToKoreanDate(el.created_at),
             };
           }),
       });

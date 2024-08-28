@@ -88,14 +88,14 @@ router.post(
 // 상담 내역 Save
 router.post(
   "/consulting_emotion_log",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIConsultingLogSave
 );
 
 // 상담 내역 Load
 router.post(
   "/consulting_emotion_log_load",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIConsultingLogLoad
 );
 
