@@ -1614,6 +1614,78 @@ const openAIController = {
       });
     }
   },
+  // 게임친구 모델 - 마루
+  postOpenAIConsultingMaru: async (req, res) => {
+    const { data } = req.body;
+    // console.log(data);
+
+    let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
+    let promptArr = []; // 삽입 Prompt Array
+    // let prevChat_flag = true; // 이전 대화 내역 유무
+    // console.log(messageArr);
+    try {
+      if (typeof data === "string") {
+        parseEBTdata = JSON.parse(data);
+      } else parseEBTdata = data;
+
+      const { messageArr, pUid, game } = parseEBTdata;
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.json({ message: "No pUid input value - 400" });
+      }
+
+      if (!game) {
+        console.log("No game input value - 400");
+        return res.json({ message: "No game input value - 400" });
+      }
+
+      parsepUid = pUid;
+      console.log(
+        `마루 게임 API /consulting_emotion_maru Path 호출 - pUid: ${parsepUid}`
+      );
+      // 고정 삽입 프롬프트
+      promptArr.push(persona_prompt_ubi); // 페르소나 프롬프트 삽입
+      promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
+
+      if (game === "remarks") {
+        promptArr.push({
+          role: "system",
+          content: `assistant는 user와 끝말잇기 게임을 진행한다. 단어는 2 ~ 5글자 사이의 명사만으로 생성한다. 
+'륨', '릇'과 같은 한방단어로 인해 assistant가 패배할 경우 assistant는 패배를 인정하고 재시작 여부를 user에게 묻는다.`,
+        });
+      }
+
+      const response = await openai.chat.completions.create({
+        messages: [...promptArr, ...parseMessageArr],
+        model: "gpt-4o", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      });
+
+      // let emotion = parseInt(response.choices[0].message.content.slice(-1));
+      // console.log(emotion);
+
+      const message = {
+        message: response.choices[0].message.content,
+        // emotion,
+      };
+      // console.log([
+      //   ...parseMessageArr,
+      //   { role: "assistant", content: message.message },
+      // ]);
+      res.json(message);
+    } catch (err) {
+      console.error(err);
+      res.json({
+        message: "Server Error",
+        // emotion: 0,
+      });
+    }
+  },
   // 달력 관련 데이터 반환 (Date 단위)
   postOpenAIMypageCalendarData: async (req, res) => {
     const { data } = req.body;

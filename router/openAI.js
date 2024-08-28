@@ -17,6 +17,7 @@ const {
   postOpenAIConsultingPupu,
   postOpenAIConsultingUbi,
   postOpenAIConsultingSoyes,
+  postOpenAIConsultingMaru,
   postOpenAIMypageCalendarData,
   postClovaVoiceTTS,
   postOpenAIPernalTestAnalysis,
@@ -85,6 +86,14 @@ router.post(
   vaildateTokenConsulting,
   postOpenAIConsultingSoyes
 );
+
+// 게임친구 모델 - 마루
+router.post(
+  "/consulting_emotion_maru",
+  // vaildateTokenConsulting,
+  postOpenAIConsultingMaru
+);
+
 // 상담 내역 Save
 router.post(
   "/consulting_emotion_log",
