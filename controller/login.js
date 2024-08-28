@@ -1045,6 +1045,7 @@ const loginController = {
       }
       // refreshToken만 있는 경우 - User Table 조회
       else if (refreshToken) {
+        console.log(`refreshToken Check! - ${refreshToken}`);
         // refreshToken 복호화
         const decoded = verifyToken("refresh", refreshToken);
         // 토큰 만료
@@ -1062,7 +1063,7 @@ const loginController = {
         }
         // 입력 pUid와 토큰 해석 id와 일치하지 않는 경우
         if (pUid !== decoded.id) {
-          console.log("Input Payload pUid Not Match RefreshToken Decoded pUid");
+          console.log(`Input Payload pUid Not Match RefreshToken Decoded pUid`);
           return res.status(401).json({
             message:
               "Input Payload pUid Not Match RefreshToken Decoded pUid - 401",
