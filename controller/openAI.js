@@ -1838,26 +1838,68 @@ const openAIController = {
       //   },
       // ];
 
+      // console.log(pt_join_data);
+
+      function convertToKoreanTime(utcString) {
+        // 입력된 UTC 시간을 Date 객체로 변환
+        const date = new Date(utcString);
+
+        // 한국 시간대(KST, UTC+9)로 변환
+        const options = {
+          timeZone: "Asia/Seoul",
+          year: "numeric",
+          month: "numeric",
+          day: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+          second: "numeric",
+          hour12: false, // 24시간 형식 사용
+        };
+
+        // 한국 시간대로 변환된 날짜를 받아옴
+        const koreanDateString = date.toLocaleString("ko-KR", options);
+
+        // 'YYYY. M. D. H시 MM분 SS초' 형식을 직접 사용하여 결과 출력
+        const formattedDate = koreanDateString
+          .replace(".", "년")
+          .replace(".", "월")
+          .replace(".", "일")
+          .replace(" ", " ")
+          .replace(":", "시 ")
+          .replace(":", "분 ")
+          .concat("");
+
+        return formattedDate;
+      }
+
       return res.status(200).json({
         message: "MyPage Data Access Success! - 200 OK",
-        ebt_data: ebt_join_data.map((el) => {
-          return {
-            id: el.ebt_id,
-            date: el.ebt_updated_at,
-          };
-        }),
-        pt_data: pt_join_data.map((el) => {
-          return {
-            result: el.persanl_result,
-            date: el.created_at,
-          };
-        }),
-        pupu_data: consult_join_data.map((el) => {
-          return {
-            id: el.entry_id,
-            date: el.created_at,
-          };
-        }),
+        ebt_data: ebt_join_data
+          .sort(
+            (a, b) => new Date(a.ebt_updated_at) - new Date(b.ebt_updated_at)
+          )
+          .map((el) => {
+            return {
+              id: el.ebt_id,
+              date: convertToKoreanTime(el.ebt_updated_at),
+            };
+          }),
+        pt_data: pt_join_data
+          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+          .map((el) => {
+            return {
+              result: el.persanl_result,
+              date: convertToKoreanTime(el.created_at),
+            };
+          }),
+        pupu_data: consult_join_data
+          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+          .map((el) => {
+            return {
+              id: el.entry_id,
+              date: convertToKoreanTime(el.created_at),
+            };
+          }),
       });
     } catch (err) {
       console.error(err);
