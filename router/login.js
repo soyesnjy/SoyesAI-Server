@@ -76,7 +76,7 @@ router.post("/ai/social", postSocialAppLoginHandler);
 // AI 일반 로그아웃
 router.get("/ai/logout", getAILogoutHandler);
 // AI 회원 탈퇴
-router.delete("/ai/secession", deleteAIUserDeleteHandler);
+router.post("/ai/secession", deleteAIUserDeleteHandler);
 
 // AI RefreshToken 갱신
 router.post("/ai/certificationtoken", postAIRefreshTokenCertHandler);
