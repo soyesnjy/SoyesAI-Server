@@ -966,6 +966,14 @@ const loginController = {
         parseData = JSON.parse(data);
       } else parseData = data;
 
+      // data 없을 경우
+      if (!parseData) {
+        console.log("Non data Input Value - 400 Bad Request");
+        return res
+          .status(400)
+          .json({ message: "Non data Input Value - 400 Bad Request" });
+      }
+
       const { pUid } = parseData;
 
       // pUid 없을 경우
