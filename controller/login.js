@@ -1289,8 +1289,8 @@ const loginController = {
       // None refreshToken
       if (!refreshToken) {
         return res
-          .status(404)
-          .json({ message: "Non refreshToken Value - 404 Bad Request" });
+          .status(400)
+          .json({ message: "Non refreshToken Value - 400 Bad Request" });
       }
 
       // let parsepUid = pUid;
@@ -1301,10 +1301,31 @@ const loginController = {
 
       console.log(`RefreshToken 인증 API 호출 - pUid: ${decoded.id}`);
 
+      // 토큰 만료
       if (decoded === "expired")
         return res.status(401).json({
           message: "Token has expired - 401 UNAUTHORIZED",
         });
+
+      const user_table = User_Table_Info.table;
+      const user_attribute = User_Table_Info.attribute;
+
+      // 1. SELECT (row가 있는지 없는지 검사)
+      // User 계정 DB SELECT Method. uid를 입력값으로 받음
+      const ebt_data = await user_ai_select(
+        user_table,
+        user_attribute,
+        decoded.id
+      );
+
+      // DB 회원 정보 조회
+      if (!ebt_data[0]) {
+        console.log("Non User - 401 UNAUTHORIZED");
+        return res.status(401).json({
+          message: "Non User - 401 UNAUTHORIZED",
+        });
+      }
+
       // 유효하지 않은 refreshToken 양식일 경우
       if (!decoded) {
         console.log("Invalid token format - 401 UNAUTHORIZED");
