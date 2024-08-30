@@ -954,6 +954,73 @@ const loginController = {
       res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
+  // AI 회원탈퇴
+  deleteAIUserDeleteHandler: async (req, res) => {
+    console.log("AI 회원탈퇴 API 호출");
+    const { data } = req.body;
+    // console.log(data);
+    let parseData;
+    try {
+      // 입력값 파싱
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { pUid } = parseData;
+
+      // pUid 없을 경우
+      if (!pUid) {
+        console.log("Non pUid Value - 400 Bad Request");
+        return res
+          .status(400)
+          .json({ message: "Non pUid Value - 400 Bad Request" });
+      }
+
+      let parsepUid = pUid;
+
+      console.log(`User Delete API 호출 - pUid: ${parsepUid}`);
+
+      /* User DB 조회 */
+      // User Table && attribut 명시
+      const user_table = User_Table_Info.table;
+      const user_attribute = User_Table_Info.attribute;
+
+      // 1. SELECT (row가 있는지 없는지 검사)
+      // User 계정 DB SELECT Method. uid를 입력값으로 받음
+      const ebt_data = await user_ai_select(
+        user_table,
+        user_attribute,
+        parsepUid
+      );
+
+      console.log(ebt_data[0]);
+
+      // User 계정이 있는 경우 (row값이 있는 경우 실행)
+      if (ebt_data[0]) {
+        // 회원 삭제 쿼리
+        const delete_query = `DELETE FROM ${user_table} WHERE ${user_attribute.pKey} = ?`;
+
+        connection_AI.query(delete_query, [parsepUid], (err) => {
+          if (err) {
+            console.log(err);
+            return res.status(400).json({ message: err.sqlMessage });
+          }
+          console.log("User DB Delete Success!");
+          return res.status(200).json({ message: "User DB Delete Success!" });
+        });
+      }
+      // User 계정이 없는 경우 (row값이 없는 경우 실행)
+      else {
+        console.log(`Non User - 400 Not Found (pUid: ${parsepUid})`);
+        return res.status(400).json({ message: "Non User - 400 Not Found" });
+      }
+    } catch (err) {
+      console.error(err);
+      return res
+        .status(500)
+        .json({ message: "Server Error - 500 Bad Gateway" });
+    }
+  },
   // (Middle Ware) AI JWT 토큰 유효성 검사 - 서비스 이용
   vaildateTokenConsulting: async (req, res, next) => {
     const { data } = req.body;

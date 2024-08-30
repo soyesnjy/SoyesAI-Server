@@ -1666,22 +1666,18 @@ const openAIController = {
         model: "gpt-4o", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
-      // let emotion = parseInt(response.choices[0].message.content.slice(-1));
-      // console.log(emotion);
-
       const message = {
         message: response.choices[0].message.content,
-        // emotion,
       };
       // console.log([
       //   ...parseMessageArr,
       //   { role: "assistant", content: message.message },
       // ]);
-      res.json(message);
+      return res.status(200).json(message);
     } catch (err) {
       console.error(err);
-      res.json({
-        message: "Server Error",
+      res.status(500).json({
+        message: "Server Error - 500",
         // emotion: 0,
       });
     }
