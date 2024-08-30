@@ -958,7 +958,7 @@ const loginController = {
   deleteAIUserDeleteHandler: async (req, res) => {
     console.log("AI 회원탈퇴 API 호출");
     const { data } = req.body;
-    // console.log(data);
+    console.log(data);
     let parseData;
     try {
       // 입력값 파싱
@@ -970,10 +970,10 @@ const loginController = {
 
       // pUid 없을 경우
       if (!pUid) {
-        console.log("Non pUid Value - 400 Bad Request");
+        console.log("Non pUid Input Value - 400 Bad Request");
         return res
           .status(400)
-          .json({ message: "Non pUid Value - 400 Bad Request" });
+          .json({ message: "Non pUid Input Value - 400 Bad Request" });
       }
 
       let parsepUid = pUid;
