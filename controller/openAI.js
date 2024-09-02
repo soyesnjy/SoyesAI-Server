@@ -1804,6 +1804,7 @@ const openAIController = {
   // 마이페이지 데이터 반환 API
   postOpenAIMypageData: async (req, res) => {
     const { data } = req.body;
+    console.log(data);
     let parseEBTdata, parsepUid; // Parsing 변수
 
     try {
@@ -2102,6 +2103,7 @@ const openAIController = {
   // 상담 로그 Load API
   postOpenAIConsultingLogLoad: async (req, res) => {
     const { data } = req.body;
+    console.log(data);
     let parseEBTdata, parsepUid;
 
     try {
@@ -2168,6 +2170,7 @@ const openAIController = {
   // User 정서행동 검사 11종 결과 반환
   postOpenAIUserEBTResultData: async (req, res) => {
     const { data } = req.body;
+    console.log(data);
     let parseEBTdata, parsepUid;
 
     try {
