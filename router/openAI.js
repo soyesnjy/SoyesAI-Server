@@ -120,7 +120,7 @@ router.post(
   vaildateTokenConsulting,
   postOpenAIMoodDataSave
 );
-// 기분훈련 데이터 Load
+// 기분훈련 시작 데이터 Load
 router.post(
   "/training_mood_ella/load",
   vaildateTokenConsulting,

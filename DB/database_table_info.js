@@ -373,6 +373,24 @@ const Review_Table_Info = {
     attr2: "content",
   },
 };
+const Ella_Training_Table_Info = {
+  Mood: {
+    table: "soyes_training_mood",
+    attribute: {
+      pKey: "mood_idx",
+      fKey: "uid",
+      attr1: "mood_round_idx",
+      attr2: "mood_name",
+      attr3: "mood_score",
+      attr4: "mood_todo_list",
+      attr5: "mood_talk_list",
+      attr6: "mood_meditation_feedback",
+      attr7: "mood_avartar",
+      attr8: "created_at",
+      attr9: "updated_at",
+    },
+  },
+};
 
 module.exports = {
   User_Table_Info,
@@ -381,4 +399,5 @@ module.exports = {
   PT_Table_Info,
   Consult_Table_Info,
   Review_Table_Info,
+  Ella_Training_Table_Info,
 };

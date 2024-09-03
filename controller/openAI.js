@@ -220,6 +220,7 @@ const {
   EBT_Table_Info,
   PT_Table_Info,
   Consult_Table_Info,
+  Ella_Training_Table_Info,
 } = require("../DB/database_table_info");
 
 // User 정서행동 2점문항 반환 (String)
@@ -2591,29 +2592,73 @@ Todo List가 아니라고 판단되면 제외한다.
       const {
         pUid,
         type,
+        mood_situation,
+        mood_thought,
+        mood_solution,
+        mood_different_thought,
+        mood_rating,
         mood_name,
         mood_cognitive_score,
         mood_todo_list,
         mood_talk_list,
+        mood_meditation_feedback,
       } = parseData;
 
-      // No pUid => return
-      if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.status(400).json({ message: "No pUid input value - 400" });
+      // No Required Mood Data => return
+      if (
+        !pUid ||
+        !type ||
+        !mood_situation ||
+        !mood_thought ||
+        !mood_solution ||
+        !mood_different_thought ||
+        !mood_rating
+      ) {
+        console.log("No type input value - 400");
+        return res
+          .status(400)
+          .json({ message: "No Required Mood Data input value - 400" });
       }
 
-      // No type => return
-      if (!type) {
-        console.log("No type input value - 400");
-        return res.status(400).json({ message: "No type input value - 400" });
+      // 타입별 필수 입력값 체크
+      if (type === "first" && (!mood_name || !mood_cognitive_score)) {
+        console.log(
+          `There are no input values suitable for the type (first) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "There are no input values suitable for the type",
+        });
+      }
+      if (type === "second" && !mood_todo_list) {
+        console.log(
+          `There are no input values suitable for the type (second) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "There are no input values suitable for the type",
+        });
+      }
+      if (type === "third" && !mood_talk_list) {
+        console.log(
+          `There are no input values suitable for the type (third) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "There are no input values suitable for the type",
+        });
+      }
+      if (type === "fourth" && !mood_meditation_feedback) {
+        console.log(
+          `There are no input values suitable for the type (fourth) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "There are no input values suitable for the type",
+        });
       }
 
       // pUid default값 설정
       parsepUid = pUid;
 
       console.log(
-        `기분 훈련 저장 API /openAI/calendar Path 호출 - pUid: ${parsepUid}`
+        `기분 훈련 저장 API /openAI/training_mood_ella/save Path 호출 - pUid: ${parsepUid}`
       );
 
       const table = Ella_Training_Table_Info["Mood"].table;
@@ -2627,12 +2672,66 @@ Todo List가 아니라고 판단되면 제외한다.
 
       // console.log(select_data[0]);
 
-      // TODO - Mood Table INSERT || UPDATE
+      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
+      if (
+        type === "first" &&
+        select_data.length &&
+        select_data[0].mood_round_idx !== 4
+      ) {
+        console.log(
+          `The type value does not match the current episode (first) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "The type value does not match the current episode",
+        });
+      }
+
+      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
+      if (
+        type === "second" &&
+        select_data.length &&
+        select_data[0].mood_round_idx !== 1
+      ) {
+        console.log(
+          `The type value does not match the current episode (second) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "The type value does not match the current episode",
+        });
+      }
+
+      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
+      if (
+        type === "third" &&
+        select_data.length &&
+        select_data[0].mood_round_idx !== 2
+      ) {
+        console.log(
+          `The type value does not match the current episode (third)- pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "The type value does not match the current episode",
+        });
+      }
+
+      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
+      if (
+        type === "fourth" &&
+        select_data.length &&
+        select_data[0].mood_round_idx !== 3
+      ) {
+        console.log(
+          `The type value does not match the current episode (fourth) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "The type value does not match the current episode",
+        });
+      }
 
       // 타입별 query, value 삽입
       switch (type) {
         case "first":
-          const insert_query = `INSERT INTO ${table} (${attribute.fKey}, ${attribute.attr1}, ${attribute.attr2}, ${attribute.attr3}, ${attribute.attr6}) VALUES (?, ?, ?, ?, ?);`;
+          const insert_query = `INSERT INTO ${table} (uid, mood_round_idx, mood_name, mood_score, mood_avartar, mood_situation_first, mood_thought_first, mood_solution_first, mood_different_thought_first, mood_rating_first) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
           // console.log(insert_query);
           const insert_value = [
             parsepUid,
@@ -2640,26 +2739,41 @@ Todo List가 아니라고 판단되면 제외한다.
             mood_name,
             mood_cognitive_score,
             "Ella",
+            mood_situation,
+            mood_thought,
+            mood_solution,
+            mood_different_thought,
+            mood_rating,
           ];
           // console.log(insert_value);
-          // LOCK - 2024.08.19 이후 해제 (1회기 Insert Query)
-          if (false) {
-            connection_AI.query(
-              insert_query,
-              insert_value,
-              (error, rows, fields) => {
-                if (error) console.log(error);
-                else console.log("Mood First Insert Success!");
+
+          connection_AI.query(
+            insert_query,
+            insert_value,
+            (error, rows, fields) => {
+              if (error) {
+                console.log(error);
+                return res.status(400).json({ message: error.sqlMessage });
               }
-            );
-          }
+              console.log("Mood First Insert Success!");
+              return res
+                .status(200)
+                .json({ message: "Mood First Data Save Success!" });
+            }
+          );
+
           break;
         case "second":
-          update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr4} = ? WHERE ${attribute.pKey} = ?`;
+          update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr4} = ?, mood_situation_second = ?, mood_thought_second = ?, mood_solution_second = ?, mood_different_thought_second = ?, mood_rating_second = ? WHERE ${attribute.pKey} = ?`;
           // console.log(update_query);
           update_value = [
             2,
             JSON.stringify(mood_todo_list),
+            mood_situation,
+            mood_thought,
+            mood_solution,
+            mood_different_thought,
+            mood_rating,
             select_data[0].mood_idx,
           ];
           // console.log(update_value);
@@ -2667,17 +2781,28 @@ Todo List가 아니라고 판단되면 제외한다.
             update_query,
             update_value,
             (error, rows, fields) => {
-              if (error) console.log(error);
-              else console.log("Mood Second Update Success!");
+              if (error) {
+                console.log(error);
+                return res.status(400).json({ message: error.sqlMessage });
+              }
+              console.log("Mood Second Update Success!");
+              return res
+                .status(200)
+                .json({ message: "Mood Second Data Save Success!" });
             }
           );
           break;
         case "third":
-          update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr5} = ? WHERE ${attribute.pKey} = ?`;
+          update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr5} = ?, mood_situation_third = ?, mood_thought_third = ?, mood_solution_third = ?, mood_different_thought_third = ?, mood_rating_third = ? WHERE ${attribute.pKey} = ?`;
           // console.log(update_query);
           update_value = [
             3,
             JSON.stringify(mood_talk_list),
+            mood_situation,
+            mood_thought,
+            mood_solution,
+            mood_different_thought,
+            mood_rating,
             select_data[0].mood_idx,
           ];
           // console.log(update_value);
@@ -2685,31 +2810,51 @@ Todo List가 아니라고 판단되면 제외한다.
             update_query,
             update_value,
             (error, rows, fields) => {
-              if (error) console.log(error);
-              else console.log("Mood Third Update Success!");
+              if (error) {
+                console.log(error);
+                return res.status(400).json({ message: error.sqlMessage });
+              }
+              console.log("Mood Third Update Success!");
+              return res
+                .status(200)
+                .json({ message: "Mood Third Data Save Success!" });
             }
           );
           break;
         case "fourth":
-          update_query = `UPDATE ${table} SET ${attribute.attr1} = ? WHERE ${attribute.pKey} = ?`;
+          update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr6} = ?, mood_situation_fourth = ?, mood_thought_fourth = ?, mood_solution_fourth = ?, mood_different_thought_fourth = ?, mood_rating_fourth = ? WHERE ${attribute.pKey} = ?`;
           // console.log(update_query);
-          update_value = [4, select_data[0].mood_idx];
+          update_value = [
+            4,
+            mood_meditation_feedback,
+            mood_situation,
+            mood_thought,
+            mood_solution,
+            mood_different_thought,
+            mood_rating,
+            select_data[0].mood_idx,
+          ];
           // console.log(update_value);
           connection_AI.query(
             update_query,
             update_value,
             (error, rows, fields) => {
-              if (error) console.log(error);
-              else console.log("Mood Fourth Update Success!");
+              if (error) {
+                console.log(error);
+                return res.status(400).json({ message: error.sqlMessage });
+              }
+              console.log("Mood Fourth Update Success!");
+              return res
+                .status(200)
+                .json({ message: "Mood Fourth Data Save Success!" });
             }
           );
           break;
       }
-      return res.json({ message: "Mood Data Save Success!" });
     } catch (err) {
       console.error(err);
-      res.json({
-        message: "Server Error",
+      res.status(500).json({
+        message: "Server Error - 500",
       });
     }
   },
@@ -2736,33 +2881,31 @@ Todo List가 아니라고 판단되면 제외한다.
       // pUid default값 설정
       parsepUid = pUid;
 
-      console.log(`기분 훈련 Data Load API 호출 - pUid: ${parsepUid}`);
+      console.log(`기분 훈련 Start Data Load API 호출 - pUid: ${parsepUid}`);
 
-      // LOCK - 2024.08.19 이후 해제 (Mood Table Select)
-      if (false) {
-        // Mood Table 명시
-        const table = Ella_Training_Table_Info["Mood"].table;
-        const attribute = Ella_Training_Table_Info["Mood"].attribute;
-        // Mood Table User 조회
-        const select_query = `SELECT * FROM ${table} WHERE ${attribute.fKey} = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
-        const select_data = await fetchUserData(connection_AI, select_query);
-        // case.1 - Row가 없거나 mood_round_idx값이 4일 경우: 기분관리 프로그램을 시작하는 인원. { mood_round_idx: 0, mood_name: "" } 반환
-        if (!select_data[0] || select_data[0].mood_round_idx === 4)
-          return res.json({ mood_round_idx: 0, mood_name: "" });
-        // case.2 - Row가 있을 경우: 기분관리 프로그램을 진행했던 인원. { mood_round_idx: data.mood_round_idx, mood_name: data.mood_name } 반환
-        else {
-          return res.json({
-            mood_round_idx: select_data[0].mood_round_idx,
-            mood_name: select_data[0].mood_name,
-          });
-        }
+      // Mood Table 명시
+      const table = Ella_Training_Table_Info["Mood"].table;
+      const attribute = Ella_Training_Table_Info["Mood"].attribute;
+      // Mood Table User 조회
+      const select_query = `SELECT * FROM ${table} WHERE ${attribute.fKey} = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
+      const select_data = await fetchUserData(connection_AI, select_query);
+      // case.1 - Row가 없거나 mood_round_idx값이 4일 경우: 기분관리 프로그램을 시작하는 인원. { mood_round_idx: 0, mood_name: "" } 반환
+      if (!select_data[0] || select_data[0].mood_round_idx === 4)
+        return res.json({ mood_round_idx: 0, mood_name: "" });
+      // case.2 - Row가 있을 경우: 기분관리 프로그램을 진행했던 인원. { mood_round_idx: data.mood_round_idx, mood_name: data.mood_name } 반환
+      else {
+        return res.status(200).json({
+          mood_round_idx: select_data[0].mood_round_idx,
+          mood_name: select_data[0].mood_name,
+        });
       }
+
       // dummy data (임시)
-      res.json({ mood_round_idx: 0, mood_name: "" });
+      // return res.json({ mood_round_idx: 0, mood_name: "" });
     } catch (err) {
       console.error(err);
-      res.json({
-        message: "Server Error",
+      res.status(500).json({
+        message: "Server Error - 500",
       });
     }
   },
