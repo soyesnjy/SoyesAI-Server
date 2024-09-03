@@ -2035,11 +2035,10 @@ const openAIController = {
       // 푸푸 페르소나 프롬프트 삽입
       analysisPrompt.push({
         role: "system",
-        content: `assistant의 이름은 '푸푸'이다. '푸푸'는 풍부한 상담기술을 갖고, 6-12세(유치원~초등학생) 아이들 눈높이에 맞게 초등학교 6학년 수준의 언어로 말하는 상담사이다. 푸푸는 반말을 사용한다.
-      푸푸는 다음 형식으로 분석을 제공한다.
-      1) 상담 키워드를 3가지로 요약한다.
-      2) 유저가 사용한 감정 단어를 파악한다.
-      3) 사용된 전체 감정 단어 중 상세한 감정 단어의 비율만 '정서 인식 **%'의 형식으로 제시한다.`,
+        content: `user가 상담을 종료하면 다음 형식으로 분석을 제공한다.
+1) 상담 키워드를 3가지로 요약한다.
+2) 유저가 사용한 감정 단어를 파악한다.
+3) 사용된 전체 감정 단어 중 상세한 감정 단어의 비율만 '정서 인식(명확한 감정 단어를 사용한 비율) **%'의 형식으로 제시한다.`,
       });
 
       // 상담 분석 명령 프롬프트 삽입
@@ -2058,7 +2057,7 @@ const openAIController = {
       // AI 분석 내용 보기좋게 정리
       const analyzeMsg = message.message.split(". ").join(".\n");
 
-      messageArr.push({ role: "assistant", content: analyzeMsg });
+      messageArr.push({ role: "user", content: analyzeMsg });
 
       // console.log(analyzeMsg);
 
@@ -2103,7 +2102,6 @@ const openAIController = {
   // 상담 로그 Load API
   postOpenAIConsultingLogLoad: async (req, res) => {
     const { data } = req.body;
-    console.log(data);
     let parseEBTdata, parsepUid;
 
     try {
@@ -2126,6 +2124,7 @@ const openAIController = {
       console.log(
         `상담 로그 Load API /openAI/consulting_emotion_log_load Path 호출 - pUid: ${parsepUid}`
       );
+      console.log(parseEBTdata);
 
       const resultArr = await select_soyesAI_Consult_Log(pKeyValue, parsepUid);
 
