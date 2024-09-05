@@ -2580,9 +2580,9 @@ Todo List가 아니라고 판단되면 제외한다.
   // 기분 훈련 저장 API
   postOpenAIMoodDataSave: async (req, res) => {
     const { data } = req.body;
-    // console.log(data);
-    let parseData, parsepUid; // Parsing 변수
-
+    console.log(data);
+    let parseData, parsepUid, parseType; // Parsing 변수
+    const typeArr = ["first", "second", "third", "fourth"]; // type 식별자
     try {
       // json 파싱
       if (typeof data === "string") {
@@ -2591,7 +2591,7 @@ Todo List가 아니라고 판단되면 제외한다.
 
       const {
         pUid,
-        type,
+        type, // 2024.09.05: String -> Int 변경
         mood_situation,
         mood_thought,
         mood_solution,
@@ -2620,8 +2620,11 @@ Todo List가 아니라고 판단되면 제외한다.
           .json({ message: "No Required Mood Data input value - 400" });
       }
 
+      parseType = typeArr[type - 1];
+      console.log(`parseType : ${parseType}`);
+
       // 타입별 필수 입력값 체크
-      if (type === "first" && (!mood_name || !mood_cognitive_score)) {
+      if (parseType === "first" && (!mood_name || !mood_cognitive_score)) {
         console.log(
           `There are no input values suitable for the type (first) - pUid: ${parsepUid}`
         );
@@ -2629,7 +2632,7 @@ Todo List가 아니라고 판단되면 제외한다.
           message: "There are no input values suitable for the type",
         });
       }
-      if (type === "second" && !mood_todo_list) {
+      if (parseType === "second" && !mood_todo_list) {
         console.log(
           `There are no input values suitable for the type (second) - pUid: ${parsepUid}`
         );
@@ -2637,7 +2640,7 @@ Todo List가 아니라고 판단되면 제외한다.
           message: "There are no input values suitable for the type",
         });
       }
-      if (type === "third" && !mood_talk_list) {
+      if (parseType === "third" && !mood_talk_list) {
         console.log(
           `There are no input values suitable for the type (third) - pUid: ${parsepUid}`
         );
@@ -2645,7 +2648,7 @@ Todo List가 아니라고 판단되면 제외한다.
           message: "There are no input values suitable for the type",
         });
       }
-      if (type === "fourth" && !mood_meditation_feedback) {
+      if (parseType === "fourth" && !mood_meditation_feedback) {
         console.log(
           `There are no input values suitable for the type (fourth) - pUid: ${parsepUid}`
         );
@@ -2674,7 +2677,7 @@ Todo List가 아니라고 판단되면 제외한다.
 
       // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
       if (
-        type === "first" &&
+        parseType === "first" &&
         select_data.length &&
         select_data[0].mood_round_idx !== 4
       ) {
@@ -2688,7 +2691,7 @@ Todo List가 아니라고 판단되면 제외한다.
 
       // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
       if (
-        type === "second" &&
+        parseType === "second" &&
         select_data.length &&
         select_data[0].mood_round_idx !== 1
       ) {
@@ -2702,7 +2705,7 @@ Todo List가 아니라고 판단되면 제외한다.
 
       // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
       if (
-        type === "third" &&
+        parseType === "third" &&
         select_data.length &&
         select_data[0].mood_round_idx !== 2
       ) {
@@ -2716,7 +2719,7 @@ Todo List가 아니라고 판단되면 제외한다.
 
       // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
       if (
-        type === "fourth" &&
+        parseType === "fourth" &&
         select_data.length &&
         select_data[0].mood_round_idx !== 3
       ) {
@@ -2729,7 +2732,7 @@ Todo List가 아니라고 판단되면 제외한다.
       }
 
       // 타입별 query, value 삽입
-      switch (type) {
+      switch (parseType) {
         case "first":
           const insert_query = `INSERT INTO ${table} (uid, mood_round_idx, mood_name, mood_score, mood_avartar, mood_situation_first, mood_thought_first, mood_solution_first, mood_different_thought_first, mood_rating_first) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
           // console.log(insert_query);
@@ -2861,7 +2864,7 @@ Todo List가 아니라고 판단되면 제외한다.
   // 기분 훈련 데이터 Load API
   postOpenAIMoodDataLoad: async (req, res) => {
     const { data } = req.body;
-    // console.log(data);
+    console.log(data);
     let parseData, parsepUid; // Parsing 변수
 
     try {
