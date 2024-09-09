@@ -1845,11 +1845,14 @@ const openAIController = {
 
       // Consult Table Key
       const consult_log_table = Consult_Table_Info["Log"].table;
-      const consult_log_attribute = Consult_Table_Info["Log"].attribute;
+      // const consult_log_attribute = Consult_Table_Info["Log"].attribute;
+
+      // Consult Table Key
+      const north_table = North_Table_Info.table;
+      // const north_attribute = North_Table_Info.attribute;
 
       // 1. SELECT USER JOIN EBT_Log
       const select_ebt_join_query = `SELECT ${pKey}, ${updated_at} FROM ${ebt_log_table} WHERE uid = '${parsepUid}' AND ${status} = '1' ORDER BY ${created_at} DESC LIMIT 5;`;
-
       const ebt_join_data = await fetchUserData(
         connection_AI,
         select_ebt_join_query
@@ -1858,18 +1861,49 @@ const openAIController = {
 
       // 2. SELECT USER PT_Log
       const select_pt_join_query = `SELECT ${pt_log_attribute.attr2}, created_at FROM ${pt_log_table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 5;`;
-
       const pt_join_data = await fetchUserData(
         connection_AI,
         select_pt_join_query
       );
 
       // 3. SELECT USER Consult_Log
-      const select_consult_join_query = `SELECT * FROM ${consult_log_table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 5;`;
-
+      const select_consult_join_query = `SELECT * FROM ${consult_log_table} WHERE uid = '${parsepUid}' AND avarta_name = 'pupu' ORDER BY created_at DESC LIMIT 5;`;
       const consult_join_data = await fetchUserData(
         connection_AI,
         select_consult_join_query
+      );
+
+      // 4. SELECT
+      const select_north_join_query = `SELECT JSON_OBJECT(
+    'mood_data', IFNULL((SELECT JSON_ARRAYAGG(north_mental_data)
+                  FROM (SELECT north_mental_data
+                        FROM ${north_table}
+                        WHERE uid = '${parsepUid}' AND north_diary_tag = 'mood'
+                        ORDER BY created_at DESC
+                        LIMIT 5) AS mood), JSON_ARRAY()),
+    'friend_data', IFNULL((SELECT JSON_ARRAYAGG(north_mental_data)
+                    FROM (SELECT north_mental_data
+                          FROM ${north_table}
+                          WHERE uid = '${parsepUid}' AND north_diary_tag = 'friend'
+                          ORDER BY created_at DESC
+                          LIMIT 5) AS friend), JSON_ARRAY()),
+    'family_data', IFNULL((SELECT JSON_ARRAYAGG(north_mental_data)
+                    FROM (SELECT north_mental_data
+                          FROM ${north_table}
+                          WHERE uid = '${parsepUid}' AND north_diary_tag = 'family'
+                          ORDER BY created_at DESC
+                          LIMIT 5) AS family), JSON_ARRAY()),
+    'school_data', IFNULL((SELECT JSON_ARRAYAGG(north_mental_data)
+                    FROM (SELECT north_mental_data
+                          FROM ${north_table}
+                          WHERE uid = '${parsepUid}' AND north_diary_tag = 'school'
+                          ORDER BY created_at DESC
+                          LIMIT 5) AS school), JSON_ARRAY())
+) AS result;
+`;
+      const north_join_data = await fetchUserData(
+        connection_AI,
+        select_north_join_query
       );
 
       // console.log(consult_join_data);
@@ -1969,6 +2003,7 @@ const openAIController = {
               date: convertToKoreanDate(el.created_at),
             };
           }),
+        north_data: JSON.parse(north_join_data[0].result),
       });
     } catch (err) {
       console.error(err);
@@ -2958,7 +2993,7 @@ const NorthController = {
     let parseEBTdata, parsepUid, parseMentalData; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
 
-    const tagArr = ["mood", "friend", "family", "school", "study"];
+    const tagArr = ["mood", "friend", "family", "school"];
     try {
       if (typeof data === "string") {
         parseEBTdata = JSON.parse(data);
@@ -3118,43 +3153,41 @@ const NorthController = {
 
     let parseEBTdata, parsepUid; // Parsing 변수
 
-    const tagArr = ["mood", "friend", "family", "school", "study"];
     try {
       if (typeof data === "string") {
         parseEBTdata = JSON.parse(data);
       } else parseEBTdata = data;
 
-      const { content, pUid, tag } = parseEBTdata;
+      const { pUid } = parseEBTdata;
       // messageArr가 문자열일 경우 json 파싱
 
       // No pUid => return
-      if (!pUid || !content || !tag) {
+      if (!pUid) {
         console.log("No Required input value - 400");
         return res
           .status(400)
           .json({ message: "No Required input value - 400" });
       }
-      // tag 값이 지정된 값이 아닐 경우
-      if (!tagArr.includes(tag)) {
-        console.log("The specified tag value was not entered.- 400");
-        return res
-          .status(400)
-          .json({ message: "The specified tag value was not entered.- 400" });
-      }
 
       parsepUid = pUid;
       console.log(
-        `북극이 일기 Load API /consulting_emotion_north Path 호출 - pUid: ${parsepUid}`
+        `북극이 일기 Load API /north_load Path 호출 - pUid: ${parsepUid}`
       );
 
       // DB Select
       const table = North_Table_Info.table;
 
       // 1. SELECT User Mood Table Data
-      const select_query = `SELECT * FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
+      const select_query = `SELECT
+      north_diary_content AS content,
+      north_diary_tag AS tag,
+      DATE_FORMAT(created_at, '%Y-%m-%d') AS date
+      FROM ${table}
+      WHERE uid = '${parsepUid}'
+      ORDER BY created_at ASC;`;
       const select_data = await fetchUserData(connection_AI, select_query);
 
-      // return res.status(200).json(message);
+      return res.status(200).json({ data: select_data });
     } catch (err) {
       console.error(err);
       res.status(500).json({
