@@ -6,6 +6,7 @@ const { errController } = require("../controller/index");
 const {
   openAIController,
   ellaMoodController,
+  NorthController,
   // openAIController_Regercy, // 레거시 코드
 } = require("../controller/openAI");
 
@@ -18,7 +19,6 @@ const {
   postOpenAIConsultingUbi,
   postOpenAIConsultingSoyes,
   postOpenAIConsultingMaru,
-  postOpenAIConsultingNorth,
   postOpenAIMypageCalendarData,
   postClovaVoiceTTS,
   postOpenAIPernalTestAnalysis,
@@ -37,6 +37,9 @@ const {
   postOpenAIMoodDataSave,
   postOpenAIMoodDataLoad,
 } = ellaMoodController;
+
+const { postOpenAIConsultingNorthSave, postOpenAIConsultingNorthLoad } =
+  NorthController;
 
 // 토큰 유효성 검사 미들웨어
 const { vaildateTokenConsulting, vaildatePlan } = loginController;
@@ -95,11 +98,18 @@ router.post(
   postOpenAIConsultingMaru
 );
 
-// 일기 친구모델 - 북국이
+// 북극이 데이터 Save
 router.post(
-  "/consulting_emotion_north",
+  "/north_save",
   // vaildateTokenConsulting,
-  postOpenAIConsultingNorth
+  postOpenAIConsultingNorthSave
+);
+
+// 북극이 데이터 Load
+router.post(
+  "/north_load",
+  // vaildateTokenConsulting,
+  postOpenAIConsultingNorthLoad
 );
 
 // 상담 내역 Save
