@@ -101,14 +101,14 @@ router.post(
 // 북극이 데이터 Save
 router.post(
   "/north_save",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIConsultingNorthSave
 );
 
 // 북극이 데이터 Load
 router.post(
   "/north_load",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIConsultingNorthLoad
 );
 
@@ -149,7 +149,7 @@ router.post(
 router.post("/calendar", vaildateTokenConsulting, postOpenAIMypageCalendarData);
 
 // 마이페이지 데이터 반환
-router.post("/mypage", postOpenAIMypageData);
+router.post("/mypage", vaildateTokenConsulting, postOpenAIMypageData);
 // User EBT 결과(11종) 데이터 반환
 router.post("/ebtresult", vaildateTokenConsulting, postOpenAIUserEBTResultData);
 

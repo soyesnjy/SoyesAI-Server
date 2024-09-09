@@ -1873,7 +1873,7 @@ const openAIController = {
         select_consult_join_query
       );
 
-      // 4. SELECT
+      // 4. SELECT User North Data (일일 모니터링)
       const select_north_join_query = `SELECT JSON_OBJECT(
     'mood_data', IFNULL((SELECT JSON_ARRAYAGG(north_mental_data)
                   FROM (SELECT north_mental_data
@@ -3132,7 +3132,9 @@ const NorthController = {
               return res.status(400).json({ message: error.sqlMessage });
             }
             console.log(`North Insert Success! - ${parsepUid}`);
-            return res.status(200).json({ message: "North Insert Success!" });
+            return res
+              .status(200)
+              .json({ message: "North Diary Save Success!" });
           }
         );
       }
@@ -3187,7 +3189,9 @@ const NorthController = {
       ORDER BY created_at ASC;`;
       const select_data = await fetchUserData(connection_AI, select_query);
 
-      return res.status(200).json({ data: select_data });
+      return res
+        .status(200)
+        .json({ message: "North Diary Load Success!", data: select_data });
     } catch (err) {
       console.error(err);
       res.status(500).json({
