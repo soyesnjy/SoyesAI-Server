@@ -129,6 +129,11 @@ async function fetchUserData(connection, query) {
   }
 }
 
+// 숫자 확인용 함수
+function isNum(val) {
+  return !isNaN(val);
+}
+
 // 심리 검사 관련
 const {
   persnal_short, // 성격검사 짧은 결과
@@ -1683,6 +1688,148 @@ const openAIController = {
       });
     }
   },
+  // 일기친구 모델 - 북극이
+  postOpenAIConsultingNorth: async (req, res) => {
+    const { data } = req.body;
+    // console.log(data);
+
+    let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
+    let promptArr = []; // 삽입 Prompt Array
+    // let prevChat_flag = true; // 이전 대화 내역 유무
+    // console.log(messageArr);
+
+    const tagArr = ["mood", "friend", "family", "school", "study"];
+    try {
+      if (typeof data === "string") {
+        parseEBTdata = JSON.parse(data);
+      } else parseEBTdata = data;
+
+      const { content, pUid, tag } = parseEBTdata;
+      // messageArr가 문자열일 경우 json 파싱
+
+      // No pUid => return
+      if (!pUid || !content || !tag) {
+        console.log("No Required input value - 400");
+        return res
+          .status(400)
+          .json({ message: "No Required input value - 400" });
+      }
+      // tag 값이 지정된 값이 아닐 경우
+      if (!tagArr.includes(tag)) {
+        console.log("The specified tag value was not entered.- 400");
+        return res
+          .status(400)
+          .json({ message: "The specified tag value was not entered.- 400" });
+      }
+
+      parsepUid = pUid;
+      console.log(
+        `북극이 일기 API /consulting_emotion_north Path 호출 - pUid: ${parsepUid}`
+      );
+
+      // 고정 삽입 프롬프트 - 유저 작성 일기 인지
+      promptArr.push({
+        role: "system",
+        content: `다음에 오는 문장은 유저가 오늘 작성한 일기야.
+        '''
+        ${content}
+        '''`,
+      });
+
+      // tag 매칭 프롬프트 삽입
+      switch (tag) {
+        case "mood":
+          promptArr.push({
+            role: "user",
+            content: `일기를 분석하고 아래의 기준에 맞춰 유저의 기분에 대한 점수를 반환해줘.
+            '''
+            좋음: 2
+            보통: 1
+            나쁨: 0
+            '''
+            판단하기 힘들 경우 '보통'으로 판단하고 1을 반환해줘.
+            반드시 정수값만 반환해야 해.`,
+          });
+          break;
+        case "friend":
+          promptArr.push({
+            role: "user",
+            content: `일기를 분석하고 아래의 기준에 맞춰 유저의 또래관계에 대한 점수를 반환해줘.
+            '''
+            좋음: 2
+            보통: 1
+            나쁨: 0
+            '''
+            판단하기 힘들 경우 '보통'으로 판단하고 1을 반환해줘.
+            반드시 정수값만 반환해야 해.`,
+          });
+          break;
+        case "family":
+          promptArr.push({
+            role: "user",
+            content: `일기를 분석하고 아래의 기준에 맞춰 유저의 가족관계에 대한 점수를 반환해줘.
+            '''
+            좋음: 2
+            보통: 1
+            나쁨: 0
+            '''
+            판단하기 힘들 경우 '보통'으로 판단하고 1을 반환해줘.
+            반드시 정수값만 반환해야 해.`,
+          });
+          break;
+        case "school":
+          promptArr.push({
+            role: "user",
+            content: `일기를 분석하고 아래의 기준에 맞춰 유저의 학교생활에 대한 점수를 반환해줘.
+            '''
+            좋음: 2
+            보통: 1
+            나쁨: 0
+            '''
+            판단하기 힘들 경우 '보통'으로 판단하고 1을 반환해줘.
+            반드시 정수값만 반환해야 해.`,
+          });
+          break;
+        case "study":
+          promptArr.push({
+            role: "user",
+            content: `일기를 분석하고 아래의 기준에 맞춰 유저의 학업 성취도에 대한 점수를 반환해줘.
+            '''
+            좋음: 2
+            보통: 1
+            나쁨: 0
+            '''
+            판단하기 힘들 경우 '보통'으로 판단하고 1을 반환해줘.
+            반드시 정수값만 반환해야 해.`,
+          });
+          break;
+      }
+
+      const response = await openai.chat.completions.create({
+        messages: [...promptArr],
+        model: "gpt-4o", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      });
+
+      const message = {
+        message: response.choices[0].message.content,
+      };
+      // console.log([
+      //   ...parseMessageArr,
+      //   { role: "assistant", content: message.message },
+      // ]);
+
+      //TODO#: DB Insert OR Update
+      console.log(isNum(response.choices[0].message.content));
+
+      return res.status(200).json(message);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "Server Error - 500",
+        // emotion: 0,
+      });
+    }
+  },
   // 달력 관련 데이터 반환 (Date 단위)
   postOpenAIMypageCalendarData: async (req, res) => {
     const { data } = req.body;
@@ -2471,6 +2618,35 @@ const ellaMoodController = {
       if (!messageArr) {
         console.log("No messageArr input value - 400");
         return res.json({ message: "No messageArr input value - 400" });
+      }
+
+      // code - situation 관련 필수값 예외처리
+      if (code === "situation" && !mood_situation) {
+        console.log("No Required input value - 400");
+        return res.json({
+          message: `No messageArr input value: code:${code}, mood_situation:${mood_situation} - 400`,
+        });
+      }
+      // code - thought 관련 필수값 예외처리
+      if (code === "thought" && !mood_thought) {
+        console.log("No Required input value - 400");
+        return res.json({
+          message: `No messageArr input value: code:${code}, mood_thought:${mood_thought} - 400`,
+        });
+      }
+      // code - listing 관련 필수값 예외처리
+      if (code === "listing" && !mood_todo_list) {
+        console.log("No Required input value - 400");
+        return res.json({
+          message: `No messageArr input value: code:${code}, mood_todo_list:${mood_todo_list} - 400`,
+        });
+      }
+      // code - talking 관련 필수값 예외처리
+      if (code === "talking" && !mood_talk_list) {
+        console.log("No Required input value - 400");
+        return res.json({
+          message: `No messageArr input value: code:${code}, mood_talk_list:${mood_talk_list} - 400`,
+        });
       }
 
       // pUid default값 설정

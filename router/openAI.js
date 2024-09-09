@@ -18,6 +18,7 @@ const {
   postOpenAIConsultingUbi,
   postOpenAIConsultingSoyes,
   postOpenAIConsultingMaru,
+  postOpenAIConsultingNorth,
   postOpenAIMypageCalendarData,
   postClovaVoiceTTS,
   postOpenAIPernalTestAnalysis,
@@ -90,8 +91,15 @@ router.post(
 // 게임친구 모델 - 마루
 router.post(
   "/consulting_emotion_maru",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIConsultingMaru
+);
+
+// 일기 친구모델 - 북국이
+router.post(
+  "/consulting_emotion_north",
+  // vaildateTokenConsulting,
+  postOpenAIConsultingNorth
 );
 
 // 상담 내역 Save
