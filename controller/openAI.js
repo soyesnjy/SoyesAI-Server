@@ -2624,28 +2624,28 @@ const ellaMoodController = {
       if (code === "situation" && !mood_situation) {
         console.log("No Required input value - 400");
         return res.json({
-          message: `No messageArr input value: code:${code}, mood_situation:${mood_situation} - 400`,
+          message: `No Required input value: code:${code}, mood_situation:${mood_situation} - 400`,
         });
       }
       // code - thought 관련 필수값 예외처리
       if (code === "thought" && !mood_thought) {
         console.log("No Required input value - 400");
         return res.json({
-          message: `No messageArr input value: code:${code}, mood_thought:${mood_thought} - 400`,
+          message: `No Required input value: code:${code}, mood_thought:${mood_thought} - 400`,
         });
       }
       // code - listing 관련 필수값 예외처리
       if (code === "listing" && !mood_todo_list) {
         console.log("No Required input value - 400");
         return res.json({
-          message: `No messageArr input value: code:${code}, mood_todo_list:${mood_todo_list} - 400`,
+          message: `No Required input value: code:${code}, mood_todo_list:${mood_todo_list} - 400`,
         });
       }
       // code - talking 관련 필수값 예외처리
       if (code === "talking" && !mood_talk_list) {
         console.log("No Required input value - 400");
         return res.json({
-          message: `No messageArr input value: code:${code}, mood_talk_list:${mood_talk_list} - 400`,
+          message: `No Required input value: code:${code}, mood_talk_list:${mood_talk_list} - 400`,
         });
       }
 
