@@ -6,6 +6,7 @@ const { errController } = require("../controller/index");
 const {
   openAIController,
   ellaMoodController,
+  ellaFriendController,
   NorthController,
   // openAIController_Regercy, // 레거시 코드
 } = require("../controller/openAI");
@@ -37,6 +38,9 @@ const {
   postOpenAIMoodDataSave,
   postOpenAIMoodDataLoad,
 } = ellaMoodController;
+
+const { postOpenAIEllaFriendTraning, postOpenAIFriendDataSave } =
+  ellaFriendController;
 
 const { postOpenAIConsultingNorthSave, postOpenAIConsultingNorthLoad } =
   NorthController;
@@ -77,13 +81,6 @@ router.post(
   postOpenAIConsultingUbi
 );
 
-// (Legacy) 정서멘토 모델 - 라라
-// router.post(
-//   "/consulting_emotion_lala",
-//   vaildateTokenConsulting,
-//   postOpenAIConsultingLala
-// );
-
 // 전문상담사 모델 - 소예
 router.post(
   "/consulting_emotion_soyes",
@@ -108,7 +105,7 @@ router.post(
 // 북극이 데이터 Load
 router.post(
   "/north_load",
-  vaildateTokenConsulting,
+  // vaildateTokenConsulting,
   postOpenAIConsultingNorthLoad
 );
 
@@ -126,24 +123,38 @@ router.post(
   postOpenAIConsultingLogLoad
 );
 
-// 기분훈련 모델 - 엘라
+// 기분 훈련 모델 - 엘라
 router.post(
   "/training_mood_ella",
   vaildateTokenConsulting,
   postOpenAIEllaMoodTraning
 );
-// 기분훈련 데이터 Save
+// 기분 훈련 데이터 Save
 router.post(
   "/training_mood_ella/save",
   vaildateTokenConsulting,
   postOpenAIMoodDataSave
 );
-// 기분훈련 시작 데이터 Load
+// 기분 훈련 시작 데이터 Load
 router.post(
   "/training_mood_ella/load",
   vaildateTokenConsulting,
   postOpenAIMoodDataLoad
 );
+
+// 또래관계 훈련 모델 - 엘라
+router.post(
+  "/training_friend_ella",
+  // vaildateTokenConsulting,
+  postOpenAIEllaFriendTraning
+);
+
+// 또래관계 훈련 데이터 Save
+// router.post(
+//   "/training_friend_ella/save",
+//   // vaildateTokenConsulting,
+//   postOpenAIFriendDataSave
+// );
 
 // 달력 데이터 반환
 router.post("/calendar", vaildateTokenConsulting, postOpenAIMypageCalendarData);

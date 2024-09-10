@@ -193,6 +193,7 @@ const {
   persona_prompt_lala_v3,
   persona_prompt_lala_v4,
   persona_prompt_lala_v5,
+  persona_prompt_lala_v6,
   solution_matching_persona_prompt,
   persona_prompt_pupu_v2,
   persona_prompt_pupu_v4,
@@ -2501,44 +2502,46 @@ const ellaMoodController = {
       // No pUid => return
       if (!pUid) {
         console.log("No pUid input value - 400");
-        return res.json({ message: "No pUid input value - 400" });
+        return res.status(400).json({ message: "No pUid input value - 400" });
       }
       // No type => return
       if (!code) {
         console.log("No code input value - 400");
-        return res.json({ message: "No type input value - 400" });
+        return res.status(400).json({ message: "No type input value - 400" });
       }
       // No type => return
       if (!messageArr) {
         console.log("No messageArr input value - 400");
-        return res.json({ message: "No messageArr input value - 400" });
+        return res
+          .status(400)
+          .json({ message: "No messageArr input value - 400" });
       }
 
       // code - situation 관련 필수값 예외처리
       if (code === "situation" && !mood_situation) {
         console.log("No Required input value - 400");
-        return res.json({
+        return res.status(400).json({
           message: `No Required input value: code:${code}, mood_situation:${mood_situation} - 400`,
         });
       }
       // code - thought 관련 필수값 예외처리
       if (code === "thought" && !mood_thought) {
         console.log("No Required input value - 400");
-        return res.json({
+        return res.status(400).json({
           message: `No Required input value: code:${code}, mood_thought:${mood_thought} - 400`,
         });
       }
       // code - listing 관련 필수값 예외처리
       if (code === "listing" && !mood_todo_list) {
         console.log("No Required input value - 400");
-        return res.json({
+        return res.status(400).json({
           message: `No Required input value: code:${code}, mood_todo_list:${mood_todo_list} - 400`,
         });
       }
       // code - talking 관련 필수값 예외처리
       if (code === "talking" && !mood_talk_list) {
         console.log("No Required input value - 400");
-        return res.json({
+        return res.status(400).json({
           message: `No Required input value: code:${code}, mood_talk_list:${mood_talk_list} - 400`,
         });
       }
@@ -2984,6 +2987,423 @@ Todo List가 아니라고 판단되면 제외한다.
   },
 };
 
+const ellaFriendController = {
+  // 또래관계 훈련 - 엘라
+  postOpenAIEllaFriendTraning: async (req, res) => {
+    const { data } = req.body;
+    console.log(data);
+    let parseData,
+      parseMessageArr = [],
+      parsepUid; // Parsing 변수
+    let promptArr = []; // 삽입 Prompt Array
+
+    try {
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { messageArr, pUid, code } = parseData;
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
+      }
+      // No type => return
+      if (!code) {
+        console.log("No code input value - 400");
+        return res.status(400).json({ message: "No type input value - 400" });
+      }
+      // No messageArr => return
+      if (!messageArr) {
+        console.log("No messageArr input value - 400");
+        return res
+          .status(400)
+          .json({ message: "No messageArr input value - 400" });
+      }
+
+      // pUid default값 설정
+      parsepUid = pUid;
+      parseMessageArr = [...messageArr];
+      console.log(`엘라 또래관계 훈련 API 호출 - pUid: ${parsepUid}`);
+
+      // promptArr.push(persona_prompt_lala_v6); // 엘라 페르소나
+
+      // code 매칭 프롬프트 삽입
+      switch (code) {
+        case "friend_new_consult":
+          promptArr.push(persona_prompt_lala_v6);
+          promptArr.push({
+            role: "system",
+            content: `대화 3번까지: user가 자신을 소개하지 않으면 먼저 자기 이름을 말하고 user 이름을 묻는다. 이름을 묻고 난 뒤에는 user에게 관심을 보이며 질문을 하나 한다.
+4번째 대화부터: user의 말에 단답형으로 말하고 질문하지 않는다. user가 자신과 공통 관심사가 있는 경우에는 자기개방을 하며 관심을 표현한다. 관심을 보일 때는 ‘대단하다’, ‘나도 하고 싶어’, ‘그거 뭐야’, ‘정말?’ 같은 말을 종종 사용한다. user가 자신을 칭찬하면 user에 대해서도 질문한다. user가 엘라가 좋아하는 것을 비난하거나, 욕을 하거나, 단답형으로 말하면 '아, 그래', '알겠어', '그렇게 말하면 불편해' 등으로 짧게 말한다. 반대로 엘라의 말에 user가 불편해하거나 어색해하면 사과하고 분위기를 돌린다.`,
+          });
+          break;
+        case "friend_new_analysis":
+          promptArr.push({
+            role: "system",
+            content: `아래 기준에 따라 user의 대화를 분석한다. 예) 분석 기준 (O, X 표시) 대화에 나타난 user 반응. 해당하는 반응이 없으면 user 반응은 제시하지 않는다.
+기준1: 친구에게 먼저 이름을 물어봤어요
+기준2: 처음 만난 친구에게 자신이 누구인지 소개했어요
+기준3: 친구와 함께 대화할 수 있는 질문을 했어요
+기준4: 친구의 답변에 나도 내 이야기를 해서 대화를 이어나가요
+기준5: 친구의 좋은 점을 알아보고 칭찬했어요
+기준6: 엘라와 공통점을 찾았어요
+
+1-2번째 기준에서 O인 경우 각각 1점, 3-6번째 기준에서 O인 경우 각각 2점으로 변환하여 채점한다
+점수는 알려주지 않고 해당하는 코멘트만 한다.
+8점 이상이면 "새로운 친구와 잘 대화했어. 실제 친구와도 이렇게 대화해 봐"
+5~7점이면 "대화를 이어가려고 노력했어. 계속 연습해보자"
+4점 이하이면 "새로운 친구와 대화를 이어가기 어려웠던 걸까? 계속 연습해보자"라고 하고 마친다.
+`,
+          });
+          break;
+        case "friend_group_analysis_first":
+          promptArr.push({
+            role: "system",
+            content: `assistant는 반말과 초등학교 6학년 수준에 맞는 어휘를 사용한다. assistant는 user의 반응을 분석하고 대안을 제시하는 역할을 한다.
+아이들이 몇 명씩 모여 놀이터에서 놀고 있다. user는 자신이 이때 어떻게 할지 얘기할 것이다. user 가 반응하면 아이들 사이에 잘 섞일 수 있게 다가가는지 평가하라.`,
+          });
+          break;
+        case "friend_group_analysis_second":
+          promptArr.push({
+            role: "system",
+            content: `assistant는 반말과 초등학교 6학년 수준에 맞는 어휘를 사용한다. assistant는 user의 반응을 분석하고 대안을 제시하는 역할을 한다.
+아이들이 쉬는 시간에 3-4명씩 모여 떠들거나 놀고 있다. user는 자신이 이때 어떻게 할지 얘기할 것이다. user 가 반응하면 아이들의 이목을 집중시키지 않고 자연스럽게 대화에 참여할 수 있는 반응을 하는지 평가하라. 직접적으로 같이 얘기해도 되는지 물어보는 경우, 괜찮은 반응이지만 친구들의 이야기 흐름을 끊을 수도 있음을 알려준다. 어떤 이야기를 하고 있는지 관찰한 뒤 재미있는 부분에서 같이 웃으며 살며시 끼어들거나, 다른 아이 말에 비슷한 경험이 있다고 말하며 공감을 표현하거나, 다른 아이 말에 질문을 하며 관심을 표현하는 등, 다른 반응 예시를 하나 들어준다.`,
+          });
+          break;
+        case "friend_group_analysis_third":
+          promptArr.push({
+            role: "system",
+            content: `assistant는 반말과 초등학교 6학년 수준에 맞는 어휘를 사용한다. assistant는 user의 반응을 분석하고 대안을 제시하는 역할을 한다.
+아이들이 모여 보드게임을 하고 있다. user는 자신이 이때 어떻게 할지 얘기할 것이다. user 가 반응하면 아이들의 게임을 방해하지 않으면서 자연스럽게 참여할 수 있을지를 평가한다. 아이들이 게임을 하고 있는 중에 하고 싶다고 말하기보다 끝나기를 기다렸다가 다음 순서에 ‘재밌겠다. 나랑 한 번 해볼래?’라고 하거나, 협동이 필요한 게임에서 도움이 될 만한 행동을 하거나, 친구들의 게임을 즐겁게 지켜보는 것이 좋은 반응이다. 하지만 귓속말로 특정한 사람에게만 힌트를 주는 것과 같은 행동은 갈등을 일으킬 수 있다. 이를 참고하여 유저의 반응과 다른 예시를 하나 들어준다.`,
+          });
+          break;
+        case "friend_conflict_consult":
+          promptArr.push({
+            role: "system",
+            content: `user의 응답 내용을 기초로 대화 상대방 역할을 맡아 대화를 시작한다. User가 대화 종료를 누르기 전까지 대화를 지속한다.`,
+          });
+          break;
+        case "friend_conflict_analysis":
+          promptArr.push({
+            role: "system",
+            content: `user의 반응 중 한 문장을 보다 나은 반응으로 수정하고 근거를 설명한다.`,
+          });
+          break;
+      }
+
+      console.log(promptArr);
+
+      const response = await openai.chat.completions.create({
+        messages: [...promptArr, ...parseMessageArr],
+        model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      });
+
+      const message = {
+        message: response.choices[0].message.content,
+      };
+
+      return res.status(200).json(message);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({
+        message: "Server Error - 500 Bad Gateway" + err.message,
+      });
+    }
+  },
+  // 또래관계 훈련 저장 API
+  postOpenAIFriendDataSave: async (req, res) => {
+    const { data } = req.body;
+    console.log(data);
+    let parseData, parsepUid, parseType; // Parsing 변수
+    // type 식별자 friend_new, friend_group, friend_test, friend_conflict
+    const typeArr = [
+      "friend_new",
+      "friend_group",
+      "friend_test",
+      "friend_conflict",
+    ];
+    try {
+      // json 파싱
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const {
+        pUid,
+        type, // 2024.09.05: String -> Int 변경
+        mood_situation,
+        mood_thought,
+        mood_solution,
+        mood_different_thought,
+        mood_rating,
+        mood_name,
+        mood_cognitive_score,
+        mood_todo_list,
+        mood_talk_list,
+        mood_meditation_feedback,
+      } = parseData;
+
+      // No Required Mood Data => return
+      if (
+        !pUid ||
+        !type ||
+        !mood_situation ||
+        !mood_thought ||
+        !mood_solution ||
+        !mood_different_thought ||
+        !mood_rating
+      ) {
+        console.log("No type input value - 400");
+        return res
+          .status(400)
+          .json({ message: "No Required Mood Data input value - 400" });
+      }
+
+      parseType = typeArr[type - 1];
+      console.log(`parseType : ${parseType}`);
+
+      // 타입별 필수 입력값 체크
+      if (parseType === "first" && (!mood_name || !mood_cognitive_score)) {
+        console.log(
+          `There are no input values suitable for the type (first) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "There are no input values suitable for the type",
+        });
+      }
+      if (parseType === "second" && !mood_todo_list) {
+        console.log(
+          `There are no input values suitable for the type (second) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "There are no input values suitable for the type",
+        });
+      }
+      if (parseType === "third" && !mood_talk_list) {
+        console.log(
+          `There are no input values suitable for the type (third) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "There are no input values suitable for the type",
+        });
+      }
+      if (parseType === "fourth" && !mood_meditation_feedback) {
+        console.log(
+          `There are no input values suitable for the type (fourth) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "There are no input values suitable for the type",
+        });
+      }
+
+      // pUid default값 설정
+      parsepUid = pUid;
+
+      console.log(
+        `기분 훈련 저장 API /openAI/training_mood_ella/save Path 호출 - pUid: ${parsepUid}`
+      );
+
+      const table = Ella_Training_Table_Info["Mood"].table;
+      const attribute = Ella_Training_Table_Info["Mood"].attribute;
+
+      let update_query, update_value;
+
+      // 1. SELECT User Mood Table Data
+      const select_query = `SELECT * FROM ${table} WHERE ${attribute.fKey} = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
+      const select_data = await fetchUserData(connection_AI, select_query);
+
+      // console.log(select_data[0]);
+
+      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
+      if (
+        parseType === "first" &&
+        select_data.length &&
+        select_data[0].mood_round_idx !== 4
+      ) {
+        console.log(
+          `The type value does not match the current episode (first) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "The type value does not match the current episode",
+        });
+      }
+
+      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
+      if (
+        parseType === "second" &&
+        select_data.length &&
+        select_data[0].mood_round_idx !== 1
+      ) {
+        console.log(
+          `The type value does not match the current episode (second) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "The type value does not match the current episode",
+        });
+      }
+
+      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
+      if (
+        parseType === "third" &&
+        select_data.length &&
+        select_data[0].mood_round_idx !== 2
+      ) {
+        console.log(
+          `The type value does not match the current episode (third)- pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "The type value does not match the current episode",
+        });
+      }
+
+      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
+      if (
+        parseType === "fourth" &&
+        select_data.length &&
+        select_data[0].mood_round_idx !== 3
+      ) {
+        console.log(
+          `The type value does not match the current episode (fourth) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "The type value does not match the current episode",
+        });
+      }
+
+      // 타입별 query, value 삽입
+      switch (parseType) {
+        case "first":
+          const insert_query = `INSERT INTO ${table} (uid, mood_round_idx, mood_name, mood_score, mood_avartar, mood_situation_first, mood_thought_first, mood_solution_first, mood_different_thought_first, mood_rating_first) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
+          // console.log(insert_query);
+          const insert_value = [
+            parsepUid,
+            1,
+            mood_name,
+            mood_cognitive_score,
+            "Ella",
+            mood_situation,
+            mood_thought,
+            mood_solution,
+            mood_different_thought,
+            mood_rating,
+          ];
+          // console.log(insert_value);
+
+          connection_AI.query(
+            insert_query,
+            insert_value,
+            (error, rows, fields) => {
+              if (error) {
+                console.log(error);
+                return res.status(400).json({ message: error.sqlMessage });
+              }
+              console.log("Mood First Insert Success!");
+              return res
+                .status(200)
+                .json({ message: "Mood First Data Save Success!" });
+            }
+          );
+
+          break;
+        case "second":
+          update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr4} = ?, mood_situation_second = ?, mood_thought_second = ?, mood_solution_second = ?, mood_different_thought_second = ?, mood_rating_second = ? WHERE ${attribute.pKey} = ?`;
+          // console.log(update_query);
+          update_value = [
+            2,
+            JSON.stringify(mood_todo_list),
+            mood_situation,
+            mood_thought,
+            mood_solution,
+            mood_different_thought,
+            mood_rating,
+            select_data[0].mood_idx,
+          ];
+          // console.log(update_value);
+          connection_AI.query(
+            update_query,
+            update_value,
+            (error, rows, fields) => {
+              if (error) {
+                console.log(error);
+                return res.status(400).json({ message: error.sqlMessage });
+              }
+              console.log("Mood Second Update Success!");
+              return res
+                .status(200)
+                .json({ message: "Mood Second Data Save Success!" });
+            }
+          );
+          break;
+        case "third":
+          update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr5} = ?, mood_situation_third = ?, mood_thought_third = ?, mood_solution_third = ?, mood_different_thought_third = ?, mood_rating_third = ? WHERE ${attribute.pKey} = ?`;
+          // console.log(update_query);
+          update_value = [
+            3,
+            JSON.stringify(mood_talk_list),
+            mood_situation,
+            mood_thought,
+            mood_solution,
+            mood_different_thought,
+            mood_rating,
+            select_data[0].mood_idx,
+          ];
+          // console.log(update_value);
+          connection_AI.query(
+            update_query,
+            update_value,
+            (error, rows, fields) => {
+              if (error) {
+                console.log(error);
+                return res.status(400).json({ message: error.sqlMessage });
+              }
+              console.log("Mood Third Update Success!");
+              return res
+                .status(200)
+                .json({ message: "Mood Third Data Save Success!" });
+            }
+          );
+          break;
+        case "fourth":
+          update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr6} = ?, mood_situation_fourth = ?, mood_thought_fourth = ?, mood_solution_fourth = ?, mood_different_thought_fourth = ?, mood_rating_fourth = ? WHERE ${attribute.pKey} = ?`;
+          // console.log(update_query);
+          update_value = [
+            4,
+            mood_meditation_feedback,
+            mood_situation,
+            mood_thought,
+            mood_solution,
+            mood_different_thought,
+            mood_rating,
+            select_data[0].mood_idx,
+          ];
+          // console.log(update_value);
+          connection_AI.query(
+            update_query,
+            update_value,
+            (error, rows, fields) => {
+              if (error) {
+                console.log(error);
+                return res.status(400).json({ message: error.sqlMessage });
+              }
+              console.log("Mood Fourth Update Success!");
+              return res
+                .status(200)
+                .json({ message: "Mood Fourth Data Save Success!" });
+            }
+          );
+          break;
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "Server Error - 500",
+      });
+    }
+  },
+};
+
 const NorthController = {
   // 일기친구 모델 - 북극이 Save API
   postOpenAIConsultingNorthSave: async (req, res) => {
@@ -3183,7 +3603,7 @@ const NorthController = {
       const select_query = `SELECT
       north_diary_content AS content,
       north_diary_tag AS tag,
-      DATE_FORMAT(created_at, '%Y-%m-%d') AS date
+      DATE_FORMAT(created_at, '%Y년 %m월 %d일') AS date
       FROM ${table}
       WHERE uid = '${parsepUid}'
       ORDER BY created_at ASC;`;
@@ -4386,6 +4806,7 @@ const openAIController_Regercy = {
 module.exports = {
   openAIController,
   ellaMoodController,
+  ellaFriendController,
   NorthController,
   // openAIController_Regercy,
 };
