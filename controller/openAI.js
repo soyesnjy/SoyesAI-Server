@@ -2996,7 +2996,15 @@ const ellaFriendController = {
       parseMessageArr = [],
       parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
-
+    const codeArr = [
+      "friend_new_consult",
+      "friend_new_analysis",
+      "friend_group_analysis_first",
+      "friend_group_analysis_second",
+      "friend_group_analysis_third",
+      "friend_conflict_consult",
+      "friend_conflict_analysis",
+    ];
     try {
       if (typeof data === "string") {
         parseData = JSON.parse(data);
@@ -3022,6 +3030,14 @@ const ellaFriendController = {
           .json({ message: "No messageArr input value - 400" });
       }
 
+      // No Matching code Value => return
+      if (!codeArr.includes(code)) {
+        console.log("No matching code value - 400");
+        return res
+          .status(400)
+          .json({ message: "No matching code value - 400" });
+      }
+
       // pUid default값 설정
       parsepUid = pUid;
       parseMessageArr = [...messageArr];
@@ -3042,19 +3058,15 @@ const ellaFriendController = {
         case "friend_new_analysis":
           promptArr.push({
             role: "system",
-            content: `아래 기준에 따라 user의 대화를 분석한다. 예) 분석 기준 (O, X 표시) 대화에 나타난 user 반응. 해당하는 반응이 없으면 user 반응은 제시하지 않는다.
-기준1: 친구에게 먼저 이름을 물어봤어요
-기준2: 처음 만난 친구에게 자신이 누구인지 소개했어요
-기준3: 친구와 함께 대화할 수 있는 질문을 했어요
-기준4: 친구의 답변에 나도 내 이야기를 해서 대화를 이어나가요
-기준5: 친구의 좋은 점을 알아보고 칭찬했어요
-기준6: 엘라와 공통점을 찾았어요
-
-1-2번째 기준에서 O인 경우 각각 1점, 3-6번째 기준에서 O인 경우 각각 2점으로 변환하여 채점한다
-점수는 알려주지 않고 해당하는 코멘트만 한다.
-8점 이상이면 "새로운 친구와 잘 대화했어. 실제 친구와도 이렇게 대화해 봐"
-5~7점이면 "대화를 이어가려고 노력했어. 계속 연습해보자"
-4점 이하이면 "새로운 친구와 대화를 이어가기 어려웠던 걸까? 계속 연습해보자"라고 하고 마친다.
+            content: `다음 기준에 따라 “user”의 대화를 분석하여 채점한다. assistant의 반응은 분석에서 제외한다. 1-2번째 기준에 해당하는 user 반응은 각각 1점, 3-6번째 기준에 해당하는 user 반응은 2점으로 변환하여 채점한다. 
+1. 친구에게 먼저 이름을 물어봤어요
+2. 처음 만난 친구에게 자신이 누구인지 소개했어요
+3. 친구와 함께 대화할 수 있는 질문을 했어요
+4. 친구의 답변에 나도 내 이야기를 해서 대화를 이어나가요
+5. 친구의 좋은 점을 알아보고 칭찬했어요.
+6. 엘라와 공통점을 찾았어요. 
+분석 결과 제시
+점수에 해당하는 코멘트를 제공한다. 점수는 알려주지 않는다. 8점 이상이면 "새로운 친구와 잘 대화했어. 실제 친구와도 이렇게 대화해 봐" 5~7점이면 "대화를 이어가려고 노력했어. 계속 연습해보자" 4점 이하이면 "새로운 친구와 대화를 이어가기 어려웠던 걸까? 계속 연습해보자"라고 한다.
 `,
           });
           break;
@@ -3093,10 +3105,10 @@ const ellaFriendController = {
           break;
       }
 
-      console.log(promptArr);
+      // console.log(promptArr);
 
       const response = await openai.chat.completions.create({
-        messages: [...promptArr, ...parseMessageArr],
+        messages: [...parseMessageArr, ...promptArr],
         model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
