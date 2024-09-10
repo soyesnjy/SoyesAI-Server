@@ -2996,6 +2996,7 @@ const ellaFriendController = {
       parseMessageArr = [],
       parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
+    let temperature = 1;
     const codeArr = [
       "friend_new_consult",
       "friend_new_analysis",
@@ -3058,17 +3059,32 @@ const ellaFriendController = {
         case "friend_new_analysis":
           promptArr.push({
             role: "system",
-            content: `다음 기준에 따라 “user”의 대화를 분석하여 채점한다. assistant의 반응은 분석에서 제외한다. 1-2번째 기준에 해당하는 user 반응은 각각 1점, 3-6번째 기준에 해당하는 user 반응은 2점으로 변환하여 채점한다. 
+            content: `각 단계의 분석을 수행하고 4단계 내용을 user에게 출력하라.
+1단계: 기준 1, 2에 해당하는 user 반응은 1점, 기준 3-6에 해당하는 user 반응은 2점으로 변환하여 채점한다. assistant의 반응은 분석에서 제외한다.  1단계 점수는 user에게 표시하지 않는다. 
+기준
 1. 친구에게 먼저 이름을 물어봤어요
 2. 처음 만난 친구에게 자신이 누구인지 소개했어요
 3. 친구와 함께 대화할 수 있는 질문을 했어요
 4. 친구의 답변에 나도 내 이야기를 해서 대화를 이어나가요
 5. 친구의 좋은 점을 알아보고 칭찬했어요.
-6. 엘라와 공통점을 찾았어요. 
-분석 결과 제시
-점수에 해당하는 코멘트를 제공한다. 점수는 알려주지 않는다. 8점 이상이면 "새로운 친구와 잘 대화했어. 실제 친구와도 이렇게 대화해 봐" 5~7점이면 "대화를 이어가려고 노력했어. 계속 연습해보자" 4점 이하이면 "새로운 친구와 대화를 이어가기 어려웠던 걸까? 계속 연습해보자"라고 한다.
-`,
+6. 엘라와 공통점을 찾았어요.
+
+2단계: “user”의 말 중에 좋은 반응이 있는지 여부를 분석하라. 좋은 반응 내용은 다음과 같다. assistant의 반응은 분석에서 제외한다.  2단계 분석은 user에게 표시하지 않는다. 
+친구에게 먼저 이름을 물어봤어요
+처음 만난 친구에게 자신이 누구인지 소개했어요
+친구와 함께 대화할 수 있는 질문을 했어요
+친구의 답변에 나도 내 이야기를 해서 대화를 이어나가요
+친구의 좋은 점을 알아보고 칭찬했어요.
+엘라와 공통점을 찾았어요.
+
+3단계: “user”의 말 중에 더 나은 반응이 가능한 문장을 하나 고르라. assistant의 반응은 분석에서 제외한다.  3단계 분석 내용은 user에게 표시하지 않는다.
+
+4단계: 다음 형식으로 유저에게 출력한다.
+1) 1단계 점수에 맞는 멘트만 출력한다. 점수는 출력하지 않는다. 8점 이상 "새로운 친구와 잘 대화했어. 실제 친구와도 이렇게 대화해 봐" 5~7점 "대화를 이어가려고 노력했어. 계속 연습해보자" 4점 이하 "새로운 친구와 대화를 이어가기 어려웠던 걸까? 계속 연습해보자"라고 한다.
+2) '이런 반응들은 좋았어'라고 하며 1단계에서 관찰된 좋은 반응 내용과 user의 실제 응답을 알려준다. 좋은 반응이 여러 개 관찰되면 여러 개 다 알려준다.
+3)  2단계에서 고른 "user"의 말과 대안 반응`,
           });
+          temperature = 0.7; // 고정된 형식 답변 유도를 위한 수치 조정
           break;
         case "friend_group_analysis_first":
           promptArr.push({
@@ -3105,11 +3121,12 @@ const ellaFriendController = {
           break;
       }
 
-      // console.log(promptArr);
+      // console.log(temperature);
 
       const response = await openai.chat.completions.create({
         messages: [...parseMessageArr, ...promptArr],
         model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        temperature,
       });
 
       const message = {
