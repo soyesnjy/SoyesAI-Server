@@ -1667,7 +1667,7 @@ const openAIController = {
       } else if (game === "balance") {
         promptArr.push({
           role: "system",
-          content: `assistant는 user와 밸런스 게임을 진행한다. 총 10회 질문한다.
+          content: `assistant는 user와 밸런스 게임을 진행한다. 문제는 1문제씩 총 10회 질문한다.
 assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문제만 출제한다.
 게임이 종료되면 assistant가 밸런스 게임에서 선택한 단어 10개를 보여주고 user와의 매칭률을 계산해서 %로 알려준다.`,
         });
@@ -1676,6 +1676,7 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
       const response = await openai.chat.completions.create({
         messages: [...promptArr, ...parseMessageArr],
         model: "gpt-4o", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        temperature: 0.7,
       });
 
       const message = {
