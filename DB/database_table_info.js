@@ -390,6 +390,18 @@ const Ella_Training_Table_Info = {
       attr9: "updated_at",
     },
   },
+  Friend: {
+    table: "soyes_training_friend",
+    attribute: {
+      pKey: "friend_id",
+      fKey: "uid",
+      attr1: "friend_type",
+      attr2: "friend_result",
+      attr3: "friend_consult_log",
+      attr4: "created_at",
+      attr5: "updated_at",
+    },
+  },
 };
 const North_Table_Info = {
   table: "soyes_ai_North",

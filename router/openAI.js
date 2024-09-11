@@ -145,16 +145,16 @@ router.post(
 // 또래관계 훈련 모델 - 엘라
 router.post(
   "/training_friend_ella",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIEllaFriendTraning
 );
 
 // 또래관계 훈련 데이터 Save
-// router.post(
-//   "/training_friend_ella/save",
-//   // vaildateTokenConsulting,
-//   postOpenAIFriendDataSave
-// );
+router.post(
+  "/training_friend_ella/save",
+  vaildateTokenConsulting,
+  postOpenAIFriendDataSave
+);
 
 // 달력 데이터 반환
 router.post("/calendar", vaildateTokenConsulting, postOpenAIMypageCalendarData);

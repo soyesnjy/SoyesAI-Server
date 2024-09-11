@@ -562,6 +562,11 @@ const openAIController = {
       // console.log(parseData);
 
       const { messageArr, type, score, pUid } = parseData;
+      console.log(
+        `EBT 테스트 결과 분석 및 메일 전송 API /analysis Path 호출 - pUid:${pUid}`
+      );
+      console.log(parseData);
+
       // No type => return
       if (!type) {
         console.log("No type input value - 404");
@@ -596,10 +601,6 @@ const openAIController = {
 
       parsingType = type;
       parsepUid = pUid;
-
-      console.log(
-        `EBT 테스트 결과 분석 및 메일 전송 API /analysis Path 호출 - pUid:${parsepUid}`
-      );
 
       // T점수 계산
       const scoreSum = parsingScore.reduce((acc, cur) => acc + cur);
@@ -869,16 +870,21 @@ const openAIController = {
   postOpenAIPernalTestAnalysis: async (req, res) => {
     const { data } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
 
-    let parsePTData,
+    let parseData,
       parsePTResult,
       yourMailAddr = "";
     try {
       // 파싱. Client JSON 데이터
       if (typeof data === "string") {
-        parsePTData = JSON.parse(data);
-      } else parsePTData = data;
+        parseData = JSON.parse(data);
+      } else parseData = data;
 
-      const { resultText, pUid } = parsePTData;
+      const { resultText, pUid } = parseData;
+      console.log(
+        `PT 테스트 결과 분석 및 메일 전송 API /analysis_pt Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
+
       // No type => return
       if (!resultText) {
         console.log("No resultText input value - 400");
@@ -894,10 +900,6 @@ const openAIController = {
 
       parsepUid = pUid;
       parsePTResult = resultText;
-
-      console.log(
-        `PT 테스트 결과 분석 및 메일 전송 API /analysis_pt Path 호출 - pUid: ${parsepUid}`
-      );
 
       // const analysisPrompt = [];
       // const userPrompt = [];
@@ -1114,14 +1116,17 @@ const openAIController = {
   postOpenAIPernalTestSave: async (req, res) => {
     const { data } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
 
-    let parsePTData, parsePTResult;
+    let parseData, parsePTResult;
     try {
       // 파싱. Client JSON 데이터
       if (typeof data === "string") {
-        parsePTData = JSON.parse(data);
-      } else parsePTData = data;
+        parseData = JSON.parse(data);
+      } else parseData = data;
 
-      const { resultText, pUid } = parsePTData;
+      const { resultText, pUid } = parseData;
+      console.log(`PT 테스트 결과 저장 API 호출 - pUid: ${pUid}`);
+      console.log(parseData);
+
       // No type => return
       if (!resultText) {
         console.log("No resultText input value - 404");
@@ -1137,8 +1142,6 @@ const openAIController = {
 
       parsepUid = pUid;
       parsePTResult = resultText;
-
-      console.log(`PT 테스트 결과 저장 API 호출 - pUid: ${parsepUid}`);
 
       // 오늘 날짜 변환
       const dateObj = new Date();
@@ -1190,20 +1193,15 @@ const openAIController = {
     // let prevChat_flag = true; // 이전 대화 내역 유무
     // console.log(`accessAuth: ${req.session.accessAuth}`);
     try {
-      /* 비인증 || 세션 만료 유저 접근 처리
-      if (!req.session.accessToken) {
-        console.log("Unauthorized User Accessed");
-        return res
-          .status(401)
-          .json({ message: "Session Expiration" });
-      }
-      */
       if (typeof data === "string") {
         parseData = JSON.parse(data);
       } else parseData = data;
 
       const { messageArr, pUid } = parseData;
-      // console.log(parseData);
+      console.log(
+        `푸푸 상담 API /consulting_emotion_pupu Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
       // messageArr가 문자열일 경우 json 파싱
       if (typeof messageArr === "string") {
         parseMessageArr = JSON.parse(messageArr);
@@ -1216,9 +1214,6 @@ const openAIController = {
       }
 
       parsepUid = pUid;
-      console.log(
-        `푸푸 상담 API /consulting_emotion_pupu Path 호출 - pUid: ${parsepUid}`
-      );
 
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_pupu_v5); // 2024.08.21~
@@ -1627,16 +1622,20 @@ const openAIController = {
     const { data } = req.body;
     // console.log(data);
 
-    let parseEBTdata, parseMessageArr, parsepUid; // Parsing 변수
+    let parseData, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
-    // let prevChat_flag = true; // 이전 대화 내역 유무
-    // console.log(messageArr);
+
     try {
       if (typeof data === "string") {
-        parseEBTdata = JSON.parse(data);
-      } else parseEBTdata = data;
+        parseData = JSON.parse(data);
+      } else parseData = data;
 
-      const { messageArr, pUid, game } = parseEBTdata;
+      const { messageArr, pUid, game } = parseData;
+      console.log(
+        `마루 게임 API /consulting_emotion_maru Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
+
       // messageArr가 문자열일 경우 json 파싱
       if (typeof messageArr === "string") {
         parseMessageArr = JSON.parse(messageArr);
@@ -1654,9 +1653,7 @@ const openAIController = {
       }
 
       parsepUid = pUid;
-      console.log(
-        `마루 게임 API /consulting_emotion_maru Path 호출 - pUid: ${parsepUid}`
-      );
+
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_ubi); // 페르소나 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
@@ -1693,14 +1690,19 @@ const openAIController = {
   // 달력 관련 데이터 반환 (Date 단위)
   postOpenAIMypageCalendarData: async (req, res) => {
     const { data } = req.body;
-    let parseEBTdata, parsepUid, parseDate; // Parsing 변수
+    let parseData, parsepUid, parseDate; // Parsing 변수
     try {
       // json 파싱
       if (typeof data === "string") {
-        parseEBTdata = JSON.parse(data);
-      } else parseEBTdata = data;
+        parseData = JSON.parse(data);
+      } else parseData = data;
 
-      const { pUid, date } = parseEBTdata;
+      const { pUid, date } = parseData;
+      console.log(
+        `달력 데이터 반환 API /openAI/calendar Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
+
       // No pUid => return
       if (!pUid) {
         console.log("No pUid input value - 404");
@@ -1709,10 +1711,6 @@ const openAIController = {
       // pUid default값 설정
       parsepUid = pUid;
       parseDate = date;
-
-      console.log(
-        `달력 데이터 반환 API /openAI/calendar Path 호출 - pUid: ${parsepUid}`
-      );
 
       // DB 조회 => User Table + User EBT Table JOIN 후 관련 데이터 전달
       // const user_table = User_Table_Info.table;
@@ -1813,15 +1811,20 @@ const openAIController = {
   postOpenAIMypageData: async (req, res) => {
     const { data } = req.body;
     console.log(data);
-    let parseEBTdata, parsepUid; // Parsing 변수
+    let parseData, parsepUid; // Parsing 변수
 
     try {
       // json 파싱
       if (typeof data === "string") {
-        parseEBTdata = JSON.parse(data);
-      } else parseEBTdata = data;
+        parseData = JSON.parse(data);
+      } else parseData = data;
 
-      const { pUid } = parseEBTdata;
+      const { pUid } = parseData;
+      console.log(
+        `마이페이지 데이터 반환 API /openAI/mypage Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
+
       // No pUid => return
       if (!pUid) {
         console.log("No pUid input value - 400");
@@ -1830,10 +1833,6 @@ const openAIController = {
       // pUid default값 설정
       parsepUid = pUid;
       // parseDate = date;
-
-      console.log(
-        `마이페이지 데이터 반환 API /openAI/mypage Path 호출 - pUid: ${parsepUid}`
-      );
 
       // EBT Table Key
       const ebt_log_table = EBT_Table_Info["All"].table;
@@ -2044,16 +2043,18 @@ const openAIController = {
   // 상담 로그 Save API
   postOpenAIConsultingLogSave: async (req, res) => {
     const { data } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
-    // console.log(data);
-    let parseEBTdata, parsepUid;
+    let parseData, parsepUid;
     try {
       // 파싱. Client JSON 데이터
       if (typeof data === "string") {
-        parseEBTdata = JSON.parse(data);
-      } else parseEBTdata = data;
+        parseData = JSON.parse(data);
+      } else parseData = data;
 
-      const { messageArr, avartar, pUid } = parseEBTdata;
-      // console.log(parseEBTdata);
+      const { messageArr, avartar, pUid } = parseData;
+      console.log(
+        `상담 로그 저장 API /consulting_emotion_log Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
 
       // No pUid => return
       if (!pUid) {
@@ -2061,9 +2062,6 @@ const openAIController = {
         return res.status(400).json({ message: "Non pUid input value - 400" });
       }
       parsepUid = pUid;
-      console.log(
-        `상담 로그 저장 API /consulting_emotion_log Path 호출 - pUid: ${parsepUid}`
-      );
       // 문답 5회 미만일 경우 return
       if (messageArr.length <= 8) {
         console.log(`messageArr Not enough length - pUid: ${parsepUid}`);
@@ -2145,15 +2143,19 @@ const openAIController = {
   // 상담 로그 Load API
   postOpenAIConsultingLogLoad: async (req, res) => {
     const { data } = req.body;
-    let parseEBTdata, parsepUid;
+    let parseData, parsepUid;
 
     try {
       // json 파싱
       if (typeof data === "string") {
-        parseEBTdata = JSON.parse(data);
-      } else parseEBTdata = data;
+        parseData = JSON.parse(data);
+      } else parseData = data;
 
-      const { pUid, pKeyValue } = parseEBTdata;
+      const { pUid, pKeyValue } = parseData;
+      console.log(
+        `상담 로그 Load API /openAI/consulting_emotion_log_load Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
       // contentKey: AI 분석 결과 반환 트리거
       // keyValue: Consult_Log Table Row Primary Key. 마이페이지 결과보기 버튼에 할당 후 전달받을 예정
 
@@ -2164,10 +2166,6 @@ const openAIController = {
       }
       // pUid default값 설정
       parsepUid = pUid;
-      console.log(
-        `상담 로그 Load API /openAI/consulting_emotion_log_load Path 호출 - pUid: ${parsepUid}`
-      );
-      console.log(parseEBTdata);
 
       const resultArr = await select_soyesAI_Consult_Log(pKeyValue, parsepUid);
 
@@ -2213,18 +2211,21 @@ const openAIController = {
   postOpenAIUserEBTResultData: async (req, res) => {
     const { data } = req.body;
     console.log(data);
-    let parseEBTdata, parsepUid;
+    let parseData, parsepUid;
 
     try {
       // json 파싱
       if (typeof data === "string") {
-        parseEBTdata = JSON.parse(data);
-      } else parseEBTdata = data;
+        parseData = JSON.parse(data);
+      } else parseData = data;
 
-      const { pUid, contentKey, pKeyValue } = parseEBTdata;
+      const { pUid, contentKey, pKeyValue } = parseData;
       // contentKey: AI 분석 결과 반환 트리거
       // keyValue: EBT Table Row Primary Key. 마이페이지 결과보기 버튼에 할당 후 전달받을 예정
-
+      console.log(
+        `User 정서행동 검사 결과 반환 API /openAI/ebtresult Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
       // No pUid => return
       if (!pUid) {
         console.log("No pUid input value - 400");
@@ -2232,9 +2233,6 @@ const openAIController = {
       }
       // pUid default값 설정
       parsepUid = pUid;
-      console.log(
-        `User 정서행동 검사 결과 반환 API /openAI/ebtresult Path 호출 - pUid: ${parsepUid}`
-      );
 
       const resultArr = await select_soyesAI_EbtResult_v2(
         pKeyValue,
@@ -2478,7 +2476,6 @@ const ellaMoodController = {
   // 훈련 트레이너 - 엘라 (New)
   postOpenAIEllaMoodTraning: async (req, res) => {
     const { data } = req.body;
-    console.log(data);
     let parseData,
       parseMessageArr = [],
       parsepUid; // Parsing 변수
@@ -2498,6 +2495,9 @@ const ellaMoodController = {
         mood_todo_list,
         mood_talk_list,
       } = parseData;
+
+      console.log(`엘라 훈련 API 호출 - pUid: ${pUid}`);
+      console.log(parseData);
 
       // No pUid => return
       if (!pUid) {
@@ -2548,7 +2548,6 @@ const ellaMoodController = {
 
       // pUid default값 설정
       parsepUid = pUid;
-      console.log(`엘라 훈련 API 호출 - pUid: ${parsepUid}`);
 
       promptArr.push(persona_prompt_lala_v5); // 엘라 페르소나
 
@@ -2653,7 +2652,6 @@ Todo List가 아니라고 판단되면 제외한다.
   // 기분 훈련 저장 API
   postOpenAIMoodDataSave: async (req, res) => {
     const { data } = req.body;
-    console.log(data);
     let parseData, parsepUid, parseType; // Parsing 변수
     const typeArr = ["first", "second", "third", "fourth"]; // type 식별자
     try {
@@ -2676,6 +2674,11 @@ Todo List가 아니라고 판단되면 제외한다.
         mood_talk_list,
         mood_meditation_feedback,
       } = parseData;
+
+      console.log(
+        `기분 훈련 저장 API /openAI/training_mood_ella/save Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
 
       // No Required Mood Data => return
       if (
@@ -2732,10 +2735,6 @@ Todo List가 아니라고 판단되면 제외한다.
 
       // pUid default값 설정
       parsepUid = pUid;
-
-      console.log(
-        `기분 훈련 저장 API /openAI/training_mood_ella/save Path 호출 - pUid: ${parsepUid}`
-      );
 
       const table = Ella_Training_Table_Info["Mood"].table;
       const attribute = Ella_Training_Table_Info["Mood"].attribute;
@@ -2937,7 +2936,7 @@ Todo List가 아니라고 판단되면 제외한다.
   // 기분 훈련 데이터 Load API
   postOpenAIMoodDataLoad: async (req, res) => {
     const { data } = req.body;
-    console.log(data);
+
     let parseData, parsepUid; // Parsing 변수
 
     try {
@@ -2948,6 +2947,9 @@ Todo List가 아니라고 판단되면 제외한다.
 
       const { pUid } = parseData;
 
+      console.log(`기분 훈련 Start Data Load API 호출 - pUid: ${pUid}`);
+      console.log(parseData);
+
       // No pUid => return
       if (!pUid) {
         console.log("No pUid input value - 400");
@@ -2956,8 +2958,6 @@ Todo List가 아니라고 판단되면 제외한다.
 
       // pUid default값 설정
       parsepUid = pUid;
-
-      console.log(`기분 훈련 Start Data Load API 호출 - pUid: ${parsepUid}`);
 
       // Mood Table 명시
       const table = Ella_Training_Table_Info["Mood"].table;
@@ -2991,7 +2991,6 @@ const ellaFriendController = {
   // 또래관계 훈련 - 엘라
   postOpenAIEllaFriendTraning: async (req, res) => {
     const { data } = req.body;
-    console.log(data);
     let parseData,
       parseMessageArr = [],
       parsepUid; // Parsing 변수
@@ -3012,6 +3011,9 @@ const ellaFriendController = {
       } else parseData = data;
 
       const { messageArr, pUid, code } = parseData;
+
+      console.log(`엘라 또래관계 훈련 API 호출 - pUid: ${pUid}`);
+      console.log(parseData);
 
       // No pUid => return
       if (!pUid) {
@@ -3042,7 +3044,6 @@ const ellaFriendController = {
       // pUid default값 설정
       parsepUid = pUid;
       parseMessageArr = [...messageArr];
-      console.log(`엘라 또래관계 훈련 API 호출 - pUid: ${parsepUid}`);
 
       // promptArr.push(persona_prompt_lala_v6); // 엘라 페르소나
 
@@ -3144,8 +3145,7 @@ const ellaFriendController = {
   // 또래관계 훈련 저장 API
   postOpenAIFriendDataSave: async (req, res) => {
     const { data } = req.body;
-    console.log(data);
-    let parseData, parsepUid, parseType; // Parsing 변수
+    let parseData, parsepUid; // Parsing 변수
     // type 식별자 friend_new, friend_group, friend_test, friend_conflict
     const typeArr = [
       "friend_new",
@@ -3153,171 +3153,84 @@ const ellaFriendController = {
       "friend_test",
       "friend_conflict",
     ];
+    const resultArr = ["FTH", "FSH", "LTH", "LSH", "FTL", "FSL", "LTL", "LSL"];
     try {
       // json 파싱
       if (typeof data === "string") {
         parseData = JSON.parse(data);
       } else parseData = data;
 
-      const {
-        pUid,
-        type, // 2024.09.05: String -> Int 변경
-        mood_situation,
-        mood_thought,
-        mood_solution,
-        mood_different_thought,
-        mood_rating,
-        mood_name,
-        mood_cognitive_score,
-        mood_todo_list,
-        mood_talk_list,
-        mood_meditation_feedback,
-      } = parseData;
+      const { pUid, type, result, messageArr } = parseData;
+      console.log(
+        `또래관계 훈련 저장 API /openAI/training_friend_ella/save Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
 
       // No Required Mood Data => return
-      if (
-        !pUid ||
-        !type ||
-        !mood_situation ||
-        !mood_thought ||
-        !mood_solution ||
-        !mood_different_thought ||
-        !mood_rating
-      ) {
+      if (!pUid || !type) {
         console.log("No type input value - 400");
         return res
           .status(400)
           .json({ message: "No Required Mood Data input value - 400" });
       }
 
-      parseType = typeArr[type - 1];
-      console.log(`parseType : ${parseType}`);
-
-      // 타입별 필수 입력값 체크
-      if (parseType === "first" && (!mood_name || !mood_cognitive_score)) {
-        console.log(
-          `There are no input values suitable for the type (first) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "There are no input values suitable for the type",
-        });
-      }
-      if (parseType === "second" && !mood_todo_list) {
-        console.log(
-          `There are no input values suitable for the type (second) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "There are no input values suitable for the type",
-        });
-      }
-      if (parseType === "third" && !mood_talk_list) {
-        console.log(
-          `There are no input values suitable for the type (third) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "There are no input values suitable for the type",
-        });
-      }
-      if (parseType === "fourth" && !mood_meditation_feedback) {
-        console.log(
-          `There are no input values suitable for the type (fourth) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "There are no input values suitable for the type",
-        });
+      // No Matching Type Value => return
+      if (!typeArr.includes(type)) {
+        console.log("No matching Type value - 400");
+        return res
+          .status(400)
+          .json({ message: "No matching Type value - 400" });
       }
 
-      // pUid default값 설정
       parsepUid = pUid;
 
-      console.log(
-        `기분 훈련 저장 API /openAI/training_mood_ella/save Path 호출 - pUid: ${parsepUid}`
-      );
+      // friend_test 필수 입력값 체크
+      if (type === "friend_test") {
+        // No result Value => return
+        if (!result) {
+          console.log(
+            `There are no input values suitable for the type - pUid: ${parsepUid}`
+          );
+          return res.status(400).json({
+            message: "There are no input values suitable for the type",
+          });
+        }
+        // No Matching Result Value => return
+        else if (!resultArr.includes(result)) {
+          console.log("No matching Result value - 400");
+          return res
+            .status(400)
+            .json({ message: "No matching Result value - 400" });
+        }
+      }
+      // 그 외 타입 필수 입력값 체크
+      if (
+        (type === "friend_new" ||
+          type === "friend_group" ||
+          type === "friend_conflict") &&
+        !messageArr
+      ) {
+        console.log(
+          `There are no input values suitable for the type - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "There are no input values suitable for the type",
+        });
+      }
 
-      const table = Ella_Training_Table_Info["Mood"].table;
-      const attribute = Ella_Training_Table_Info["Mood"].attribute;
+      const table = Ella_Training_Table_Info["Friend"].table;
+      // const attribute = Ella_Training_Table_Info["Friend"].attribute;
 
-      let update_query, update_value;
-
-      // 1. SELECT User Mood Table Data
-      const select_query = `SELECT * FROM ${table} WHERE ${attribute.fKey} = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
-      const select_data = await fetchUserData(connection_AI, select_query);
+      let insert_query, insert_value;
 
       // console.log(select_data[0]);
 
-      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
-      if (
-        parseType === "first" &&
-        select_data.length &&
-        select_data[0].mood_round_idx !== 4
-      ) {
-        console.log(
-          `The type value does not match the current episode (first) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "The type value does not match the current episode",
-        });
-      }
-
-      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
-      if (
-        parseType === "second" &&
-        select_data.length &&
-        select_data[0].mood_round_idx !== 1
-      ) {
-        console.log(
-          `The type value does not match the current episode (second) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "The type value does not match the current episode",
-        });
-      }
-
-      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
-      if (
-        parseType === "third" &&
-        select_data.length &&
-        select_data[0].mood_round_idx !== 2
-      ) {
-        console.log(
-          `The type value does not match the current episode (third)- pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "The type value does not match the current episode",
-        });
-      }
-
-      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
-      if (
-        parseType === "fourth" &&
-        select_data.length &&
-        select_data[0].mood_round_idx !== 3
-      ) {
-        console.log(
-          `The type value does not match the current episode (fourth) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "The type value does not match the current episode",
-        });
-      }
-
       // 타입별 query, value 삽입
-      switch (parseType) {
-        case "first":
-          const insert_query = `INSERT INTO ${table} (uid, mood_round_idx, mood_name, mood_score, mood_avartar, mood_situation_first, mood_thought_first, mood_solution_first, mood_different_thought_first, mood_rating_first) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
+      switch (type) {
+        case "friend_test":
+          insert_query = `INSERT INTO ${table} (uid, friend_type, friend_result) VALUES (?, ?, ?);`;
           // console.log(insert_query);
-          const insert_value = [
-            parsepUid,
-            1,
-            mood_name,
-            mood_cognitive_score,
-            "Ella",
-            mood_situation,
-            mood_thought,
-            mood_solution,
-            mood_different_thought,
-            mood_rating,
-          ];
+          insert_value = [parsepUid, type, result];
           // console.log(insert_value);
 
           connection_AI.query(
@@ -3328,98 +3241,32 @@ const ellaFriendController = {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("Mood First Insert Success!");
+              console.log("friend_test Insert Success!");
               return res
                 .status(200)
-                .json({ message: "Mood First Data Save Success!" });
+                .json({ message: "friend_test Data Save Success!" });
             }
           );
 
           break;
-        case "second":
-          update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr4} = ?, mood_situation_second = ?, mood_thought_second = ?, mood_solution_second = ?, mood_different_thought_second = ?, mood_rating_second = ? WHERE ${attribute.pKey} = ?`;
-          // console.log(update_query);
-          update_value = [
-            2,
-            JSON.stringify(mood_todo_list),
-            mood_situation,
-            mood_thought,
-            mood_solution,
-            mood_different_thought,
-            mood_rating,
-            select_data[0].mood_idx,
-          ];
-          // console.log(update_value);
+        default:
+          insert_query = `INSERT INTO ${table} (uid, friend_type, friend_consult_log) VALUES (?, ?, ?);`;
+          // console.log(insert_query);
+          insert_value = [parsepUid, type, JSON.stringify(messageArr)];
+          // console.log(insert_value);
+
           connection_AI.query(
-            update_query,
-            update_value,
+            insert_query,
+            insert_value,
             (error, rows, fields) => {
               if (error) {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("Mood Second Update Success!");
+              console.log("friend_test Insert Success!");
               return res
                 .status(200)
-                .json({ message: "Mood Second Data Save Success!" });
-            }
-          );
-          break;
-        case "third":
-          update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr5} = ?, mood_situation_third = ?, mood_thought_third = ?, mood_solution_third = ?, mood_different_thought_third = ?, mood_rating_third = ? WHERE ${attribute.pKey} = ?`;
-          // console.log(update_query);
-          update_value = [
-            3,
-            JSON.stringify(mood_talk_list),
-            mood_situation,
-            mood_thought,
-            mood_solution,
-            mood_different_thought,
-            mood_rating,
-            select_data[0].mood_idx,
-          ];
-          // console.log(update_value);
-          connection_AI.query(
-            update_query,
-            update_value,
-            (error, rows, fields) => {
-              if (error) {
-                console.log(error);
-                return res.status(400).json({ message: error.sqlMessage });
-              }
-              console.log("Mood Third Update Success!");
-              return res
-                .status(200)
-                .json({ message: "Mood Third Data Save Success!" });
-            }
-          );
-          break;
-        case "fourth":
-          update_query = `UPDATE ${table} SET ${attribute.attr1} = ?, ${attribute.attr6} = ?, mood_situation_fourth = ?, mood_thought_fourth = ?, mood_solution_fourth = ?, mood_different_thought_fourth = ?, mood_rating_fourth = ? WHERE ${attribute.pKey} = ?`;
-          // console.log(update_query);
-          update_value = [
-            4,
-            mood_meditation_feedback,
-            mood_situation,
-            mood_thought,
-            mood_solution,
-            mood_different_thought,
-            mood_rating,
-            select_data[0].mood_idx,
-          ];
-          // console.log(update_value);
-          connection_AI.query(
-            update_query,
-            update_value,
-            (error, rows, fields) => {
-              if (error) {
-                console.log(error);
-                return res.status(400).json({ message: error.sqlMessage });
-              }
-              console.log("Mood Fourth Update Success!");
-              return res
-                .status(200)
-                .json({ message: "Mood Fourth Data Save Success!" });
+                .json({ message: "friend_test Data Save Success!" });
             }
           );
           break;
@@ -3437,19 +3284,21 @@ const NorthController = {
   // 일기친구 모델 - 북극이 Save API
   postOpenAIConsultingNorthSave: async (req, res) => {
     const { data } = req.body;
-    console.log(data);
-
-    let parseEBTdata, parsepUid, parseMentalData; // Parsing 변수
+    let parseData, parsepUid, parseMentalData; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
 
     const tagArr = ["mood", "friend", "family", "school"];
     try {
       if (typeof data === "string") {
-        parseEBTdata = JSON.parse(data);
-      } else parseEBTdata = data;
+        parseData = JSON.parse(data);
+      } else parseData = data;
 
-      const { content, pUid, tag } = parseEBTdata;
-      // messageArr가 문자열일 경우 json 파싱
+      const { content, pUid, tag } = parseData;
+
+      console.log(
+        `북극이 일기 Save API /consulting_emotion_north Path 호출 - pUid: ${parsepUid}`
+      );
+      console.log(parseData);
 
       // No pUid => return
       if (!pUid || !content || !tag) {
@@ -3467,9 +3316,6 @@ const NorthController = {
       }
 
       parsepUid = pUid;
-      console.log(
-        `북극이 일기 Save API /consulting_emotion_north Path 호출 - pUid: ${parsepUid}`
-      );
 
       // 고정 삽입 프롬프트 - 유저 작성 일기 인지
       promptArr.push({
@@ -3600,17 +3446,18 @@ const NorthController = {
   // 일기친구 모델 - 북극이 Load API
   postOpenAIConsultingNorthLoad: async (req, res) => {
     const { data } = req.body;
-    console.log(data);
-
-    let parseEBTdata, parsepUid; // Parsing 변수
+    let parseData, parsepUid; // Parsing 변수
 
     try {
       if (typeof data === "string") {
-        parseEBTdata = JSON.parse(data);
-      } else parseEBTdata = data;
+        parseData = JSON.parse(data);
+      } else parseData = data;
 
-      const { pUid } = parseEBTdata;
-      // messageArr가 문자열일 경우 json 파싱
+      const { pUid } = parseData;
+      console.log(
+        `북극이 일기 Load API /north_load Path 호출 - pUid: ${parsepUid}`
+      );
+      console.log(parseData);
 
       // No pUid => return
       if (!pUid) {
@@ -3621,9 +3468,6 @@ const NorthController = {
       }
 
       parsepUid = pUid;
-      console.log(
-        `북극이 일기 Load API /north_load Path 호출 - pUid: ${parsepUid}`
-      );
 
       // DB Select
       const table = North_Table_Info.table;
