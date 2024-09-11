@@ -1664,6 +1664,12 @@ const openAIController = {
           content: `assistant는 user와 끝말잇기 게임을 진행한다. 단어는 2 ~ 5글자 사이의 명사만으로 생성한다. 
 '륨', '릇'과 같은 한방단어로 인해 assistant가 패배할 경우 assistant는 패배를 인정하고 재시작 여부를 user에게 묻는다.`,
         });
+      } else if (game === "balance") {
+        promptArr.push({
+          role: "system",
+          content: `assistant는 user와 밸런스 게임을 진행한다. 총 10회 질문한다. 
+assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문제만 출제한다`,
+        });
       }
 
       const response = await openai.chat.completions.create({
