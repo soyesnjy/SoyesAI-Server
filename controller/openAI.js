@@ -1669,7 +1669,7 @@ const openAIController = {
           role: "system",
           content: `assistant는 user와 밸런스 게임을 진행한다. 총 10회 질문한다.
 assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문제만 출제한다.
-게임이 종료되면 assistant가 선택한 단어가 나오고 user와의 매칭률을 계산해서 %로 알려준다. `,
+게임이 종료되면 assistant가 밸런스 게임에서 선택한 단어 10개를 보여주고 user와의 매칭률을 계산해서 %로 알려준다.`,
         });
       }
 
