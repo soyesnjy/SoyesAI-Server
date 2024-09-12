@@ -2481,7 +2481,7 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
 };
 
 const ellaMoodController = {
-  // 훈련 트레이너 - 엘라 (New)
+  // 기분훈련 트레이너 - 엘라 (New)
   postOpenAIEllaMoodTraning: async (req, res) => {
     const { data } = req.body;
     let parseData,
@@ -2657,7 +2657,7 @@ Todo List가 아니라고 판단되면 제외한다.
       });
     }
   },
-  // 기분 훈련 저장 API
+  // 기분훈련 저장 API
   postOpenAIMoodDataSave: async (req, res) => {
     const { data } = req.body;
     let parseData, parsepUid, parseType; // Parsing 변수
@@ -2941,7 +2941,7 @@ Todo List가 아니라고 판단되면 제외한다.
       });
     }
   },
-  // 기분 훈련 데이터 Load API
+  // 기분훈련 시작 데이터 Load API
   postOpenAIMoodDataLoad: async (req, res) => {
     const { data } = req.body;
 
@@ -2986,6 +2986,143 @@ Todo List가 아니라고 판단되면 제외한다.
 
       // dummy data (임시)
       // return res.json({ mood_round_idx: 0, mood_name: "" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "Server Error - 500",
+      });
+    }
+  },
+  // 기분훈련 보고서 데이터 Load API
+  postOpenAIMoodTrainingDataLoad: async (req, res) => {
+    const { data } = req.body;
+
+    let parseData, parsepUid; // Parsing 변수
+
+    try {
+      // json 파싱
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { pUid, type } = parseData;
+
+      console.log(`기분 훈련 보고서 Data Load API 호출 - pUid: ${pUid}`);
+      console.log(parseData);
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
+      }
+
+      // No type => return
+      if (!type) {
+        console.log("No type input value - 400");
+        return res.status(400).json({ message: "No type input value - 400" });
+      }
+
+      // pUid default값 설정
+      parsepUid = pUid;
+
+      // Mood Table 명시
+      const table = Ella_Training_Table_Info["Mood"].table;
+
+      // Mood Table User 조회
+      let select_query;
+      let select_data;
+
+      switch (type) {
+        case 1:
+          select_query = `SELECT mood_name, mood_situation_first, mood_thought_first, mood_solution_first, mood_different_thought_first, mood_score FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
+          select_data = await fetchUserData(connection_AI, select_query);
+
+          // 회기를 실시하지 않은 경우
+          if (!select_data[0]?.mood_score)
+            return res
+              .status(200)
+              .json({ message: "Non Mood Training First Data" });
+
+          return res.status(200).json({
+            message: "Mood Training First Data Load Success!",
+            data: {
+              mood_name: select_data[0]?.mood_name,
+              mood_situation: select_data[0]?.mood_situation_first,
+              mood_thought: select_data[0]?.mood_thought_first,
+              mood_solution: select_data[0]?.mood_solution_first,
+              mood_different_thought:
+                select_data[0]?.mood_different_thought_first,
+              mood_score: select_data[0]?.mood_score,
+            },
+          });
+        case 2:
+          select_query = `SELECT mood_name, mood_situation_second, mood_thought_second, mood_solution_second, mood_different_thought_second, mood_todo_list FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
+          select_data = await fetchUserData(connection_AI, select_query);
+
+          // 회기를 실시하지 않은 경우
+          if (!select_data[0]?.mood_todo_list)
+            return res
+              .status(200)
+              .json({ message: "Non Mood Training Second Data" });
+
+          return res.status(200).json({
+            message: "Mood Training Second Data Load Success!",
+            data: {
+              mood_name: select_data[0]?.mood_name,
+              mood_situation: select_data[0]?.mood_situation_second,
+              mood_thought: select_data[0]?.mood_thought_second,
+              mood_solution: select_data[0]?.mood_solution_second,
+              mood_different_thought:
+                select_data[0]?.mood_different_thought_second,
+              mood_todo_list: JSON.parse(select_data[0]?.mood_todo_list),
+            },
+          });
+        case 3:
+          select_query = `SELECT mood_name, mood_situation_third, mood_thought_third, mood_solution_third, mood_different_thought_third, mood_talk_list FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
+          select_data = await fetchUserData(connection_AI, select_query);
+
+          // 회기를 실시하지 않은 경우
+          if (!select_data[0]?.mood_talk_list)
+            return res
+              .status(200)
+              .json({ message: "Non Mood Training Third Data" });
+
+          return res.status(200).json({
+            message: "Mood Training Third Data Load Success!",
+            data: {
+              mood_name: select_data[0]?.mood_name,
+              mood_situation: select_data[0]?.mood_situation_third,
+              mood_thought: select_data[0]?.mood_thought_third,
+              mood_solution: select_data[0]?.mood_solution_third,
+              mood_different_thought:
+                select_data[0]?.mood_different_thought_third,
+              mood_talk_list: JSON.parse(select_data[0]?.mood_talk_list),
+            },
+          });
+        case 4:
+          select_query = `SELECT mood_name, mood_situation_fourth, mood_thought_fourth, mood_solution_fourth, mood_different_thought_fourth, mood_meditation_feedback FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
+          select_data = await fetchUserData(connection_AI, select_query);
+
+          // 회기를 실시하지 않은 경우
+          if (!select_data[0]?.mood_meditation_feedback)
+            return res
+              .status(200)
+              .json({ message: "Non Mood Training Fourth Data" });
+
+          return res.status(200).json({
+            message: "Mood Training Fourth Data Load Success!",
+            data: {
+              mood_name: select_data[0]?.mood_name,
+              mood_situation: select_data[0]?.mood_situation_fourth,
+              mood_thought: select_data[0]?.mood_thought_fourth,
+              mood_solution: select_data[0]?.mood_solution_fourth,
+              mood_different_thought:
+                select_data[0]?.mood_different_thought_fourth,
+              mood_meditation_feedback:
+                select_data[0]?.mood_meditation_feedback,
+            },
+          });
+      }
     } catch (err) {
       console.error(err);
       res.status(500).json({
@@ -3176,7 +3313,7 @@ const ellaFriendController = {
 
       // No Required Mood Data => return
       if (!pUid || !type) {
-        console.log("No type input value - 400");
+        console.log("No Required input value - 400");
         return res
           .status(400)
           .json({ message: "No Required Mood Data input value - 400" });
@@ -3249,10 +3386,10 @@ const ellaFriendController = {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("friend_test Insert Success!");
+              console.log("Friend Data Insert Success!");
               return res
                 .status(200)
-                .json({ message: "friend_test Data Save Success!" });
+                .json({ message: "Friend Data Save Success!" });
             }
           );
 
@@ -3271,13 +3408,132 @@ const ellaFriendController = {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("friend_test Insert Success!");
+              console.log("Friend Data Insert Success!");
               return res
                 .status(200)
-                .json({ message: "friend_test Data Save Success!" });
+                .json({ message: "Friend Data Save Success!" });
             }
           );
           break;
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "Server Error - 500",
+      });
+    }
+  },
+  // 또래관계 보고서 데이터 Load API
+  postOpenAIFriendTrainingDataLoad: async (req, res) => {
+    const { data } = req.body;
+
+    let parseData, parsepUid; // Parsing 변수
+    const typeArr = [
+      "friend_new",
+      "friend_group",
+      "friend_test",
+      "friend_conflict",
+    ];
+    try {
+      // json 파싱
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { pUid, type } = parseData;
+
+      console.log(`또래관계 보고서 Data Load API 호출 - pUid: ${pUid}`);
+      console.log(parseData);
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
+      }
+
+      // No type => return
+      if (!type) {
+        console.log("No type input value - 400");
+        return res.status(400).json({ message: "No type input value - 400" });
+      }
+
+      // No Matching Type Value => return
+      if (!typeArr.includes(type)) {
+        console.log("No matching Type value - 400");
+        return res
+          .status(400)
+          .json({ message: "No matching Type value - 400" });
+      }
+
+      // pUid default값 설정
+      parsepUid = pUid;
+
+      // Mood Table 명시
+      const table = Ella_Training_Table_Info["Friend"].table;
+
+      // Mood Table User 조회
+      let select_query;
+      let select_data;
+
+      switch (type) {
+        case "friend_test":
+          select_query = `SELECT friend_result FROM ${table} WHERE uid = '${parsepUid}' AND friend_type = 'friend_test' ORDER BY created_at DESC LIMIT 1;`;
+          select_data = await fetchUserData(connection_AI, select_query);
+
+          // 회기를 실시하지 않은 경우
+          if (!select_data[0]?.friend_result)
+            return res.status(200).json({ message: "Non Friend Test Data" });
+
+          return res.status(200).json({
+            message: "Friend Training Test Data Load Success!",
+            data: {
+              friend_result: select_data[0].friend_result,
+            },
+          });
+        case "friend_new":
+          select_query = `SELECT friend_consult_log FROM ${table} WHERE uid = '${parsepUid}' AND friend_type = 'friend_new' ORDER BY created_at DESC LIMIT 1;`;
+          select_data = await fetchUserData(connection_AI, select_query);
+
+          // 회기를 실시하지 않은 경우
+          if (!select_data[0]?.friend_consult_log)
+            return res.status(200).json({ message: "Non Friend New Data" });
+
+          return res.status(200).json({
+            message: "Friend Training New Data Load Success!",
+            data: {
+              friend_result: JSON.parse(select_data[0].friend_consult_log),
+            },
+          });
+        case "friend_group":
+          select_query = `SELECT friend_consult_log FROM ${table} WHERE uid = '${parsepUid}' AND friend_type = 'friend_group' ORDER BY created_at DESC LIMIT 1;`;
+          select_data = await fetchUserData(connection_AI, select_query);
+
+          // 회기를 실시하지 않은 경우
+          if (!select_data[0]?.friend_consult_log)
+            return res.status(200).json({ message: "Non Friend Group Data" });
+
+          return res.status(200).json({
+            message: "Friend Training Group Data Load Success!",
+            data: {
+              friend_result: JSON.parse(select_data[0].friend_consult_log),
+            },
+          });
+        case "friend_conflict":
+          select_query = `SELECT friend_consult_log FROM ${table} WHERE uid = '${parsepUid}' AND friend_type = 'friend_conflict' ORDER BY created_at DESC LIMIT 1;`;
+          select_data = await fetchUserData(connection_AI, select_query);
+
+          // 회기를 실시하지 않은 경우
+          if (!select_data[0]?.friend_consult_log)
+            return res
+              .status(200)
+              .json({ message: "Non Friend Conflict Data" });
+
+          return res.status(200).json({
+            message: "Friend Training Conflict Data Load Success!",
+            data: {
+              friend_result: JSON.parse(select_data[0].friend_consult_log),
+            },
+          });
       }
     } catch (err) {
       console.error(err);
