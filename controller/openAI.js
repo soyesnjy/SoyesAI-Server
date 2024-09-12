@@ -3052,7 +3052,7 @@ Todo List가 아니라고 판단되면 제외한다.
               mood_solution: select_data[0]?.mood_solution_first,
               mood_different_thought:
                 select_data[0]?.mood_different_thought_first,
-              mood_score: select_data[0]?.mood_score,
+              mood_cognitive_score: select_data[0]?.mood_score,
             },
           });
         case 2:
