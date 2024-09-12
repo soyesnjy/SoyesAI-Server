@@ -37,10 +37,14 @@ const {
   postOpenAIEllaMoodTraning,
   postOpenAIMoodDataSave,
   postOpenAIMoodDataLoad,
+  postOpenAIMoodTrainingDataLoad,
 } = ellaMoodController;
 
-const { postOpenAIEllaFriendTraning, postOpenAIFriendDataSave } =
-  ellaFriendController;
+const {
+  postOpenAIEllaFriendTraning,
+  postOpenAIFriendDataSave,
+  postOpenAIFriendTrainingDataLoad,
+} = ellaFriendController;
 
 const { postOpenAIConsultingNorthSave, postOpenAIConsultingNorthLoad } =
   NorthController;
@@ -123,23 +127,30 @@ router.post(
   postOpenAIConsultingLogLoad
 );
 
-// 기분 훈련 모델 - 엘라
+// 기분훈련 모델 - 엘라
 router.post(
   "/training_mood_ella",
   vaildateTokenConsulting,
   postOpenAIEllaMoodTraning
 );
-// 기분 훈련 데이터 Save
+// 기분훈련 데이터 Save
 router.post(
   "/training_mood_ella/save",
   vaildateTokenConsulting,
   postOpenAIMoodDataSave
 );
-// 기분 훈련 시작 데이터 Load
+// 기분훈련 시작 데이터 Load
 router.post(
   "/training_mood_ella/load",
   vaildateTokenConsulting,
   postOpenAIMoodDataLoad
+);
+
+// 기분훈련 보고서 데이터 Load
+router.post(
+  "/training_mood_ella/load/training",
+  vaildateTokenConsulting,
+  postOpenAIMoodTrainingDataLoad
 );
 
 // 또래관계 훈련 모델 - 엘라
@@ -154,6 +165,13 @@ router.post(
   "/training_friend_ella/save",
   vaildateTokenConsulting,
   postOpenAIFriendDataSave
+);
+
+// 또래관계 훈련 보고서 데이터 Load
+router.post(
+  "/training_friend_ella/load/training",
+  vaildateTokenConsulting,
+  postOpenAIFriendTrainingDataLoad
 );
 
 // 달력 데이터 반환
