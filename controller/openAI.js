@@ -2998,7 +2998,7 @@ Todo List가 아니라고 판단되면 제외한다.
     const { data } = req.body;
 
     let parseData, parsepUid; // Parsing 변수
-
+    const typeArr = [1, 2, 3, 4];
     try {
       // json 파싱
       if (typeof data === "string") {
@@ -3020,6 +3020,14 @@ Todo List가 아니라고 판단되면 제외한다.
       if (!type) {
         console.log("No type input value - 400");
         return res.status(400).json({ message: "No type input value - 400" });
+      }
+
+      // No Matching Type Value => return
+      if (!typeArr.includes(type)) {
+        console.log("No matching Type value - 400");
+        return res
+          .status(400)
+          .json({ message: "No matching Type value - 400" });
       }
 
       // pUid default값 설정
@@ -3501,7 +3509,7 @@ const ellaFriendController = {
           return res.status(200).json({
             message: "Friend Training New Data Load Success!",
             data: {
-              friend_result: JSON.parse(select_data[0].friend_consult_log),
+              friend_consult_log: JSON.parse(select_data[0].friend_consult_log),
             },
           });
         case "friend_group":
@@ -3515,7 +3523,7 @@ const ellaFriendController = {
           return res.status(200).json({
             message: "Friend Training Group Data Load Success!",
             data: {
-              friend_result: JSON.parse(select_data[0].friend_consult_log),
+              friend_consult_log: JSON.parse(select_data[0].friend_consult_log),
             },
           });
         case "friend_conflict":
@@ -3531,7 +3539,7 @@ const ellaFriendController = {
           return res.status(200).json({
             message: "Friend Training Conflict Data Load Success!",
             data: {
-              friend_result: JSON.parse(select_data[0].friend_consult_log),
+              friend_consult_log: JSON.parse(select_data[0].friend_consult_log),
             },
           });
       }
