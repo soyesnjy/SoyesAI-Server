@@ -3567,7 +3567,6 @@ const ellaAnxietyController = {
       "consolation",
       "solution",
       "challenge_start",
-      "challenge_again",
       "challenge_recommend",
       "challenge_end",
     ];
@@ -3640,25 +3639,19 @@ const ellaAnxietyController = {
         case "challenge_start":
           promptArr.push({
             role: "system",
-            content: `user가 적은 목표를 점진적으로 연습할 수 있는 5단계를 쉬운 것부터 300자 이내로 제시한다.`,
-          });
-          break;
-        case "challenge_again":
-          promptArr.push({
-            role: "system",
-            content: `'계획을 좀 바꿔보자. 이건 어떨까?' 라며 이전보다 쉬운 5단계를 제시한다.`,
+            content: `assistant의 이름은 '엘라' 이며 반말을 사용한다. user가 두렵고 떨리지만 도전하고 싶은 목표를 말하면, 엘라는 '이렇게 차근차근 도전해보자'라고 하며 점진적으로 연습할 수 있는 5단계 활동을 300자 이내로 제시하고 '어떤 것 같아?'라는 말로 마친다. 5단계 활동은 초등학생이 할 수 있는 활동이어야 한다. 유저가 새 활동을 추천해달라고 하는 경우, 새로운 5단계 활동을 300자 이내로 제시한다.`,
           });
           break;
         case "challenge_recommend":
           promptArr.push({
             role: "system",
-            content: `5점 미만중에 가장 높은 점수의 활동을 이번주에 실천해보도록 권한다. 동점의 단계가 있다면 가장 낮은 단계를 권한다.`,
+            content: `유저가 활동을 언제, 어디에서 실천할지 입력한 경우, 계획을 잘 세웠다고 격려한다. 유저가 활동을 실천할 수 있는 시간이나 장소를 말하지 못한 경우, ‘~는 어떨까?’라는 말로 대안을 제시한다.`,
           });
           break;
         case "challenge_end":
           promptArr.push({
             role: "system",
-            content: `user 응답에 반응하고, 실천 후 어땠는지 넬라 일기에 기록하도록 안내한다.`,
+            content: `user 응답에 반응한다. '차근차근 도전해보고 두려운 마음이 어떻게 변하는지 북극이 일기에도 써보자'라고 한다.`,
           });
           break;
       }
