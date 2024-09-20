@@ -7,6 +7,7 @@ const {
   openAIController,
   ellaMoodController,
   ellaFriendController,
+  ellaAnxietyController,
   NorthController,
   // openAIController_Regercy, // 레거시 코드
 } = require("../controller/openAI");
@@ -45,6 +46,13 @@ const {
   postOpenAIFriendDataSave,
   postOpenAIFriendTrainingDataLoad,
 } = ellaFriendController;
+
+const {
+  postOpenAIEllaAnxietyTraning,
+  postOpenAIAnxietyDataSave,
+  postOpenAIAnxietyDataLoad,
+  postOpenAIAnxietyTrainingDataLoad,
+} = ellaAnxietyController;
 
 const { postOpenAIConsultingNorthSave, postOpenAIConsultingNorthLoad } =
   NorthController;
@@ -145,7 +153,6 @@ router.post(
   vaildateTokenConsulting,
   postOpenAIMoodDataLoad
 );
-
 // 기분훈련 보고서 데이터 Load
 router.post(
   "/training_mood_ella/load/training",
@@ -159,14 +166,12 @@ router.post(
   vaildateTokenConsulting,
   postOpenAIEllaFriendTraning
 );
-
 // 또래관계 훈련 데이터 Save
 router.post(
   "/training_friend_ella/save",
   vaildateTokenConsulting,
   postOpenAIFriendDataSave
 );
-
 // 또래관계 훈련 보고서 데이터 Load
 router.post(
   "/training_friend_ella/load/training",
@@ -174,9 +179,15 @@ router.post(
   postOpenAIFriendTrainingDataLoad
 );
 
+// 불안훈련 모델 - 엘라
+router.post(
+  "/training_anxiety_ella",
+  vaildateTokenConsulting,
+  postOpenAIEllaAnxietyTraning
+);
+
 // 달력 데이터 반환
 router.post("/calendar", vaildateTokenConsulting, postOpenAIMypageCalendarData);
-
 // 마이페이지 데이터 반환
 router.post("/mypage", vaildateTokenConsulting, postOpenAIMypageData);
 // User EBT 결과(11종) 데이터 반환
