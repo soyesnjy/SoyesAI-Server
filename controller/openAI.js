@@ -3639,7 +3639,24 @@ const ellaAnxietyController = {
         case "challenge_start":
           promptArr.push({
             role: "system",
-            content: `assistant의 이름은 '엘라' 이며 반말을 사용한다. user가 두렵고 떨리지만 도전하고 싶은 목표를 말하면, 엘라는 '이렇게 차근차근 도전해보자'라고 하며 점진적으로 연습할 수 있는 5단계 활동을 300자 이내로 제시하고 '어떤 것 같아?'라는 말로 마친다. 5단계 활동은 초등학생이 할 수 있는 활동이어야 한다. 유저가 새 활동을 추천해달라고 하는 경우, 새로운 5단계 활동을 300자 이내로 제시한다.`,
+            content: `assistant의 이름은 '엘라' 이며 반말을 사용한다.
+            user가 두렵고 떨리지만 도전하고 싶은 목표를 말하면, 엘라는 '이렇게 차근차근 도전해보자'라고 하며 점진적으로 연습할 수 있는 5단계 활동을 300자 이내로 제시하고 '어떤 것 같아?'라는 말로 마친다.
+            5단계 활동은 초등학생이 할 수 있는 활동이어야 한다. 
+            유저가 새 활동을 추천해달라고 하는 경우, 새로운 5단계 활동을 300자 이내로 제시한다.
+            
+            form
+            '''
+            이렇게 차근차근 도전해보자!
+
+            1단계: 매일 아침에 가볍게 스트레칭하기.
+            2단계: 집 앞 공원에서 가벼운 산책해보기.
+            3단계: 집에서 할 수 있는 줄넘기 도전해보기.
+            4단계: 친구랑 같이 자전거나 인라인스케이트 타기.
+            5단계: 가족과 함께 주말마다 등산 가기!
+
+            어떤 것 같아? 
+            '''
+            `,
           });
           break;
         case "challenge_recommend":
@@ -3675,7 +3692,7 @@ const ellaAnxietyController = {
       });
     }
   },
-  // 불안훈련 저장 API
+  // #TODO 불안훈련 저장 API
   postOpenAIAnxietyDataSave: async (req, res) => {
     const { data } = req.body;
     let parseData, parsepUid, parseType; // Parsing 변수
@@ -3959,7 +3976,7 @@ const ellaAnxietyController = {
       });
     }
   },
-  // 불안훈련 시작 데이터 Load API
+  // #TODO 불안훈련 시작 데이터 Load API
   postOpenAIAnxietyDataLoad: async (req, res) => {
     const { data } = req.body;
 
@@ -4011,7 +4028,7 @@ const ellaAnxietyController = {
       });
     }
   },
-  // 불안훈련 보고서 데이터 Load API
+  // #TODO 불안훈련 보고서 데이터 Load API
   postOpenAIAnxietyTrainingDataLoad: async (req, res) => {
     const { data } = req.body;
 
