@@ -185,6 +185,12 @@ router.post(
   vaildateTokenConsulting,
   postOpenAIEllaAnxietyTraning
 );
+// 불안훈련 데이터 Save
+router.post(
+  "/training_anxiety_ella/save",
+  vaildateTokenConsulting,
+  postOpenAIAnxietyDataSave
+);
 
 // 달력 데이터 반환
 router.post("/calendar", vaildateTokenConsulting, postOpenAIMypageCalendarData);

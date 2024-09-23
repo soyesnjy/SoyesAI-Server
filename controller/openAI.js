@@ -2662,6 +2662,7 @@ Todo List가 아니라고 판단되면 제외한다.
     const { data } = req.body;
     let parseData, parsepUid, parseType; // Parsing 변수
     const typeArr = ["first", "second", "third", "fourth"]; // type 식별자
+    const regex = /^(?![1-4]$).+$/;
     try {
       // json 파싱
       if (typeof data === "string") {
@@ -2702,6 +2703,13 @@ Todo List가 아니라고 판단되면 제외한다.
         return res
           .status(400)
           .json({ message: "No Required Mood Data input value - 400" });
+      }
+
+      if (regex.test(String(type))) {
+        console.log(`type is not matching [1 ~ 4] - pUid: ${parsepUid}`);
+        return res.status(400).json({
+          message: "type is not matching [1 ~ 4]",
+        });
       }
 
       parseType = typeArr[type - 1];
@@ -3728,11 +3736,13 @@ const ellaAnxietyController = {
       });
     }
   },
-  // #TODO 불안훈련 저장 API
+  // 불안훈련 저장 API
   postOpenAIAnxietyDataSave: async (req, res) => {
     const { data } = req.body;
     let parseData, parsepUid, parseType; // Parsing 변수
-    const typeArr = ["first", "second", "third", "fourth"]; // type 식별자
+    const typeArr = ["first", "second", "third", "fourth", "fifth"]; // type 식별자
+    const regex = /^(?![1-5]$).+$/;
+
     try {
       // json 파싱
       if (typeof data === "string") {
@@ -3740,22 +3750,23 @@ const ellaAnxietyController = {
       } else parseData = data;
 
       const {
+        // 필수 입력
         pUid,
-        type, // 2024.09.05: String -> Int 변경
-        mood_situation,
-        mood_thought,
-        mood_solution,
-        mood_different_thought,
-        mood_rating,
-        mood_name,
-        mood_cognitive_score,
-        mood_todo_list,
-        mood_talk_list,
-        mood_meditation_feedback,
+        type,
+        anxiety_situation,
+        anxiety_physical,
+        anxiety_thought,
+        anxiety_rating,
+        // 조건부 입력
+        anxiety_name, // 1회기
+        anxiety_worrys, // 1~3회기
+        anxiety_cognitive_score, // 4회기
+        anxiety_challenge_steps, // 5회기
+        anxiety_challenge_score, // 5회기
       } = parseData;
 
       console.log(
-        `기분 훈련 저장 API /openAI/training_mood_ella/save Path 호출 - pUid: ${pUid}`
+        `불안 훈련 저장 API /openAI/training_mood_ella/save Path 호출 - pUid: ${pUid}`
       );
       console.log(parseData);
 
@@ -3763,11 +3774,10 @@ const ellaAnxietyController = {
       if (
         !pUid ||
         !type ||
-        !mood_situation ||
-        !mood_thought ||
-        !mood_solution ||
-        !mood_different_thought ||
-        !mood_rating
+        !anxiety_situation ||
+        !anxiety_physical ||
+        !anxiety_thought ||
+        !anxiety_rating
       ) {
         console.log("No type input value - 400");
         return res
@@ -3775,11 +3785,19 @@ const ellaAnxietyController = {
           .json({ message: "No Required Mood Data input value - 400" });
       }
 
+      // type [1~5] 체크
+      if (regex.test(String(type))) {
+        console.log(`Type is not matching [1 ~ 5] - pUid: ${parsepUid}`);
+        return res.status(400).json({
+          message: "Type is not matching [1 ~ 5]",
+        });
+      }
+
       parseType = typeArr[type - 1];
       console.log(`parseType : ${parseType}`);
 
       // 타입별 필수 입력값 체크
-      if (parseType === "first" && (!mood_name || !mood_cognitive_score)) {
+      if (parseType === "first" && !anxiety_name) {
         console.log(
           `There are no input values suitable for the type (first) - pUid: ${parsepUid}`
         );
@@ -3787,25 +3805,36 @@ const ellaAnxietyController = {
           message: "There are no input values suitable for the type",
         });
       }
-      if (parseType === "second" && !mood_todo_list) {
+
+      if (
+        (parseType === "first" ||
+          parseType === "second" ||
+          parseType === "third") &&
+        !anxiety_worrys
+      ) {
         console.log(
-          `There are no input values suitable for the type (second) - pUid: ${parsepUid}`
+          `There are no input values suitable for the type (anxiety_worrys) - pUid: ${parsepUid}`
         );
         return res.status(400).json({
           message: "There are no input values suitable for the type",
         });
       }
-      if (parseType === "third" && !mood_talk_list) {
-        console.log(
-          `There are no input values suitable for the type (third) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "There are no input values suitable for the type",
-        });
-      }
-      if (parseType === "fourth" && !mood_meditation_feedback) {
+      if (parseType === "fourth" && !anxiety_cognitive_score) {
         console.log(
           `There are no input values suitable for the type (fourth) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "There are no input values suitable for the type",
+        });
+      }
+      if (
+        parseType === "fifth" &&
+        (!anxiety_challenge_steps ||
+          !anxiety_challenge_score ||
+          anxiety_challenge_score?.length !== 5)
+      ) {
+        console.log(
+          `There are no input values suitable for the type (fifth) - pUid: ${parsepUid}`
         );
         return res.status(400).json({
           message: "There are no input values suitable for the type",
@@ -3815,7 +3844,7 @@ const ellaAnxietyController = {
       // pUid default값 설정
       parsepUid = pUid;
 
-      const table = Ella_Training_Table_Info["Mood"].table;
+      const table = Ella_Training_Table_Info["Anxiety"].table;
       // const attribute = Ella_Training_Table_Info["Mood"].attribute;
 
       let update_query, update_value;
@@ -3830,7 +3859,7 @@ const ellaAnxietyController = {
       if (
         parseType === "first" &&
         select_data.length &&
-        select_data[0].mood_round_idx !== 4
+        select_data[0].anxiety_round_idx !== 5
       ) {
         console.log(
           `The type value does not match the current episode (first) - pUid: ${parsepUid}`
@@ -3844,7 +3873,7 @@ const ellaAnxietyController = {
       if (
         parseType === "second" &&
         select_data.length &&
-        select_data[0].mood_round_idx !== 1
+        select_data[0].anxiety_round_idx !== 1
       ) {
         console.log(
           `The type value does not match the current episode (second) - pUid: ${parsepUid}`
@@ -3858,7 +3887,7 @@ const ellaAnxietyController = {
       if (
         parseType === "third" &&
         select_data.length &&
-        select_data[0].mood_round_idx !== 2
+        select_data[0].anxiety_round_idx !== 2
       ) {
         console.log(
           `The type value does not match the current episode (third)- pUid: ${parsepUid}`
@@ -3872,10 +3901,24 @@ const ellaAnxietyController = {
       if (
         parseType === "fourth" &&
         select_data.length &&
-        select_data[0].mood_round_idx !== 3
+        select_data[0].anxiety_round_idx !== 3
       ) {
         console.log(
           `The type value does not match the current episode (fourth) - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "The type value does not match the current episode",
+        });
+      }
+
+      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 5가 아닐 경우 Not Matching 에러
+      if (
+        parseType === "fifth" &&
+        select_data.length &&
+        select_data[0].anxiety_round_idx !== 4
+      ) {
+        console.log(
+          `The type value does not match the current episode (fifth) - pUid: ${parsepUid}`
         );
         return res.status(400).json({
           message: "The type value does not match the current episode",
@@ -3887,28 +3930,24 @@ const ellaAnxietyController = {
         case "first":
           const insert_query = `INSERT INTO ${table} 
           (uid,
-          mood_round_idx,
-          mood_name,
-          mood_score,
-          mood_avartar,
-          mood_situation_first,
-          mood_thought_first,
-          mood_solution_first,
-          mood_different_thought_first,
-          mood_rating_first)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
+          anxiety_round_idx,
+          anxiety_name,
+          anxiety_situation_first,
+          anxiety_physical_first,
+          anxiety_thought_first,
+          anxiety_worrys_first,
+          anxiety_rating_first)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?);`;
           // console.log(insert_query);
           const insert_value = [
             parsepUid,
             1,
-            mood_name,
-            mood_cognitive_score,
-            "Ella",
-            mood_situation,
-            mood_thought,
-            mood_solution,
-            mood_different_thought,
-            mood_rating,
+            anxiety_name,
+            anxiety_situation,
+            anxiety_physical,
+            anxiety_thought,
+            JSON.stringify(anxiety_worrys),
+            anxiety_rating,
           ];
           // console.log(insert_value);
 
@@ -3920,26 +3959,33 @@ const ellaAnxietyController = {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("Mood First Insert Success!");
+              console.log("Anxiety First Insert Success!");
               return res
                 .status(200)
-                .json({ message: "Mood First Data Save Success!" });
+                .json({ message: "Anxiety First Data Save Success!" });
             }
           );
 
           break;
         case "second":
-          update_query = `UPDATE ${table} SET mood_round_idx = ?, mood_todo_list = ?, mood_situation_second = ?, mood_thought_second = ?, mood_solution_second = ?, mood_different_thought_second = ?, mood_rating_second = ? WHERE mood_idx = ?`;
+          update_query = `UPDATE ${table} SET
+          anxiety_round_idx = ?,
+          anxiety_situation_second = ?,
+          anxiety_physical_second = ?,
+          anxiety_thought_second = ?,
+          anxiety_worrys_second = ?,
+          anxiety_rating_second = ?
+          WHERE anxiety_idx = ?`;
+
           // console.log(update_query);
           update_value = [
             2,
-            JSON.stringify(mood_todo_list),
-            mood_situation,
-            mood_thought,
-            mood_solution,
-            mood_different_thought,
-            mood_rating,
-            select_data[0].mood_idx,
+            anxiety_situation,
+            anxiety_physical,
+            anxiety_thought,
+            JSON.stringify(anxiety_worrys),
+            anxiety_rating,
+            select_data[0].anxiety_idx,
           ];
           // console.log(update_value);
           connection_AI.query(
@@ -3958,17 +4004,24 @@ const ellaAnxietyController = {
           );
           break;
         case "third":
-          update_query = `UPDATE ${table} SET mood_round_idx = ?, mood_talk_list = ?, mood_situation_third = ?, mood_thought_third = ?, mood_solution_third = ?, mood_different_thought_third = ?, mood_rating_third = ? WHERE mood_idx = ?`;
+          update_query = `UPDATE ${table} SET
+          anxiety_round_idx = ?,
+          anxiety_situation_third = ?,
+          anxiety_physical_third = ?,
+          anxiety_thought_third = ?,
+          anxiety_worrys_third = ?,
+          anxiety_rating_third = ?
+          WHERE anxiety_idx = ?`;
+
           // console.log(update_query);
           update_value = [
             3,
-            JSON.stringify(mood_talk_list),
-            mood_situation,
-            mood_thought,
-            mood_solution,
-            mood_different_thought,
-            mood_rating,
-            select_data[0].mood_idx,
+            anxiety_situation,
+            anxiety_physical,
+            anxiety_thought,
+            JSON.stringify(anxiety_worrys),
+            anxiety_rating,
+            select_data[0].anxiety_idx,
           ];
           // console.log(update_value);
           connection_AI.query(
@@ -3979,25 +4032,31 @@ const ellaAnxietyController = {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("Mood Third Update Success!");
+              console.log("Anxiety Third Update Success!");
               return res
                 .status(200)
-                .json({ message: "Mood Third Data Save Success!" });
+                .json({ message: "Anxiety Third Data Save Success!" });
             }
           );
           break;
         case "fourth":
-          update_query = `UPDATE ${table} SET mood_round_idx = ?, mood_meditation_feedback = ?, mood_situation_fourth = ?, mood_thought_fourth = ?, mood_solution_fourth = ?, mood_different_thought_fourth = ?, mood_rating_fourth = ? WHERE mood_idx = ?`;
+          update_query = `UPDATE ${table} SET
+          anxiety_round_idx = ?,
+          anxiety_cognitive_score = ?,
+          anxiety_situation_fourth = ?,
+          anxiety_physical_fourth = ?,
+          anxiety_thought_fourth = ?,
+          anxiety_rating_fourth = ?
+          WHERE anxiety_idx = ?`;
           // console.log(update_query);
           update_value = [
             4,
-            mood_meditation_feedback,
-            mood_situation,
-            mood_thought,
-            mood_solution,
-            mood_different_thought,
-            mood_rating,
-            select_data[0].mood_idx,
+            anxiety_cognitive_score,
+            anxiety_situation,
+            anxiety_physical,
+            anxiety_thought,
+            anxiety_rating,
+            select_data[0].anxiety_idx,
           ];
           // console.log(update_value);
           connection_AI.query(
@@ -4008,10 +4067,48 @@ const ellaAnxietyController = {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("Mood Fourth Update Success!");
+              console.log("Anxiety Fourth Update Success!");
               return res
                 .status(200)
-                .json({ message: "Mood Fourth Data Save Success!" });
+                .json({ message: "Anxiety Fourth Data Save Success!" });
+            }
+          );
+          break;
+        case "fifth":
+          update_query = `UPDATE ${table} SET
+          anxiety_round_idx = ?,
+          anxiety_challenge_steps = ?,
+          anxiety_challenge_score = ?,
+          anxiety_situation_fourth = ?,
+          anxiety_physical_fourth = ?,
+          anxiety_thought_fourth = ?,
+          anxiety_rating_fourth = ?
+          WHERE anxiety_idx = ?`;
+
+          // console.log(update_query);
+          update_value = [
+            5,
+            anxiety_challenge_steps,
+            anxiety_challenge_score.join("/"),
+            anxiety_situation,
+            anxiety_physical,
+            anxiety_thought,
+            anxiety_rating,
+            select_data[0].anxiety_idx,
+          ];
+          // console.log(update_value);
+          connection_AI.query(
+            update_query,
+            update_value,
+            (error, rows, fields) => {
+              if (error) {
+                console.log(error);
+                return res.status(400).json({ message: error.sqlMessage });
+              }
+              console.log("Anxiety Fifth Update Success!");
+              return res
+                .status(200)
+                .json({ message: "Anxiety Fifth Data Save Success!" });
             }
           );
           break;

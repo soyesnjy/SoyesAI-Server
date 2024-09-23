@@ -402,6 +402,20 @@ const Ella_Training_Table_Info = {
       attr5: "updated_at",
     },
   },
+  Anxiety: {
+    table: "soyes_training_anxiety",
+    attribute: {
+      pKey: "anxiety_idx",
+      fKey: "uid",
+      attr1: "anxiety_round_idx",
+      attr2: "anxiety_name",
+      attr3: "anxiety_cognitive_score",
+      attr4: "anxiety_challenge_steps",
+      attr5: "anxiety_challenge_score",
+      attr6: "created_at",
+      attr7: "updated_at",
+    },
+  },
 };
 const North_Table_Info = {
   table: "soyes_ai_North",
