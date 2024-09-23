@@ -4120,10 +4120,9 @@ const ellaAnxietyController = {
       });
     }
   },
-  // #TODO 불안훈련 시작 데이터 Load API
+  // 불안훈련 시작 데이터 Load API
   postOpenAIAnxietyDataLoad: async (req, res) => {
     const { data } = req.body;
-
     let parseData, parsepUid; // Parsing 변수
 
     try {
@@ -4134,7 +4133,7 @@ const ellaAnxietyController = {
 
       const { pUid } = parseData;
 
-      console.log(`기분 훈련 Start Data Load API 호출 - pUid: ${pUid}`);
+      console.log(`불안 훈련 Start Data Load API 호출 - pUid: ${pUid}`);
       console.log(parseData);
 
       // No pUid => return
@@ -4146,20 +4145,21 @@ const ellaAnxietyController = {
       // pUid default값 설정
       parsepUid = pUid;
 
-      // Mood Table 명시
-      const table = Ella_Training_Table_Info["Mood"].table;
-      const attribute = Ella_Training_Table_Info["Mood"].attribute;
-      // Mood Table User 조회
-      const select_query = `SELECT * FROM ${table} WHERE ${attribute.fKey} = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
+      // Table 명시
+      const table = Ella_Training_Table_Info["Anxiety"].table;
+      // const attribute = Ella_Training_Table_Info["Anxiety"].attribute;
+
+      // Table User 조회
+      const select_query = `SELECT * FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
       const select_data = await fetchUserData(connection_AI, select_query);
-      // case.1 - Row가 없거나 mood_round_idx값이 4일 경우: 기분관리 프로그램을 시작하는 인원. { mood_round_idx: 0, mood_name: "" } 반환
-      if (!select_data[0] || select_data[0].mood_round_idx === 4)
-        return res.json({ mood_round_idx: 0, mood_name: "" });
-      // case.2 - Row가 있을 경우: 기분관리 프로그램을 진행했던 인원. { mood_round_idx: data.mood_round_idx, mood_name: data.mood_name } 반환
+      // case.1 - Row가 없거나 anxiety_round_idx값이 5일 경우
+      if (!select_data[0] || select_data[0].anxiety_round_idx === 5)
+        return res.json({ anxiety_round_idx: 0, anxiety_name: "" });
+      // case.2 - Row가 있을 경우
       else {
         return res.status(200).json({
-          mood_round_idx: select_data[0].mood_round_idx,
-          mood_name: select_data[0].mood_name,
+          anxiety_round_idx: select_data[0].anxiety_round_idx,
+          anxiety_name: select_data[0].anxiety_name,
         });
       }
 

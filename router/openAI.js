@@ -188,8 +188,14 @@ router.post(
 // 불안훈련 데이터 Save
 router.post(
   "/training_anxiety_ella/save",
-  vaildateTokenConsulting,
+  // vaildateTokenConsulting,
   postOpenAIAnxietyDataSave
+);
+// 불안훈련 시작 데이터 Load
+router.post(
+  "/training_anxiety_ella/load",
+  // vaildateTokenConsulting,
+  postOpenAIAnxietyDataLoad
 );
 
 // 달력 데이터 반환
