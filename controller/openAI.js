@@ -2814,7 +2814,18 @@ Todo List가 아니라고 판단되면 제외한다.
       // 타입별 query, value 삽입
       switch (parseType) {
         case "first":
-          const insert_query = `INSERT INTO ${table} (uid, mood_round_idx, mood_name, mood_score, mood_avartar, mood_situation_first, mood_thought_first, mood_solution_first, mood_different_thought_first, mood_rating_first) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
+          const insert_query = `INSERT INTO ${table} 
+          (uid,
+          mood_round_idx,
+          mood_name,
+          mood_score,
+          mood_avartar,
+          mood_situation_first,
+          mood_thought_first,
+          mood_solution_first,
+          mood_different_thought_first,
+          mood_rating_first)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
           // console.log(insert_query);
           const insert_value = [
             parsepUid,
@@ -2847,7 +2858,16 @@ Todo List가 아니라고 판단되면 제외한다.
 
           break;
         case "second":
-          update_query = `UPDATE ${table} SET mood_round_idx = ?, mood_todo_list = ?, mood_situation_second = ?, mood_thought_second = ?, mood_solution_second = ?, mood_different_thought_second = ?, mood_rating_second = ? WHERE mood_idx = ?`;
+          update_query = `UPDATE ${table} SET 
+          mood_round_idx = ?,
+          mood_todo_list = ?,
+          mood_situation_second = ?,
+          mood_thought_second = ?,
+          mood_solution_second = ?,
+          mood_different_thought_second = ?,
+          mood_rating_second = ?
+          WHERE mood_idx = ?`;
+
           // console.log(update_query);
           update_value = [
             2,
@@ -2876,7 +2896,15 @@ Todo List가 아니라고 판단되면 제외한다.
           );
           break;
         case "third":
-          update_query = `UPDATE ${table} SET mood_round_idx = ?, mood_talk_list = ?, mood_situation_third = ?, mood_thought_third = ?, mood_solution_third = ?, mood_different_thought_third = ?, mood_rating_third = ? WHERE mood_idx = ?`;
+          update_query = `UPDATE ${table} SET 
+          mood_round_idx = ?,
+          mood_talk_list = ?,
+          mood_situation_third = ?,
+          mood_thought_third = ?,
+          mood_solution_third = ?,
+          mood_different_thought_third = ?,
+          mood_rating_third = ?
+          WHERE mood_idx = ?`;
           // console.log(update_query);
           update_value = [
             3,
@@ -2905,7 +2933,15 @@ Todo List가 아니라고 판단되면 제외한다.
           );
           break;
         case "fourth":
-          update_query = `UPDATE ${table} SET mood_round_idx = ?, mood_meditation_feedback = ?, mood_situation_fourth = ?, mood_thought_fourth = ?, mood_solution_fourth = ?, mood_different_thought_fourth = ?, mood_rating_fourth = ? WHERE mood_idx = ?`;
+          update_query = `UPDATE ${table} SET
+          mood_round_idx = ?,
+          mood_meditation_feedback = ?,
+          mood_situation_fourth = ?,
+          mood_thought_fourth = ?,
+          mood_solution_fourth = ?,
+          mood_different_thought_fourth = ?,
+          mood_rating_fourth = ?
+          WHERE mood_idx = ?`;
           // console.log(update_query);
           update_value = [
             4,
@@ -3849,7 +3885,18 @@ const ellaAnxietyController = {
       // 타입별 query, value 삽입
       switch (parseType) {
         case "first":
-          const insert_query = `INSERT INTO ${table} (uid, mood_round_idx, mood_name, mood_score, mood_avartar, mood_situation_first, mood_thought_first, mood_solution_first, mood_different_thought_first, mood_rating_first) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
+          const insert_query = `INSERT INTO ${table} 
+          (uid,
+          mood_round_idx,
+          mood_name,
+          mood_score,
+          mood_avartar,
+          mood_situation_first,
+          mood_thought_first,
+          mood_solution_first,
+          mood_different_thought_first,
+          mood_rating_first)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`;
           // console.log(insert_query);
           const insert_value = [
             parsepUid,
