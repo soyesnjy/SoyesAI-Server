@@ -3782,7 +3782,7 @@ const ellaAnxietyController = {
         console.log("No type input value - 400");
         return res
           .status(400)
-          .json({ message: "No Required Mood Data input value - 400" });
+          .json({ message: "No Required Anxiety Data input value - 400" });
       }
 
       // type [1~5] 체크
