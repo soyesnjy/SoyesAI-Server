@@ -160,6 +160,31 @@ router.post(
   postOpenAIMoodTrainingDataLoad
 );
 
+// 불안훈련 모델 - 엘라
+router.post(
+  "/training_anxiety_ella",
+  vaildateTokenConsulting,
+  postOpenAIEllaAnxietyTraning
+);
+// 불안훈련 데이터 Save
+router.post(
+  "/training_anxiety_ella/save",
+  vaildateTokenConsulting,
+  postOpenAIAnxietyDataSave
+);
+// 불안훈련 시작 데이터 Load
+router.post(
+  "/training_anxiety_ella/load",
+  vaildateTokenConsulting,
+  postOpenAIAnxietyDataLoad
+);
+// 불안훈련 보고서 데이터 Load
+router.post(
+  "/training_anxiety_ella/load/training",
+  vaildateTokenConsulting,
+  postOpenAIAnxietyTrainingDataLoad
+);
+
 // 또래관계 훈련 모델 - 엘라
 router.post(
   "/training_friend_ella",
@@ -177,25 +202,6 @@ router.post(
   "/training_friend_ella/load/training",
   vaildateTokenConsulting,
   postOpenAIFriendTrainingDataLoad
-);
-
-// 불안훈련 모델 - 엘라
-router.post(
-  "/training_anxiety_ella",
-  vaildateTokenConsulting,
-  postOpenAIEllaAnxietyTraning
-);
-// 불안훈련 데이터 Save
-router.post(
-  "/training_anxiety_ella/save",
-  // vaildateTokenConsulting,
-  postOpenAIAnxietyDataSave
-);
-// 불안훈련 시작 데이터 Load
-router.post(
-  "/training_anxiety_ella/load",
-  // vaildateTokenConsulting,
-  postOpenAIAnxietyDataLoad
 );
 
 // 달력 데이터 반환

@@ -4079,10 +4079,10 @@ const ellaAnxietyController = {
           anxiety_round_idx = ?,
           anxiety_challenge_steps = ?,
           anxiety_challenge_score = ?,
-          anxiety_situation_fourth = ?,
-          anxiety_physical_fourth = ?,
-          anxiety_thought_fourth = ?,
-          anxiety_rating_fourth = ?
+          anxiety_situation_fifth = ?,
+          anxiety_physical_fifth = ?,
+          anxiety_thought_fifth = ?,
+          anxiety_rating_fifth = ?
           WHERE anxiety_idx = ?`;
 
           // console.log(update_query);
@@ -4172,12 +4172,12 @@ const ellaAnxietyController = {
       });
     }
   },
-  // #TODO 불안훈련 보고서 데이터 Load API
+  // 불안훈련 보고서 데이터 Load API
   postOpenAIAnxietyTrainingDataLoad: async (req, res) => {
     const { data } = req.body;
 
     let parseData, parsepUid; // Parsing 변수
-    const typeArr = [1, 2, 3, 4];
+    const typeArr = [1, 2, 3, 4, 5];
     try {
       // json 파싱
       if (typeof data === "string") {
@@ -4186,7 +4186,7 @@ const ellaAnxietyController = {
 
       const { pUid, type } = parseData;
 
-      console.log(`기분 훈련 보고서 Data Load API 호출 - pUid: ${pUid}`);
+      console.log(`불안 훈련 보고서 Data Load API 호출 - pUid: ${pUid}`);
       console.log(parseData);
 
       // No pUid => return
@@ -4212,101 +4212,161 @@ const ellaAnxietyController = {
       // pUid default값 설정
       parsepUid = pUid;
 
-      // Mood Table 명시
-      const table = Ella_Training_Table_Info["Mood"].table;
+      // Table 명시
+      const table = Ella_Training_Table_Info["Anxiety"].table;
 
-      // Mood Table User 조회
+      // Table User 조회
       let select_query;
       let select_data;
 
       switch (type) {
         case 1:
-          select_query = `SELECT mood_name, mood_situation_first, mood_thought_first, mood_solution_first, mood_different_thought_first, mood_score FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
+          select_query = `SELECT 
+          anxiety_name,
+          anxiety_situation_first,
+          anxiety_physical_first,
+          anxiety_thought_first,
+          anxiety_worrys_first
+          FROM ${table}
+          WHERE uid = '${parsepUid}'
+          ORDER BY created_at DESC LIMIT 1;`;
+
           select_data = await fetchUserData(connection_AI, select_query);
 
           // 회기를 실시하지 않은 경우
-          if (!select_data[0]?.mood_score)
+          if (!select_data[0]?.anxiety_situation_first)
             return res
               .status(200)
-              .json({ message: "Non Mood Training First Data" });
+              .json({ message: "Non Anxiety Training First Data" });
 
           return res.status(200).json({
-            message: "Mood Training First Data Load Success!",
+            message: "Anxiety Training First Data Load Success!",
             data: {
-              mood_name: select_data[0]?.mood_name,
-              mood_situation: select_data[0]?.mood_situation_first,
-              mood_thought: select_data[0]?.mood_thought_first,
-              mood_solution: select_data[0]?.mood_solution_first,
-              mood_different_thought:
-                select_data[0]?.mood_different_thought_first,
-              mood_cognitive_score: select_data[0]?.mood_score,
+              anxiety_name: select_data[0]?.anxiety_name,
+              anxiety_situation: select_data[0]?.anxiety_situation_first,
+              anxiety_physical: select_data[0]?.anxiety_physical_first,
+              anxiety_thought: select_data[0]?.anxiety_thought_first,
+              anxiety_worrys: JSON.parse(select_data[0]?.anxiety_worrys_first),
             },
           });
         case 2:
-          select_query = `SELECT mood_name, mood_situation_second, mood_thought_second, mood_solution_second, mood_different_thought_second, mood_todo_list FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
+          select_query = `SELECT 
+          anxiety_name,
+          anxiety_situation_second,
+          anxiety_physical_second,
+          anxiety_thought_second,
+          anxiety_worrys_second
+          FROM ${table}
+          WHERE uid = '${parsepUid}'
+          ORDER BY created_at DESC LIMIT 1;`;
+
           select_data = await fetchUserData(connection_AI, select_query);
 
           // 회기를 실시하지 않은 경우
-          if (!select_data[0]?.mood_todo_list)
+          if (!select_data[0]?.anxiety_situation_second)
             return res
               .status(200)
-              .json({ message: "Non Mood Training Second Data" });
+              .json({ message: "Non Anxiety Training Second Data" });
 
           return res.status(200).json({
-            message: "Mood Training Second Data Load Success!",
+            message: "Anxiety Training Second Data Load Success!",
             data: {
-              mood_name: select_data[0]?.mood_name,
-              mood_situation: select_data[0]?.mood_situation_second,
-              mood_thought: select_data[0]?.mood_thought_second,
-              mood_solution: select_data[0]?.mood_solution_second,
-              mood_different_thought:
-                select_data[0]?.mood_different_thought_second,
-              mood_todo_list: JSON.parse(select_data[0]?.mood_todo_list),
+              anxiety_name: select_data[0]?.anxiety_name,
+              anxiety_situation: select_data[0]?.anxiety_situation_second,
+              anxiety_physical: select_data[0]?.anxiety_physical_second,
+              anxiety_thought: select_data[0]?.anxiety_thought_second,
+              anxiety_worrys: JSON.parse(select_data[0]?.anxiety_worrys_second),
             },
           });
         case 3:
-          select_query = `SELECT mood_name, mood_situation_third, mood_thought_third, mood_solution_third, mood_different_thought_third, mood_talk_list FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
+          select_query = `SELECT 
+          anxiety_name,
+          anxiety_situation_third,
+          anxiety_physical_third,
+          anxiety_thought_third,
+          anxiety_worrys_third
+          FROM ${table}
+          WHERE uid = '${parsepUid}'
+          ORDER BY created_at DESC LIMIT 1;`;
+
           select_data = await fetchUserData(connection_AI, select_query);
 
           // 회기를 실시하지 않은 경우
-          if (!select_data[0]?.mood_talk_list)
+          if (!select_data[0]?.anxiety_situation_third)
             return res
               .status(200)
-              .json({ message: "Non Mood Training Third Data" });
+              .json({ message: "Non Anxiety Training Third Data" });
 
           return res.status(200).json({
-            message: "Mood Training Third Data Load Success!",
+            message: "Anxiety Training Third Data Load Success!",
             data: {
-              mood_name: select_data[0]?.mood_name,
-              mood_situation: select_data[0]?.mood_situation_third,
-              mood_thought: select_data[0]?.mood_thought_third,
-              mood_solution: select_data[0]?.mood_solution_third,
-              mood_different_thought:
-                select_data[0]?.mood_different_thought_third,
-              mood_talk_list: JSON.parse(select_data[0]?.mood_talk_list),
+              anxiety_name: select_data[0]?.anxiety_name,
+              anxiety_situation: select_data[0]?.anxiety_situation_third,
+              anxiety_physical: select_data[0]?.anxiety_physical_third,
+              anxiety_thought: select_data[0]?.anxiety_thought_third,
+              anxiety_worrys: JSON.parse(select_data[0]?.anxiety_worrys_third),
             },
           });
         case 4:
-          select_query = `SELECT mood_name, mood_situation_fourth, mood_thought_fourth, mood_solution_fourth, mood_different_thought_fourth, mood_meditation_feedback FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
+          select_query = `SELECT 
+          anxiety_name,
+          anxiety_situation_fourth,
+          anxiety_physical_fourth,
+          anxiety_thought_fourth,
+          anxiety_cognitive_score
+          FROM ${table}
+          WHERE uid = '${parsepUid}'
+          ORDER BY created_at DESC LIMIT 1;`;
+
           select_data = await fetchUserData(connection_AI, select_query);
 
           // 회기를 실시하지 않은 경우
-          if (!select_data[0]?.mood_meditation_feedback)
+          if (!select_data[0]?.anxiety_situation_fourth)
             return res
               .status(200)
-              .json({ message: "Non Mood Training Fourth Data" });
+              .json({ message: "Non Anxiety Training fourth Data" });
 
           return res.status(200).json({
-            message: "Mood Training Fourth Data Load Success!",
+            message: "Anxiety Training fourth Data Load Success!",
             data: {
-              mood_name: select_data[0]?.mood_name,
-              mood_situation: select_data[0]?.mood_situation_fourth,
-              mood_thought: select_data[0]?.mood_thought_fourth,
-              mood_solution: select_data[0]?.mood_solution_fourth,
-              mood_different_thought:
-                select_data[0]?.mood_different_thought_fourth,
-              mood_meditation_feedback:
-                select_data[0]?.mood_meditation_feedback,
+              anxiety_name: select_data[0]?.anxiety_name,
+              anxiety_situation: select_data[0]?.anxiety_situation_fourth,
+              anxiety_physical: select_data[0]?.anxiety_physical_fourth,
+              anxiety_thought: select_data[0]?.anxiety_thought_fourth,
+              anxiety_cognitive_score: select_data[0]?.anxiety_cognitive_score,
+            },
+          });
+        case 5:
+          select_query = `SELECT 
+          anxiety_name,
+          anxiety_situation_fifth,
+          anxiety_physical_fifth,
+          anxiety_thought_fifth,
+          anxiety_challenge_steps,
+          anxiety_challenge_score
+          FROM ${table}
+          WHERE uid = '${parsepUid}'
+          ORDER BY created_at DESC LIMIT 1;`;
+
+          select_data = await fetchUserData(connection_AI, select_query);
+
+          // 회기를 실시하지 않은 경우
+          if (!select_data[0]?.anxiety_situation_fifth)
+            return res
+              .status(200)
+              .json({ message: "Non Anxiety Training Fifth Data" });
+
+          return res.status(200).json({
+            message: "Anxiety Training Fifth Data Load Success!",
+            data: {
+              anxiety_name: select_data[0]?.anxiety_name,
+              anxiety_situation: select_data[0]?.anxiety_situation_fifth,
+              anxiety_physical: select_data[0]?.anxiety_physical_fifth,
+              anxiety_thought: select_data[0]?.anxiety_thought_fifth,
+              anxiety_challenge_steps: select_data[0]?.anxiety_challenge_steps,
+              anxiety_challenge_score: select_data[0]?.anxiety_challenge_score
+                .split("/")
+                .map((el) => Number(el)),
             },
           });
       }
