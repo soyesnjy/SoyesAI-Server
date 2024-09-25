@@ -2598,7 +2598,7 @@ const ellaMoodController = {
             '''
             예시: '그건 정말 그래. 그런데 다르게도 생각해볼 수 있을까?'`,
           });
-          parseMessageArr = [...messageArr];
+          // parseMessageArr = [...messageArr];
           break;
         case "another":
           promptArr.push({
