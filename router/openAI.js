@@ -9,7 +9,7 @@ const {
   ellaFriendController,
   ellaAnxietyController,
   NorthController,
-  // openAIController_Regercy, // 레거시 코드
+  ubiController,
 } = require("../controller/openAI");
 
 const { loginController } = require("../controller/login");
@@ -46,6 +46,8 @@ const {
   postOpenAIFriendDataSave,
   postOpenAIFriendTrainingDataLoad,
 } = ellaFriendController;
+
+const { postOpenAIUbiMeditationRecomend } = ubiController;
 
 const {
   postOpenAIEllaAnxietyTraning,
@@ -86,11 +88,19 @@ router.post(
   // vaildatePlan,
   postOpenAIConsultingPupu
 );
+
 // 공부친구 모델 - 우비
 router.post(
   "/consulting_emotion_ubi",
   vaildateTokenConsulting,
   postOpenAIConsultingUbi
+);
+
+// 명상추천 모델 - 우비
+router.post(
+  "/meditation_recomend_ubi",
+  // vaildateTokenConsulting,
+  postOpenAIUbiMeditationRecomend
 );
 
 // 전문상담사 모델 - 소예
@@ -117,7 +127,7 @@ router.post(
 // 북극이 데이터 Load
 router.post(
   "/north_load",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIConsultingNorthLoad
 );
 
@@ -138,7 +148,7 @@ router.post(
 // 기분훈련 모델 - 엘라
 router.post(
   "/training_mood_ella",
-  vaildateTokenConsulting,
+  // vaildateTokenConsulting,
   postOpenAIEllaMoodTraning
 );
 // 기분훈련 데이터 Save
