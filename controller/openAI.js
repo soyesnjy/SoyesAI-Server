@@ -8,6 +8,7 @@ const { dbconfig_ai } = require("../DB/database");
 const puppeteer = require("puppeteer");
 const ejs = require("ejs");
 const path = require("path");
+const { PDFDocument } = require("pdf-lib");
 
 // Redis 연결
 const redisStore = require("../DB/redisClient");
@@ -292,7 +293,7 @@ const select_soyesAI_EbtResult_v2 = async (keyValue, contentKey, parsepUid) => {
   }
 };
 
-const select_soyesAI_Consult_Log = async (keyValue, parsepUid) => {
+const select_soyesAI_Consult_Log = async (keyValue, parsepUid, count = 1) => {
   try {
     // New EBT Table
     const table = Consult_Table_Info["Log"].table;
@@ -301,7 +302,7 @@ const select_soyesAI_Consult_Log = async (keyValue, parsepUid) => {
     // 조건부 Select Query
     const select_query = keyValue
       ? `SELECT * FROM ${table} WHERE (${pKey} ='${keyValue}')` // keyValue 값으로 조회하는 경우
-      : `SELECT * FROM ${table} WHERE (${cKey} ='${parsepUid}') ORDER BY ${created_at} DESC LIMIT 1`; // 가장 최근 검사 결과를 조회하는 경우
+      : `SELECT * FROM ${table} WHERE (${cKey} ='${parsepUid}') ORDER BY ${created_at} DESC LIMIT ${count}`; // 가장 최근 검사 결과를 조회하는 경우
 
     // const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`; // Select Query
     const ebt_data = await fetchUserData(connection_AI, select_query);
@@ -4525,7 +4526,6 @@ const ubiController = {
       // };
 
       // const tagObj = { music: 0, draw: 1, yoga: 2 };
-
       const tagObj = { draw: 1, yoga: 2 };
       const vTagArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -4934,6 +4934,8 @@ const reportController = {
   },
   postReportTest: async (req, res) => {
     const { data } = req.body;
+    const pdfBuffers = []; // 각 PDF의 버퍼를 저장할 배열
+    let parsepUid, parseName, parseEmail, parseAge, parseGender;
     try {
       if (typeof data === "string") {
         parseData = JSON.parse(data);
@@ -4943,39 +4945,304 @@ const reportController = {
       console.log(`결과보고서 발송 API /report Path 호출 - pUid: ${pUid}`);
       console.log(parseData);
 
+      // No pUid => return
+      if (!pUid || !name || !email || !age || !gender) {
+        console.log("No Required input value - 400");
+        return res
+          .status(400)
+          .json({ message: "No Required input value - 400" });
+      }
+
+      parsepUid = pUid;
+      parseName = name;
+      parseEmail = email;
+      parseAge = age;
+      parseGender = gender;
+
+      const ebtResultMap = {
+        양호: "img_result_1.png",
+        주의: "img_result_2.png",
+        경고: "img_result_3.png",
+        default: "img_result_2.png",
+      };
+      const ptResultMap = {
+        E: "E 관련 설명",
+        R: "R 관련 설명",
+        C: "C 관련 설명",
+        P: "P 관련 설명",
+        O: "O 관련 설명",
+        F: "F 관련 설명",
+        I: "I 관련 설명",
+        S: "S 관련 설명",
+        default: "성격 검사 미실시",
+      };
+      const friendMap = {
+        FTH: {
+          category: "좋은 친구형",
+          ment: "배려심 있고 협동을 잘 하며 사람들과 어울리기 좋아하는 유형이에요. 친구 이야기를 잘 들어주고, 기쁘거나 슬픈 일에 공감을 잘 해요. 내 의견을 고집하기보다 어디에나 잘 어울리고, 대부분의 아이들과 잘 지낼 수 있어요. 다른 아이들에게 편안하고 좋은 친구가 되어줄 수 있어요.",
+        },
+        FSH: {
+          category: "은근한 개인주의자형",
+          ment: "혼자 있을 때 편하지만 드러내지 않고 남들에게 잘 맞춰주는 유형이에요. 친구들의 제안을 잘 따르고 큰 불만 없이 아이들과 무리를 지어 잘 지낼 수 있어요. 하지만 다른 사람의 감정에 둔하고, 다정하기보다는 무뚝뚝한 편이고, 혼자 있어도 불편하지 않아요.",
+        },
+        LTH: {
+          category: "인싸 리더형",
+          ment: "리더십있고 친구들에게 인기 있는 유형이에요. 내가 좋아하는 놀이를 하고, 내가 원하는 방식으로 상황을 이끌어가는 것을 좋아해요. 동시에 친구들의 감정도 잘 알아차리고 함께 어울리는 것을 좋아해서, 친구들의 관심을 끌고 동의를 잘 얻어내는 편이에요.",
+        },
+        LSH: {
+          category: "단호한 개인주의자형",
+          ment: "독립적이고 자기 주장이 분명하며 필요할 때는 소통 능력을 발휘하는 유형이에요. 나에게 좋고 싫은 것, 옳고 그르다고 생각하는 것이 분명해요. 하지만 다른 사람의 기분을 상하게 하거나, 친구와 다투지 않고 내 의견을 전달할 줄 알아요. 다정다감하기보다는 단호한 면이 있어요.",
+        },
+        FTL: {
+          category: "좋은데 힘들어형",
+          ment: "친구를 좋아하고 잘 맞춰주지만 속으로 힘들어하는 유형이에요. 내 의견을 주장하기보다 친구들의 의견을 따르는 편이에요. 친구 마음을 배려하고 다른 사람과 함께 있는 걸 좋아해요. 하지만 갈등이 생겼을 때 어떻게 해결해야하는지, 내 마음을 어떻게 표현해야하는지 잘 몰라 힘들어할 수 있어요.",
+        },
+        FSL: {
+          category: "조용한 친구형",
+          ment: "조용히 혼자 있는 것이 편하고  관계에 어려움을 느끼는 유형이에요. 갈등을 만들기보다는 상황에 따르며 원만히 지내고 싶어해요. 하지만 친구들의 마음을 이해하거나, 지금 어떤 상황이 벌어지고 있는지 빨리 알아차리지 못할 수 있어요. 큰 다툼은 없지만 속으로 친구관계를 힘들어할 수 있어요.",
+        },
+        LTL: {
+          category: "좌충우돌형",
+          ment: "친구를 좋아하고 이끌고 싶어하지만 소통 능력이 부족해 어려움을 느끼는 유형이에요. 내 의견을 잘 말하고, 아니라고 생각될 때는 참지 않는 편이에요. 친구들과 어울리는 걸 좋아하고, 다양하게 내 감정을 표현하기도 해요. 하지만 친구들이 내 의견을 잘 따르지 않거나, 종종 갈등이 생겨 힘들어할 수 있어요.",
+        },
+        LSL: {
+          category: "마이웨이형",
+          ment: "자기주장이 분명하고 내 영역을 지키고 싶으나 소통이 어려운 유형이에요. 내 생각이 분명하고 그걸 남들에게 잘 표현해요. 하지만 다른 사람의 감정을 이해하는데 서투르고 친구들과 같은 관심사를 공유하기보다 나만의 남다른 취향이 있어요. 갈등이 생겼을 때 어떻게 해결해야하는지 모르고 서로 오해가 깊어질 수 있어요.",
+        },
+        default: {
+          category: "유형검사",
+          ment: "미실시",
+        },
+      };
+
+      // PDF 결합 함수
+      async function mergePDFs(pdfBuffers) {
+        const mergedPdf = await PDFDocument.create();
+
+        for (const buffer of pdfBuffers) {
+          const pdf = await PDFDocument.load(buffer);
+          const copiedPages = await mergedPdf.copyPages(
+            pdf,
+            pdf.getPageIndices()
+          );
+          copiedPages.forEach((page) => mergedPdf.addPage(page));
+        }
+
+        const mergedPdfBytes = await mergedPdf.save();
+        return mergedPdfBytes;
+      }
+
       // DB Data Select
-      const selectData = {
+      let selectData = {
         report_url: process.env.REPORT_URL,
-        reportDate: "2024-09-06",
-        name: "노지용",
-        age: "51",
-        gender: "남",
+      };
+
+      // Page 1 Data
+      const dateObj = new Date();
+      const year = dateObj.getFullYear();
+      const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+      const day = ("0" + dateObj.getDate()).slice(-2);
+      const date = `${year}-${month}-${day}`;
+
+      // Page 2 Data
+      const north_table = North_Table_Info.table;
+      const select_north_join_query = `SELECT JSON_OBJECT(
+  'mood_data', IFNULL((SELECT JSON_ARRAYAGG(north_mental_data)
+                FROM (SELECT north_mental_data
+                      FROM ${north_table}
+                      WHERE uid = '${parsepUid}' AND north_diary_tag = 'mood'
+                      ORDER BY created_at DESC
+                      LIMIT 5) AS mood), JSON_ARRAY()),
+  'friend_data', IFNULL((SELECT JSON_ARRAYAGG(north_mental_data)
+                  FROM (SELECT north_mental_data
+                        FROM ${north_table}
+                        WHERE uid = '${parsepUid}' AND north_diary_tag = 'friend'
+                        ORDER BY created_at DESC
+                        LIMIT 5) AS friend), JSON_ARRAY()),
+  'family_data', IFNULL((SELECT JSON_ARRAYAGG(north_mental_data)
+                  FROM (SELECT north_mental_data
+                        FROM ${north_table}
+                        WHERE uid = '${parsepUid}' AND north_diary_tag = 'family'
+                        ORDER BY created_at DESC
+                        LIMIT 5) AS family), JSON_ARRAY()),
+  'school_data', IFNULL((SELECT JSON_ARRAYAGG(north_mental_data)
+                  FROM (SELECT north_mental_data
+                        FROM ${north_table}
+                        WHERE uid = '${parsepUid}' AND north_diary_tag = 'school'
+                        ORDER BY created_at DESC
+                        LIMIT 5) AS school), JSON_ARRAY())
+) AS result;
+`;
+      const north_join_data = await fetchUserData(
+        connection_AI,
+        select_north_join_query
+      );
+      const page2_data = JSON.parse(north_join_data[0].result);
+
+      // Page 3,4 Data
+      const page3_data = await select_soyesAI_EbtResult_v2("", true, parsepUid);
+
+      // Page 5,6 Data
+      const pt_log_table = PT_Table_Info["Log"].table;
+      const select_pt_query = `SELECT 
+      persanl_result FROM ${pt_log_table} 
+      WHERE uid = '${parsepUid}' 
+      ORDER BY created_at DESC LIMIT 1;`;
+
+      const pt_data = await fetchUserData(connection_AI, select_pt_query);
+      const page5_data = pt_data[0];
+
+      // Page 7 Data
+      const mood_table = Ella_Training_Table_Info["Mood"].table;
+      const anxiety_table = Ella_Training_Table_Info["Anxiety"].table;
+
+      const mood_select_query = `SELECT 
+      mood_rating_first,
+      mood_rating_second,
+      mood_rating_third,
+      mood_rating_fourth
+      FROM ${mood_table} WHERE uid = '${parsepUid}' 
+      ORDER BY created_at DESC LIMIT 1;`;
+
+      const mood_select_data = await fetchUserData(
+        connection_AI,
+        mood_select_query
+      );
+      const page7_mood_data = mood_select_data[0]
+        ? Object.values(mood_select_data[0]).filter((el) => el)
+        : [];
+
+      const anxiety_select_query = `SELECT 
+      anxiety_rating_first,
+      anxiety_rating_second,
+      anxiety_rating_third,
+      anxiety_rating_fourth,
+      anxiety_rating_fifth
+      FROM ${anxiety_table} WHERE uid = '${parsepUid}' 
+      ORDER BY created_at DESC LIMIT 1;`;
+
+      const anxiety_select_data = await fetchUserData(
+        connection_AI,
+        anxiety_select_query
+      );
+      const page7_anxiety_data = anxiety_select_data[0]
+        ? Object.values(anxiety_select_data[0]).filter((el) => el)
+        : [];
+
+      // Page 8 Data
+      const friend_table = Ella_Training_Table_Info["Friend"].table;
+      const friend_select_query = `SELECT 
+      friend_result 
+      FROM ${friend_table} 
+      WHERE uid = '${parsepUid}' AND friend_type = 'friend_test' 
+      ORDER BY created_at DESC LIMIT 1;`;
+
+      const friend_select_data = await fetchUserData(
+        connection_AI,
+        friend_select_query
+      );
+      const page8_friend_data = friend_select_data[0]?.friend_result;
+
+      // Page 9 Data
+      const pupu_table = Consult_Table_Info["Log"].table;
+      const pupu_select_query = `SELECT consult_log FROM ${pupu_table} WHERE uid ='${parsepUid}' ORDER BY created_at DESC LIMIT 3`; // 가장 최근 검사 결과를 조회하는 경우
+
+      const pupu_select_data = await fetchUserData(
+        connection_AI,
+        pupu_select_query
+      );
+
+      const page9_pupu_data = pupu_select_data
+        .map((el) => JSON.parse(el.consult_log))
+        .map((el) => (el.length > 0 ? el[el.length - 1].content : ""));
+
+      // Select Data 갱신
+      selectData = {
+        ...selectData,
+        // page 1
+        reportDate: date,
+        name: parseName,
+        age: parseAge,
+        gender: parseGender,
+        // page 2
+        moodData: JSON.stringify(page2_data.mood_data.map((el) => el + 1)),
+        friendData: JSON.stringify(page2_data.friend_data.map((el) => el + 1)),
+        familyData: JSON.stringify(page2_data.family_data.map((el) => el + 1)),
+        schoolData: JSON.stringify(page2_data.school_data.map((el) => el + 1)),
+        // page 3
+        ebt_school: page3_data[0]?.content,
+        ebt_school_result: ebtResultMap[page3_data[0]?.result || "default"],
+        ebt_friend: page3_data[1]?.content,
+        ebt_friend_result: ebtResultMap[page3_data[1]?.result || "default"],
+        ebt_family: page3_data[2]?.content,
+        ebt_family_result: ebtResultMap[page3_data[2]?.result || "default"],
+        ebt_tScores: JSON.stringify(
+          page3_data.length > 0
+            ? page3_data.map((el) => el.tScore || 50)
+            : [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+        ),
+        // page 4
+        ebt_mood: page3_data[3]?.content,
+        ebt_mood_result: ebtResultMap[page3_data[3]?.result || "default"],
+        ebt_unrest: page3_data[4]?.content,
+        ebt_unrest_result: ebtResultMap[page3_data[4]?.result || "default"],
+        ebt_sad: page3_data[5]?.content,
+        ebt_sad_result: ebtResultMap[page3_data[5]?.result || "default"],
+        ebt_health: page3_data[6]?.content,
+        ebt_health_result: ebtResultMap[page3_data[6]?.result || "default"],
+        ebt_attention: page3_data[7]?.content,
+        ebt_attention_result: ebtResultMap[page3_data[7]?.result || "default"],
+        ebt_angry: page3_data[8]?.content,
+        ebt_angry_result: ebtResultMap[page3_data[8]?.result || "default"],
+        ebt_movement: page3_data[9]?.content,
+        ebt_movement_result: ebtResultMap[page3_data[9]?.result || "default"],
+        ebt_self: page3_data[10]?.content,
+        ebt_self_result: ebtResultMap[page3_data[10]?.result || "default"],
+        // page 5
+        persnalResult: page5_data?.persanl_result || "default",
+        result_first: page5_data?.persanl_result[0] || "default",
+        result_second: page5_data?.persanl_result[1] || "default",
+        result_third: page5_data?.persanl_result[2] || "default",
+        result_fourth: page5_data?.persanl_result[3] || "default",
+        // page 6
+        result_first_ment:
+          ptResultMap[page5_data?.persanl_result[0]] || "default",
+        result_second_ment:
+          ptResultMap[page5_data?.persanl_result[1]] || "default",
+        result_third_ment:
+          ptResultMap[page5_data?.persanl_result[2]] || "default",
+        result_fourth_ment:
+          ptResultMap[page5_data?.persanl_result[3]] || "default",
+        // page 7
+        mood_scores: JSON.stringify(page7_mood_data),
+        anxiety_scores: JSON.stringify(page7_anxiety_data),
+        // page 8
+        friend_result: friendMap[page8_friend_data || "default"]?.category,
+        friend_result_ment: friendMap[page8_friend_data || "default"]?.ment,
+        // page 9
+        pupu_analysis_1: page9_pupu_data[0],
+        pupu_analysis_2: page9_pupu_data[1],
+        pupu_analysis_3: page9_pupu_data[2],
       };
 
       // 변환할 EJS 파일들의 경로를 배열로 설정
       const ejsFiles = [
         "1.ejs",
-        // "2.ejs",
-        // "3.ejs",
-        // "4.ejs",
-        // "5.ejs",
-        // "6.ejs",
-        // "7.ejs",
-        // "8.ejs",
-        // "9.ejs",
+        "2.ejs",
+        "3.ejs",
+        "4.ejs",
+        "5.ejs",
+        "6.ejs",
+        "7.ejs",
+        "8.ejs",
+        "9.ejs",
       ];
 
-      // 모든 EJS 파일을 HTML로 렌더링하고 결합
-      let combinedHtmlContent = `
-        <html>
-          <head>
-            <style>
-              body { font-family: 'Arial', sans-serif; }
-              .page-break { page-break-after: always; }
-            </style>
-          </head>
-          <body>
-      `;
+      // Puppeteer 브라우저 실행
+      const browser = await puppeteer.launch({
+        headless: true, // 백그라운드 모드로 실행
+        args: ["--no-sandbox", "--disable-setuid-sandbox"], // 샌드박스 모드 비활성화
+      });
 
       for (const file of ejsFiles) {
         const templatePath = path.join(
@@ -4986,33 +5253,28 @@ const reportController = {
           file
         );
         const htmlContent = await ejs.renderFile(templatePath, selectData);
-        combinedHtmlContent += `
-          <div class="content-section">
-            ${htmlContent}
-          </div>
-          <div class="page-break"></div>
-        `;
+
+        const page = await browser.newPage();
+
+        // 원하는 뷰포트 크기 설정
+        // await page.setViewport({
+        //   width: 909, // 너비 909px
+        //   height: 1286, // 높이 1286px
+        // });
+
+        await page.setContent(htmlContent, { waitUntil: "networkidle0" });
+
+        // 개별 PDF 생성
+        const pdfBuffer = await page.pdf({
+          width: "909px",
+          height: "1286px",
+          printBackground: true,
+        });
+
+        pdfBuffers.push(pdfBuffer);
       }
 
-      // HTML 닫기 태그 추가
-      combinedHtmlContent += `
-          </body>
-        </html>
-      `;
-
-      // Puppeteer 브라우저 실행
-      const browser = await puppeteer.launch({
-        headless: true, // 백그라운드 모드로 실행
-        args: ["--no-sandbox", "--disable-setuid-sandbox"], // 샌드박스 모드 비활성화
-      });
-
-      const page = await browser.newPage();
-
-      // 결합된 HTML 콘텐츠를 페이지에 설정
-      await page.setContent(combinedHtmlContent, { waitUntil: "networkidle0" });
-
-      // PDF 생성
-      const pdfBuffer = await page.pdf({ format: "A4" });
+      const mergedPdfBuffer = await mergePDFs(pdfBuffers);
 
       await browser.close();
 
@@ -5036,13 +5298,13 @@ const reportController = {
         attachments: [
           {
             filename: "Soyes_Report_Test.pdf",
-            content: pdfBuffer,
+            content: mergedPdfBuffer,
           },
         ],
       };
 
       await transporter.sendMail(mailOptions);
-      res.status(200).json({ message: "PDF sent successfully" });
+      return res.status(200).json({ message: "PDF sent successfully" });
     } catch (error) {
       console.error("Error processing request:", error);
       res.status(500).json({ message: "Failed to process the request" });
