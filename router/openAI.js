@@ -10,6 +10,7 @@ const {
   ellaAnxietyController,
   NorthController,
   ubiController,
+  reportController,
 } = require("../controller/openAI");
 
 const { loginController } = require("../controller/login");
@@ -58,6 +59,8 @@ const {
 
 const { postOpenAIConsultingNorthSave, postOpenAIConsultingNorthLoad } =
   NorthController;
+
+const { postReportTest } = reportController;
 
 // 토큰 유효성 검사 미들웨어
 const { vaildateTokenConsulting, vaildatePlan } = loginController;
@@ -212,6 +215,13 @@ router.post(
   "/training_friend_ella/load/training",
   vaildateTokenConsulting,
   postOpenAIFriendTrainingDataLoad
+);
+
+// 결과보고서 PDF 이메일 발송
+router.post(
+  "/report",
+  // vaildateTokenConsulting,
+  postReportTest
 );
 
 // 달력 데이터 반환

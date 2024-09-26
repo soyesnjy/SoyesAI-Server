@@ -4,6 +4,11 @@ const stream = require("stream");
 const mysql = require("mysql");
 const { dbconfig_ai } = require("../DB/database");
 
+// 결과보고서 관련
+const puppeteer = require("puppeteer");
+const ejs = require("ejs");
+const path = require("path");
+
 // Redis 연결
 const redisStore = require("../DB/redisClient");
 
@@ -229,153 +234,6 @@ const {
   Ella_Training_Table_Info,
   North_Table_Info,
 } = require("../DB/database_table_info");
-
-// User 정서행동 2점문항 반환 (String)
-// const select_soyes_AI_Ebt_Table = async (
-//   user_table,
-//   user_attr,
-//   ebt_Question,
-//   parsepUid
-// ) => {
-//   try {
-//     // console.log(user_table);
-//     const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
-//     const ebt_school_data = await fetchUserData(connection_AI, select_query);
-//     // console.log(ebt_school_data[0]);
-//     // ebt_school_data[0]
-//     //   ? console.log(`${parsepUid} 계정은 존재합니다`)
-//     //   : console.log(`${parsepUid} 계정은 없습니다`);
-//     // delete ebt_school_data[0].uid; // uid 속성 삭제
-//     // Attribute의 값이 2인 요소의 배열 필터링. select 값이 없으면
-
-//     const problem_attr_arr = ebt_school_data[0]
-//       ? Object.keys(ebt_school_data[0])
-//       : [];
-
-//     const problem_attr_nameArr = problem_attr_arr.filter(
-//       // 속성명이 question을 가지고있고, 해당 속성의 값이 2인 경우 filtering
-//       (el) => el.includes("question") && ebt_school_data[0][el] === 2
-//     );
-//     // console.log(problem_attr_nameArr);
-
-//     // 문답 개수에 따른 시나리오 문답 투척
-//     // Attribute의 값이 2인 요소가 없는 경우
-//     return problem_attr_nameArr.length === 0
-//       ? { testResult: "", ebt_school_data }
-//       : {
-//           testResult: problem_attr_nameArr
-//             .map((el) => ebt_Question[el])
-//             .join("\n"),
-//           ebt_school_data,
-//         };
-//   } catch (err) {
-//     console.log(err);
-//     return { testResult: "", ebt_school_data: {} };
-//   }
-// };
-
-// User 정서행동 결과 반환 - ("NonTesting" / "danger" / "etc" / "Error")
-// const select_soyes_AI_Ebt_Result = async (inputTable, parsepUid) => {
-//   // 동기식 DB 접근 함수 1. Promise 생성 함수
-//   try {
-//     const {
-//       table, // 조회할 EBT table (11개 Class)
-//       attribute, // table Attribute
-//       danger_score, // 위험 판단 점수
-//       caution_score,
-//       average,
-//       standard,
-//     } = inputTable;
-
-//     const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`; // Select Query
-//     const ebt_data = await fetchUserData(connection_AI, select_query);
-//     // console.log(ebt_data[0]);
-
-//     // 검사를 진행하지 않은 경우
-//     if (!ebt_data[0])
-//       return {
-//         testStatus: false,
-//         scoreSum: 99,
-//         tScore: 999.99,
-//         result: "NonTesting",
-//         content: "검사를 진행하지 않았구나!",
-//       };
-
-//     // 검사 스코어 합 + T점수 계산
-//     const scoreSum = Object.values(ebt_data[0])
-//       .filter((el) => typeof el === "number")
-//       .reduce((acc, cur) => acc + cur);
-//     const tScore = (((scoreSum - average) / standard) * 10 + 50).toFixed(2);
-//     // 검사 결과
-//     const result =
-//       danger_score <= scoreSum
-//         ? "경고"
-//         : caution_score <= scoreSum
-//         ? "주의"
-//         : "양호";
-//     // danger_score 보다 높으면 "위험", 아니면 "그외" 반환
-//     return {
-//       testStatus: true,
-//       scoreSum,
-//       tScore: Number(tScore),
-//       result,
-//       content: JSON.parse(ebt_data[0].chat).text,
-//     };
-//   } catch (err) {
-//     console.log(err);
-//     return "Error";
-//   }
-// };
-
-// User 정서행동 결과 분석 반환
-// const select_soyes_AI_Ebt_Analyis = async (inputTable, parsepUid) => {
-//   // 동기식 DB 접근 함수 1. Promise 생성 함수
-//   try {
-//     const {
-//       ebtClass,
-//       table, // 조회할 EBT table
-//       attribute, // table Attribute
-//     } = inputTable;
-
-//     const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`; // Select Query
-//     const ebt_data = await fetchUserData(connection_AI, select_query);
-//     // console.log(ebt_data[0]);
-
-//     // 검사를 진행하지 않은 경우
-//     if (!ebt_data[0])
-//       return {
-//         ebtClass: "NonTesting",
-//         analyisResult: "NonTesting",
-//       };
-//     const analyisResult = JSON.parse(ebt_data[0].chat).text;
-//     // console.log("chat: " + chat);
-
-//     return {
-//       ebtClass,
-//       analyisResult,
-//     };
-//   } catch (err) {
-//     console.log(err);
-//     return {
-//       analyisResult: "select_soyes_AI_Ebt_Analyis Error",
-//     };
-//   }
-// };
-
-// User 성격 검사 유형 반환 (String)
-// const select_soyes_AI_Pt_Table = async (user_table, user_attr, parsepUid) => {
-//   try {
-//     // console.log(user_table);
-//     const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${parsepUid}'`; // Select Query
-//     const ebt_school_data = await fetchUserData(connection_AI, select_query);
-//     // console.log(ebt_school_data[0]);
-
-//     return ebt_school_data[0] ? ebt_school_data[0].persanl_result : "default";
-//   } catch (err) {
-//     console.log(err);
-//     return "default";
-//   }
-// };
 
 // New EBT Result Select Method
 
@@ -4549,9 +4407,7 @@ const NorthController = {
       } else parseData = data;
 
       const { pUid } = parseData;
-      console.log(
-        `북극이 일기 Load API /north_load Path 호출 - pUid: ${parsepUid}`
-      );
+      console.log(`북극이 일기 Load API /north_load Path 호출 - pUid: ${pUid}`);
       console.log(parseData);
 
       // No pUid => return
@@ -4705,6 +4561,467 @@ const ubiController = {
   },
 };
 
+const reportController = {
+  postReportTest_ejs1: async (req, res) => {
+    console.log("Test Report API 호출!");
+    try {
+      // const { scores, interpretations, recipientEmail } = req.body;
+
+      const templatePath = path.join(__dirname, "..", "src", "reportTest2.ejs");
+      const htmlContent = await ejs.renderFile(templatePath, {
+        reportDate: "2024-09-06",
+        name: "노지용",
+        age: "51",
+        gender: "남",
+      });
+
+      // const browser = await puppeteer.launch();
+      const browser = await puppeteer.launch({
+        headless: true, // 백그라운드 모드로 실행
+        args: ["--no-sandbox", "--disable-setuid-sandbox"], // 샌드박스 모드 비활성화
+      });
+      const page = await browser.newPage();
+      await page.setContent(htmlContent, { waitUntil: "networkidle0" });
+      const pdfBuffer = await page.pdf({ format: "A4" });
+      await browser.close();
+
+      let myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
+      let myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: myMailAddr,
+          pass: myMailPwd,
+        },
+      });
+
+      const mailOptions = {
+        from: "soyesnjy@gmail.com",
+        to: "soyesnjy@gmail.com",
+        subject: "Your Psychology Test Results",
+        text: "Please find attached your psychology test results.",
+        attachments: [
+          {
+            filename: "Soyes_Report_Test.pdf",
+            content: pdfBuffer,
+          },
+        ],
+      };
+
+      await transporter.sendMail(mailOptions);
+      res.status(200).json({ message: "PDF sent successfully to " });
+    } catch (error) {
+      console.error("Error processing request:", error);
+      res.status(500).json({ message: "Failed to process the request" });
+    }
+  },
+  postReportTest: async (req, res) => {
+    const { data } = req.body;
+    try {
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { pUid, name, email, age, gender } = parseData;
+      console.log(`결과보고서 발송 API /report Path 호출 - pUid: ${pUid}`);
+      console.log(parseData);
+
+      // DB Data Select
+      const selectData = {
+        report_url: process.env.REPORT_URL,
+        reportDate: "2024-09-06",
+        name: "노지용",
+        age: "51",
+        gender: "남",
+      };
+
+      // 변환할 EJS 파일들의 경로를 배열로 설정
+      const ejsFiles = [
+        "1.ejs",
+        // "2.ejs",
+        // "3.ejs",
+        // "4.ejs",
+        // "5.ejs",
+        // "6.ejs",
+        // "7.ejs",
+        // "8.ejs",
+        // "9.ejs",
+      ];
+
+      // 모든 EJS 파일을 HTML로 렌더링하고 결합
+      let combinedHtmlContent = `
+        <html>
+          <head>
+            <style>
+              body { font-family: 'Arial', sans-serif; }
+              .page-break { page-break-after: always; }
+            </style>
+          </head>
+          <body>
+      `;
+
+      for (const file of ejsFiles) {
+        const templatePath = path.join(
+          __dirname,
+          "..",
+          "src",
+          "report_final",
+          file
+        );
+        const htmlContent = await ejs.renderFile(templatePath, selectData);
+        combinedHtmlContent += `
+          <div class="content-section">
+            ${htmlContent}
+          </div>
+          <div class="page-break"></div>
+        `;
+      }
+
+      // HTML 닫기 태그 추가
+      combinedHtmlContent += `
+          </body>
+        </html>
+      `;
+
+      // Puppeteer 브라우저 실행
+      const browser = await puppeteer.launch({
+        headless: true, // 백그라운드 모드로 실행
+        args: ["--no-sandbox", "--disable-setuid-sandbox"], // 샌드박스 모드 비활성화
+      });
+
+      const page = await browser.newPage();
+
+      // 결합된 HTML 콘텐츠를 페이지에 설정
+      await page.setContent(combinedHtmlContent, { waitUntil: "networkidle0" });
+
+      // PDF 생성
+      const pdfBuffer = await page.pdf({ format: "A4" });
+
+      await browser.close();
+
+      // 이메일 전송 설정
+      let myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
+      let myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: myMailAddr,
+          pass: myMailPwd,
+        },
+      });
+
+      const mailOptions = {
+        from: "soyesnjy@gmail.com",
+        to: "soyesnjy@gmail.com",
+        subject: "Your Psychology Test Results",
+        text: "Please find attached your psychology test results.",
+        attachments: [
+          {
+            filename: "Soyes_Report_Test.pdf",
+            content: pdfBuffer,
+          },
+        ],
+      };
+
+      await transporter.sendMail(mailOptions);
+      res.status(200).json({ message: "PDF sent successfully" });
+    } catch (error) {
+      console.error("Error processing request:", error);
+      res.status(500).json({ message: "Failed to process the request" });
+    }
+  },
+  postReportTest_a: async (req, res) => {
+    console.log("Test Report API 호출!");
+    try {
+      // 데이터 설정
+      const dataValue = {
+        reportDate: "2024-09-06",
+        name: "노지용",
+        age: "51",
+        gender: "남",
+      };
+
+      const dataValue2 = {
+        moodData: [1, 1, 1, 1, 1],
+        friendData: [2, 2, 2, 2, 2],
+        familyData: [3, 3, 3, 3, 3],
+        schoolData: [4, 4, 4, 4, 4],
+      };
+
+      const dataValue3 = {
+        ebtTscores: [80, 80, 80, 80, 80, 80, 80, 80, 80, 80, 80],
+        schoolAnalysis: "학교생활 분석 내용",
+        friendAnalysis: "친구관계 분석 내용",
+        familyAnalysis: "가족관계 분석 내용",
+      };
+
+      // HTML 파일 경로 설정
+      const templatePath = path.join(
+        __dirname,
+        "..",
+        "src",
+        "report_final",
+        "2.html"
+      );
+
+      // HTML 파일 읽기
+      const htmlContent = await new Promise((resolve, reject) => {
+        fs.readFile(templatePath, "utf8", (err, data) => {
+          if (err) {
+            return reject(err);
+          }
+
+          // 보고서 1페이지 데이터 처리
+          // let renderedHtml = data
+          //   .replace("{{reportDate}}", dataValue.reportDate)
+          //   .replace("{{name}}", dataValue.name)
+          //   .replace("{{age}}", dataValue.age)
+          //   .replace("{{gender}}", dataValue.gender);
+
+          // 보고서 2페이지 데이터 처리
+          let renderedHtml = data
+            .replace("{{moodData}}", JSON.stringify(dataValue2.moodData))
+            .replace("{{friendData}}", JSON.stringify(dataValue2.friendData))
+            .replace("{{familyData}}", JSON.stringify(dataValue2.familyData))
+            .replace("{{schoolData}}", JSON.stringify(dataValue2.schoolData));
+
+          // 보고서 3페이지 데이터 처리
+          // let renderedHtml = data
+          //   .replace(
+          //     "{{ebtTscores}}",
+          //     JSON.stringify(JSON.stringify(dataValue3.ebtTscores))
+          //   )
+          //   .replace(
+          //     "{{schoolAnalysis}}",
+          //     JSON.stringify(dataValue3.schoolAnalysis)
+          //   )
+          //   .replace(
+          //     "{{friendAnalysis}}",
+          //     JSON.stringify(dataValue3.friendAnalysis)
+          //   )
+          //   .replace(
+          //     "{{familyAnalysis}}",
+          //     JSON.stringify(dataValue3.familyAnalysis)
+          //   );
+
+          resolve(renderedHtml);
+        });
+      });
+
+      // Puppeteer 브라우저 실행
+      const browser = await puppeteer.launch({
+        headless: false,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      });
+
+      const page = await browser.newPage();
+
+      // HTML을 페이지에 설정하고 스타일 로드 대기
+      await page.setContent(htmlContent, { waitUntil: "networkidle0" });
+
+      // PDF 생성
+      const pdfBuffer = await page.pdf({ format: "A4" });
+
+      // await browser.close();
+
+      // 이메일 전송 설정
+      let myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
+      let myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: myMailAddr,
+          pass: myMailPwd,
+        },
+      });
+
+      const mailOptions = {
+        from: "soyesnjy@gmail.com",
+        to: "soyesnjy@gmail.com",
+        subject: "Your Psychology Test Results",
+        text: "Please find attached your psychology test results.",
+        attachments: [
+          {
+            filename: "Soyes_Report_Test.pdf",
+            content: pdfBuffer,
+          },
+        ],
+      };
+
+      // await transporter.sendMail(mailOptions);
+      res.status(200).json({ message: "PDF sent successfully" });
+    } catch (error) {
+      console.error("Error processing request:", error);
+      res.status(500).json({ message: "Failed to process the request" });
+    }
+  },
+  postReportTest_b: async (req, res) => {
+    try {
+      // 데이터 설정
+      const dataValue = {
+        reportDate: "2024-09-06",
+        name: "노지용",
+        age: "51",
+        gender: "남",
+        moodData: [1, 2, 3, 4, 5],
+        friendData: [1, 2, 3, 4, 5],
+        familyData: [1, 2, 3, 4, 5],
+        schoolData: [1, 2, 3, 4, 5],
+      };
+
+      // HTML 파일 경로 설정
+      const templateFileName = "2.html";
+      const templateUrl = `http://localhost:${PORT}/${templateFileName}`;
+
+      // Puppeteer 브라우저 실행
+      const browser = await puppeteer.launch({
+        headless: false,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      });
+
+      const page = await browser.newPage();
+
+      // 3. HTML 파일을 URL로 로드하여 렌더링
+      await page.goto(templateUrl, { waitUntil: "networkidle0" });
+
+      // 4. 데이터 삽입을 위한 JavaScript 코드 실행
+      await page.evaluate((dataValue) => {
+        // document.body.innerHTML = document.body.innerHTML;
+        // .replace("{{reportDate}}", dataValue.reportDate)
+        // .replace("{{name}}", dataValue.name)
+        // .replace("{{age}}", dataValue.age)
+        // .replace("{{gender}}", dataValue.gender)
+
+        initializeMoodChart(dataValue.moodData);
+        initializeFriendChart(dataValue.friendData);
+        initializeFamilyChart(dataValue.familyData);
+        initializeSchoolChart(dataValue.schoolData);
+      }, dataValue);
+
+      // 5. PDF 생성
+      const pdfBuffer = await page.pdf({ format: "A4" });
+
+      // await browser.close();
+
+      // 이메일 전송 설정
+      let myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
+      let myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: myMailAddr,
+          pass: myMailPwd,
+        },
+      });
+
+      const mailOptions = {
+        from: "soyesnjy@gmail.com",
+        to: "soyesnjy@gmail.com",
+        subject: "Your Psychology Test Results",
+        text: "Please find attached your psychology test results.",
+        attachments: [
+          {
+            filename: "Soyes_Report_Test.pdf",
+            content: pdfBuffer,
+          },
+        ],
+      };
+
+      await transporter.sendMail(mailOptions);
+      return res.status(200).json({ message: "PDF sent successfully" });
+    } catch (error) {
+      console.error("Error processing request:", error);
+      res.status(500).json({ message: "Failed to process the request" });
+    }
+  },
+  postReportTest_c: async (req, res) => {
+    console.log("Test Report API 호출!");
+    const { data } = req.body;
+    try {
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { pUid, email } = parseData;
+      console.log(`결과보고서 발송 API /report Path 호출 - pUid: ${pUid}`);
+      console.log(parseData);
+
+      //
+
+      const templatePath = path.join(
+        __dirname,
+        "..",
+        "src",
+        "report_final",
+        "2.ejs"
+      );
+
+      const htmlContent = await ejs.renderFile(templatePath, {
+        reportDate: "2024-09-06",
+        name: "노지용",
+        age: "51",
+        gender: "남",
+        moodData: JSON.stringify([1, 2, 3, 4, 5]),
+        friendData: JSON.stringify([1, 2, 3, 4, 5]),
+        familyData: JSON.stringify([1, 2, 3, 4, 5]),
+        schoolData: JSON.stringify([1, 2, 3, 4, 5]),
+      });
+
+      const browser = await puppeteer.launch({
+        headless: false, // 백그라운드 모드로 실행
+        args: ["--no-sandbox", "--disable-setuid-sandbox"], // 샌드박스 모드 비활성화
+      });
+
+      const page = await browser.newPage();
+
+      // await page.emulateMediaType("screen");
+
+      await page.setContent(htmlContent, { waitUntil: "networkidle0" });
+
+      // 차트나 동적 콘텐츠가 완전히 렌더링될 시간을 확보
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const pdfBuffer = await page.pdf({ format: "A4" });
+      // await browser.close();
+
+      let myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
+      let myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: myMailAddr,
+          pass: myMailPwd,
+        },
+      });
+
+      const mailOptions = {
+        from: "soyesnjy@gmail.com",
+        to: "soyesnjy@gmail.com",
+        subject: "Your Psychology Test Results",
+        text: "Please find attached your psychology test results.",
+        attachments: [
+          {
+            filename: "Soyes_Report_Test.pdf",
+            content: pdfBuffer,
+          },
+        ],
+      };
+
+      // await transporter.sendMail(mailOptions);
+
+      return res.status(200).json({ message: "PDF sent successfully to " });
+    } catch (error) {
+      console.error("Error processing request:", error);
+      res.status(500).json({ message: "Failed to process the request" });
+    }
+  },
+};
+
 // console.log("jenkins 테스트용 주석22");
 
 module.exports = {
@@ -4714,4 +5031,5 @@ module.exports = {
   ellaAnxietyController,
   NorthController,
   ubiController,
+  reportController,
 };
