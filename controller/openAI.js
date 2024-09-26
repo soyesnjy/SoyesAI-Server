@@ -4538,6 +4538,16 @@ const ubiController = {
           Math.floor(Math.random() * Object.keys(tagObj).length)
         ];
 
+      const tag2 =
+        Object.keys(tagObj)[
+          Math.floor(Math.random() * Object.keys(tagObj).length)
+        ];
+
+      const tag3 =
+        Object.keys(tagObj)[
+          Math.floor(Math.random() * Object.keys(tagObj).length)
+        ];
+
       const message = {
         data: [
           {
@@ -4547,6 +4557,22 @@ const ubiController = {
                 ? vTagArr[Math.floor(Math.random() * vTagArr.length)]
                 : 0,
             index: arrCreate(maxArr[tagObj[tag]]),
+          },
+          {
+            tag2,
+            Video_Tag:
+              tag2 === "music"
+                ? vTagArr[Math.floor(Math.random() * vTagArr.length)]
+                : 0,
+            index: arrCreate(maxArr[tagObj[tag2]]),
+          },
+          {
+            tag3,
+            Video_Tag:
+              tag3 === "music"
+                ? vTagArr[Math.floor(Math.random() * vTagArr.length)]
+                : 0,
+            index: arrCreate(maxArr[tagObj[tag3]]),
           },
         ],
       };
