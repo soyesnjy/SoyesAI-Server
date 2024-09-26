@@ -5292,7 +5292,7 @@ const reportController = {
 
       const mailOptions = {
         from: "soyesnjy@gmail.com",
-        to: "soyesnjy@gmail.com",
+        to: parseEmail,
         subject: "Your Psychology Test Results",
         text: "Please find attached your psychology test results.",
         attachments: [
