@@ -4524,7 +4524,9 @@ const ubiController = {
       //   message: response.choices[0].message.content,
       // };
 
-      const tagObj = { music: 0, draw: 1, yoga: 2 };
+      // const tagObj = { music: 0, draw: 1, yoga: 2 };
+
+      const tagObj = { draw: 1, yoga: 2 };
       const vTagArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
       const arrCreate = (num) => {
@@ -4637,122 +4639,6 @@ const reportController = {
 
       await transporter.sendMail(mailOptions);
       res.status(200).json({ message: "PDF sent successfully to " });
-    } catch (error) {
-      console.error("Error processing request:", error);
-      res.status(500).json({ message: "Failed to process the request" });
-    }
-  },
-  postReportTest: async (req, res) => {
-    const { data } = req.body;
-    try {
-      if (typeof data === "string") {
-        parseData = JSON.parse(data);
-      } else parseData = data;
-
-      const { pUid, name, email, age, gender } = parseData;
-      console.log(`결과보고서 발송 API /report Path 호출 - pUid: ${pUid}`);
-      console.log(parseData);
-
-      // DB Data Select
-      const selectData = {
-        report_url: process.env.REPORT_URL,
-        reportDate: "2024-09-06",
-        name: "노지용",
-        age: "51",
-        gender: "남",
-      };
-
-      // 변환할 EJS 파일들의 경로를 배열로 설정
-      const ejsFiles = [
-        "1.ejs",
-        // "2.ejs",
-        // "3.ejs",
-        // "4.ejs",
-        // "5.ejs",
-        // "6.ejs",
-        // "7.ejs",
-        // "8.ejs",
-        // "9.ejs",
-      ];
-
-      // 모든 EJS 파일을 HTML로 렌더링하고 결합
-      let combinedHtmlContent = `
-        <html>
-          <head>
-            <style>
-              body { font-family: 'Arial', sans-serif; }
-              .page-break { page-break-after: always; }
-            </style>
-          </head>
-          <body>
-      `;
-
-      for (const file of ejsFiles) {
-        const templatePath = path.join(
-          __dirname,
-          "..",
-          "src",
-          "report_final",
-          file
-        );
-        const htmlContent = await ejs.renderFile(templatePath, selectData);
-        combinedHtmlContent += `
-          <div class="content-section">
-            ${htmlContent}
-          </div>
-          <div class="page-break"></div>
-        `;
-      }
-
-      // HTML 닫기 태그 추가
-      combinedHtmlContent += `
-          </body>
-        </html>
-      `;
-
-      // Puppeteer 브라우저 실행
-      const browser = await puppeteer.launch({
-        headless: true, // 백그라운드 모드로 실행
-        args: ["--no-sandbox", "--disable-setuid-sandbox"], // 샌드박스 모드 비활성화
-      });
-
-      const page = await browser.newPage();
-
-      // 결합된 HTML 콘텐츠를 페이지에 설정
-      await page.setContent(combinedHtmlContent, { waitUntil: "networkidle0" });
-
-      // PDF 생성
-      const pdfBuffer = await page.pdf({ format: "A4" });
-
-      await browser.close();
-
-      // 이메일 전송 설정
-      let myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
-      let myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
-
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: myMailAddr,
-          pass: myMailPwd,
-        },
-      });
-
-      const mailOptions = {
-        from: "soyesnjy@gmail.com",
-        to: "soyesnjy@gmail.com",
-        subject: "Your Psychology Test Results",
-        text: "Please find attached your psychology test results.",
-        attachments: [
-          {
-            filename: "Soyes_Report_Test.pdf",
-            content: pdfBuffer,
-          },
-        ],
-      };
-
-      await transporter.sendMail(mailOptions);
-      res.status(200).json({ message: "PDF sent successfully" });
     } catch (error) {
       console.error("Error processing request:", error);
       res.status(500).json({ message: "Failed to process the request" });
@@ -5041,6 +4927,122 @@ const reportController = {
       // await transporter.sendMail(mailOptions);
 
       return res.status(200).json({ message: "PDF sent successfully to " });
+    } catch (error) {
+      console.error("Error processing request:", error);
+      res.status(500).json({ message: "Failed to process the request" });
+    }
+  },
+  postReportTest: async (req, res) => {
+    const { data } = req.body;
+    try {
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { pUid, name, email, age, gender } = parseData;
+      console.log(`결과보고서 발송 API /report Path 호출 - pUid: ${pUid}`);
+      console.log(parseData);
+
+      // DB Data Select
+      const selectData = {
+        report_url: process.env.REPORT_URL,
+        reportDate: "2024-09-06",
+        name: "노지용",
+        age: "51",
+        gender: "남",
+      };
+
+      // 변환할 EJS 파일들의 경로를 배열로 설정
+      const ejsFiles = [
+        "1.ejs",
+        // "2.ejs",
+        // "3.ejs",
+        // "4.ejs",
+        // "5.ejs",
+        // "6.ejs",
+        // "7.ejs",
+        // "8.ejs",
+        // "9.ejs",
+      ];
+
+      // 모든 EJS 파일을 HTML로 렌더링하고 결합
+      let combinedHtmlContent = `
+        <html>
+          <head>
+            <style>
+              body { font-family: 'Arial', sans-serif; }
+              .page-break { page-break-after: always; }
+            </style>
+          </head>
+          <body>
+      `;
+
+      for (const file of ejsFiles) {
+        const templatePath = path.join(
+          __dirname,
+          "..",
+          "src",
+          "report_final",
+          file
+        );
+        const htmlContent = await ejs.renderFile(templatePath, selectData);
+        combinedHtmlContent += `
+          <div class="content-section">
+            ${htmlContent}
+          </div>
+          <div class="page-break"></div>
+        `;
+      }
+
+      // HTML 닫기 태그 추가
+      combinedHtmlContent += `
+          </body>
+        </html>
+      `;
+
+      // Puppeteer 브라우저 실행
+      const browser = await puppeteer.launch({
+        headless: true, // 백그라운드 모드로 실행
+        args: ["--no-sandbox", "--disable-setuid-sandbox"], // 샌드박스 모드 비활성화
+      });
+
+      const page = await browser.newPage();
+
+      // 결합된 HTML 콘텐츠를 페이지에 설정
+      await page.setContent(combinedHtmlContent, { waitUntil: "networkidle0" });
+
+      // PDF 생성
+      const pdfBuffer = await page.pdf({ format: "A4" });
+
+      await browser.close();
+
+      // 이메일 전송 설정
+      let myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
+      let myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: myMailAddr,
+          pass: myMailPwd,
+        },
+      });
+
+      const mailOptions = {
+        from: "soyesnjy@gmail.com",
+        to: "soyesnjy@gmail.com",
+        subject: "Your Psychology Test Results",
+        text: "Please find attached your psychology test results.",
+        attachments: [
+          {
+            filename: "Soyes_Report_Test.pdf",
+            content: pdfBuffer,
+          },
+        ],
+      };
+
+      await transporter.sendMail(mailOptions);
+      res.status(200).json({ message: "PDF sent successfully" });
     } catch (error) {
       console.error("Error processing request:", error);
       res.status(500).json({ message: "Failed to process the request" });
