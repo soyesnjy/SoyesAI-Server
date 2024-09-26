@@ -4559,7 +4559,7 @@ const ubiController = {
             index: arrCreate(maxArr[tagObj[tag]]),
           },
           {
-            tag2,
+            tag: tag2,
             Video_Tag:
               tag2 === "music"
                 ? vTagArr[Math.floor(Math.random() * vTagArr.length)]
@@ -4567,7 +4567,7 @@ const ubiController = {
             index: arrCreate(maxArr[tagObj[tag2]]),
           },
           {
-            tag3,
+            tag: tag3,
             Video_Tag:
               tag3 === "music"
                 ? vTagArr[Math.floor(Math.random() * vTagArr.length)]
