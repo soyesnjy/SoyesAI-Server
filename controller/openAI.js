@@ -4496,21 +4496,21 @@ const ubiController = {
       // promptArr.push(persona_prompt_lala_v6); // 엘라 페르소나
 
       // type 매칭 프롬프트 삽입
-      switch (type) {
-        case "banner":
-          promptArr.push({
-            role: "system",
-            content: ``,
-          });
-          break;
-        case "ubi":
-          promptArr.push({
-            role: "system",
-            content: ``,
-          });
-          temperature = 0.7; // 고정된 형식 답변 유도를 위한 수치 조정
-          break;
-      }
+      // switch (type) {
+      //   case "banner":
+      //     promptArr.push({
+      //       role: "system",
+      //       content: ``,
+      //     });
+      //     break;
+      //   case "ubi":
+      //     promptArr.push({
+      //       role: "system",
+      //       content: ``,
+      //     });
+      //     temperature = 0.7; // 고정된 형식 답변 유도를 위한 수치 조정
+      //     break;
+      // }
 
       // console.log(temperature);
 
@@ -4542,7 +4542,7 @@ const ubiController = {
         data: [
           {
             tag,
-            vTag:
+            Video_Tag:
               tag === "music"
                 ? vTagArr[Math.floor(Math.random() * vTagArr.length)]
                 : 0,
