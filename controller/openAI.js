@@ -5172,11 +5172,11 @@ const reportController = {
         familyData: JSON.stringify(page2_data.family_data.map((el) => el + 1)),
         schoolData: JSON.stringify(page2_data.school_data.map((el) => el + 1)),
         // page 3
-        ebt_school: page3_data[0]?.content.slice(0, 135),
+        ebt_school: page3_data[0]?.content?.slice(0, 135),
         ebt_school_result: ebtResultMap[page3_data[0]?.result || "default"],
-        ebt_friend: page3_data[1]?.content.slice(0, 135),
+        ebt_friend: page3_data[1]?.content?.slice(0, 135),
         ebt_friend_result: ebtResultMap[page3_data[1]?.result || "default"],
-        ebt_family: page3_data[2]?.content.slice(0, 135),
+        ebt_family: page3_data[2]?.content?.slice(0, 135),
         ebt_family_result: ebtResultMap[page3_data[2]?.result || "default"],
         ebt_tScores: JSON.stringify(
           page3_data.length > 0
@@ -5184,21 +5184,21 @@ const reportController = {
             : [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
         ),
         // page 4
-        ebt_mood: page3_data[3]?.content.slice(0, 127),
+        ebt_mood: page3_data[3]?.content?.slice(0, 127),
         ebt_mood_result: ebtResultMap[page3_data[3]?.result || "default"],
-        ebt_unrest: page3_data[4]?.content.slice(0, 127),
+        ebt_unrest: page3_data[4]?.content?.slice(0, 127),
         ebt_unrest_result: ebtResultMap[page3_data[4]?.result || "default"],
-        ebt_sad: page3_data[5]?.content.slice(0, 127),
+        ebt_sad: page3_data[5]?.content?.slice(0, 127),
         ebt_sad_result: ebtResultMap[page3_data[5]?.result || "default"],
-        ebt_health: page3_data[6]?.content.slice(0, 127),
+        ebt_health: page3_data[6]?.content?.slice(0, 127),
         ebt_health_result: ebtResultMap[page3_data[6]?.result || "default"],
-        ebt_attention: page3_data[7]?.content.slice(0, 127),
+        ebt_attention: page3_data[7]?.content?.slice(0, 127),
         ebt_attention_result: ebtResultMap[page3_data[7]?.result || "default"],
-        ebt_angry: page3_data[8]?.content.slice(0, 127),
+        ebt_angry: page3_data[8]?.content?.slice(0, 127),
         ebt_angry_result: ebtResultMap[page3_data[8]?.result || "default"],
-        ebt_movement: page3_data[9]?.content.slice(0, 127),
+        ebt_movement: page3_data[9]?.content?.slice(0, 127),
         ebt_movement_result: ebtResultMap[page3_data[9]?.result || "default"],
-        ebt_self: page3_data[10]?.content.slice(0, 127),
+        ebt_self: page3_data[10]?.content?.slice(0, 127),
         ebt_self_result: ebtResultMap[page3_data[10]?.result || "default"],
         // page 5
         persnalResult: page5_data?.persanl_result || "pt_default",
@@ -5223,9 +5223,9 @@ const reportController = {
         friend_result_img: page8_friend_data || "default",
         friend_result_ment: friendMap[page8_friend_data || "default"]?.ment,
         // page 9
-        pupu_analysis_1: page9_pupu_data[0].slice(0, 170),
-        pupu_analysis_2: page9_pupu_data[1].slice(0, 170),
-        pupu_analysis_3: page9_pupu_data[2].slice(0, 170),
+        pupu_analysis_1: page9_pupu_data[0]?.slice(0, 170),
+        pupu_analysis_2: page9_pupu_data[1]?.slice(0, 170),
+        pupu_analysis_3: page9_pupu_data[2]?.slice(0, 170),
       };
 
       // 변환할 EJS 파일들의 경로를 배열로 설정
