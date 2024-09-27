@@ -4966,14 +4966,14 @@ const reportController = {
         default: "img_result_2.png",
       };
       const ptResultMap = {
-        E: "E 관련 설명",
-        R: "R 관련 설명",
-        C: "C 관련 설명",
-        P: "P 관련 설명",
-        O: "O 관련 설명",
-        F: "F 관련 설명",
-        I: "I 관련 설명",
-        S: "S 관련 설명",
+        E: "아동은 이성형보다는 감정형에 가깝습니다. 감정형은 감수성이 풍부하고 감정이 드러나기 쉬운 특질을 말합니다. 감정형은 뜨거움과 열정을 상징하는 불에 비유할 수 있습니다.",
+        R: "아동은 감정형보다 이성형에 가깝습니다. 이성형은 감정보다는 이성적 판단이 앞서고 침착한 특질을 말합니다. 이성형은 차가움과 침착함을 상징하는 물에 비유할 수 있습니다.",
+        C: "아동은 신중형보다는 용기형에 가깝습니다. 용기형은 위험이나 처벌이 예상되는 상황에서도 낙천적으로 생각하고 위축되지 않는 용기를 보이는 특질을 말합니다. 용기형은 과감한 용기를 상징하는 칼에 비유할 수 있습니다.",
+        P: "아동은 용기형보다 신중형에 가깝습니다. 신중형은 위험과 실패를 대비하여 행동을 미리 조심할 줄 아는 신중한 특질을 말합니다. 신중형은 자기보호와 신중성을 상징하는 방패에 비유할 수 있습니다.",
+        F: "아동은 개방형보다 안정형에 가깝습니다. 안정형은 익숙하고 예측이 되는 대상이나 환경을 선호하고 안정을 추구하는 특질을 말합니다. 안정형은 익숙하고 편안한 집에 비유할 수 있습니다.",
+        O: "아동은 안정형보다는 개방형에 가깝습니다. 개방형은 새로운 자극에 마음이 열려 있고 모험을 즐기는 특질을 말합니다. 개방형은 새로운 자극이 많아 모험을 펼칠 수 있는 들판에 비유할 수 있습니다.",
+        I: "아동은 관계형보다 독립형에 가깝습니다. 독립형은 독립적으로 활동하는 것을 선호하는 특질을 말합니다. 독립형은 독립적인 생활을 추구하는 고양이에 비유할 수 있습니다.",
+        S: "아동은 독립형보다는 관계형에 가깝습니다. 관계형은 다른 사람들과 어울리며 관계 맺는 것을 좋아하는 특질을 말합니다. 관계형은 사람을 좋아하는 강아지에 비유할 수 있습니다.",
         default: "성격 검사 미실시",
       };
       const friendMap = {
@@ -5016,21 +5016,6 @@ const reportController = {
       };
 
       // PDF 결합 함수
-      // async function mergePDFs(pdfBuffers) {
-      //   const mergedPdf = await PDFDocument.create();
-
-      //   for (const buffer of pdfBuffers) {
-      //     const pdf = await PDFDocument.load(buffer);
-      //     const copiedPages = await mergedPdf.copyPages(
-      //       pdf,
-      //       pdf.getPageIndices()
-      //     );
-      //     copiedPages.forEach((page) => mergedPdf.addPage(page));
-      //   }
-
-      //   const mergedPdfBytes = await mergedPdf.save();
-      //   return mergedPdfBytes;
-      // }
       async function mergePDFs(pdfBuffers) {
         const mergedPdf = await PDFDocument.create();
 
@@ -5187,11 +5172,11 @@ const reportController = {
         familyData: JSON.stringify(page2_data.family_data.map((el) => el + 1)),
         schoolData: JSON.stringify(page2_data.school_data.map((el) => el + 1)),
         // page 3
-        ebt_school: page3_data[0]?.content,
+        ebt_school: page3_data[0]?.content.slice(0, 135),
         ebt_school_result: ebtResultMap[page3_data[0]?.result || "default"],
-        ebt_friend: page3_data[1]?.content,
+        ebt_friend: page3_data[1]?.content.slice(0, 135),
         ebt_friend_result: ebtResultMap[page3_data[1]?.result || "default"],
-        ebt_family: page3_data[2]?.content,
+        ebt_family: page3_data[2]?.content.slice(0, 135),
         ebt_family_result: ebtResultMap[page3_data[2]?.result || "default"],
         ebt_tScores: JSON.stringify(
           page3_data.length > 0
@@ -5199,21 +5184,21 @@ const reportController = {
             : [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
         ),
         // page 4
-        ebt_mood: page3_data[3]?.content,
+        ebt_mood: page3_data[3]?.content.slice(0, 127),
         ebt_mood_result: ebtResultMap[page3_data[3]?.result || "default"],
-        ebt_unrest: page3_data[4]?.content,
+        ebt_unrest: page3_data[4]?.content.slice(0, 127),
         ebt_unrest_result: ebtResultMap[page3_data[4]?.result || "default"],
-        ebt_sad: page3_data[5]?.content,
+        ebt_sad: page3_data[5]?.content.slice(0, 127),
         ebt_sad_result: ebtResultMap[page3_data[5]?.result || "default"],
-        ebt_health: page3_data[6]?.content,
+        ebt_health: page3_data[6]?.content.slice(0, 127),
         ebt_health_result: ebtResultMap[page3_data[6]?.result || "default"],
-        ebt_attention: page3_data[7]?.content,
+        ebt_attention: page3_data[7]?.content.slice(0, 127),
         ebt_attention_result: ebtResultMap[page3_data[7]?.result || "default"],
-        ebt_angry: page3_data[8]?.content,
+        ebt_angry: page3_data[8]?.content.slice(0, 127),
         ebt_angry_result: ebtResultMap[page3_data[8]?.result || "default"],
-        ebt_movement: page3_data[9]?.content,
+        ebt_movement: page3_data[9]?.content.slice(0, 127),
         ebt_movement_result: ebtResultMap[page3_data[9]?.result || "default"],
-        ebt_self: page3_data[10]?.content,
+        ebt_self: page3_data[10]?.content.slice(0, 127),
         ebt_self_result: ebtResultMap[page3_data[10]?.result || "default"],
         // page 5
         persnalResult: page5_data?.persanl_result || "pt_default",
@@ -5235,12 +5220,12 @@ const reportController = {
         anxiety_scores: JSON.stringify(page7_anxiety_data),
         // page 8
         friend_result: friendMap[page8_friend_data || "default"]?.category,
-        friend_result_img: page8_friend_data || "FTH",
+        friend_result_img: page8_friend_data || "default",
         friend_result_ment: friendMap[page8_friend_data || "default"]?.ment,
         // page 9
-        pupu_analysis_1: page9_pupu_data[0],
-        pupu_analysis_2: page9_pupu_data[1],
-        pupu_analysis_3: page9_pupu_data[2],
+        pupu_analysis_1: page9_pupu_data[0].slice(0, 170),
+        pupu_analysis_2: page9_pupu_data[1].slice(0, 170),
+        pupu_analysis_3: page9_pupu_data[2].slice(0, 170),
       };
 
       // 변환할 EJS 파일들의 경로를 배열로 설정
@@ -5313,8 +5298,8 @@ const reportController = {
       const mailOptions = {
         from: "soyesnjy@gmail.com",
         to: parseEmail,
-        subject: "Your Psychology Test Results",
-        text: "Please find attached your psychology test results.",
+        subject: "SoyeAI 결과보고서",
+        text: "SoyeAI 결과보고서 입니다.",
         attachments: [
           {
             filename: "Soyes_Report_Test.pdf",
