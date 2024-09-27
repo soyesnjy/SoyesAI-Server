@@ -1,7 +1,90 @@
-# 사용할 Node.js의 버전을 명시합니다.
-FROM node:18
+# 1단계: 빌드 이미지 (최대한 가벼운 node:alpine을 사용하여 의존성 설치)
+FROM node:18-alpine AS build
 
-# 보고서용 라이브러리 설치
+# 필수 패키지 설치
+RUN apk add --no-cache \
+  libc6-compat \
+  libnss3 \
+  libatk-bridge2.0 \
+  libx11-xcb \
+  libxcb-dri3 \
+  libxcomposite \
+  libxdamage \
+  libxrandr \
+  libgbm \
+  libasound2 \
+  libpangocairo \
+  libgtk-3 \
+  libxshmfence \
+  libnss3-dev \
+  libnspr4 \
+  wget \
+  lsb-release \
+  fonts-liberation \
+  libappindicator3 \
+  xdg-utils \
+  libgconf-2 \
+  libxss1 \
+  ttf-freefont \
+  fonts-noto-cjk
+
+# 애플리케이션 디렉토리 생성
+WORKDIR /usr/src/app
+
+# package.json과 package-lock.json 파일 복사
+COPY package*.json ./
+
+# 패키지 설치 (npm ci는 package-lock.json을 이용하여 패키지를 설치, 빠르고 일관성 있는 설치 가능)
+RUN npm ci --only=production
+
+# 2단계: 실제 실행 환경
+FROM node:18-alpine
+
+# 필수 패키지 설치 (여기서 필요 없는 개발 패키지들은 제외)
+RUN apk add --no-cache \
+  libnss3 \
+  libatk-bridge2.0 \
+  libx11-xcb \
+  libxcb-dri3 \
+  libxcomposite \
+  libxdamage \
+  libxrandr \
+  libgbm \
+  libasound2 \
+  libpangocairo \
+  libgtk-3 \
+  libxshmfence \
+  libnss3-dev \
+  libnspr4 \
+  lsb-release \
+  fonts-liberation \
+  libappindicator3 \
+  xdg-utils \
+  libgconf-2 \
+  libxss1 \
+  ttf-freefont \
+  fonts-noto-cjk
+
+# 애플리케이션 디렉토리 생성
+WORKDIR /usr/src/app
+
+# 빌드 이미지에서 node_modules와 애플리케이션 소스 복사
+COPY --from=build /usr/src/app /usr/src/app
+
+# 애플리케이션 포트 명시 (필요에 따라 주석 해제)
+# EXPOSE 4000
+
+# pm2 설치
+RUN npm install pm2 -g
+
+# 애플리케이션 실행
+CMD ["pm2-runtime", "start", "app.js"]
+
+
+# # 사용할 Node.js의 버전을 명시합니다.
+# FROM node:18
+
+# # 보고서용 라이브러리 설치 (최초 1회만)
 # RUN apt-get update && apt-get install -y \
 #   libnss3 \
 #   libatk-bridge2.0-0 \
@@ -28,27 +111,27 @@ FROM node:18
 #   fonts-noto-core \
 #   fonts-freefont-ttf
 
-# 애플리케이션 디렉토리를 생성합니다.
-WORKDIR /usr/src/app
+# # 애플리케이션 디렉토리를 생성합니다.
+# WORKDIR /usr/src/app
 
-# 애플리케이션 의존성 설치를 위한 파일들을 복사합니다.
-# package.json 과 package-lock.json (if available)
-COPY package*.json ./
+# # 애플리케이션 의존성 설치를 위한 파일들을 복사합니다.
+# # package.json 과 package-lock.json (if available)
+# COPY package*.json ./
 
-# 패키지를 설치합니다.
-RUN npm install
+# # 패키지를 설치합니다.
+# RUN npm install
 
-# # pm2를 글로벌로 설치합니다.
-RUN npm install pm2 -g
+# # # pm2를 글로벌로 설치합니다.
+# RUN npm install pm2 -g
 
-# 애플리케이션 소스를 복사합니다.
-COPY . .
+# # 애플리케이션 소스를 복사합니다.
+# COPY . .
 
-# 애플리케이션이 사용할 포트를 명시합니다.
-# EXPOSE 4000
+# # 애플리케이션이 사용할 포트를 명시합니다.
+# # EXPOSE 4000
 
-# 애플리케이션을 Node.js로 직접 실행합니다.
-# CMD ["node", "app.js"]
+# # 애플리케이션을 Node.js로 직접 실행합니다.
+# # CMD ["node", "app.js"]
 
-# # 애플리케이션을 pm2로 실행합니다.
-CMD ["pm2-runtime", "start", "app.js"]
+# # # 애플리케이션을 pm2로 실행합니다.
+# CMD ["pm2-runtime", "start", "app.js"]
