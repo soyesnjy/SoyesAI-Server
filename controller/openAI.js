@@ -5216,25 +5216,26 @@ const reportController = {
         ebt_self: page3_data[10]?.content,
         ebt_self_result: ebtResultMap[page3_data[10]?.result || "default"],
         // page 5
-        persnalResult: page5_data?.persanl_result || "default",
-        result_first: page5_data?.persanl_result[0] || "default",
-        result_second: page5_data?.persanl_result[1] || "default",
-        result_third: page5_data?.persanl_result[2] || "default",
-        result_fourth: page5_data?.persanl_result[3] || "default",
+        persnalResult: page5_data?.persanl_result || "pt_default",
+        result_first: page5_data?.persanl_result[0] || "pt_detail_default",
+        result_second: page5_data?.persanl_result[1] || "pt_detail_default",
+        result_third: page5_data?.persanl_result[2] || "pt_detail_default",
+        result_fourth: page5_data?.persanl_result[3] || "pt_detail_default",
         // page 6
         result_first_ment:
-          ptResultMap[page5_data?.persanl_result[0]] || "default",
+          ptResultMap[page5_data?.persanl_result[0] || "default"],
         result_second_ment:
-          ptResultMap[page5_data?.persanl_result[1]] || "default",
+          ptResultMap[page5_data?.persanl_result[1] || "default"],
         result_third_ment:
-          ptResultMap[page5_data?.persanl_result[2]] || "default",
+          ptResultMap[page5_data?.persanl_result[2] || "default"],
         result_fourth_ment:
-          ptResultMap[page5_data?.persanl_result[3]] || "default",
+          ptResultMap[page5_data?.persanl_result[3] || "default"],
         // page 7
         mood_scores: JSON.stringify(page7_mood_data),
         anxiety_scores: JSON.stringify(page7_anxiety_data),
         // page 8
         friend_result: friendMap[page8_friend_data || "default"]?.category,
+        friend_result_img: page8_friend_data || "FTH",
         friend_result_ment: friendMap[page8_friend_data || "default"]?.ment,
         // page 9
         pupu_analysis_1: page9_pupu_data[0],
@@ -5244,20 +5245,20 @@ const reportController = {
 
       // 변환할 EJS 파일들의 경로를 배열로 설정
       const ejsFiles = [
-        // "1.ejs",
-        // "2.ejs",
+        "1.ejs",
+        "2.ejs",
         "3.ejs",
-        // "4.ejs",
-        // "5.ejs",
-        // "6.ejs",
-        // "7.ejs",
-        // "8.ejs",
-        // "9.ejs",
+        "4.ejs",
+        "5.ejs",
+        "6.ejs",
+        "7.ejs",
+        "8.ejs",
+        "9.ejs",
       ];
 
       // Puppeteer 브라우저 실행
       const browser = await puppeteer.launch({
-        headless: false, // 백그라운드 모드로 실행
+        headless: true, // 백그라운드 모드로 실행
         args: ["--no-sandbox", "--disable-setuid-sandbox", "--fontconfig"], // 샌드박스 모드 비활성화
       });
 
@@ -5295,7 +5296,7 @@ const reportController = {
 
       const mergedPdfBuffer = await mergePDFs(pdfBuffers);
 
-      // await browser.close();
+      await browser.close();
 
       // 이메일 전송 설정
       let myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
