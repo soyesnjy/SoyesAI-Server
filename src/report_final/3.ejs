@@ -378,7 +378,7 @@
         }
 
         #myChart1 {
-          top: 320px;
+          top: 360px;
           width: 705px;
           height: 320px;
         }
@@ -457,8 +457,9 @@
         </span>
         <span id="t7_3" class="t s2_3">정서 행동 검사 </span
         ><span id="t8_3" class="t s3_3"
-          >(SOYES Emotional-Behavioral Problem Scale) </span
-        ><span id="t9_3" class="t s4_3">Ⅰ </span>
+          >(SOYES Emotional-Behavioral Problem Scale)
+        </span>
+        <!-- <span id="t9_3" class="t s4_3">Ⅰ </span> -->
         <span id="ta_3" class="t s5_3">학교 </span>
         <span id="tb_3" class="t s5_3">생활 </span>
         <span id="tc_3" class="t s5_3">친구 </span>
@@ -592,6 +593,16 @@
             height: 48px;
           "
         />
+        <!-- End text definitions -->
+        <canvas
+          id="myChart1"
+          style="
+            width: 705px;
+            height: 280px;
+            display: block;
+            box-sizing: border-box;
+          "
+        ></canvas>
 
         <span id="t10_3" class="t s7_3">학교 생활 </span>
         <img
@@ -632,17 +643,6 @@
         />
         <span id="id_33" class="t2 s6_3"> <%= ebt_family %> </span>
       </div>
-
-      <!-- End text definitions -->
-      <canvas
-        id="myChart1"
-        style="
-          width: 705px;
-          height: 320px;
-          display: block;
-          box-sizing: border-box;
-        "
-      ></canvas>
     </div>
 
     <script>
@@ -711,6 +711,11 @@
             y: {
               display: false, // y축 레이블 숨기기
               beginAtZero: true,
+            },
+          },
+          plugins: {
+            legend: {
+              display: false, // 레전드 숨기기
             },
           },
         },

@@ -5244,20 +5244,20 @@ const reportController = {
 
       // 변환할 EJS 파일들의 경로를 배열로 설정
       const ejsFiles = [
-        "1.ejs",
-        "2.ejs",
+        // "1.ejs",
+        // "2.ejs",
         "3.ejs",
-        "4.ejs",
-        "5.ejs",
-        "6.ejs",
-        "7.ejs",
-        "8.ejs",
-        "9.ejs",
+        // "4.ejs",
+        // "5.ejs",
+        // "6.ejs",
+        // "7.ejs",
+        // "8.ejs",
+        // "9.ejs",
       ];
 
       // Puppeteer 브라우저 실행
       const browser = await puppeteer.launch({
-        headless: true, // 백그라운드 모드로 실행
+        headless: false, // 백그라운드 모드로 실행
         args: ["--no-sandbox", "--disable-setuid-sandbox", "--fontconfig"], // 샌드박스 모드 비활성화
       });
 
@@ -5295,7 +5295,7 @@ const reportController = {
 
       const mergedPdfBuffer = await mergePDFs(pdfBuffers);
 
-      await browser.close();
+      // await browser.close();
 
       // 이메일 전송 설정
       let myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
