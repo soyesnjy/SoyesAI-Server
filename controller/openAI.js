@@ -5258,7 +5258,7 @@ const reportController = {
       // Puppeteer 브라우저 실행
       const browser = await puppeteer.launch({
         headless: true, // 백그라운드 모드로 실행
-        args: ["--no-sandbox", "--disable-setuid-sandbox"], // 샌드박스 모드 비활성화
+        args: ["--no-sandbox", "--disable-setuid-sandbox", "--fontconfig"], // 샌드박스 모드 비활성화
       });
 
       for (const file of ejsFiles) {
