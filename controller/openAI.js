@@ -4525,8 +4525,8 @@ const ubiController = {
       //   message: response.choices[0].message.content,
       // };
 
-      // const tagObj = { music: 0, draw: 1, yoga: 2 };
-      const tagObj = { draw: 1, yoga: 2 };
+      // const tagObj = { draw: 1, yoga: 2 };
+      const tagObj = { music: 0, draw: 1, yoga: 2 };
       const vTagArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
       const arrCreate = (num) => {
@@ -4558,7 +4558,7 @@ const ubiController = {
               tag === "music"
                 ? vTagArr[Math.floor(Math.random() * vTagArr.length)]
                 : 0,
-            index: arrCreate(maxArr[tagObj[tag]]),
+            index: tag === "music" ? [] : arrCreate(maxArr[tagObj[tag]]),
           },
           {
             tag: tag2,
@@ -4566,7 +4566,7 @@ const ubiController = {
               tag2 === "music"
                 ? vTagArr[Math.floor(Math.random() * vTagArr.length)]
                 : 0,
-            index: arrCreate(maxArr[tagObj[tag2]]),
+            index: tag2 === "music" ? [] : arrCreate(maxArr[tagObj[tag]]),
           },
           {
             tag: tag3,
@@ -4574,7 +4574,7 @@ const ubiController = {
               tag3 === "music"
                 ? vTagArr[Math.floor(Math.random() * vTagArr.length)]
                 : 0,
-            index: arrCreate(maxArr[tagObj[tag3]]),
+            index: tag3 === "music" ? [] : arrCreate(maxArr[tagObj[tag]]),
           },
         ],
       };
