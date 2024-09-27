@@ -5326,7 +5326,7 @@ const reportController = {
       return res.status(200).json({ message: "PDF sent successfully" });
     } catch (error) {
       console.error("Error processing request:", error);
-      res.status(500).json({ message: "Failed to process the request" });
+      res.status(500).json({ message: `Error processing request: ${error}` });
     }
   },
 };
