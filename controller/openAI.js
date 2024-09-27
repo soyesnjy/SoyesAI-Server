@@ -5016,11 +5016,28 @@ const reportController = {
       };
 
       // PDF 결합 함수
+      // async function mergePDFs(pdfBuffers) {
+      //   const mergedPdf = await PDFDocument.create();
+
+      //   for (const buffer of pdfBuffers) {
+      //     const pdf = await PDFDocument.load(buffer);
+      //     const copiedPages = await mergedPdf.copyPages(
+      //       pdf,
+      //       pdf.getPageIndices()
+      //     );
+      //     copiedPages.forEach((page) => mergedPdf.addPage(page));
+      //   }
+
+      //   const mergedPdfBytes = await mergedPdf.save();
+      //   return mergedPdfBytes;
+      // }
       async function mergePDFs(pdfBuffers) {
         const mergedPdf = await PDFDocument.create();
 
         for (const buffer of pdfBuffers) {
           const pdf = await PDFDocument.load(buffer);
+
+          // 페이지를 복사하고 병합
           const copiedPages = await mergedPdf.copyPages(
             pdf,
             pdf.getPageIndices()
@@ -5255,6 +5272,8 @@ const reportController = {
         const htmlContent = await ejs.renderFile(templatePath, selectData);
 
         const page = await browser.newPage();
+
+        await page.emulateMediaType("screen"); // 화면 스타일 적용
 
         // 원하는 뷰포트 크기 설정
         // await page.setViewport({
