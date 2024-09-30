@@ -193,6 +193,7 @@ const {
   ebt_analysis_prompt_v5,
   ebt_analysis_prompt_v6,
   ebt_analysis_prompt_v8,
+  ebt_analysis_prompt_v9,
   pt_analysis_prompt,
   test_prompt_20240402,
   persona_prompt_lala_v2,
@@ -204,6 +205,7 @@ const {
   persona_prompt_pupu_v2,
   persona_prompt_pupu_v4,
   persona_prompt_pupu_v5,
+  persona_prompt_pupu_v6,
 } = require("../DB/test_prompt");
 
 // 인지행동 검사 관련
@@ -478,8 +480,8 @@ const openAIController = {
       const analysisPrompt = [];
       const userPrompt = [];
 
-      // 정서행동 검사 분석가 페르소나 v8 - 0819
-      analysisPrompt.push(ebt_analysis_prompt_v8);
+      // 정서행동 검사 분석가 페르소나 v8 - 2024.09.30 ~
+      analysisPrompt.push(ebt_analysis_prompt_v9);
       // 분야별 결과 해석 프롬프트
       analysisPrompt.push(ebt_Analysis[parsingType]);
       // 결과 해석 요청 프롬프트
@@ -1075,7 +1077,7 @@ const openAIController = {
       parsepUid = pUid;
 
       // 고정 삽입 프롬프트
-      promptArr.push(persona_prompt_pupu_v5); // 2024.08.21~
+      promptArr.push(persona_prompt_pupu_v6); // 2024.09.30 ~
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       // const lastUserContent =
