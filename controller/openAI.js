@@ -206,6 +206,7 @@ const {
   persona_prompt_pupu_v4,
   persona_prompt_pupu_v5,
   persona_prompt_pupu_v6,
+  persona_prompt_maru,
 } = require("../DB/test_prompt");
 
 // 인지행동 검사 관련
@@ -1516,7 +1517,7 @@ const openAIController = {
       parsepUid = pUid;
 
       // 고정 삽입 프롬프트
-      promptArr.push(persona_prompt_ubi); // 페르소나 프롬프트 삽입
+      promptArr.push(persona_prompt_maru); // 페르소나 프롬프트 삽입
       promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       if (game === "remarks") {
@@ -1530,7 +1531,8 @@ const openAIController = {
           role: "system",
           content: `assistant는 user와 밸런스 게임을 진행한다. 문제는 1문제씩 총 10회 질문한다.
 assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문제만 출제한다.
-게임이 종료되면 assistant가 밸런스 게임에서 선택한 단어 10개를 보여주고 user와의 매칭률을 계산해서 %로 알려준다.`,
+게임이 종료되면 assistant가 밸런스 게임에서 선택한 단어 10개를 보여주고 user와의 매칭률을 계산해서 %로 알려준다.
+`,
         });
       }
 
