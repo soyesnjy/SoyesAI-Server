@@ -357,9 +357,11 @@ const Consult_Table_Info = {
   Log: {
     table: "soyes_ai_User_Consult_Log",
     attribute: {
-      pKey: "uid",
+      pKey: "entry_id",
+      cKey: "uid",
       attr1: "avarta_name",
       attr2: "consult_log",
+      created_at: "created_at",
     },
   },
 };
@@ -371,6 +373,62 @@ const Review_Table_Info = {
     attr2: "content",
   },
 };
+const Ella_Training_Table_Info = {
+  Mood: {
+    table: "soyes_training_mood",
+    attribute: {
+      pKey: "mood_idx",
+      fKey: "uid",
+      attr1: "mood_round_idx",
+      attr2: "mood_name",
+      attr3: "mood_score",
+      attr4: "mood_todo_list",
+      attr5: "mood_talk_list",
+      attr6: "mood_meditation_feedback",
+      attr7: "mood_avartar",
+      attr8: "created_at",
+      attr9: "updated_at",
+    },
+  },
+  Friend: {
+    table: "soyes_training_friend",
+    attribute: {
+      pKey: "friend_id",
+      fKey: "uid",
+      attr1: "friend_type",
+      attr2: "friend_result",
+      attr3: "friend_consult_log",
+      attr4: "created_at",
+      attr5: "updated_at",
+    },
+  },
+  Anxiety: {
+    table: "soyes_training_anxiety",
+    attribute: {
+      pKey: "anxiety_idx",
+      fKey: "uid",
+      attr1: "anxiety_round_idx",
+      attr2: "anxiety_name",
+      attr3: "anxiety_cognitive_score",
+      attr4: "anxiety_challenge_steps",
+      attr5: "anxiety_challenge_score",
+      attr6: "created_at",
+      attr7: "updated_at",
+    },
+  },
+};
+const North_Table_Info = {
+  table: "soyes_ai_North",
+  attribute: {
+    pKey: "north_id",
+    fKey: "uid",
+    attr1: "north_diary_content",
+    attr2: "north_diary_tag",
+    attr3: "north_mental_data",
+    attr4: "created_at",
+    attr5: "updated_at",
+  },
+};
 
 module.exports = {
   User_Table_Info,
@@ -379,4 +437,6 @@ module.exports = {
   PT_Table_Info,
   Consult_Table_Info,
   Review_Table_Info,
+  Ella_Training_Table_Info,
+  North_Table_Info,
 };

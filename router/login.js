@@ -24,6 +24,7 @@ const {
   postAIRefreshTokenCertHandler,
   postSocialAppLoginHandler,
   postAIGuestLoginHandler, // Guest Login API
+  deleteAIUserDeleteHandler, // 회원 퇄퇴
 } = loginController;
 
 const {
@@ -74,6 +75,9 @@ router.get("/ai/guest", postAIGuestLoginHandler);
 router.post("/ai/social", postSocialAppLoginHandler);
 // AI 일반 로그아웃
 router.get("/ai/logout", getAILogoutHandler);
+// AI 회원 탈퇴
+router.post("/ai/secession", deleteAIUserDeleteHandler);
+
 // AI RefreshToken 갱신
 router.post("/ai/certificationtoken", postAIRefreshTokenCertHandler);
 
