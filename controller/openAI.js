@@ -4529,8 +4529,8 @@ const ubiController = {
       //   message: response.choices[0].message.content,
       // };
 
-      // const tagObj = { draw: 1, yoga: 2 };
-      const tagObj = { music: 0, draw: 1, yoga: 2 };
+      const tagObj = { draw: 1, yoga: 2 };
+      // const tagObj = { music: 0, draw: 1, yoga: 2 };
       const vTagArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
       const arrCreate = (num) => {
