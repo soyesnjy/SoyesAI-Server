@@ -2455,11 +2455,15 @@ const ellaMoodController = {
         case "thought":
           promptArr.push({
             role: "system",
-            content: `아래 문장에 기초해서 다른 관점을 생각해보도록 한다.
-            '''
-            ${mood_thought}
-            '''
-            예시: '그건 정말 그래. 그런데 다르게도 생각해볼 수 있을까?'`,
+            // 2024.10.07 이전 프롬프트
+            // content: `아래 문장에 기초해서 다른 관점을 생각해보도록 한다.
+            // '''
+            // ${mood_thought}
+            // '''
+            // 예시: '그건 정말 그래. 그런데 다르게도 생각해볼 수 있을까?'`,
+            // 2024.10.07 프롬프트 변경
+            content:
+              "슬플 때 유저가 하는 생각에 초등학생의 눈높이에 맞춰 한 문장으로 유저의 감정을 반영하며 공감한다. 질문은 하지 않는다.",
           });
           // parseMessageArr = [...messageArr];
           break;
@@ -3534,13 +3538,13 @@ const ellaAnxietyController = {
         case "consolation":
           promptArr.push({
             role: "system",
-            content: `유저의 고민에 한 문장으로 위로나 격려를 한다.`,
+            content: `유저가 불안해하고 걱정하는 내용에 초등학생의 눈높이에 맞춰 한 문장으로 유저의 감정을 반영하며 공감한다. 질문은 하지 않는다.`,
           });
           break;
         case "solution":
           promptArr.push({
             role: "system",
-            content: `유저의 고민에 한 문장으로 도움이 될만한 해결방법을 알려 준다.`,
+            content: `유저가 불안해하고 걱정하는 상황에 대해 초등학생이 시도해볼 수 있는 해결책을 70자 이내로 한 가지 제시한다. 예) ~해보면 어때?`,
           });
           break;
         case "challenge_start":
