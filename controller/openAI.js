@@ -4425,16 +4425,22 @@ const NorthController = {
 
       parsepUid = pUid;
 
+      // 오늘 날짜 변환
+      const dateObj = new Date();
+      const year = dateObj.getFullYear();
+
       // DB Select
       const table = North_Table_Info.table;
 
       // 1. SELECT User Mood Table Data
       const select_query = `SELECT
+      north_id AS id,
       north_diary_content AS content,
       north_diary_tag AS tag,
       DATE_FORMAT(created_at, '%Y년 %m월 %d일') AS date
       FROM ${table}
       WHERE uid = '${parsepUid}'
+      AND created_at LIKE '%${year}%'
       ORDER BY created_at ASC;`;
       const select_data = await fetchUserData(connection_AI, select_query);
 
@@ -4446,6 +4452,67 @@ const NorthController = {
       res.status(500).json({
         message: "Server Error - 500",
         // emotion: 0,
+      });
+    }
+  },
+  // 일기친구 모델 - 북극이 일기 Delete API
+  postOpenAIConsultingNorthDelete: async (req, res) => {
+    const { data } = req.body;
+    let parseData, parsepUid; // Parsing 변수
+
+    try {
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { pUid, id } = parseData;
+      console.log(
+        `북극이 일기 Delete API /north_delete Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
+      }
+
+      // No pUid => return
+      if (!id) {
+        console.log("No id input value - 400");
+        return res.status(400).json({ message: "No id input value - 400" });
+      }
+
+      parsepUid = pUid;
+
+      // Delete Qurty
+      const table = North_Table_Info.table;
+      const delete_query = `DELETE FROM ${table} WHERE north_id = ?`;
+
+      // Delete 수행
+      connection_AI.query(delete_query, [id], (err, results) => {
+        if (err) {
+          console.log(err);
+          return res.status(400).json({ message: err.sqlMessage });
+        }
+
+        // 삭제된 행이 있는지 확인
+        if (results.affectedRows > 0) {
+          console.log("North Diary Delete Success!");
+          return res
+            .status(200)
+            .json({ message: "North Diary Delete Success!" });
+        } else {
+          console.log("No rows deleted, possibly due to non-existing id.");
+          return res
+            .status(400)
+            .json({ message: "No rows deleted, ID not found." });
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "Server Error - 500",
       });
     }
   },
