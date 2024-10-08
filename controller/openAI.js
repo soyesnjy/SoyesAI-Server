@@ -3493,6 +3493,7 @@ const ellaAnxietyController = {
       "emotion",
       "consolation",
       "solution",
+      "box_end",
       "challenge_start",
       "challenge_recommend",
       "challenge_end",
@@ -3561,6 +3562,12 @@ const ellaAnxietyController = {
           promptArr.push({
             role: "system",
             content: `유저가 불안해하고 걱정하는 상황에 대해 초등학생이 시도해볼 수 있는 해결책을 70자 이내로 한 가지 제시한다. 예) ~해보면 어때?`,
+          });
+          break;
+        case "box_end":
+          promptArr.push({
+            role: "system",
+            content: `유저의 마지막 말을 듣고 감정을 반영하며 한 문장으로 공감한다. 이후 이번 상담은 여기서 마치려고 한다고 이야기한 후 종료한다.`,
           });
           break;
         case "challenge_start":
