@@ -261,8 +261,8 @@ const select_soyesAI_EbtResult_v2 = async (keyValue, contentKey, parsepUid) => {
     // 검사를 진행하지 않은 경우
     if (!ebt_data[0]) return [];
 
-    // tScore 계산 + 검사 결과 +
-    const resultArr = EBT_classArr.map((type) => {
+    // tScore 계산 + 검사 결과
+    const resultArr = EBT__reportClassArr.map((type) => {
       const { average, standard, danger_score, caution_score } =
         EBT_Table_Info[type];
       // 검사 스코어 합 + T점수 계산
@@ -340,6 +340,21 @@ const EBT_classArr = [
   "Movement",
   "Angry",
   "Self",
+];
+
+// EBT 반영 Class 정의
+const EBT__reportClassArr = [
+  "School",
+  "Friend",
+  "Family",
+  "Self",
+  "Unrest",
+  "Sad",
+  "Health",
+  "Attention",
+  "Movement",
+  "Mood",
+  "Angry",
 ];
 
 // AI API
@@ -5182,6 +5197,7 @@ const reportController = {
 
       // Page 3,4 Data
       const page3_data = await select_soyesAI_EbtResult_v2("", true, parsepUid);
+      // console.log(page3_data);
 
       // Page 5,6 Data
       const pt_log_table = PT_Table_Info["Log"].table;
@@ -5283,8 +5299,8 @@ const reportController = {
             : [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
         ),
         // page 4
-        ebt_mood: page3_data[3]?.content?.slice(0, 127),
-        ebt_mood_result: ebtResultMap[page3_data[3]?.result || "default"],
+        ebt_self: page3_data[3]?.content?.slice(0, 127),
+        ebt_self_result: ebtResultMap[page3_data[3]?.result || "default"],
         ebt_unrest: page3_data[4]?.content?.slice(0, 127),
         ebt_unrest_result: ebtResultMap[page3_data[4]?.result || "default"],
         ebt_sad: page3_data[5]?.content?.slice(0, 127),
@@ -5293,12 +5309,12 @@ const reportController = {
         ebt_health_result: ebtResultMap[page3_data[6]?.result || "default"],
         ebt_attention: page3_data[7]?.content?.slice(0, 127),
         ebt_attention_result: ebtResultMap[page3_data[7]?.result || "default"],
-        ebt_angry: page3_data[8]?.content?.slice(0, 127),
-        ebt_angry_result: ebtResultMap[page3_data[8]?.result || "default"],
-        ebt_movement: page3_data[9]?.content?.slice(0, 127),
-        ebt_movement_result: ebtResultMap[page3_data[9]?.result || "default"],
-        ebt_self: page3_data[10]?.content?.slice(0, 127),
-        ebt_self_result: ebtResultMap[page3_data[10]?.result || "default"],
+        ebt_movement: page3_data[8]?.content?.slice(0, 127),
+        ebt_movement_result: ebtResultMap[page3_data[8]?.result || "default"],
+        ebt_mood: page3_data[9]?.content?.slice(0, 127),
+        ebt_mood_result: ebtResultMap[page3_data[9]?.result || "default"],
+        ebt_angry: page3_data[10]?.content?.slice(0, 127),
+        ebt_angry_result: ebtResultMap[page3_data[10]?.result || "default"],
         // page 5
         persnalResult: page5_data?.persanl_result || "pt_default",
         result_first: page5_data?.persanl_result[0] || "pt_detail_default",
