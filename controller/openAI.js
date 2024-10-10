@@ -1079,7 +1079,7 @@ const openAIController = {
 
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_pupu_v6); // 2024.09.30 ~
-      promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
+      // promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       // const lastUserContent =
       //   parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
@@ -1229,7 +1229,7 @@ const openAIController = {
       );
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_ubi); // 페르소나 프롬프트 삽입
-      promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
+      // promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       const lastUserContent =
         parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
@@ -1341,7 +1341,7 @@ const openAIController = {
       );
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_soyes); // 페르소나 프롬프트 삽입
-      promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
+      // promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       const lastUserContent =
         parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
@@ -1518,7 +1518,7 @@ const openAIController = {
 
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_maru); // 페르소나 프롬프트 삽입
-      promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
+      // promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       if (game === "remarks") {
         promptArr.push({
