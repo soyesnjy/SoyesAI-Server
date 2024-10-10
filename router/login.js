@@ -10,9 +10,9 @@ const {
 
 const {
   // 토큰
-  vaildateToken,
-  tokenLoginHandler,
-  tokenLogoutHandler,
+  // vaildateToken,
+  // tokenLoginHandler,
+  // tokenLogoutHandler,
   // OAuth
   oauthUrlHandler,
   oauthKakaoUrlHandler,

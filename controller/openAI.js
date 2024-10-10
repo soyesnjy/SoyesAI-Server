@@ -206,6 +206,7 @@ const {
   persona_prompt_pupu_v4,
   persona_prompt_pupu_v5,
   persona_prompt_pupu_v6,
+  persona_prompt_pupu_v7,
   persona_prompt_maru,
 } = require("../DB/test_prompt");
 
@@ -1078,7 +1079,7 @@ const openAIController = {
       parsepUid = pUid;
 
       // 고정 삽입 프롬프트
-      promptArr.push(persona_prompt_pupu_v6); // 2024.09.30 ~
+      promptArr.push(persona_prompt_pupu_v7); // 2024.10.10 ~
       // promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       // const lastUserContent =
