@@ -198,7 +198,7 @@ const loginController = {
     try {
       const SCOPES = [
         "https://www.googleapis.com/auth/userinfo.profile", // 기본 프로필
-        "https://www.googleapis.com/auth/userinfo.email", // 이메일
+        // "https://www.googleapis.com/auth/userinfo.email", // 이메일 권한 잠금
       ];
 
       const authUrl = oAuth2Client.generateAuthUrl({
@@ -256,7 +256,7 @@ const loginController = {
           // 2. INSERT USER (row값이 없는 경우 실행)
           if (!ebt_data[0]) {
             parseUid = id;
-            parseEmail = email;
+            // parseEmail = email;
             const insert_query = `INSERT INTO ${table} (${Object.values(
               attribute
             ).join(", ")}) VALUES (${Object.values(attribute)
@@ -266,7 +266,7 @@ const loginController = {
 
             const insert_value = [
               id,
-              email,
+              email || null,
               null,
               null,
               null,
