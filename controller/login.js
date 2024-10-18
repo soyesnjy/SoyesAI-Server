@@ -1273,28 +1273,34 @@ const loginController = {
       }
       // refreshToken만 있는 경우 - User Table 조회
       else if (refreshToken) {
-        console.log(`refreshToken Check! - ${refreshToken}`);
+        console.log(`RefreshToken Check! - ${refreshToken}`);
         // refreshToken 복호화
         const decoded = verifyToken("refresh", refreshToken);
         // 토큰 만료
         if (decoded === "expired") {
-          console.log(`RefreshToken 만료! - ${decoded.id}`);
+          console.log(`RefreshToken Expired! - pUid:${pUid}`);
           // 만료된 토큰 데이터 삭제
           req.session.destroy((err) => {
             if (err) console.error("세션 삭제 중 에러 발생", err);
           });
+          // refreshToken 쿠키 삭제
           res.clearCookie("refreshToken", {
             sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
             secure: process.env.DEV_OPS !== "local",
           });
-          return res.status(401).json({ message: "Token has expired - 401" });
+          return res.status(401).json({
+            message:
+              "로그인 세션이 만료되었습니다. 로그아웃 후 재로그인 바랍니다! (Token has expired)",
+          });
         }
         // 입력 pUid와 토큰 해석 id와 일치하지 않는 경우
         if (pUid !== decoded.id) {
-          console.log(`Input Payload pUid Not Match RefreshToken Decoded pUid`);
+          console.log(
+            `Input Payload pUid Not Match RefreshToken Decoded pUid - pUid:${pUid}`
+          );
           return res.status(401).json({
             message:
-              "Input Payload pUid Not Match RefreshToken Decoded pUid - 401",
+              "로그인 세션이 만료되었습니다. 로그아웃 후 재로그인 바랍니다! (pUid Not Match RefreshToken Decoded ID)",
           });
         }
         // User Table 조회
@@ -1328,13 +1334,16 @@ const loginController = {
           console.log(`RefreshToken Non User! 400 - ${decoded.id}`);
           return res
             .status(400)
-            .json({ message: "RefreshToken Non User! - 400" });
+            .json({ message: "존재하지 않는 회원입니다.(Non User)" });
         }
       }
       // Token 미발급 상태 - 로그인 권장
       else {
-        console.log("Login Session Expire! - 401");
-        return res.status(401).json({ message: "Login Session Expire! - 401" });
+        console.log("Non RefreshToken Cookie! - 401");
+        return res.status(401).json({
+          message:
+            "로그인 세션이 만료되었습니다. 로그아웃 후 재로그인 바랍니다! (Non RefreshToken Cookie)",
+        });
       }
     } catch (err) {
       console.log(err.message);
@@ -1436,7 +1445,7 @@ const loginController = {
         parseLoginData = JSON.parse(data);
       } else parseLoginData = data;
 
-      const { pUid, refreshToken } = parseLoginData;
+      const { refreshToken } = parseLoginData;
       const sessionId = req.sessionID;
 
       // Non refreshToken
@@ -1455,7 +1464,8 @@ const loginController = {
       // 토큰 만료
       if (decoded === "expired")
         return res.status(401).json({
-          message: "Token has expired - 401 UNAUTHORIZED",
+          // message: "Token has expired - 401 UNAUTHORIZED",
+          message: "로그인 세션이 만료되었습니다. 재로그인 바랍니다!",
         });
 
       console.log(`RefreshToken 인증 API 호출 - pUid: ${decoded.id}`);
@@ -1483,7 +1493,8 @@ const loginController = {
       if (!decoded) {
         console.log("Invalid token format - 401 UNAUTHORIZED");
         return res.status(401).json({
-          message: "Invalid token format - 401 UNAUTHORIZED",
+          // message: "Invalid token format - 401 UNAUTHORIZED",
+          message: "유효하지 않은 인증 방식입니다. 재로그인 바랍니다.",
         });
       }
 
@@ -1500,7 +1511,7 @@ const loginController = {
 
         // cookie refreshToken 갱신
         res.cookie("refreshToken", refreshToken, {
-          maxAge: 24 * 60 * 60 * 1000, // 세션 토큰값 갱신
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 쿠키 갱신 (7일)
           httpOnly: true,
           sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
           secure: process.env.DEV_OPS !== "local",
