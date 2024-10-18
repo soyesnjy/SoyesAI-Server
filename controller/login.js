@@ -237,7 +237,7 @@ const loginController = {
           if (err) return console.error(err);
           // console.log(response.data);
 
-          const { id, email } = response.data;
+          const { id } = response.data;
 
           const table = User_Table_Info.table;
           const attribute = User_Table_Info.attribute;
@@ -266,7 +266,7 @@ const loginController = {
 
             const insert_value = [
               id,
-              email || null,
+              null,
               null,
               null,
               null,
@@ -315,14 +315,14 @@ const loginController = {
           // JWT Token 발급 후 세션 저장
           const token = generateToken({
             id: parseUid,
-            email: parseEmail,
+            // email: parseEmail,
           });
 
           // Session 내부에 accessToken 저장
           // req.session.accessToken = token.accessToken;
           // browser Cookie에 refreshToken 저장
           // res.cookie("refreshToken", token.refreshToken, {
-          //   maxAge: 24 * 60 * 60 * 1000,
+          //   maxAge: 7 * 24 * 60 * 60 * 1000,
           //   httpOnly: true,
           //   sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
           //   secure: process.env.DEV_OPS !== "local",
@@ -421,7 +421,7 @@ const loginController = {
 
       // DB 계정 생성 파트
       const { id } = response.data;
-      const { email } = response.data.kakao_account;
+      // const { email } = response.data.kakao_account;
 
       const table = User_Table_Info.table;
       const attribute = User_Table_Info.attribute;
@@ -443,7 +443,7 @@ const loginController = {
       // 2. INSERT USER (row값이 없는 경우 실행)
       if (!ebt_data[0]) {
         parseUid = id;
-        parseEmail = email;
+
         const insert_query = `INSERT INTO ${table} (${Object.values(
           attribute
         ).join(", ")}) VALUES (${Object.values(attribute)
@@ -451,7 +451,7 @@ const loginController = {
           .join(", ")})`;
         // console.log(insert_query);
 
-        const insert_value = [id, email, null, null, null, "kakao", date, date];
+        const insert_value = [id, null, null, null, null, "kakao", date, date];
         // console.log(insert_value);
 
         // 계정 생성 쿼리 임시 주석
@@ -497,7 +497,7 @@ const loginController = {
       // JWT Token 발급 후 세션 저장
       const token = generateToken({
         id: parseUid,
-        email: parseEmail,
+        // email: parseEmail,
       });
 
       // Session 내부에 accessToken 저장
@@ -540,39 +540,33 @@ const loginController = {
       res.status(500).json({ data: "Server Error!" });
     }
   },
-  // AI 일반 로그인 - 인증
-  postAILoginHandler: async (req, res) => {
+  // AI 애플 로그인
+  postAIAppleLoginHandler: async (req, res) => {
     const { data } = req.body;
     let parseLoginData;
+    let parsepUid = "";
+
     try {
       // 입력값 파싱
       if (typeof data === "string") {
         parseLoginData = JSON.parse(data);
       } else parseLoginData = data;
 
-      const { pUid, passWord } = parseLoginData;
+      const { id } = parseLoginData;
       const sessionId = req.sessionID;
 
       // pUid 없을 경우
-      if (!pUid) {
+      if (!id) {
         console.log("Non pUid Value - 400 Bad Request");
         return res
           .status(400)
           .json({ message: "Non pUid Value - 400 Bad Request" });
       }
 
-      // passWord 없을 경우
-      if (!passWord) {
-        console.log("Non passWord Value - 400 Bad Request");
-        return res
-          .status(400)
-          .json({ message: "Non passWord Value - 400 Bad Request" });
-      }
+      parsepUid = id;
+      // let parsePassWard = passWord;
 
-      let parsepUid = pUid;
-      let parsePassWard = passWord;
-
-      console.log(`User Login Access - pUid: ${parsepUid}`);
+      console.log(`Apple Login API 호출 - pUid: ${parsepUid}`);
 
       /* User DB 조회 */
       // User Table && attribut 명시
@@ -594,93 +588,111 @@ const loginController = {
         parsepUid
       );
 
-      // User 계정이 있는 경우 (row값이 있는 경우 실행)
-      if (ebt_data[0]) {
-        // Password 불일치
-        if (ebt_data[0].passWard !== parsePassWard) {
-          console.log(
-            `Password is incorrect! - 202 Accepted (pUid: ${parsepUid})`
-          );
-          return res
-            .status(202)
-            .json({ message: "Password is incorrect! - 202 Accepted" });
-        }
-        // Password 일치
-        else {
-          // 최종 로그인 날짜 갱신
-          const update_query = `UPDATE ${user_table} SET ${Object.values(
-            user_attribute
-          )
-            .filter((el) => el === "lastLogin_date")
-            .map((el) => {
-              return `${el} = ?`;
-            })
-            .join(", ")} WHERE ${user_attribute.pKey} = ?`;
-          // console.log(update_query);
+      // 2. INSERT User 계정이 없는 경우
+      if (!ebt_data[0]) {
+        const insert_query = `INSERT INTO ${user_table} (${Object.values(
+          user_attribute
+        ).join(", ")}) VALUES (${Object.values(user_attribute)
+          .map((el) => "?")
+          .join(", ")})`;
+        // console.log(insert_query);
 
-          const update_value = [date, parsepUid];
-          // console.log(update_value);
+        const insert_value = [
+          parsepUid,
+          null,
+          null,
+          null,
+          null,
+          "apple",
+          date,
+          date,
+        ];
+        // console.log(insert_value);
 
-          connection_AI.query(
-            update_query,
-            update_value,
-            (error, rows, fields) => {
-              if (error) console.log(error);
-              else console.log("User Login Date UPDATE Success!");
-            }
-          );
-
-          // JWT Token 발급 후 세션 저장
-          const token = generateToken({
-            id: ebt_data[0].uid,
-            email: ebt_data[0].Email,
-          });
-
-          // Session 내부에 accessToken 저장
-          req.session.accessToken = token.accessToken;
-          // browser Cookie에 refreshToken 저장
-          res.cookie("refreshToken", token.refreshToken, {
-            maxAge: 24 * 60 * 60 * 1000,
-            httpOnly: true,
-            sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
-            secure: process.env.DEV_OPS !== "local",
-          });
-
-          const expire = String(dateObj.setHours(dateObj.getHours() + 1));
-
-          // Redis에서 기존 세션 ID 확인
-          redisStore.get(`user_session:${parsepUid}`, (err, oldSessionId) => {
-            if (oldSessionId) {
-              // 기존 세션 무효화
-              redisStore.destroy(`user_session:${parsepUid}`, (err, reply) => {
-                console.log("Previous session invalidated");
-              });
-            }
-            // 새 세션 ID를 사용자 ID와 연결
-            redisStore.set(
-              `user_session:${parsepUid}`,
-              sessionId,
-              (err, reply) => {
-                // 로그인 처리 로직
-                console.log(`[${parsepUid}] SessionID Update - ${sessionId}`);
-              }
-            );
-          });
-
-          console.log(`User Login Success! - 200 OK (pUid: ${parsepUid})`);
-          // client 전송
-          return res.status(200).json({
-            message: "User Login Success! - 200 OK",
-            refreshToken: token.refreshToken,
-            // expire,
-          });
-        }
+        // 계정 생성 쿼리 임시 주석
+        connection_AI.query(
+          insert_query,
+          insert_value,
+          (error, rows, fields) => {
+            if (error)
+              console.log(
+                "Apple OAuth User Row DB INSERT: " + error.sqlMessage
+              );
+            else console.log("Apple OAuth User Row DB INSERT Success!");
+          }
+        );
       }
-      // User 계정이 없는 경우 (row값이 없는 경우 실행)
+
+      // 3. UPDATE User 계정이 있는 경우
       else {
-        console.log(`Non User - 404 Not Found (pUid: ${parsepUid})`);
-        return res.status(404).json({ message: "Non User - 404 Not Found" });
+        // 최종 로그인 날짜 갱신
+        const update_query = `UPDATE ${user_table} SET ${Object.values(
+          user_attribute
+        )
+          .filter((el) => el === "lastLogin_date")
+          .map((el) => {
+            return `${el} = ?`;
+          })
+          .join(", ")} WHERE ${user_attribute.pKey} = ?`;
+        // console.log(update_query);
+
+        const update_value = [date, parsepUid];
+        // console.log(update_value);
+
+        connection_AI.query(
+          update_query,
+          update_value,
+          (error, rows, fields) => {
+            if (error)
+              console.log(
+                "Apple OAuth User Row DB UPDATE: " + error.sqlMessage
+              );
+            else console.log("Apple OAuth User Row DB UPDATE Success!");
+          }
+        );
       }
+
+      // JWT Token 발급 후 세션 저장
+      const token = generateToken({
+        id: parsepUid,
+        // email: ebt_data[0].Email,
+      });
+
+      // Session 내부에 accessToken 저장
+      // req.session.accessToken = token.accessToken;
+
+      // browser Cookie에 refreshToken 저장
+      res.cookie("refreshToken", token.refreshToken, {
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+        secure: process.env.DEV_OPS !== "local",
+      });
+
+      // const expire = String(dateObj.setHours(dateObj.getHours() + 1));
+
+      // Redis에서 기존 세션 ID 확인
+      redisStore.get(`user_session:${parsepUid}`, (err, oldSessionId) => {
+        if (oldSessionId) {
+          // 기존 세션 무효화
+          redisStore.destroy(`user_session:${parsepUid}`, (err, reply) => {
+            // console.log("Previous session invalidated");
+          });
+        }
+        // 새 세션 ID를 사용자 ID와 연결
+        redisStore.set(`user_session:${parsepUid}`, sessionId, (err, reply) => {
+          // 로그인 처리 로직
+          // console.log(`[${parsepUid}] SessionID Update - ${sessionId}`);
+        });
+      });
+
+      // client 전송
+      return res.status(200).json({
+        pUid: parsepUid,
+        message: "User Apple Login Success! - 200 OK",
+        refreshToken: token.refreshToken,
+        // expire,
+      });
     } catch (err) {
       console.error(err);
       return res
