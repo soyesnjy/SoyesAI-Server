@@ -77,7 +77,7 @@ console.log(new Date().toString());
 // 응답 압축
 app.use(compression());
 
-console.log("comment: jenkins용 주석");
+// console.log("comment: jenkins용 주석");
 
 // const responseBodyLogger = (req, res, next) => {
 //   const oldSend = res.send;

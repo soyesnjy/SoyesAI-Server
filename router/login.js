@@ -10,16 +10,16 @@ const {
 
 const {
   // 토큰
-  vaildateToken,
-  tokenLoginHandler,
-  tokenLogoutHandler,
+  // vaildateToken,
+  // tokenLoginHandler,
+  // tokenLogoutHandler,
   // OAuth
   oauthUrlHandler,
   oauthKakaoUrlHandler,
   oauthKakaoRedirectUrlHandler,
   oauthGoogleRedirectUrlHandler,
   // AI 일반 로그인
-  postAILoginHandler,
+  postAIAppleLoginHandler,
   getAILogoutHandler,
   postAIRefreshTokenCertHandler,
   postSocialAppLoginHandler,
@@ -27,24 +27,24 @@ const {
   deleteAIUserDeleteHandler, // 회원 퇄퇴
 } = loginController;
 
-const {
-  // 쿠키
-  vaildateCookies,
-  CookieLoginHandler,
-  CookieLogoutHandler,
-  // 세션
-  vaildateSession,
-  sessionLoginHandler,
-  sessionLogoutHandler,
-  // 유저 정보
-  getUserHandler,
-  postUsersHandler,
-  postUserHandler,
-  postTeacherHandler,
-  // 소셜 로그인 핸들러
-  oauthGoogleAccessTokenHandler,
-  oauthKakaoAccessTokenHandler,
-} = loginController_Regercy;
+// const {
+//   // 쿠키
+//   vaildateCookies,
+//   CookieLoginHandler,
+//   CookieLogoutHandler,
+//   // 세션
+//   vaildateSession,
+//   sessionLoginHandler,
+//   sessionLogoutHandler,
+//   // 유저 정보
+//   getUserHandler,
+//   postUsersHandler,
+//   postUserHandler,
+//   postTeacherHandler,
+//   // 소셜 로그인 핸들러
+//   oauthGoogleAccessTokenHandler,
+//   oauthKakaoAccessTokenHandler,
+// } = loginController_Regercy;
 
 // 쿠키
 // router.post("/", vaildateCookies, CookieLoginHandler);
@@ -68,7 +68,7 @@ const {
 // router.post("/postTeacher");
 
 // AI 일반 로그인
-router.post("/ai", postAILoginHandler);
+
 // AI Guest 로그인
 router.get("/ai/guest", postAIGuestLoginHandler);
 // AI 소셜 로그인
@@ -90,6 +90,9 @@ router.get("/oauth_rediret_url/google", oauthGoogleRedirectUrlHandler);
 router.get("/oauth_url/kakao", oauthKakaoUrlHandler);
 // Kakao OAuth Redirect Url
 router.get("/oauth_rediret_url/kakao", oauthKakaoRedirectUrlHandler);
+
+// Apple 계정 로그인
+router.post("/ai/apple", postAIAppleLoginHandler);
 
 // (Regercy) Google OAuth Approve
 // router.post("/oauth_token/google", oauthGoogleAccessTokenHandler);

@@ -206,6 +206,7 @@ const {
   persona_prompt_pupu_v4,
   persona_prompt_pupu_v5,
   persona_prompt_pupu_v6,
+  persona_prompt_pupu_v7,
   persona_prompt_maru,
 } = require("../DB/test_prompt");
 
@@ -260,8 +261,8 @@ const select_soyesAI_EbtResult_v2 = async (keyValue, contentKey, parsepUid) => {
     // 검사를 진행하지 않은 경우
     if (!ebt_data[0]) return [];
 
-    // tScore 계산 + 검사 결과 +
-    const resultArr = EBT_classArr.map((type) => {
+    // tScore 계산 + 검사 결과
+    const resultArr = EBT__reportClassArr.map((type) => {
       const { average, standard, danger_score, caution_score } =
         EBT_Table_Info[type];
       // 검사 스코어 합 + T점수 계산
@@ -339,6 +340,21 @@ const EBT_classArr = [
   "Movement",
   "Angry",
   "Self",
+];
+
+// EBT 반영 Class 정의
+const EBT__reportClassArr = [
+  "School",
+  "Friend",
+  "Family",
+  "Self",
+  "Unrest",
+  "Sad",
+  "Health",
+  "Attention",
+  "Movement",
+  "Mood",
+  "Angry",
 ];
 
 // AI API
@@ -1078,8 +1094,8 @@ const openAIController = {
       parsepUid = pUid;
 
       // 고정 삽입 프롬프트
-      promptArr.push(persona_prompt_pupu_v6); // 2024.09.30 ~
-      promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
+      promptArr.push(persona_prompt_pupu_v7); // 2024.10.10 ~
+      // promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       // const lastUserContent =
       //   parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
@@ -1229,7 +1245,7 @@ const openAIController = {
       );
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_ubi); // 페르소나 프롬프트 삽입
-      promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
+      // promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       const lastUserContent =
         parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
@@ -1341,7 +1357,7 @@ const openAIController = {
       );
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_soyes); // 페르소나 프롬프트 삽입
-      promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
+      // promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       const lastUserContent =
         parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
@@ -1518,7 +1534,7 @@ const openAIController = {
 
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_maru); // 페르소나 프롬프트 삽입
-      promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
+      // promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
 
       if (game === "remarks") {
         promptArr.push({
@@ -2388,20 +2404,20 @@ const ellaMoodController = {
           .json({ message: "No messageArr input value - 400" });
       }
 
-      // code - situation 관련 필수값 예외처리
-      if (code === "situation" && !mood_situation) {
-        console.log("No Required input value - 400");
-        return res.status(400).json({
-          message: `No Required input value: code:${code}, mood_situation:${mood_situation} - 400`,
-        });
-      }
-      // code - thought 관련 필수값 예외처리
-      if (code === "thought" && !mood_thought) {
-        console.log("No Required input value - 400");
-        return res.status(400).json({
-          message: `No Required input value: code:${code}, mood_thought:${mood_thought} - 400`,
-        });
-      }
+      // // code - situation 관련 필수값 예외처리
+      // if (code === "situation" && !mood_situation) {
+      //   console.log("No Required input value - 400");
+      //   return res.status(400).json({
+      //     message: `No Required input value: code:${code}, mood_situation:${mood_situation} - 400`,
+      //   });
+      // }
+      // // code - thought 관련 필수값 예외처리
+      // if (code === "thought" && !mood_thought) {
+      //   console.log("No Required input value - 400");
+      //   return res.status(400).json({
+      //     message: `No Required input value: code:${code}, mood_thought:${mood_thought} - 400`,
+      //   });
+      // }
       // code - listing 관련 필수값 예외처리
       if (code === "listing" && !mood_todo_list) {
         console.log("No Required input value - 400");
@@ -2427,19 +2443,15 @@ const ellaMoodController = {
         case "emotion":
           promptArr.push({
             role: "system",
-            content: `유저가 마지막으로 한 말에 공감하되, 절대 질문으로 문장을 끝내지 않는다.`,
+            // 2024.10.11 프롬프트 교체
+            content: `슬플 때 유저가 하는 생각에 초등학생의 눈높이에 맞춰 30자 이내로 유저의 감정을 반영하며 공감한다. 질문은 하지 않는다.`,
           });
           parseMessageArr = [...messageArr];
           break;
         case "situation":
           promptArr.push({
             role: "system",
-            content: `아래 문장에 기초하여 유저에게 상황을 바꿀 방법을 생각해보게 한다.
-            '''
-            ${mood_situation}
-            '''
-            예시: '~할 때 ~를 만난다고 했어. 이 상황을 바꿀 방법이 있을까?'
-            `,
+            content: `user의 응답을 격려하고, '~해보면 어떨까?'라며 90자 이내로 user가 말하지 않은 해결 방법을 하나 말해준다. 초등학교 6학년이 할 수 있는 방법이어야 한다.`,
           });
           parseMessageArr = [...messageArr];
           break;
@@ -2455,11 +2467,15 @@ const ellaMoodController = {
         case "thought":
           promptArr.push({
             role: "system",
-            content: `아래 문장에 기초해서 다른 관점을 생각해보도록 한다.
-            '''
-            ${mood_thought}
-            '''
-            예시: '그건 정말 그래. 그런데 다르게도 생각해볼 수 있을까?'`,
+            // 2024.10.07 이전 프롬프트
+            // content: `아래 문장에 기초해서 다른 관점을 생각해보도록 한다.
+            // '''
+            // ${mood_thought}
+            // '''
+            // 예시: '그건 정말 그래. 그런데 다르게도 생각해볼 수 있을까?'`,
+            // 2024.10.11 프롬프트 변경
+            content:
+              "User응답을 격려하고 상황을 다른 관점으로는 어떻게 볼 수 있는지 90자 이내로 한 가지 제시한다.",
           });
           // parseMessageArr = [...messageArr];
           break;
@@ -3110,11 +3126,26 @@ const ellaFriendController = {
       // code 매칭 프롬프트 삽입
       switch (code) {
         case "friend_new_consult":
-          promptArr.push(persona_prompt_lala_v6);
+          // promptArr.push(persona_prompt_lala_v6);
           promptArr.push({
             role: "system",
-            content: `대화 3번까지: user가 자신을 소개하지 않으면 먼저 자기 이름을 말하고 user 이름을 묻는다. 이름을 묻고 난 뒤에는 user에게 관심을 보이며 질문을 하나 한다.
-4번째 대화부터: user의 말에 단답형으로 말하고 질문하지 않는다. user가 자신과 공통 관심사가 있는 경우에는 자기개방을 하며 관심을 표현한다. 관심을 보일 때는 ‘대단하다’, ‘나도 하고 싶어’, ‘그거 뭐야’, ‘정말?’ 같은 말을 종종 사용한다. user가 자신을 칭찬하면 user에 대해서도 질문한다. user가 엘라가 좋아하는 것을 비난하거나, 욕을 하거나, 단답형으로 말하면 '아, 그래', '알겠어', '그렇게 말하면 불편해' 등으로 짧게 말한다. 반대로 엘라의 말에 user가 불편해하거나 어색해하면 사과하고 분위기를 돌린다.`,
+            // 2024.10.08 이전 프롬프트
+            // content: `대화 3번까지: user가 자신을 소개하지 않으면 먼저 자기 이름을 말하고 user 이름을 묻는다. 이름을 묻고 난 뒤에는 user에게 관심을 보이며 질문을 하나 한다.
+            // 4번째 대화부터: user의 말에 단답형으로 말하고 질문하지 않는다. user가 자신과 공통 관심사가 있는 경우에는 자기개방을 하며 관심을 표현한다. 관심을 보일 때는 ‘대단하다’, ‘나도 하고 싶어’, ‘그거 뭐야’, ‘정말?’ 같은 말을 종종 사용한다. user가 자신을 칭찬하면 user에 대해서도 질문한다. user가 엘라가 좋아하는 것을 비난하거나, 욕을 하거나, 단답형으로 말하면 '아, 그래', '알겠어', '그렇게 말하면 불편해' 등으로 짧게 말한다. 반대로 엘라의 말에 user가 불편해하거나 어색해하면 사과하고 분위기를 돌린다.`,
+            // 2024.10.08 프롬프트 교체
+            //             content: `assistant의 이름은 '엘라' 초등학교 4학년이며 user와 처음 만나서 서먹하며 user가 질문하는 경우 외에는 모두 단답형으로 답한다.
+            // 엘라는 떡볶이를 좋아하고 더 매운 맛을 먹어보고 싶어한다. 딱히 좋아하는 운동은 없다.
+            // 처음에 '안녕'이라고 인사한다.
+            // 이후 user가 자신을 소개하지 않으면 먼저 자기 이름을 말하고 user 이름을 묻는다.
+            // user가 자신과 공통 관심사가 있는 경우에는 자기 개방을 한다.
+            // uesr가 엘라에게 질문하는 경우에만 user에게 질문한다.
+            // user가 엘라가 좋아하는 것을 비난하거나, 욕을 하거나, 단답형으로 말하면 '아, 그래', '알겠어', '그렇게 말하면 불편해' 등으로 짧게 말한다.
+            // 반대로 엘라의 말에 user가 불편해하거나 어색해하면 사과한다.`,
+            // 2024.10.10 프롬프트 교체
+            content: `assistant의 이름은 '엘라'이다. '엘라'는 초등학교 4학년이며 유저와 처음 만나서 서먹한 사이이다. 유저에게 반말을 사용한다. 떡볶이를 좋아하고, 더 매운 맛을 먹어보고 싶어하며, 딱히 좋아하는 운동은 없다. 하교 후 학원을 가고, 시간이 남으면 놀이터에서 논다.
+1단계: user가 대화를 시작하면 '안녕'이라고 인사한다. user가 자기 소개를 하지 않는 경우, 먼저 자기 이름을 말하고 user 이름을 묻는다. user의 응답에 따라 각각 3번의 대화를 주고 받는다. 
+2단계: user가 주도적으로 대화를 이끌어 갈 기회를 주어야 하므로 질문은 하지 않는다. user와 공통점을 발견하면 그 주제와 관련해 두 번 더 이야기 한다. user가 엘라를 비난하거나, 욕을 하거나, 단답형으로 말하면 '아, 그래', '알겠어', '그렇게 말하면 불편해' 등으로 짧게 말한다. 반대로 엘라의 말에 user가 불편해하거나 어색해하면 사과한다. 15번의 대화를 주고 받으면 3단계로 넘어간다.
+3단계: 오늘은 시간이 다 되서 다음에 만나자고 하고 대화를 마무리한다. user의 반응에 따라 자연스럽게 대화를 마무리한다.`,
           });
           break;
         case "friend_new_analysis":
@@ -3133,7 +3164,7 @@ const ellaFriendController = {
 2단계: “user”의 말 중에 좋은 반응이 있는지 여부를 분석하라. 좋은 반응 내용은 다음과 같다. assistant의 반응은 분석에서 제외한다.  2단계 분석은 user에게 표시하지 않는다. 
 친구에게 먼저 이름을 물어봤어요
 처음 만난 친구에게 자신이 누구인지 소개했어요
-친구와 함께 대화할 수 있는 질문을 했어요
+친구와 함께 대화할 수 있는 질문을 했어요 (의문사나 물음표가 있는 경우에만 질문으로 파악한다)
 친구의 답변에 나도 내 이야기를 해서 대화를 이어나가요
 친구의 좋은 점을 알아보고 칭찬했어요.
 엘라와 공통점을 찾았어요.
@@ -3151,33 +3182,60 @@ const ellaFriendController = {
           promptArr.push({
             role: "system",
             content: `assistant는 반말과 초등학교 6학년 수준에 맞는 어휘를 사용한다. assistant는 user의 반응을 분석하고 대안을 제시하는 역할을 한다.
-아이들이 몇 명씩 모여 놀이터에서 놀고 있다. user는 자신이 이때 어떻게 할지 얘기할 것이다. user 가 반응하면 아이들 사이에 잘 섞일 수 있게 다가가는지 2문장으로 평가하라. 다가가지 않거나, 친구들을 불쾌하게 할 수 있는 내용 외에는 유저의 반응을 격려한다. 같이 놀아도 되냐고 물어보는 것도 좋지만 친구를 도와주거나, 친구가 하고 있는 놀이에 관심을 보이거나, 친구의 놀이를 보고 재밌겠다고 말하거나 친구를 칭찬하는 것 등의 반응이 친구들의 놀이 흐름을 끊지 않고 자연스럽게 어울릴 수 있는 방법이라고 알려준다. 이름을 부르면서 다가간다고 하는 경우 이때 반가움을 표현하면 더 좋다고 알려준다.`,
+아이들이 몇 명씩 모여 놀이터에서 놀고 있다. user는 자신이 이때 어떻게 할지 얘기할 것이다. user 가 반응하면 아이들 사이에 잘 섞일 수 있게 다가가는지 2문장으로 평가하라.
+다가가지 않거나, 친구들을 불쾌하게 할 수 있는 내용 외에는 유저의 반응을 격려한다.
+같이 놀아도 되냐고 물어보는 것도 좋지만 친구를 도와주거나, 친구가 하고 있는 놀이에 관심을 보이거나, 친구의 놀이를 보고 재밌겠다고 말하거나 친구를 칭찬하는 것 등의 반응이 친구들의 놀이 흐름을 끊지 않고 자연스럽게 어울릴 수 있는 방법이라고 알려준다.
+이름을 부르면서 다가간다고 하는 경우 이때 반가움을 표현하면 더 좋다고 알려준다.`,
           });
           break;
         case "friend_group_analysis_second":
           promptArr.push({
             role: "system",
             content: `assistant는 반말과 초등학교 6학년 수준에 맞는 어휘를 사용한다. assistant는 user의 반응을 분석하고 대안을 제시하는 역할을 한다.
-아이들이 쉬는 시간에 3-4명씩 모여 떠들거나 놀고 있다. user는 자신이 이때 어떻게 할지 얘기할 것이다. user 가 반응하면 아이들의 이목을 집중시키지 않고 자연스럽게 대화에 참여할 수 있는 반응을 하는지 2문장으로 평가하라. 직접적으로 같이 얘기해도 되는지 물어보는 경우, 괜찮은 반응이지만 친구들의 이야기 흐름을 끊을 수도 있음을 알려준다. 어떤 이야기를 하고 있는지 관찰한 뒤 재미있는 부분에서 같이 웃으며 살며시 끼어들거나, 다른 아이 말에 비슷한 경험이 있다고 말하며 공감을 표현하거나, 다른 아이 말에 질문을 하며 관심을 표현하는 등, 다른 반응 예시를 하나 들어준다.`,
+아이들이 쉬는 시간에 3-4명씩 모여 떠들거나 놀고 있다. user는 자신이 이때 어떻게 할지 얘기할 것이다.
+user 가 반응하면 아이들의 이목을 집중시키지 않고 자연스럽게 대화에 참여할 수 있는 반응을 하는지 2문장으로 평가하라.
+직접적으로 같이 얘기해도 되는지 물어보는 경우, 괜찮은 반응이지만 친구들의 이야기 흐름을 끊을 수도 있음을 알려준다.
+어떤 이야기를 하고 있는지 관찰한 뒤 재미있는 부분에서 같이 웃으며 살며시 끼어들거나, 다른 아이 말에 비슷한 경험이 있다고 말하며 공감을 표현하거나, 다른 아이 말에 질문을 하며 관심을 표현하는 등, 다른 반응 예시를 하나 들어준다.
+`,
           });
           break;
         case "friend_group_analysis_third":
           promptArr.push({
             role: "system",
             content: `assistant는 반말과 초등학교 6학년 수준에 맞는 어휘를 사용한다. assistant는 user의 반응을 분석하고 대안을 제시하는 역할을 한다.
-아이들이 모여 보드게임을 하고 있다. user는 자신이 이때 어떻게 할지 얘기할 것이다. user 가 반응하면 아이들의 게임을 방해하지 않으면서 자연스럽게 참여할 수 있을지를 2문장으로 평가한다. 아이들이 게임을 하고 있는 중에 하고 싶다고 말하기보다 끝나기를 기다렸다가 다음 순서에 ‘재밌겠다. 나랑 한 번 해볼래?’라고 하거나, 협동이 필요한 게임에서 도움이 될 만한 행동을 하거나, 친구들의 게임을 즐겁게 지켜보는 것이 좋은 반응이다. 하지만 귓속말로 특정한 사람에게만 힌트를 주는 것과 같은 행동은 갈등을 일으킬 수 있다. 이를 참고하여 유저의 반응과 다른 예시를 하나 들어준다.`,
+아이들이 모여 보드게임을 하고 있다. user는 자신이 이때 어떻게 할지 얘기할 것이다. user 가 반응하면 아이들의 게임을 방해하지 않으면서 자연스럽게 참여할 수 있을지를 2문장으로 평가한다.
+아이들이 게임을 하고 있는 중에 하고 싶다고 말하기보다 끝나기를 기다렸다가 다음 순서에 ‘재밌겠다. 나랑 한 번 해볼래?’라고 하거나, 협동이 필요한 게임에서 도움이 될 만한 행동을 하거나, 친구들의 게임을 즐겁게 지켜보는 것이 좋은 반응이다.
+하지만 귓속말로 특정한 사람에게만 힌트를 주는 것과 같은 행동은 갈등을 일으킬 수 있다. 이를 참고하여 유저의 반응과 다른 예시를 하나 들어준다.`,
           });
           break;
         case "friend_conflict_consult":
           promptArr.push({
             role: "system",
-            content: `user의 응답 내용을 기초로 대화 상대방 역할을 맡아 대화를 시작한다. User가 대화 종료를 누르기 전까지 대화를 지속한다.`,
+            // 2024.10.08 이전 프롬프트
+            // content: `user의 응답 내용을 기초로 대화 상대방 역할을 맡아 대화를 시작한다. User가 대화 종료를 누르기 전까지 대화를 지속한다.`,
+            // 2024.10.08 프롬프트 교체
+            content: `엘라는 명시된 A, B, C를 참고하여 user와 역할극을 진행한다.
+'''
+A: user가 지정한 또래친구.
+B: user가 지정한 A와 대화하는 상황.
+C: user가 지정한 user를 힘들게하는 말과 행동.
+'''
+엘라의 역할: A는 user를 힘들게 하는 말과 행동(C)을 하며 대화를 이어간다.
+B와 C를 참고해 일관적으로 반응해야 한다. 사과나, 공감하는 말은 하면 안 된다.
+한 번에 60자 이내로 말한다.`,
           });
           break;
         case "friend_conflict_analysis":
           promptArr.push({
             role: "system",
-            content: `user의 반응 중 한 문장을 보다 나은 반응으로 수정하고 근거를 설명한다.`,
+            // 2024.10.08 프롬프트 교체
+            // content: `user가 대화 종료를 누르면 user의 반응 중 한 문장을 친구에게 보다 나은 반응으로 수정하고 근거를 70자 이내로 설명한다.
+            // 보다 나은 반응은 자신을 존중하거나, 자신이 원하는 결과를 얻거나, 타인과 원만한 관계를 맺는데 도움이 되는 반응이어야한다.`,
+            // 2024.10.11 프롬프트 교체
+            content: `user가 대화 종료를 누르면 user의 반응 중 한 문장을 보다 나은 반응으로 수정하고 근거를 70자 이내로 설명한다.
+            초등학교 6학년 수준의 어휘를 사용해야 한다.
+            보다 나은 반응은 친구와 원만한 관계를 유지하면서 자기 의견을 적절히 주장하고, 자신을 보호할 수 있는 반응이어야 한다.
+            A(assistant)의 반응은 분석하지 않는다.`,
           });
           break;
       }
@@ -3473,6 +3531,7 @@ const ellaAnxietyController = {
       "emotion",
       "consolation",
       "solution",
+      "box_end",
       "challenge_start",
       "challenge_recommend",
       "challenge_end",
@@ -3528,29 +3587,51 @@ const ellaAnxietyController = {
         case "emotion":
           promptArr.push({
             role: "system",
-            content: `유저가 마지막으로 한 말에 1문장으로 공감한다.`,
+            content: `불안할 때 유저가 하는 생각에 초등학생의 눈높이에 맞춰 한 문장으로 유저의 감정을 반영하며 공감한다. 질문은 하지 않는다.`,
           });
           break;
         case "consolation":
           promptArr.push({
             role: "system",
-            content: `유저의 고민에 한 문장으로 위로나 격려를 한다.`,
+            content: `유저가 불안해하고 걱정하는 내용에 초등학생의 눈높이에 맞춰 한 문장으로 유저의 감정을 반영하며 공감한다. 질문은 하지 않는다.`,
           });
           break;
         case "solution":
           promptArr.push({
             role: "system",
-            content: `유저의 고민에 한 문장으로 도움이 될만한 해결방법을 알려 준다.`,
+            content: `유저가 불안해하고 걱정하는 상황에 대해 초등학생이 시도해볼 수 있는 해결책을 70자 이내로 한 가지 제시한다. 예) ~해보면 어때?`,
+          });
+          break;
+        case "box_end":
+          promptArr.push({
+            role: "system",
+            content: `유저의 마지막 말을 듣고 감정을 반영하며 한 문장으로 공감한다. 이후 이번 상담은 여기서 마치려고 한다고 이야기한 후 종료한다.`,
           });
           break;
         case "challenge_start":
           promptArr.push({
             role: "system",
+            // 2024.10.11 이전 프롬프트
+            // content: `assistant의 이름은 '엘라' 이며 반말을 사용한다.
+            // user가 두렵고 떨리지만 도전하고 싶은 목표를 말하면, 엘라는 '이렇게 차근차근 도전해보자'라고 하며 점진적으로 연습할 수 있는 5단계 활동을 300자 이내로 제시하고 '어떤 것 같아?'라는 말로 마친다.
+            // 5단계 활동은 초등학생이 할 수 있는 활동이어야 한다.
+            // 유저가 새 활동을 추천해달라고 하는 경우, 새로운 5단계 활동을 300자 이내로 제시한다.
+
+            // form
+            // '''
+            // 1단계: 매일 아침에 가볍게 스트레칭하기.
+            // 2단계: 집 앞 공원에서 가벼운 산책해보기.
+            // 3단계: 집에서 할 수 있는 줄넘기 도전해보기.
+            // 4단계: 친구랑 같이 자전거나 인라인스케이트 타기.
+            // 5단계: 가족과 함께 주말마다 등산 가기!
+            // '''
+            // `,
+            // 2024.10.11 프롬프트 교체
             content: `assistant의 이름은 '엘라' 이며 반말을 사용한다.
-            user가 두렵고 떨리지만 도전하고 싶은 목표를 말하면, 엘라는 '이렇게 차근차근 도전해보자'라고 하며 점진적으로 연습할 수 있는 5단계 활동을 300자 이내로 제시하고 '어떤 것 같아?'라는 말로 마친다.
+            user는 직전에 자신이 도전하고 싶은 목표를 이야기했다. 그리고 assistant가 그 목표 행동을 수행할 수 있도록 돕는 점진적인 5단계 활동을 제시했지만, 특정 부분을 보완해달라고 요청했다. 이 모든 내용을 고려해, '이렇게 차근차근 도전해보자'라고 하며 점진적으로 연습할 수 있는 5단계 활동을 300자 이내로 제시하고 '어떤 것 같아?'라는 말로 마친다.
             5단계 활동은 초등학생이 할 수 있는 활동이어야 한다. 
             유저가 새 활동을 추천해달라고 하는 경우, 새로운 5단계 활동을 300자 이내로 제시한다.
-            
+
             form
             '''
             1단계: 매일 아침에 가볍게 스트레칭하기.
@@ -3559,7 +3640,7 @@ const ellaAnxietyController = {
             4단계: 친구랑 같이 자전거나 인라인스케이트 타기.
             5단계: 가족과 함께 주말마다 등산 가기!
             '''
-            `,
+`,
           });
           break;
         case "challenge_recommend":
@@ -4425,16 +4506,22 @@ const NorthController = {
 
       parsepUid = pUid;
 
+      // 오늘 날짜 변환
+      const dateObj = new Date();
+      const year = dateObj.getFullYear();
+
       // DB Select
       const table = North_Table_Info.table;
 
       // 1. SELECT User Mood Table Data
       const select_query = `SELECT
+      north_id AS id,
       north_diary_content AS content,
       north_diary_tag AS tag,
       DATE_FORMAT(created_at, '%Y년 %m월 %d일') AS date
       FROM ${table}
       WHERE uid = '${parsepUid}'
+      AND created_at LIKE '%${year}%'
       ORDER BY created_at ASC;`;
       const select_data = await fetchUserData(connection_AI, select_query);
 
@@ -4446,6 +4533,67 @@ const NorthController = {
       res.status(500).json({
         message: "Server Error - 500",
         // emotion: 0,
+      });
+    }
+  },
+  // 일기친구 모델 - 북극이 일기 Delete API
+  postOpenAIConsultingNorthDelete: async (req, res) => {
+    const { data } = req.body;
+    let parseData, parsepUid; // Parsing 변수
+
+    try {
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { pUid, id } = parseData;
+      console.log(
+        `북극이 일기 Delete API /north_delete Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
+      }
+
+      // No pUid => return
+      if (!id) {
+        console.log("No id input value - 400");
+        return res.status(400).json({ message: "No id input value - 400" });
+      }
+
+      parsepUid = pUid;
+
+      // Delete Qurty
+      const table = North_Table_Info.table;
+      const delete_query = `DELETE FROM ${table} WHERE north_id = ?`;
+
+      // Delete 수행
+      connection_AI.query(delete_query, [id], (err, results) => {
+        if (err) {
+          console.log(err);
+          return res.status(400).json({ message: err.sqlMessage });
+        }
+
+        // 삭제된 행이 있는지 확인
+        if (results.affectedRows > 0) {
+          console.log("North Diary Delete Success!");
+          return res
+            .status(200)
+            .json({ message: "North Diary Delete Success!" });
+        } else {
+          console.log("No rows deleted, possibly due to non-existing id.");
+          return res
+            .status(400)
+            .json({ message: "No rows deleted, ID not found." });
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "Server Error - 500",
       });
     }
   },
@@ -5087,6 +5235,7 @@ const reportController = {
 
       // Page 3,4 Data
       const page3_data = await select_soyesAI_EbtResult_v2("", true, parsepUid);
+      // console.log(page3_data);
 
       // Page 5,6 Data
       const pt_log_table = PT_Table_Info["Log"].table;
@@ -5188,22 +5337,22 @@ const reportController = {
             : [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
         ),
         // page 4
-        ebt_mood: page3_data[3]?.content?.slice(0, 127),
-        ebt_mood_result: ebtResultMap[page3_data[3]?.result || "default"],
-        ebt_unrest: page3_data[4]?.content?.slice(0, 127),
+        ebt_self: page3_data[3]?.content?.slice(0, 130),
+        ebt_self_result: ebtResultMap[page3_data[3]?.result || "default"],
+        ebt_unrest: page3_data[4]?.content?.slice(0, 130),
         ebt_unrest_result: ebtResultMap[page3_data[4]?.result || "default"],
-        ebt_sad: page3_data[5]?.content?.slice(0, 127),
+        ebt_sad: page3_data[5]?.content?.slice(0, 130),
         ebt_sad_result: ebtResultMap[page3_data[5]?.result || "default"],
-        ebt_health: page3_data[6]?.content?.slice(0, 127),
+        ebt_health: page3_data[6]?.content?.slice(0, 130),
         ebt_health_result: ebtResultMap[page3_data[6]?.result || "default"],
-        ebt_attention: page3_data[7]?.content?.slice(0, 127),
+        ebt_attention: page3_data[7]?.content?.slice(0, 130),
         ebt_attention_result: ebtResultMap[page3_data[7]?.result || "default"],
-        ebt_angry: page3_data[8]?.content?.slice(0, 127),
-        ebt_angry_result: ebtResultMap[page3_data[8]?.result || "default"],
-        ebt_movement: page3_data[9]?.content?.slice(0, 127),
-        ebt_movement_result: ebtResultMap[page3_data[9]?.result || "default"],
-        ebt_self: page3_data[10]?.content?.slice(0, 127),
-        ebt_self_result: ebtResultMap[page3_data[10]?.result || "default"],
+        ebt_movement: page3_data[8]?.content?.slice(0, 130),
+        ebt_movement_result: ebtResultMap[page3_data[8]?.result || "default"],
+        ebt_mood: page3_data[9]?.content?.slice(0, 130),
+        ebt_mood_result: ebtResultMap[page3_data[9]?.result || "default"],
+        ebt_angry: page3_data[10]?.content?.slice(0, 130),
+        ebt_angry_result: ebtResultMap[page3_data[10]?.result || "default"],
         // page 5
         persnalResult: page5_data?.persanl_result || "pt_default",
         result_first: page5_data?.persanl_result[0] || "pt_detail_default",

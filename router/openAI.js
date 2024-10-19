@@ -57,8 +57,11 @@ const {
   postOpenAIAnxietyTrainingDataLoad,
 } = ellaAnxietyController;
 
-const { postOpenAIConsultingNorthSave, postOpenAIConsultingNorthLoad } =
-  NorthController;
+const {
+  postOpenAIConsultingNorthSave,
+  postOpenAIConsultingNorthLoad,
+  postOpenAIConsultingNorthDelete,
+} = NorthController;
 
 const { postReportTest } = reportController;
 
@@ -132,6 +135,13 @@ router.post(
   "/north_load",
   vaildateTokenConsulting,
   postOpenAIConsultingNorthLoad
+);
+
+// 북극이 데이터 Delete
+router.post(
+  "/north_delete",
+  vaildateTokenConsulting,
+  postOpenAIConsultingNorthDelete
 );
 
 // 상담 내역 Save
