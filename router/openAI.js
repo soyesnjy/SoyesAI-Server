@@ -8,6 +8,7 @@ const {
   ellaMoodController,
   ellaFriendController,
   ellaAnxietyController,
+  ellaFamilyController,
   NorthController,
   ubiController,
   reportController,
@@ -47,6 +48,13 @@ const {
   postOpenAIFriendDataSave,
   postOpenAIFriendTrainingDataLoad,
 } = ellaFriendController;
+
+const {
+  postOpenAIEllaFamilyTraning,
+  postOpenAIFamilyDataSave,
+  postOpenAIFamilyTrainingDataLoad,
+  postOpenAIFamilyDiaryDataDelete,
+} = ellaFamilyController;
 
 const { postOpenAIUbiMeditationRecomend } = ubiController;
 
@@ -225,6 +233,31 @@ router.post(
   "/training_friend_ella/load/training",
   vaildateTokenConsulting,
   postOpenAIFriendTrainingDataLoad
+);
+
+// 가족관계 훈련 모델 - 엘라
+router.post(
+  "/training_family_ella",
+  vaildateTokenConsulting,
+  postOpenAIEllaFamilyTraning
+);
+// #TODO 가족관계 훈련 데이터 Save
+router.post(
+  "/training_family_ella/save",
+  // vaildateTokenConsulting,
+  postOpenAIFamilyDataSave
+);
+// #TODO 가족관계 훈련 보고서 데이터 Load
+router.post(
+  "/training_family_ella/load/training",
+  // vaildateTokenConsulting,
+  postOpenAIFamilyTrainingDataLoad
+);
+// #TODO 가족관계 사전 데이터 Delete
+router.post(
+  "/training_family_ella/delete/diary",
+  // vaildateTokenConsulting,
+  postOpenAIFamilyDiaryDataDelete
 );
 
 // 결과보고서 PDF 이메일 발송

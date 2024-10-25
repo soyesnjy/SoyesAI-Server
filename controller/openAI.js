@@ -4319,6 +4319,508 @@ const ellaAnxietyController = {
   },
 };
 
+const ellaFamilyController = {
+  // 가족관계 훈련 - 엘라
+  postOpenAIEllaFamilyTraning: async (req, res) => {
+    const { data } = req.body;
+    let parseData,
+      parseMessageArr = [],
+      parsepUid; // Parsing 변수
+    let promptArr = []; // 삽입 Prompt Array
+    let temperature = 1;
+    const codeArr = ["room", "homework", "phone"];
+    try {
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { messageArr, pUid, code } = parseData;
+
+      console.log(`엘라 가족관계 훈련 API 호출 - pUid: ${pUid}`);
+      console.log(parseData);
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
+      }
+      // No type => return
+      if (!code) {
+        console.log("No code input value - 400");
+        return res.status(400).json({ message: "No type input value - 400" });
+      }
+      // No messageArr => return
+      if (!messageArr) {
+        console.log("No messageArr input value - 400");
+        return res
+          .status(400)
+          .json({ message: "No messageArr input value - 400" });
+      }
+
+      // No Matching code Value => return
+      if (!codeArr.includes(code)) {
+        console.log("No matching code value - 400");
+        return res
+          .status(400)
+          .json({ message: "No matching code value - 400" });
+      }
+
+      // pUid default값 설정
+      parsepUid = pUid;
+      parseMessageArr = [...messageArr];
+
+      // promptArr.push(persona_prompt_lala_v6); // 엘라 페르소나
+
+      // code 매칭 프롬프트 삽입
+      switch (code) {
+        case "room":
+          promptArr.push({
+            role: "system",
+            content: `다음 기준에 따라 user와 역할극을 하라.
+1) assistant 역할: 잔소리하는 부모, user 역할: 자녀
+2) assistant는 자녀가 방 정리를 제대로 하지 않는다고 생각하고 잔소리를 한다. 방정리를 시키기 위해 꼭 해야 하는 이유를 설명하거나, 잘못을 지적하거나, 과거 행동을 이야기할 수 있다. 한 번에 최대 100자까지 말할 수 있고, 반말을 사용한다.
+3) 4번 이상 잔소리를 해야 한다.
+4) 대화 도중 user가 '네, 알겠어요', '알았어요', '응, 그럴게', '그렇게 할게요'와 같은 말을 하면 '그래, 알았어. 하다 보면 잘 할 수 있을 거야 '라고 한다. 이후로도 유저가 대화를 이어갈 경우 자녀를 도와주려고 하거나, 이해, 격려하는 말을 한다.
+`,
+          });
+          break;
+        case "homework":
+          promptArr.push({
+            role: "system",
+            content: `다음 기준에 따라 user와 역할극을 하라.
+1) assistant 역할: 잔소리하는 부모, user 역할: 자녀
+2) assistant는 자녀가 숙제를 제대로 하지 않는다고 생각하고 잔소리를 한다. 숙제를 시키기 위해 꼭 해야 하는 이유를 설명하거나, 잘못을 지적하거나, 과거 행동을 이야기할 수 있다. 한 번에 최대 100자까지 말할 수 있고, 반말을 사용한다.
+3) 대화 도중 user가 '네, 알겠어요', '알았어요', '응, 그럴게', '그렇게 할게요'와 같은 말을 하면 '그래, 알겠어. 먹고 싶은 간식은 없니?'라고 한다. 이후로도 유저가 대화를 이어갈 경우에는 자녀를 이해하고, 도움을 주려는 태도를 보인다.
+`,
+          });
+          temperature = 0.7; // 고정된 형식 답변 유도를 위한 수치 조정
+          break;
+        case "phone":
+          promptArr.push({
+            role: "system",
+            content: `다음 기준에 따라 user와 역할극을 하라.
+1) assistant 역할: 잔소리하는 부모, user 역할: 자녀
+2) assistant는 자녀가 핸드폰 사용 시간을 줄여야 한다고 생각하고 잔소리를 한다. 핸드폰 사용 시간을 조절해야 하는 이유를 설명하거나, 잘못을 지적하거나, 과거 행동을 이야기할 수 있다. 한 번에 최대 100자까지 말할 수 있고, 반말을 사용한다.
+3) 4번 이상 잔소리를 해야 한다.
+4) 대화 도중 user가 '네, 알겠어요', '알았어요', '응, 그럴게', '그렇게 할게요'와 같은 말을 하면 '그래, 알았어.'라고 한다. 이후로도 유저가 대화를 이어갈 경우에는 자녀를 도와주려고 하거나, 이해, 격려하는 말을 한다.
+`,
+          });
+          break;
+      }
+
+      // console.log(temperature);
+
+      const response = await openai.chat.completions.create({
+        messages: [...parseMessageArr, ...promptArr],
+        model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        temperature,
+      });
+
+      const message = {
+        message: response.choices[0].message.content,
+      };
+
+      return res.status(200).json(message);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({
+        message: "Server Error - 500 Bad Gateway" + err.message,
+      });
+    }
+  },
+  // #TODO 가족관계 훈련 저장 API
+  postOpenAIFamilyDataSave: async (req, res) => {
+    const { data } = req.body;
+    let parseData, parsepUid; // Parsing 변수
+    // type 식별자 friend_new, friend_group, friend_test, friend_conflict
+    const typeArr = [
+      "friend_new",
+      "friend_group",
+      "friend_test",
+      "friend_conflict",
+    ];
+    const resultArr = ["FTH", "FSH", "LTH", "LSH", "FTL", "FSL", "LTL", "LSL"];
+    try {
+      // json 파싱
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { pUid, type, result, messageArr } = parseData;
+      console.log(
+        `또래관계 훈련 저장 API /openAI/training_friend_ella/save Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
+
+      // No Required Mood Data => return
+      if (!pUid || !type) {
+        console.log("No Required input value - 400");
+        return res
+          .status(400)
+          .json({ message: "No Required Mood Data input value - 400" });
+      }
+
+      // No Matching Type Value => return
+      if (!typeArr.includes(type)) {
+        console.log("No matching Type value - 400");
+        return res
+          .status(400)
+          .json({ message: "No matching Type value - 400" });
+      }
+
+      parsepUid = pUid;
+
+      // friend_test 필수 입력값 체크
+      if (type === "friend_test") {
+        // No result Value => return
+        if (!result) {
+          console.log(
+            `There are no input values suitable for the type - pUid: ${parsepUid}`
+          );
+          return res.status(400).json({
+            message: "There are no input values suitable for the type",
+          });
+        }
+        // No Matching Result Value => return
+        else if (!resultArr.includes(result)) {
+          console.log("No matching Result value - 400");
+          return res
+            .status(400)
+            .json({ message: "No matching Result value - 400" });
+        }
+      }
+      // 그 외 타입 필수 입력값 체크
+      if (
+        (type === "friend_new" ||
+          type === "friend_group" ||
+          type === "friend_conflict") &&
+        !messageArr
+      ) {
+        console.log(
+          `There are no input values suitable for the type - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "There are no input values suitable for the type",
+        });
+      }
+
+      const table = Ella_Training_Table_Info["Friend"].table;
+      // const attribute = Ella_Training_Table_Info["Friend"].attribute;
+
+      let insert_query, insert_value;
+
+      // console.log(select_data[0]);
+
+      // 타입별 query, value 삽입
+      switch (type) {
+        case "friend_test":
+          insert_query = `INSERT INTO ${table} (uid, friend_type, friend_result) VALUES (?, ?, ?);`;
+          // console.log(insert_query);
+          insert_value = [parsepUid, type, result];
+          // console.log(insert_value);
+
+          connection_AI.query(
+            insert_query,
+            insert_value,
+            (error, rows, fields) => {
+              if (error) {
+                console.log(error);
+                return res.status(400).json({ message: error.sqlMessage });
+              }
+              console.log("Friend Data Insert Success!");
+              return res
+                .status(200)
+                .json({ message: "Friend Data Save Success!" });
+            }
+          );
+
+          break;
+        default:
+          insert_query = `INSERT INTO ${table} (uid, friend_type, friend_consult_log) VALUES (?, ?, ?);`;
+          // console.log(insert_query);
+          insert_value = [parsepUid, type, JSON.stringify(messageArr)];
+          // console.log(insert_value);
+
+          connection_AI.query(
+            insert_query,
+            insert_value,
+            (error, rows, fields) => {
+              if (error) {
+                console.log(error);
+                return res.status(400).json({ message: error.sqlMessage });
+              }
+              console.log("Friend Data Insert Success!");
+              return res
+                .status(200)
+                .json({ message: "Friend Data Save Success!" });
+            }
+          );
+          break;
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "Server Error - 500",
+      });
+    }
+  },
+  // #TODO 가족관계 보고서 데이터 Load API
+  postOpenAIFamilyTrainingDataLoad: async (req, res) => {
+    const { data } = req.body;
+
+    let parseData, parsepUid; // Parsing 변수
+    const typeArr = [
+      "friend_new",
+      "friend_group",
+      "friend_test",
+      "friend_conflict",
+    ];
+    try {
+      // json 파싱
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { pUid, type } = parseData;
+
+      console.log(`또래관계 보고서 Data Load API 호출 - pUid: ${pUid}`);
+      console.log(parseData);
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
+      }
+
+      // No type => return
+      if (!type) {
+        console.log("No type input value - 400");
+        return res.status(400).json({ message: "No type input value - 400" });
+      }
+
+      // No Matching Type Value => return
+      if (!typeArr.includes(type)) {
+        console.log("No matching Type value - 400");
+        return res
+          .status(400)
+          .json({ message: "No matching Type value - 400" });
+      }
+
+      // pUid default값 설정
+      parsepUid = pUid;
+
+      // Mood Table 명시
+      const table = Ella_Training_Table_Info["Friend"].table;
+
+      // Mood Table User 조회
+      let select_query;
+      let select_data;
+
+      switch (type) {
+        case "friend_test":
+          select_query = `SELECT friend_result FROM ${table} WHERE uid = '${parsepUid}' AND friend_type = 'friend_test' ORDER BY created_at DESC LIMIT 1;`;
+          select_data = await fetchUserData(connection_AI, select_query);
+
+          // 회기를 실시하지 않은 경우
+          if (!select_data[0]?.friend_result)
+            return res.status(200).json({ message: "Non Friend Test Data" });
+
+          return res.status(200).json({
+            message: "Friend Training Test Data Load Success!",
+            data: {
+              friend_result: select_data[0].friend_result,
+            },
+          });
+        case "friend_new":
+          select_query = `SELECT friend_consult_log FROM ${table} WHERE uid = '${parsepUid}' AND friend_type = 'friend_new' ORDER BY created_at DESC LIMIT 1;`;
+          select_data = await fetchUserData(connection_AI, select_query);
+
+          // 회기를 실시하지 않은 경우
+          if (!select_data[0]?.friend_consult_log)
+            return res.status(200).json({ message: "Non Friend New Data" });
+
+          return res.status(200).json({
+            message: "Friend Training New Data Load Success!",
+            data: {
+              friend_consult_log: JSON.parse(select_data[0].friend_consult_log),
+            },
+          });
+        case "friend_group":
+          select_query = `SELECT friend_consult_log FROM ${table} WHERE uid = '${parsepUid}' AND friend_type = 'friend_group' ORDER BY created_at DESC LIMIT 1;`;
+          select_data = await fetchUserData(connection_AI, select_query);
+
+          // 회기를 실시하지 않은 경우
+          if (!select_data[0]?.friend_consult_log)
+            return res.status(200).json({ message: "Non Friend Group Data" });
+
+          return res.status(200).json({
+            message: "Friend Training Group Data Load Success!",
+            data: {
+              friend_consult_log: JSON.parse(select_data[0].friend_consult_log),
+            },
+          });
+        case "friend_conflict":
+          select_query = `SELECT friend_consult_log FROM ${table} WHERE uid = '${parsepUid}' AND friend_type = 'friend_conflict' ORDER BY created_at DESC LIMIT 1;`;
+          select_data = await fetchUserData(connection_AI, select_query);
+
+          // 회기를 실시하지 않은 경우
+          if (!select_data[0]?.friend_consult_log)
+            return res
+              .status(200)
+              .json({ message: "Non Friend Conflict Data" });
+
+          return res.status(200).json({
+            message: "Friend Training Conflict Data Load Success!",
+            data: {
+              friend_consult_log: JSON.parse(select_data[0].friend_consult_log),
+            },
+          });
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "Server Error - 500",
+      });
+    }
+  },
+  // #TODO 가족관계 사전 Delete API
+  postOpenAIFamilyDiaryDataDelete: async (req, res) => {
+    const { data } = req.body;
+    let parseData, parsepUid; // Parsing 변수
+    // type 식별자 friend_new, friend_group, friend_test, friend_conflict
+    const typeArr = [
+      "friend_new",
+      "friend_group",
+      "friend_test",
+      "friend_conflict",
+    ];
+    const resultArr = ["FTH", "FSH", "LTH", "LSH", "FTL", "FSL", "LTL", "LSL"];
+    try {
+      // json 파싱
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { pUid, type, result, messageArr } = parseData;
+      console.log(
+        `또래관계 훈련 저장 API /openAI/training_friend_ella/save Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
+
+      // No Required Mood Data => return
+      if (!pUid || !type) {
+        console.log("No Required input value - 400");
+        return res
+          .status(400)
+          .json({ message: "No Required Mood Data input value - 400" });
+      }
+
+      // No Matching Type Value => return
+      if (!typeArr.includes(type)) {
+        console.log("No matching Type value - 400");
+        return res
+          .status(400)
+          .json({ message: "No matching Type value - 400" });
+      }
+
+      parsepUid = pUid;
+
+      // friend_test 필수 입력값 체크
+      if (type === "friend_test") {
+        // No result Value => return
+        if (!result) {
+          console.log(
+            `There are no input values suitable for the type - pUid: ${parsepUid}`
+          );
+          return res.status(400).json({
+            message: "There are no input values suitable for the type",
+          });
+        }
+        // No Matching Result Value => return
+        else if (!resultArr.includes(result)) {
+          console.log("No matching Result value - 400");
+          return res
+            .status(400)
+            .json({ message: "No matching Result value - 400" });
+        }
+      }
+      // 그 외 타입 필수 입력값 체크
+      if (
+        (type === "friend_new" ||
+          type === "friend_group" ||
+          type === "friend_conflict") &&
+        !messageArr
+      ) {
+        console.log(
+          `There are no input values suitable for the type - pUid: ${parsepUid}`
+        );
+        return res.status(400).json({
+          message: "There are no input values suitable for the type",
+        });
+      }
+
+      const table = Ella_Training_Table_Info["Friend"].table;
+      // const attribute = Ella_Training_Table_Info["Friend"].attribute;
+
+      let insert_query, insert_value;
+
+      // console.log(select_data[0]);
+
+      // 타입별 query, value 삽입
+      switch (type) {
+        case "friend_test":
+          insert_query = `INSERT INTO ${table} (uid, friend_type, friend_result) VALUES (?, ?, ?);`;
+          // console.log(insert_query);
+          insert_value = [parsepUid, type, result];
+          // console.log(insert_value);
+
+          connection_AI.query(
+            insert_query,
+            insert_value,
+            (error, rows, fields) => {
+              if (error) {
+                console.log(error);
+                return res.status(400).json({ message: error.sqlMessage });
+              }
+              console.log("Friend Data Insert Success!");
+              return res
+                .status(200)
+                .json({ message: "Friend Data Save Success!" });
+            }
+          );
+
+          break;
+        default:
+          insert_query = `INSERT INTO ${table} (uid, friend_type, friend_consult_log) VALUES (?, ?, ?);`;
+          // console.log(insert_query);
+          insert_value = [parsepUid, type, JSON.stringify(messageArr)];
+          // console.log(insert_value);
+
+          connection_AI.query(
+            insert_query,
+            insert_value,
+            (error, rows, fields) => {
+              if (error) {
+                console.log(error);
+                return res.status(400).json({ message: error.sqlMessage });
+              }
+              console.log("Friend Data Insert Success!");
+              return res
+                .status(200)
+                .json({ message: "Friend Data Save Success!" });
+            }
+          );
+          break;
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "Server Error - 500",
+      });
+    }
+  },
+};
+
 const NorthController = {
   // 일기친구 모델 - 북극이 Save API
   postOpenAIConsultingNorthSave: async (req, res) => {
@@ -5477,6 +5979,7 @@ module.exports = {
   ellaMoodController,
   ellaFriendController,
   ellaAnxietyController,
+  ellaFamilyController,
   NorthController,
   ubiController,
   reportController,
