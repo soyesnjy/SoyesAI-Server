@@ -238,7 +238,7 @@ router.post(
 // 가족관계 훈련 모델 - 엘라
 router.post(
   "/training_family_ella",
-  vaildateTokenConsulting,
+  // vaildateTokenConsulting,
   postOpenAIEllaFamilyTraning
 );
 // #TODO 가족관계 훈련 데이터 Save
