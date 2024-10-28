@@ -52,6 +52,7 @@ const {
 const {
   postOpenAIEllaFamilyTraning,
   postOpenAIFamilyDataSave,
+  postOpenAIFamilyDataLoad,
   postOpenAIFamilyTrainingDataLoad,
   postOpenAIFamilyDiaryDataDelete,
 } = ellaFamilyController;
@@ -238,34 +239,36 @@ router.post(
 // 가족관계 훈련 모델 - 엘라
 router.post(
   "/training_family_ella",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIEllaFamilyTraning
 );
-// #TODO 가족관계 훈련 데이터 Save
+// 가족관계 훈련 데이터 Save
 router.post(
   "/training_family_ella/save",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIFamilyDataSave
 );
-// #TODO 가족관계 훈련 보고서 데이터 Load
+// 가족관계 사전만들기 데이터 Load
+router.post(
+  "/training_family_ella/load",
+  vaildateTokenConsulting,
+  postOpenAIFamilyDataLoad
+);
+// 가족관계 훈련 보고서 데이터 Load
 router.post(
   "/training_family_ella/load/training",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIFamilyTrainingDataLoad
 );
-// #TODO 가족관계 사전 데이터 Delete
+// 가족관계 사전 데이터 Delete
 router.post(
   "/training_family_ella/delete/diary",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIFamilyDiaryDataDelete
 );
 
 // 결과보고서 PDF 이메일 발송
-router.post(
-  "/report",
-  // vaildateTokenConsulting,
-  postReportTest
-);
+router.post("/report", vaildateTokenConsulting, postReportTest);
 
 // 달력 데이터 반환
 router.post("/calendar", vaildateTokenConsulting, postOpenAIMypageCalendarData);

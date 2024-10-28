@@ -416,6 +416,19 @@ const Ella_Training_Table_Info = {
       attr7: "updated_at",
     },
   },
+  Family: {
+    table: "soyes_training_family",
+    attribute: {
+      pKey: "family_id",
+      fKey: "uid",
+      attr1: "family_type",
+      attr2: "family_test_score",
+      attr3: "family_diary_member",
+      attr4: "family_diary_consult",
+      attr5: "created_at",
+      attr6: "updated_at",
+    },
+  },
 };
 const North_Table_Info = {
   table: "soyes_ai_North",
