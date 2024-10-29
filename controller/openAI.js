@@ -4320,7 +4320,7 @@ const ellaAnxietyController = {
 };
 
 const ellaFamilyController = {
-  // 가족관계 훈련 - 엘라
+  // 가족관계 훈련 API
   postOpenAIEllaFamilyTraning: async (req, res) => {
     const { data } = req.body;
     let parseData,
@@ -4427,7 +4427,7 @@ const ellaFamilyController = {
       });
     }
   },
-  // 가족관계 훈련 저장 API
+  // 가족관계 훈련 Save API
   postOpenAIFamilyDataSave: async (req, res) => {
     const { data } = req.body;
     let parseData, parsepUid; // Parsing 변수
@@ -4440,7 +4440,7 @@ const ellaFamilyController = {
         parseData = JSON.parse(data);
       } else parseData = data;
 
-      const { pUid, type, score, member, messageArr } = parseData;
+      const { pUid, type, momScore, dadScore, member, messageArr } = parseData;
       console.log(
         `가족관계 훈련 저장 API /openAI/training_family_ella/save Path 호출 - pUid: ${pUid}`
       );
@@ -4466,18 +4466,32 @@ const ellaFamilyController = {
 
       // type === test 필수 입력값 체크
       if (type === "test") {
-        // score 값이 숫자가 아닌 경우
-        if (typeof score !== "number" || isNaN(score)) {
-          console.log(`Score value is not Number - pUid: ${parsepUid}`);
+        // momScore 값이 숫자가 아닌 경우
+        if (typeof momScore !== "number" || isNaN(momScore)) {
+          console.log(`momScore value is not Number - pUid: ${parsepUid}`);
           return res.status(400).json({
-            message: "Score value is not Number",
+            message: "momScore value is not Number",
           });
         }
-        // score 값이 범위를 벗어나는 경우
-        if (score < 1 || score > 5) {
-          console.log(`Score value smaller than 0 - pUid: ${parsepUid}`);
+        // momScore 값이 범위를 벗어나는 경우
+        if (momScore < 1 || momScore > 5) {
+          console.log(`momScore value smaller than 0 - pUid: ${parsepUid}`);
           return res.status(400).json({
-            message: "Score value smaller than 1 OR bigger than 5",
+            message: "momScore value smaller than 1 OR bigger than 5",
+          });
+        }
+        // dadScore 값이 숫자가 아닌 경우
+        if (typeof dadScore !== "number" || isNaN(dadScore)) {
+          console.log(`dadScore value is not Number - pUid: ${parsepUid}`);
+          return res.status(400).json({
+            message: "dadScore value is not Number",
+          });
+        }
+        // dadScore 값이 범위를 벗어나는 경우
+        if (dadScore < 1 || dadScore > 5) {
+          console.log(`dadScore value smaller than 0 - pUid: ${parsepUid}`);
+          return res.status(400).json({
+            message: "dadScore value smaller than 1 OR bigger than 5",
           });
         }
       }
@@ -4542,9 +4556,14 @@ const ellaFamilyController = {
       // 타입별 query, value 삽입
       switch (type) {
         case "test":
-          insert_query = `INSERT INTO ${table} (uid, family_type, family_test_score) VALUES (?, ?, ?);`;
+          insert_query = `INSERT INTO ${table} (uid, family_type, family_test_mom_score, family_test_dad_score) VALUES (?, ?, ?, ?);`;
           // console.log(insert_query);
-          insert_value = [parsepUid, type, score.toFixed(1)];
+          insert_value = [
+            parsepUid,
+            type,
+            momScore.toFixed(1),
+            dadScore.toFixed(1),
+          ];
           // console.log(insert_value);
           break;
         default:
@@ -4560,7 +4579,7 @@ const ellaFamilyController = {
           console.log(error);
           return res.status(400).json({ message: error.sqlMessage });
         }
-        console.log("Family Data Insert Success!");
+        console.log("Family Data Save Success!");
         return res.status(200).json({ message: "Family Data Save Success!" });
       });
     } catch (err) {
@@ -4616,7 +4635,7 @@ const ellaFamilyController = {
 
       // Mood Table 명시
       const table = Ella_Training_Table_Info["Family"].table;
-      const limit = member < 4 ? 1 : 3; // 부모라인 1개, 형제라인 3개 query limit
+      const limit = member < 4 ? 1 : 3; // 부모라인 1개,  q형제라인 3개uery limit
 
       // Mood Table User 조회
       const select_query = `SELECT family_id FROM ${table}
@@ -4631,7 +4650,8 @@ const ellaFamilyController = {
           select_data.length >= limit
             ? "Member limit is full"
             : "You can add members",
-        addStatus: select_data.length >= limit ? false : true,
+        member,
+        memberCount: select_data.length,
       });
     } catch (err) {
       console.error(err);
@@ -4689,13 +4709,13 @@ const ellaFamilyController = {
 
       switch (type) {
         case "test":
-          select_query = `SELECT family_test_score FROM ${table}
+          select_query = `SELECT family_test_mom_score, family_test_dad_score FROM ${table}
           WHERE uid = '${parsepUid}'
           AND family_type = 'test'
           ORDER BY created_at DESC
           LIMIT 1;`;
           select_data = await fetchUserData(connection_AI, select_query);
-          console.log(select_data);
+
           // Test를 실시하지 않은 경우
           if (!select_data.length)
             return res.status(200).json({ message: "Non Family Test Data" });
@@ -4703,7 +4723,8 @@ const ellaFamilyController = {
           return res.status(200).json({
             message: "Family Training Test Data Load Success!",
             data: {
-              score: select_data[0].family_test_score,
+              momScore: select_data[0].family_test_mom_score,
+              dadScore: select_data[0].family_test_dad_score,
             },
           });
         case "diary":
