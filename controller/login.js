@@ -702,6 +702,8 @@ const loginController = {
   },
   // AI Guest 로그인
   postAIGuestLoginHandler: async (req, res) => {
+    const query = req.query;
+    const { tag } = query;
     try {
       // 오늘 날짜 변환
       const dateObj = new Date();
@@ -715,7 +717,8 @@ const loginController = {
       const date = `${year}-${month}-${day}`;
       const guestDate = `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
 
-      let parsepUid = `guest${guestDate}`;
+      // 2024.10.29 tag 쿼리 추가 - VR 유저 식별 처리
+      let parsepUid = `${tag ? "VR_" : ""}guest${guestDate}`;
       const sessionId = req.sessionID;
       console.log(`Guest Login API 호출! - pUid: ${parsepUid}`);
 

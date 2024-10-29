@@ -4734,7 +4734,7 @@ const ellaFamilyController = {
       });
     }
   },
-  // #TODO 가족관계 사전 Delete API
+  // 가족관계 사전 Delete API
   postOpenAIFamilyDiaryDataDelete: async (req, res) => {
     const { data } = req.body;
     let parseData, parsepUid; // Parsing 변수
