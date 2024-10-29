@@ -4466,18 +4466,18 @@ const ellaFamilyController = {
 
       // type === test 필수 입력값 체크
       if (type === "test") {
-        // score 값이 Int가 아닌 경우
-        if (!Number.isInteger(score)) {
-          console.log("No Integer Score value - 400");
-          return res
-            .status(400)
-            .json({ message: "No Integer Score value - 400" });
+        // score 값이 숫자가 아닌 경우
+        if (typeof score !== "number" || isNaN(score)) {
+          console.log(`Score value is not Number - pUid: ${parsepUid}`);
+          return res.status(400).json({
+            message: "Score value is not Number",
+          });
         }
-        // score 값이 0보다 작은 경우
-        if (score < 0) {
+        // score 값이 범위를 벗어나는 경우
+        if (score < 1 || score > 5) {
           console.log(`Score value smaller than 0 - pUid: ${parsepUid}`);
           return res.status(400).json({
-            message: "Score value smaller than 0",
+            message: "Score value smaller than 1 OR bigger than 5",
           });
         }
       }
@@ -4513,7 +4513,7 @@ const ellaFamilyController = {
 
       // diary Full Count Check
       if (type === "diary") {
-        const select_query = `SELECT family_id FROM ${table} 
+        const select_query = `SELECT family_id FROM ${table}
         WHERE uid = '${parsepUid}'
         AND family_type = 'diary'
         AND family_diary_member = ${member}
@@ -4546,7 +4546,7 @@ const ellaFamilyController = {
         case "test":
           insert_query = `INSERT INTO ${table} (uid, family_type, family_test_score) VALUES (?, ?, ?);`;
           // console.log(insert_query);
-          insert_value = [parsepUid, type, score];
+          insert_value = [parsepUid, type, score.toFixed(1)];
           // console.log(insert_value);
           break;
         default:

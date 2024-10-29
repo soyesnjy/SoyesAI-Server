@@ -245,7 +245,7 @@ router.post(
 // 가족관계 훈련 데이터 Save
 router.post(
   "/training_family_ella/save",
-  vaildateTokenConsulting,
+  // vaildateTokenConsulting,
   postOpenAIFamilyDataSave
 );
 // 가족관계 사전만들기 데이터 Load
