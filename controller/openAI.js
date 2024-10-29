@@ -4451,7 +4451,7 @@ const ellaFamilyController = {
         console.log("No Required input value - 400");
         return res
           .status(400)
-          .json({ message: "No Required Mood Data input value - 400" });
+          .json({ message: "No Required Data input value - 400" });
       }
 
       // No Matching Type Value => return
@@ -4485,11 +4485,9 @@ const ellaFamilyController = {
       if (type === "diary") {
         // messageArr가 없는 경우
         if (!messageArr) {
-          console.log(
-            `There are no input values suitable for the type - pUid: ${parsepUid}`
-          );
+          console.log(`Non messageArr value - pUid: ${parsepUid}`);
           return res.status(400).json({
-            message: "There are no input values suitable for the type",
+            message: "Non messageArr value",
           });
         }
         // member가 Int값이 아닌 경우
@@ -4751,12 +4749,12 @@ const ellaFamilyController = {
       );
       console.log(parseData);
 
-      // No Required Mood Data => return
+      // No Required Data => return
       if (!pUid || !id) {
         console.log("No Required input value - 400");
         return res
           .status(400)
-          .json({ message: "No Required Mood Data input value - 400" });
+          .json({ message: "No Required Data input value - 400" });
       }
 
       parsepUid = pUid;
