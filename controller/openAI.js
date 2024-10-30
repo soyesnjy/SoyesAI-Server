@@ -4510,10 +4510,10 @@ const ellaFamilyController = {
           });
         }
         // member가 0보다 작은 경우
-        if (member < 0) {
+        if (member < 0 || member > 7) {
           console.log(`Member value smaller than 0 - pUid: ${parsepUid}`);
           return res.status(400).json({
-            message: "Member value smaller than 0",
+            message: "Member value smaller than 0 OR bigger than 7",
           });
         }
       }
@@ -4540,7 +4540,7 @@ const ellaFamilyController = {
           }
         }
         // 부모 라인 체크
-        if (0 < member && member < 4) {
+        if (0 <= member && member < 4) {
           if (select_data.length > 0) {
             console.log(`Member count is limited - pUid: ${parsepUid}`);
             return res.status(400).json({
@@ -4650,6 +4650,7 @@ const ellaFamilyController = {
             : "You can add members",
         member,
         memberCount: select_data.length,
+        maxCount: limit,
       });
     } catch (err) {
       console.error(err);
