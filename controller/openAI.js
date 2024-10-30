@@ -5693,6 +5693,8 @@ const reportController = {
         report_url: process.env.REPORT_URL,
       };
 
+      console.log(process.env.REPORT_URL);
+
       // Page 1 Data
       const dateObj = new Date();
       const year = dateObj.getFullYear();
