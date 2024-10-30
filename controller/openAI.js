@@ -3573,42 +3573,48 @@ const ellaAnxietyController = {
 
       // pUid default값 설정
       parsepUid = pUid;
-      parseMessageArr = [...messageArr];
+      // parseMessageArr = [...messageArr];
       promptArr.push(persona_prompt_lala_v6); // 엘라 페르소나
 
       // code 매칭 프롬프트 삽입
       switch (code) {
         case "situation":
+          parseMessageArr = [...messageArr];
           promptArr.push({
             role: "system",
             content: `user가 불안하다고 말한 상황에 반응한다.`,
           });
           break;
         case "emotion":
+          parseMessageArr = [...messageArr];
           promptArr.push({
             role: "system",
             content: `불안할 때 유저가 하는 생각에 초등학생의 눈높이에 맞춰 한 문장으로 유저의 감정을 반영하며 공감한다. 질문은 하지 않는다.`,
           });
           break;
         case "consolation":
+          parseMessageArr = [messageArr[messageArr.length - 1]];
           promptArr.push({
             role: "system",
             content: `유저가 불안해하고 걱정하는 내용에 초등학생의 눈높이에 맞춰 한 문장으로 유저의 감정을 반영하며 공감한다. 질문은 하지 않는다.`,
           });
           break;
         case "solution":
+          parseMessageArr = [messageArr[messageArr.length - 1]];
           promptArr.push({
             role: "system",
             content: `유저가 불안해하고 걱정하는 상황에 대해 초등학생이 시도해볼 수 있는 해결책을 70자 이내로 한 가지 제시한다. 예) ~해보면 어때?`,
           });
           break;
         case "box_end":
+          parseMessageArr = [...messageArr];
           promptArr.push({
             role: "system",
             content: `유저의 마지막 말을 듣고 감정을 반영하며 한 문장으로 공감한다. 이후 이번 상담은 여기서 마치려고 한다고 이야기한 후 종료한다.`,
           });
           break;
         case "challenge_start":
+          parseMessageArr = [...messageArr];
           promptArr.push({
             role: "system",
             // 2024.10.11 이전 프롬프트
@@ -3644,12 +3650,14 @@ const ellaAnxietyController = {
           });
           break;
         case "challenge_recommend":
+          parseMessageArr = [...messageArr];
           promptArr.push({
             role: "system",
             content: `유저가 활동을 언제, 어디에서 실천할지 입력한 경우, 계획을 잘 세웠다고 격려한다. 유저가 활동을 실천할 수 있는 시간이나 장소를 말하지 못한 경우, ‘~는 어떨까?’라는 말로 대안을 제시한다.`,
           });
           break;
         case "challenge_end":
+          parseMessageArr = [...messageArr];
           promptArr.push({
             role: "system",
             content: `user 응답에 반응한다. '차근차근 도전해보고 두려운 마음이 어떻게 변하는지 북극이 일기에도 써보자'라고 한다.`,
@@ -3658,6 +3666,7 @@ const ellaAnxietyController = {
       }
 
       // console.log(promptArr);
+      // console.log(parseMessageArr);
 
       const response = await openai.chat.completions.create({
         messages: [...promptArr, ...parseMessageArr],
