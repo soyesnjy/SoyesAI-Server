@@ -268,7 +268,11 @@ router.post(
 );
 
 // 결과보고서 PDF 이메일 발송
-router.post("/report", vaildateTokenConsulting, postReportTest);
+router.post(
+  "/report",
+  // vaildateTokenConsulting,
+  postReportTest
+);
 
 // 달력 데이터 반환
 router.post("/calendar", vaildateTokenConsulting, postOpenAIMypageCalendarData);
