@@ -23,6 +23,7 @@ const {
   postOpenAIConsultingUbi,
   postOpenAIConsultingSoyes,
   postOpenAIConsultingMaru,
+  postOpenAIConsultingCustom,
   postOpenAIMypageCalendarData,
   postClovaVoiceTTS,
   postOpenAIPernalTestAnalysis,
@@ -130,6 +131,13 @@ router.post(
   "/consulting_emotion_maru",
   vaildateTokenConsulting,
   postOpenAIConsultingMaru
+);
+
+// 커스텀 모델
+router.post(
+  "/consulting_emotion_custom",
+  vaildateTokenConsulting,
+  postOpenAIConsultingCustom
 );
 
 // 북극이 데이터 Save

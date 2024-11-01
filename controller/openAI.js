@@ -1574,6 +1574,81 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
       });
     }
   },
+  // 커스텀 모델
+  postOpenAIConsultingCustom: async (req, res) => {
+    const { data } = req.body;
+    let parseData, parseMessageArr, parsepUid; // Parsing 변수
+    let promptArr = []; // 삽입 Prompt Array
+
+    const modelArr = ["soyes", "pupu", "ubi", "ella"];
+    try {
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { messageArr, pUid, model } = parseData;
+      console.log(
+        `커스텀 상담 API /consulting_emotion_custom Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
+
+      // No Required Input => return
+      if (!pUid || !model) {
+        console.log("No Required input value - 404");
+        return res
+          .status(404)
+          .json({ message: "No Required input value - 404" });
+      }
+
+      parsepUid = pUid;
+
+      // No Matching code Value => return
+      if (!modelArr.includes(model)) {
+        console.log("No matching model value - 400");
+        return res
+          .status(400)
+          .json({ message: "No matching model value - 400" });
+      }
+
+      // 모델별 프롬프트 삽입
+      switch (model) {
+        case "soyes":
+          promptArr.push(persona_prompt_soyes);
+          break;
+        case "pupu":
+          promptArr.push(persona_prompt_pupu_v7);
+          break;
+        case "ubi":
+          promptArr.push(persona_prompt_ubi);
+          break;
+        case "ella":
+          promptArr.push(persona_prompt_lala_v6);
+          break;
+      }
+
+      const response = await openai.chat.completions.create({
+        messages: [...promptArr, ...parseMessageArr],
+        model: "gpt-4o", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      });
+
+      const message = {
+        message: response.choices[0].message.content,
+      };
+
+      // Client 반환
+      return res.status(200).json(message);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "Server Error",
+        emotion: 0,
+      });
+    }
+  },
   // 달력 관련 데이터 반환 (Date 단위)
   postOpenAIMypageCalendarData: async (req, res) => {
     const { data } = req.body;
