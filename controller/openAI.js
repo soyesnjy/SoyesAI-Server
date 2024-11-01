@@ -328,19 +328,19 @@ const select_soyesAI_Consult_Log = async (keyValue, parsepUid, count = 1) => {
 };
 
 // EBT 반영 Class 정의
-const EBT_classArr = [
-  "School",
-  "Friend",
-  "Family",
-  "Mood",
-  "Unrest",
-  "Sad",
-  "Health",
-  "Attention",
-  "Movement",
-  "Angry",
-  "Self",
-];
+// const EBT_classArr = [
+//   "School",
+//   "Friend",
+//   "Family",
+//   "Mood",
+//   "Unrest",
+//   "Sad",
+//   "Health",
+//   "Attention",
+//   "Movement",
+//   "Angry",
+//   "Self",
+// ];
 
 // EBT 반영 Class 정의
 const EBT__reportClassArr = [
@@ -3945,10 +3945,10 @@ const ellaAnxietyController = {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("Mood Second Update Success!");
+              console.log("Anxiety Second Update Success!");
               return res
                 .status(200)
-                .json({ message: "Mood Second Data Save Success!" });
+                .json({ message: "Anxiety Second Data Save Success!" });
             }
           );
           break;
