@@ -1582,7 +1582,7 @@ const loginController = {
           }
         );
 
-        console.log(token.refreshToken);
+        // console.log(token.refreshToken);
 
         // 토큰 인증
         return res.status(200).json({

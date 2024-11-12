@@ -9,6 +9,7 @@ const {
   ellaFriendController,
   ellaAnxietyController,
   ellaFamilyController,
+  ellaEmotionController,
   NorthController,
   ubiController,
   reportController,
@@ -58,8 +59,6 @@ const {
   postOpenAIFamilyDiaryDataDelete,
 } = ellaFamilyController;
 
-const { postOpenAIUbiMeditationRecomend } = ubiController;
-
 const {
   postOpenAIEllaAnxietyTraning,
   postOpenAIAnxietyDataSave,
@@ -68,10 +67,19 @@ const {
 } = ellaAnxietyController;
 
 const {
+  postOpenAIEllaEmotionTraning,
+  postOpenAIEmotionDataSave,
+  postOpenAIEmotionDataLoad,
+  postOpenAIEmotionTrainingDataLoad,
+} = ellaEmotionController;
+
+const {
   postOpenAIConsultingNorthSave,
   postOpenAIConsultingNorthLoad,
   postOpenAIConsultingNorthDelete,
 } = NorthController;
+
+const { postOpenAIUbiMeditationRecomend } = ubiController;
 
 const { postReportTest } = reportController;
 
@@ -274,6 +282,34 @@ router.post(
   vaildateTokenConsulting,
   postOpenAIFamilyDiaryDataDelete
 );
+
+// 정서인식 훈련 모델 - 엘라
+router.post(
+  "/training_emotion_ella",
+  vaildateTokenConsulting,
+  postOpenAIEllaEmotionTraning
+);
+
+// // #TODO 정서인식 훈련 데이터 Save
+// router.post(
+//   "/training_emotion_ella/save",
+//   vaildateTokenConsulting,
+//   postOpenAIEmotionDataSave
+// );
+
+// // #TODO 정서인식 훈련 시작 데이터 Load
+// router.post(
+//   "/training_emotion_ella/load",
+//   vaildateTokenConsulting,
+//   postOpenAIEmotionDataLoad
+// );
+
+// // #TODO 정서인식 훈련 보고서 데이터 Load
+// router.post(
+//   "/training_emotion_ella/load/training",
+//   vaildateTokenConsulting,
+//   postOpenAIEmotionTrainingDataLoad
+// );
 
 // 결과보고서 PDF 이메일 발송
 router.post("/report", vaildateTokenConsulting, postReportTest);
