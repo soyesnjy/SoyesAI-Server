@@ -54,7 +54,7 @@ const verifyToken = (type, token) => {
   } catch (err) {
     // 토큰 만료 에러
     if (err.name === "TokenExpiredError") {
-      console.log(`JWT Error: Token has expired - ${decoded.id}`);
+      console.log(`JWT Error: Token has expired`);
       return "expired";
     }
 
