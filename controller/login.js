@@ -138,7 +138,7 @@ const loginController = {
         // accessToken 생성 후 세션에 저장
         req.session.accessToken = generateToken({
           id: decoded.id,
-          email: `${decoded.id}@naver.com`,
+          // email: `${decoded.id}@naver.com`,
         }).accessToken;
         res.json({ message: "RefreshToken Login Success" });
       }
@@ -747,7 +747,7 @@ const loginController = {
         // Guest JWT 생성
         const token = generateToken({
           id: parsepUid,
-          email: `${parsepUid}@google.com`,
+          // email: `${parsepUid}@google.com`,
         });
 
         // Server Session accessToken 저장
@@ -1016,7 +1016,7 @@ const loginController = {
         // JWT Token 발급 후 세션 저장
         const token = generateToken({
           id: select_data[0].uid,
-          email: select_data[0].Email,
+          // email: select_data[0].Email,
         });
 
         // Session 내부에 accessToken 저장
@@ -1516,16 +1516,16 @@ const loginController = {
       // decoded 값이 있는 경우
       if (decoded.id) {
         // JWT Token 재발급 후 세션 저장
-        // const token = generateToken({
-        //   id: decoded.id,
-        //   email: decoded.email,
-        // });
+        const token = generateToken({
+          id: decoded.id,
+          // email: decoded.email,
+        });
 
         // Session 내부에 accessToken 저장
         // req.session.accessToken = token.accessToken;
 
         // cookie refreshToken 갱신
-        res.cookie("refreshToken", refreshToken, {
+        res.cookie("refreshToken", token.refreshToken, {
           maxAge: 7 * 24 * 60 * 60 * 1000, // 쿠키 갱신 (7일)
           httpOnly: true,
           sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
@@ -1535,24 +1535,24 @@ const loginController = {
         console.log(`User RefreshToken Update Success! - pUid: ${decoded.id}`);
 
         // Redis에서 기존 세션 ID 확인
-        redisStore.get(`user_session:${decoded.id}`, (err, oldSessionId) => {
-          if (oldSessionId) {
-            // 기존 세션 무효화
-            redisStore.destroy(`user_session:${decoded.id}`, (err, reply) => {
-              // console.log("Previous session invalidated");
-            });
-          }
+        // redisStore.get(`user_session:${decoded.id}`, (err, oldSessionId) => {
+        //   if (oldSessionId) {
+        //     // 기존 세션 무효화
+        //     redisStore.destroy(`user_session:${decoded.id}`, (err, reply) => {
+        //       // console.log("Previous session invalidated");
+        //     });
+        //   }
 
-          // 새 세션 ID를 사용자 ID와 연결
-          redisStore.set(
-            `user_session:${decoded.id}`,
-            sessionId,
-            (err, reply) => {
-              // 로그인 처리 로직
-              // console.log(`SessionID Update - ${sessionId}`);
-            }
-          );
-        });
+        //   // 새 세션 ID를 사용자 ID와 연결
+        //   redisStore.set(
+        //     `user_session:${decoded.id}`,
+        //     sessionId,
+        //     (err, reply) => {
+        //       // 로그인 처리 로직
+        //       // console.log(`SessionID Update - ${sessionId}`);
+        //     }
+        //   );
+        // });
 
         // User Table 로그인 날짜 갱신
         const dateObj = new Date();
@@ -1582,10 +1582,13 @@ const loginController = {
           }
         );
 
+        console.log(token.refreshToken);
+
         // 토큰 인증
         return res.status(200).json({
           message: `User RefreshToken Certification Success! - pUid: ${decoded.id}`,
           pUid: decoded.id,
+          refreshToken: token.refreshToken,
         });
       }
       // 만료된 RefreshToken 복호화 ID와 입력 ID가 다를 경우
