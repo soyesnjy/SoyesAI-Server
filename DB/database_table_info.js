@@ -430,6 +430,31 @@ const Ella_Training_Table_Info = {
       attr7: "updated_at",
     },
   },
+  Emotion: {
+    table: "soyes_training_emotion",
+    attribute: {
+      pKey: "emotion_idx",
+      fKey: "uid",
+      attr1: "emotion_round_idx",
+      // 1회기
+      attr2: "emotion_face_correct",
+      attr3: "emotion_face_wrong",
+      // 2회기
+      attr4: "emotion_body_correct",
+      attr5: "emotion_body_wrong",
+      attr6: "emotion_expression", // JSON
+      // 3회기
+      attr7: "emotion_role_correct",
+      attr8: "emotion_role_wrong",
+      attr9: "emotion_role_feedback", // String
+      // 4회기
+      attr10: "emotion_self_awareness", // [높음 / 보통 / 낮음]
+      attr11: "emotion_score_situation", // Int
+      attr12: "emotion_day_flow",
+      attr13: "created_at",
+      attr14: "updated_at",
+    },
+  },
 };
 const North_Table_Info = {
   table: "soyes_ai_North",

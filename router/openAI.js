@@ -290,26 +290,26 @@ router.post(
   postOpenAIEllaEmotionTraning
 );
 
-// // #TODO 정서인식 훈련 데이터 Save
-// router.post(
-//   "/training_emotion_ella/save",
-//   vaildateTokenConsulting,
-//   postOpenAIEmotionDataSave
-// );
+// 정서인식 훈련 데이터 Save
+router.post(
+  "/training_emotion_ella/save",
+  vaildateTokenConsulting,
+  postOpenAIEmotionDataSave
+);
 
-// // #TODO 정서인식 훈련 시작 데이터 Load
-// router.post(
-//   "/training_emotion_ella/load",
-//   vaildateTokenConsulting,
-//   postOpenAIEmotionDataLoad
-// );
+// 정서인식 훈련 시작 데이터 Load
+router.post(
+  "/training_emotion_ella/load",
+  vaildateTokenConsulting,
+  postOpenAIEmotionDataLoad
+);
 
-// // #TODO 정서인식 훈련 보고서 데이터 Load
-// router.post(
-//   "/training_emotion_ella/load/training",
-//   vaildateTokenConsulting,
-//   postOpenAIEmotionTrainingDataLoad
-// );
+// 정서인식 훈련 보고서 데이터 Load
+router.post(
+  "/training_emotion_ella/load/training",
+  vaildateTokenConsulting,
+  postOpenAIEmotionTrainingDataLoad
+);
 
 // 결과보고서 PDF 이메일 발송
 router.post("/report", vaildateTokenConsulting, postReportTest);
