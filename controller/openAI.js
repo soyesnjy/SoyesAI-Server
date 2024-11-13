@@ -4976,6 +4976,7 @@ const ellaEmotionController = {
     let parseData, parsepUid, parseType; // Parsing 변수
     const typeArr = ["first", "second", "third", "fourth"]; // type 식별자
     const regex = /^(?![1-4]$).+$/;
+    const awarenessRegex = /^(?!high$|normal$|low$).*/;
 
     try {
       // json 파싱
@@ -5069,19 +5070,31 @@ const ellaEmotionController = {
         });
       }
 
-      // 4회기 필수 입력값 체크
-      if (
-        parseType === "fourth" &&
-        (!emotion_self_awareness ||
+      // 4회기
+      if (parseType === "fourth") {
+        // 필수 입력값 체크
+        if (
+          !emotion_self_awareness ||
           !emotion_score_situation ||
-          !emotion_day_flow)
-      ) {
-        console.log(
-          `Non input values suitable for the type (fourth) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "Non input values suitable for the type (fourth)",
-        });
+          !emotion_day_flow
+        ) {
+          console.log(
+            `Non input values suitable for the type (fourth) - pUid: ${parsepUid}`
+          );
+          return res.status(400).json({
+            message: "Non input values suitable for the type (fourth)",
+          });
+        }
+        // emotion_self_awareness 단어 체크
+        if (awarenessRegex.test(emotion_self_awareness)) {
+          console.log(
+            `emotion_self_awareness is not matching [high, normal, low] - pUid: ${pUid}`
+          );
+          return res.status(400).json({
+            message:
+              "emotion_self_awareness is not matching [high, normal, low]",
+          });
+        }
       }
 
       const table = Ella_Training_Table_Info["Emotion"].table;
