@@ -5421,9 +5421,12 @@ const ellaEmotionController = {
           return res.status(200).json({
             message: "Emotion Training Data Load Success! (First)",
             data: {
-              emotion_face_correct:
-                select_data[0]?.emotion_face_correct.split("/"), // Array
-              emotion_face_wrong: select_data[0]?.emotion_face_wrong.split("/"), // Array
+              emotion_face_correct: select_data[0]?.emotion_face_correct
+                ? select_data[0]?.emotion_face_correct.split("/")
+                : [], // Array
+              emotion_face_wrong: select_data[0]?.emotion_face_wrong
+                ? select_data[0]?.emotion_face_wrong.split("/")
+                : [], // Array
             },
           });
         case 2:
@@ -5451,9 +5454,12 @@ const ellaEmotionController = {
           return res.status(200).json({
             message: "Emotion Training Data Load Success! (Second)",
             data: {
-              emotion_body_correct:
-                select_data[0]?.emotion_body_correct.split("/"), // Array
-              emotion_body_wrong: select_data[0]?.emotion_body_wrong.split("/"), // Array
+              emotion_body_correct: select_data[0]?.emotion_body_correct
+                ? select_data[0]?.emotion_body_correct.split("/")
+                : [], // Array
+              emotion_body_wrong: select_data[0]?.emotion_body_wrong
+                ? select_data[0]?.emotion_body_wrong.split("/")
+                : [], // Array
               emotion_expression: JSON.parse(
                 select_data[0]?.emotion_expression
               ), // Array[String]
@@ -5484,9 +5490,12 @@ const ellaEmotionController = {
           return res.status(200).json({
             message: "Emotion Training Data Load Success! (Third)",
             data: {
-              emotion_role_correct:
-                select_data[0]?.emotion_role_correct.split("/"), // Array
-              emotion_role_wrong: select_data[0]?.emotion_role_wrong.split("/"), // Array
+              emotion_role_correct: select_data[0]?.emotion_role_correct
+                ? select_data[0]?.emotion_role_correct.split("/")
+                : [], // Array
+              emotion_role_wrong: select_data[0]?.emotion_role_wrong
+                ? select_data[0]?.emotion_role_wrong.split("/")
+                : [], // Array
               emotion_role_feedback: select_data[0]?.emotion_role_feedback, // String
             },
           });
@@ -5517,7 +5526,9 @@ const ellaEmotionController = {
             data: {
               emotion_self_awareness: select_data[0]?.emotion_self_awareness, // String
               emotion_score_situation: select_data[0]?.emotion_score_situation, // Int
-              emotion_day_flow: select_data[0]?.emotion_day_flow.split("/"), // Array
+              emotion_day_flow: select_data[0]?.emotion_day_flow
+                ? select_data[0]?.emotion_day_flow.split("/")
+                : [], // Array
             },
           });
       }
