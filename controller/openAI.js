@@ -4976,7 +4976,7 @@ const ellaEmotionController = {
     let parseData, parsepUid, parseType; // Parsing 변수
     const typeArr = ["first", "second", "third", "fourth"]; // type 식별자
     const regex = /^(?![1-4]$).+$/;
-    const awarenessRegex = /^(?!high$|normal$|low$).*/;
+    const awarenessRegex = /^(?!score-high$|score-middle$|score-low$).*/;
 
     try {
       // json 파싱
@@ -5088,11 +5088,11 @@ const ellaEmotionController = {
         // emotion_self_awareness 단어 체크
         if (awarenessRegex.test(emotion_self_awareness)) {
           console.log(
-            `emotion_self_awareness is not matching [high, normal, low] - pUid: ${pUid}`
+            `emotion_self_awareness is not matching [score-high, score-middle, score-low] - pUid: ${pUid}`
           );
           return res.status(400).json({
             message:
-              "emotion_self_awareness is not matching [high, normal, low]",
+              "emotion_self_awareness is not matching [score-high, score-middle, score-low]",
           });
         }
       }
