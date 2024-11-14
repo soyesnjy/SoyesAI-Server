@@ -2435,7 +2435,7 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
 };
 
 const ellaMoodController = {
-  // 기분훈련 트레이너 - 엘라 (New)
+  // 기분 훈련 트레이너 - 엘라 (New)
   postOpenAIEllaMoodTraning: async (req, res) => {
     const { data } = req.body;
     let parseData,
@@ -2458,7 +2458,7 @@ const ellaMoodController = {
         mood_talk_list,
       } = parseData;
 
-      console.log(`엘라 훈련 API 호출 - pUid: ${pUid}`);
+      console.log(`엘라 기분 훈련 API 호출 - pUid: ${pUid}`);
       console.log(parseData);
 
       // No pUid => return
@@ -2639,7 +2639,7 @@ Todo List가 아니라고 판단되면 제외한다.
       } = parseData;
 
       console.log(
-        `기분 훈련 저장 API /openAI/training_mood_ella/save Path 호출 - pUid: ${pUid}`
+        `엘라 기분 훈련 저장 API /openAI/training_mood_ella/save Path 호출 - pUid: ${pUid}`
       );
       console.log(parseData);
 
@@ -2953,7 +2953,7 @@ Todo List가 아니라고 판단되면 제외한다.
 
       const { pUid } = parseData;
 
-      console.log(`기분 훈련 Start Data Load API 호출 - pUid: ${pUid}`);
+      console.log(`엘라 기분 훈련 Start Data Load API 호출 - pUid: ${pUid}`);
       console.log(parseData);
 
       // No pUid => return
@@ -3005,7 +3005,7 @@ Todo List가 아니라고 판단되면 제외한다.
 
       const { pUid, type } = parseData;
 
-      console.log(`기분 훈련 보고서 Data Load API 호출 - pUid: ${pUid}`);
+      console.log(`엘라 기분 훈련 보고서 Data Load API 호출 - pUid: ${pUid}`);
       console.log(parseData);
 
       // No pUid => return

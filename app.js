@@ -119,40 +119,48 @@ app.use("/login", loginRouter);
 const signupRouter = require("./router/signup");
 app.use("/signup", signupRouter);
 
-// Tips
-// 채팅 웹소켓 서버 라우팅
-// const chatRouter = require("./router/chat");
-// app.use(chatRouter);
-// // 유니티 채팅 웹소켓 서버 라우팅
-// const unityChatRouter = require("./router/unityChat");
-// app.use(unityChatRouter);
-// // 유니티 채팅 웹소켓 서버 라우팅2
-// const unityChatRouter2 = require("./router/unityChat2");
-// app.use(unityChatRouter2);
-// // 유니티 채팅 웹소켓 서버 라우팅3
-// const unityChatRouter3 = require("./router/unityChat3");
-// app.use(unityChatRouter3);
-// // 유니티 채팅 웹소켓 서버 라우팅4
-// const unityChatRouter4 = require("./router/unityChat4");
-// app.use(unityChatRouter4);
-// // 유니티 채팅 웹소켓 서버 라우팅5
-// const unityChatRouter5 = require("./router/unityChat5");
-// app.use(unityChatRouter5);
-// test 경로 라우팅
-const testRouter = require("./router/test");
-app.use("/test", testRouter);
-// agoraToken 경로 라우팅
-const agoraTokenRouter = require("./router/agoraToken");
-app.use("/agoraToken", agoraTokenRouter);
-
-// AI
-// openAI 경로 라우팅
 const openAIRouter = require("./router/openAI");
 app.use("/openAI", openAIRouter);
 const reviewRouter = require("./router/review");
 app.use("/review", reviewRouter);
 const kakaoPayRouter = require("./router/kakaoPay");
 app.use("/kakaopay", kakaoPayRouter);
+
+// Tips
+// 채팅 웹소켓 서버 라우팅
+// const chatRouter = require("./router/chat");
+// app.use(chatRouter);
+
+// // 유니티 채팅 웹소켓 서버 라우팅
+// const unityChatRouter = require("./router/unityChat");
+// app.use(unityChatRouter);
+
+// // 유니티 채팅 웹소켓 서버 라우팅2
+// const unityChatRouter2 = require("./router/unityChat2");
+// app.use(unityChatRouter2);
+
+// // 유니티 채팅 웹소켓 서버 라우팅3
+// const unityChatRouter3 = require("./router/unityChat3");
+// app.use(unityChatRouter3);
+
+// // 유니티 채팅 웹소켓 서버 라우팅4
+// const unityChatRouter4 = require("./router/unityChat4");
+// app.use(unityChatRouter4);
+
+// // 유니티 채팅 웹소켓 서버 라우팅5
+// const unityChatRouter5 = require("./router/unityChat5");
+// app.use(unityChatRouter5);
+
+// test 경로 라우팅
+// const testRouter = require("./router/Legacy/test");
+// app.use("/test", testRouter);
+
+// agoraToken 경로 라우팅
+// const agoraTokenRouter = require("./router/agoraToken");
+// app.use("/agoraToken", agoraTokenRouter);
+
+// AI
+// openAI 경로 라우팅
 
 // MailTest 경로 라우팅
 // const mailTestRouter = require("./router/mailTest");
