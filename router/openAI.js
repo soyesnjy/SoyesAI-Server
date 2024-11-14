@@ -293,7 +293,7 @@ router.post(
 // 정서인식 훈련 데이터 Save
 router.post(
   "/training_emotion_ella/save",
-  vaildateTokenConsulting,
+  // vaildateTokenConsulting,
   postOpenAIEmotionDataSave
 );
 

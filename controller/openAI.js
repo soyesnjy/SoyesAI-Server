@@ -5075,7 +5075,7 @@ const ellaEmotionController = {
         // 필수 입력값 체크
         if (
           !emotion_self_awareness ||
-          !emotion_score_situation ||
+          emotion_score_situation < 0 ||
           !emotion_day_flow
         ) {
           console.log(
