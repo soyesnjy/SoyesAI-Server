@@ -468,6 +468,48 @@ const North_Table_Info = {
     attr5: "updated_at",
   },
 };
+const Subscription_Table_Info = {
+  Coupon: {
+    table: "soyes_ai_coupon",
+    attribute: {
+      pKey: "coupon_id",
+      attr1: "coupon_describe",
+      attr2: "coupon_number",
+      attr3: "coupon_type", // 'sale' || 'subscription'
+      attr4: "coupon_discount_rate",
+      attr5: "coupon_subscription_period", // Int
+      attr6: "coupon_duple", // 중복 가능 여부
+      attr7: "coupon_duple_cooltime",
+      attr8: "coupon_unique", // range 범위를 갖는 고유번호 쿠폰 여부
+      attr9: "coupon_range",
+      attr10: "created_at",
+      attr11: "updated_at",
+    },
+  },
+  Subscription: {
+    table: "soyes_ai_user_subscription",
+    attribute: {
+      pKey: "uid",
+      attr1: "subscription_expiration_date",
+      attr2: "subscription_status",
+      attr3: "created_at",
+      attr4: "updated_at",
+    },
+  },
+  Log: {
+    table: "soyes_ai_user_subscription_log",
+    attribute: {
+      pKey: "subscription_log_id",
+      attr1: "uid",
+      attr2: "subscription_log_type", // 'purchase' || 'coupon'
+      attr3: "subscription_log_purchase_type", // 'day' || 'month' || 'year'
+      attr4: "subscription_log_coupon_number", // 사용된 쿠폰 번호
+      attr5: "subscription_log_coupon_id",
+      attr6: "created_at",
+      attr7: "updated_at",
+    },
+  },
+};
 
 module.exports = {
   User_Table_Info,
@@ -478,4 +520,5 @@ module.exports = {
   Review_Table_Info,
   Ella_Training_Table_Info,
   North_Table_Info,
+  Subscription_Table_Info,
 };

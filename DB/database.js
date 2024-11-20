@@ -27,6 +27,7 @@ const dbconfig_ai = {
   user: "admin",
   password: process.env.DATABASE_PASSWORD,
   database: "soyesAI",
+  timezone: "Asia/Seoul",
 };
 
 module.exports = {

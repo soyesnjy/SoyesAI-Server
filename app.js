@@ -123,8 +123,11 @@ const openAIRouter = require("./router/openAI");
 app.use("/openAI", openAIRouter);
 const reviewRouter = require("./router/review");
 app.use("/review", reviewRouter);
-const kakaoPayRouter = require("./router/kakaoPay");
-app.use("/kakaopay", kakaoPayRouter);
+const paymentRouter = require("./router/payment");
+app.use("/payment", paymentRouter);
+
+// const kakaoPayRouter = require("./router/kakaoPay");
+// app.use("/kakaopay", kakaoPayRouter);
 
 // Tips
 // 채팅 웹소켓 서버 라우팅
