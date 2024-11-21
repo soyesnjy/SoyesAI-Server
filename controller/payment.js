@@ -150,12 +150,43 @@ const PaymentController = {
         });
       }
 
+      // 두 변수 중 하나만 온 경우 => return
+      if (Boolean(coupon_number) !== Boolean(coupon_id)) {
+        console.log(
+          `Only one of the coupon-related variables was entered - pUid: ${pUid}`
+        );
+        return res.status(400).json({
+          message: "Only one of the coupon-related variables was entered",
+        });
+      }
+
       parsepUid = pUid;
 
+      const coupon_table = Subscription_Table_Info["Coupon"].table;
       const log_table = Subscription_Table_Info["Log"].table;
-      // 해당 쿠폰 사용 이력 조회
-      if (coupon_id) {
-        const log_select_query = `SELECT 
+      // 해당 쿠폰 유효성 검증 및 사용 이력 조회
+      if (coupon_id && coupon_number) {
+        // 쿠폰 유효성 검증
+        const select_query = `SELECT
+        coupon_type,
+        coupon_number
+        FROM ${coupon_table}
+        WHERE coupon_id='${coupon_id}'`;
+
+        const select_data = await fetchUserData(connection_AI, select_query);
+
+        if (
+          !select_data.length || // 없는 쿠폰
+          select_data[0]?.coupon_type !== "sale" || // 할인권 쿠폰이 아닐 경우
+          select_data[0]?.coupon_number !== coupon_number // 쿠폰 번호와 일치하지 않음
+        ) {
+          console.log(`Not Vaildation Coupon - pUid: ${pUid}`);
+          return res.status(400).json({
+            message: "유효한 쿠폰이 아닙니다 (Not Vaildation Coupon)",
+          });
+        }
+        // 사용 이력 조회
+        const log_select_query = `SELECT
         subscription_log_id,
         subscription_log_coupon_number
         FROM ${log_table}
