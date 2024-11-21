@@ -222,14 +222,15 @@ const PaymentController = {
         ?.subscription_expiration_date
         ? new Date(sub_select_data[0]?.subscription_expiration_date) <
           new Date(today)
-          ? addDays(typeMap[type]).toISOString().slice(0, 19)
+          ? addDays(typeMap[type]).toISOString().slice(0, 19).replace("T", " ")
           : addDays(
               typeMap[type],
               sub_select_data[0]?.subscription_expiration_date
             )
               .toISOString()
               .slice(0, 19)
-        : addDays(typeMap[type]).toISOString().slice(0, 19);
+              .replace("T", " ")
+        : addDays(typeMap[type]).toISOString().slice(0, 19).replace("T", " ");
 
       // DB에 Row가 없을 경우 INSERT, 있으면 지정한 속성만 UPDATE
       const duple_query = `INSERT INTO ${table} 
@@ -251,6 +252,7 @@ const PaymentController = {
         res.status(200).json({
           message:
             "이용권 구매 성공! (User Subscription Expiration Date Update Success!)",
+          data: expirationDate_value,
         });
       } catch (err) {
         console.error("Error executing query:", err);
@@ -430,14 +432,21 @@ const PaymentController = {
           ?.subscription_expiration_date
           ? new Date(sub_select_data[0]?.subscription_expiration_date) <
             new Date(today)
-            ? addDays(coupon_subscription_period).toISOString().slice(0, 19)
+            ? addDays(coupon_subscription_period)
+                .toISOString()
+                .slice(0, 19)
+                .replace("T", " ")
             : addDays(
                 coupon_subscription_period,
                 sub_select_data[0]?.subscription_expiration_date
               )
                 .toISOString()
                 .slice(0, 19)
-          : addDays(coupon_subscription_period).toISOString().slice(0, 19);
+                .replace("T", " ")
+          : addDays(coupon_subscription_period)
+              .toISOString()
+              .slice(0, 19)
+              .replace("T", " ");
 
         // DB에 Row가 없을 경우 INSERT, 있으면 지정한 속성만 UPDATE
         const duple_query = `INSERT INTO ${sub_table} 
@@ -459,6 +468,7 @@ const PaymentController = {
           res.status(200).json({
             message:
               "이용권 쿠폰 사용에 성공했습니다! (User Coupon validation Success)",
+            data: expirationDate_value,
           });
         } catch (err) {
           console.error("Error executing query:", err);
