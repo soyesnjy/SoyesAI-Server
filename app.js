@@ -27,6 +27,7 @@ app.use(
       "https://soyes-ai-project.vercel.app",
       "https://www.soyeskids.store",
       "http://localhost:3000",
+      "http://localhost/soye/model/index.php",
       // "http://127.0.0.1:53298",
       // "http://d1rq5xi9hzhyrc.cloudfront.net",
       // "http://soyes.chatbot.s3-website.ap-northeast-2.amazonaws.com",
