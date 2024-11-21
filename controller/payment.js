@@ -104,7 +104,7 @@ const PaymentController = {
       console.log(`User Expiration Date Select Success! - pUid:${parsepUid}`);
       return res.status(200).json({
         message: "User Expiration Date Select Success!",
-        data: select_data[0].subscription_expiration_date,
+        expirationDate: select_data[0].subscription_expiration_date,
       });
     } catch (err) {
       delete err.headers;
@@ -253,7 +253,7 @@ const PaymentController = {
         res.status(200).json({
           message:
             "이용권 구매 성공! (User Subscription Expiration Date Update Success!)",
-          data: expirationDate_value,
+          expirationDate: expirationDate_value,
         });
       } catch (err) {
         console.error("Error executing query:", err);
@@ -475,7 +475,7 @@ const PaymentController = {
           res.status(200).json({
             message:
               "이용권 쿠폰 사용에 성공했습니다! (User Coupon validation Success)",
-            data: expirationDate_value,
+            expirationDate: expirationDate_value,
           });
         } catch (err) {
           console.error("Error executing query:", err);
