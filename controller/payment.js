@@ -393,28 +393,28 @@ const PaymentController = {
 
       const log_table = Subscription_Table_Info["Log"].table;
 
+      // 사용 이력 체크
+      const log_select_query = `SELECT 
+      subscription_log_id,
+      subscription_log_coupon_number
+      FROM ${log_table}
+      WHERE uid='${pUid}'
+      AND subscription_log_coupon_number='${couponNumber}'`;
+
+      const log_select_data = await fetchUserData(
+        connection_AI,
+        log_select_query
+      );
+
+      if (log_select_data.length) {
+        console.log(`Already Used Coupon - pUid: ${pUid}`);
+        return res.status(203).json({
+          message: "이미 사용된 쿠폰입니다 (Already Used Coupon)",
+        });
+      }
+
       // 이용권인 경우
       if (coupon_type === "subscription") {
-        // 사용 이력 체크
-        const log_select_query = `SELECT 
-        subscription_log_id,
-        subscription_log_coupon_number
-        FROM ${log_table}
-        WHERE uid='${pUid}'
-        AND subscription_log_coupon_number='${couponNumber}'`;
-
-        const log_select_data = await fetchUserData(
-          connection_AI,
-          log_select_query
-        );
-
-        if (log_select_data.length) {
-          console.log(`Already Used Coupon - pUid: ${pUid}`);
-          return res.status(203).json({
-            message: "이미 사용된 쿠폰입니다 (Already Used Coupon)",
-          });
-        }
-
         // 이용권 만료일 확인
         const sub_table = Subscription_Table_Info["Subscription"].table;
 
