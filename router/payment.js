@@ -17,19 +17,19 @@ const { vaildateTokenConsulting } = loginController;
 // 남은 이용권 만료일 조회
 router.post(
   "/subscription/expired",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postUserSubscriptionExpiration
 );
 // 이용권 만료일 갱신 (결제 승인 시 호출)
 router.post(
   "/subscription/expired/update",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postUserSubscriptionExpirationUpdate
 );
 // 쿠폰 유효성 검증
 router.post(
   "/coupon/validation",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postUserCouponValidation
 );
 
