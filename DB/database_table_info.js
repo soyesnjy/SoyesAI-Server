@@ -505,8 +505,9 @@ const Subscription_Table_Info = {
       attr3: "subscription_log_purchase_type", // 'day' || 'month' || 'year'
       attr4: "subscription_log_coupon_number", // 사용된 쿠폰 번호
       attr5: "subscription_log_coupon_id",
-      attr6: "created_at",
-      attr7: "updated_at",
+      attr6: "subscription_log_payment_receipt", // 스토어 인앱 결제 영수증 데이터
+      attr7: "created_at",
+      attr8: "updated_at",
     },
   },
 };

@@ -130,18 +130,19 @@ const PaymentController = {
         parseData = JSON.parse(data);
       } else parseData = data;
 
-      const { pUid, type, coupon_number, coupon_id } = parseData;
+      const { pUid, type, coupon_number, coupon_id, receipt } = parseData;
 
       console.log(`유저 이용권 만료일 갱신 API 호출 - pUid: ${pUid}`);
       console.log(parseData);
 
       // No Required => return
-      if (!pUid || !type) {
+      if (!pUid || !type || !receipt) {
         console.log(`No Required input value - 400 - pUid: ${pUid}`);
         return res
           .status(400)
           .json({ message: "No Required input value - 400" });
       }
+
       // No type matching => return
       if (typeRegex.test(String(type))) {
         console.log(`Type is not matching [day, month, year] - pUid: ${pUid}`);
@@ -267,10 +268,16 @@ const PaymentController = {
       INSERT INTO ${log_table} (
         uid,
         subscription_log_type,
-        subscription_log_purchase_type
-      ) VALUES (?, ?, ?)`;
+        subscription_log_purchase_type,
+        subscription_log_payment_receipt
+      ) VALUES (?, ?, ?, ?)`;
 
-      const log_insert_value_purchase = [parsepUid, "purchase", type];
+      const log_insert_value_purchase = [
+        parsepUid,
+        "purchase",
+        type,
+        JSON.stringify(receipt), // 결제 영수증 JSON 데이터
+      ];
 
       // 두 번째 쿼리: 쿠폰 로그 삽입 (couponNumber가 존재할 때만)
       const log_insert_query_coupon = `
