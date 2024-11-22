@@ -113,6 +113,14 @@ router.post(
   postOpenAIConsultingPupu
 );
 
+// 공감친구 모델 - 푸푸 (테스트용 미들웨어 제거)
+router.post(
+  "/test/consulting_emotion_pupu",
+  // vaildateTokenConsulting,
+  // vaildatePlan,
+  postOpenAIConsultingPupu
+);
+
 // 공부친구 모델 - 우비
 router.post(
   "/consulting_emotion_ubi",

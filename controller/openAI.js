@@ -1160,9 +1160,10 @@ const openAIController = {
       // Client 반환
       res.status(200).json(message);
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.json({
-        message: "Server Error",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
         emotion: 0,
       });
     }
