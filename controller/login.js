@@ -1198,7 +1198,7 @@ const loginController = {
         .json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
-  // (Middle Ware) AI JWT 토큰 유효성 검사 - 서비스 이용
+  // (Middle Ware) SoyesAI JWT 토큰 유효성 검사
   vaildateTokenConsulting: async (req, res, next) => {
     const { data } = req.body;
     // console.log(data);
@@ -1320,13 +1320,13 @@ const loginController = {
           });
         }
         // User Table 조회
-        const ebt_data = await user_ai_select(
+        const select_data = await user_ai_select(
           user_table,
           user_attribute,
           decoded.id
         );
         // User가 존재할 경우
-        if (ebt_data[0]) {
+        if (select_data[0]) {
           // Token 재발행 후 세션에 저장
           // req.session.accessToken = generateToken({
           //   id: ebt_data[0].uid,
@@ -1366,7 +1366,7 @@ const loginController = {
       res.status(500).json({ message: "Server Error - 500" });
     }
   },
-  // (Middle Ware) AI Plan 유효성 검사 - 서비스 이용
+  // (Middle Ware) Plan 유효성 검사 - 서비스 이용
   vaildatePlan: async (req, res, next) => {
     const accessToken = req.session.accessToken;
     const refreshToken = req.cookies.refreshToken;
@@ -1442,6 +1442,91 @@ const loginController = {
         // 3-2. User Plan이 없는 경우 - 접근 제한 (미결제 유저)
         else {
           console.log(`Unpaid User 401 - ${parseUid}`);
+          return res.status(401).json({ message: "Unpaid User - 401" });
+        }
+      }
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).json({ message: "Server Error - 500" });
+    }
+  },
+  // (Middle Ware) SoyesAI 유저 이용 권한 유효성 검사
+  vaildateUserSubscriptionAuth: async (req, res, next) => {
+    // const accessToken = req.session.accessToken;
+    const refreshToken = req.cookies.refreshToken;
+
+    const user_plan_table = Subscription_Table_Info["Subscription"].table;
+    const user_plan_attribute =
+      Subscription_Table_Info["Subscription"].attribute;
+
+    let parsepUid = "",
+      decoded;
+    try {
+      // 0. Token 값을 통한 uid 조회
+      // if (accessToken) decoded = verifyToken("access", accessToken);
+      if (refreshToken) decoded = verifyToken("refresh", refreshToken);
+      else
+        return res.status(401).json({ message: "Login Session Expire! - 401" });
+
+      // 토큰 만료
+      if (decoded === "expired")
+        return res.status(401).json({ message: "Token has expired - 401" });
+
+      parsepUid = decoded.id;
+      const today = moment().tz("Asia/Seoul").format("YYYY-MM-DD HH:mm:ss");
+
+      // 1. User Redis expiry 조회
+      let userExpiryDate = await redisStore.get(
+        `user:expiry:${parsepUid}`,
+        (err, data) => data
+      );
+      // console.log("userExpiryDate: " + userExpiryDate);
+
+      // 2. User Redis expiry 값이 있는 경우 - 오늘 날짜와 expiry 값 비교
+      if (userExpiryDate) {
+        // 2-1. 만료되지 않은 경우 - next();
+        if (new Date(userExpiryDate) >= new Date(today)) {
+          console.log(`Plan 유효성 검증 통과! - ${parsepUid}`);
+          next();
+        }
+        // 2-2. 만료된 경우 - 접근 제한 (만료된 유저)
+        else {
+          console.log(`Expired User 401 - ${parsepUid}`);
+          return res.status(401).json({ message: "Expired User - 401" });
+        }
+      }
+      // 3. User Redis expiry 값이 없는 경우
+      else {
+        // 3-0. User_Plan 테이블에 해당 유저가 있는지 조회
+        const user_plan_data = await user_ai_select(
+          user_plan_table,
+          user_plan_attribute,
+          parsepUid
+        );
+        // console.log(user_plan_data[0]);
+        // 3-1. User Plan이 있는 경우 - Redis expiry 데이터 갱신 후 만료 여부 판단
+        if (user_plan_data[0]) {
+          const { expirationDate } = user_plan_data[0];
+          // Redis expiry 데이터 갱신
+          await redisStore.set(
+            `user:expiry:${parsepUid}`,
+            expirationDate,
+            (err, reply) => {
+              console.log(`User Plan Redis Update - ${parsepUid}`);
+            }
+          );
+          // 만료 여부 판단
+          if (new Date(expirationDate) >= new Date(today)) {
+            console.log(`Plan 유효성 검증 통과! - ${parsepUid}`);
+            next();
+          } else {
+            console.log(`Expired User 401 - ${parsepUid}`);
+            return res.status(401).json({ message: "Expired User - 401" });
+          }
+        }
+        // 3-2. User Plan이 없는 경우 - 접근 제한 (미결제 유저)
+        else {
+          console.log(`Unpaid User 401 - ${parsepUid}`);
           return res.status(401).json({ message: "Unpaid User - 401" });
         }
       }
