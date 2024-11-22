@@ -195,7 +195,7 @@ router.post(
 // 기분훈련 모델 - 엘라
 router.post(
   "/training_mood_ella",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIEllaMoodTraning
 );
 // 기분훈련 데이터 Save
@@ -302,7 +302,7 @@ router.post(
 // 정서인식 훈련 데이터 Save
 router.post(
   "/training_emotion_ella/save",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIEmotionDataSave
 );
 

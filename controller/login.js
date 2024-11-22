@@ -1565,7 +1565,7 @@ const loginController = {
       } else parseLoginData = data;
 
       const { refreshToken } = parseLoginData;
-      const sessionId = req.sessionID;
+      // const sessionId = req.sessionID;
 
       // Non refreshToken
       if (!refreshToken) {

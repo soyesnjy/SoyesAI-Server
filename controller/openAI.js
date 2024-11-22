@@ -143,13 +143,6 @@ function isNum(val) {
 // 심리 검사 관련
 const { ebt_Analysis } = require("../DB/psy_test");
 
-// const {
-//   base_pupu,
-//   base_soyes,
-//   base_lala,
-//   base_pupu_v2,
-// } = require("../DB/base_prompt");
-
 // 프롬프트 관련
 const {
   persona_prompt_ubi,
@@ -166,14 +159,6 @@ const {
   persona_prompt_maru,
 } = require("../DB/test_prompt");
 
-// 인지행동 검사 관련
-// const {
-//   cb_test_friend,
-//   cb_test_family,
-//   cb_test_school,
-//   cb_test_remain,
-// } = require("../DB/cognitive_behavior_test");
-
 // 텍스트 감지 관련
 const { test_result_ment } = require("../DB/detect_ment_Array");
 
@@ -185,7 +170,7 @@ const {
 
 // Database Table Info
 const {
-  User_Table_Info,
+  // User_Table_Info,
   EBT_Table_Info,
   PT_Table_Info,
   Consult_Table_Info,
@@ -279,21 +264,6 @@ const select_soyesAI_Consult_Log = async (keyValue, parsepUid, count = 1) => {
     return "Error";
   }
 };
-
-// EBT 반영 Class 정의
-// const EBT_classArr = [
-//   "School",
-//   "Friend",
-//   "Family",
-//   "Mood",
-//   "Unrest",
-//   "Sad",
-//   "Health",
-//   "Attention",
-//   "Movement",
-//   "Angry",
-//   "Self",
-// ];
 
 // EBT 반영 Class 정의
 const EBT__reportClassArr = [
@@ -469,35 +439,6 @@ const openAIController = {
         `,
       });
 
-      /*
-      const user_table = "soyes_ai_User";
-      const user_attr = {
-        pKey: "uid",
-        attr1: "email",
-      };
-
-      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${pUid}'`;
-      await fetchUserData(connection_AI, select_query);
-      console.log("받는사람: " + yourMailAddr);
-
-      yourMailAddr = "soyesnjy@gmail.com"; // dummy email. 받는사람
-      
-      // 보내는 사람 계정 로그인
-      myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
-      myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
-
-      const transporter = nodemailer.createTransport({
-        service: "gmail", // 사용할 이메일 서비스
-        // host: "smtp.gmail.com",
-        // port: 587,
-        // secure: false,
-        auth: {
-          user: myMailAddr, // 보내는 이메일 주소
-          pass: myMailPwd, // 이메일 비밀번호
-        },
-      });
-      */
-
       // AI 분석
       const response = await openai.chat.completions.create({
         messages: [...analysisPrompt, ...userPrompt],
@@ -510,28 +451,6 @@ const openAIController = {
       const analyzeMsg = message.message.split(". ").join(".\n");
       // client 전송
       res.json({ message: analyzeMsg, result });
-
-      // 메일 제목 및 내용 + 보내는사람 + 받는사람
-      const mailOptions = {
-        from: myMailAddr,
-        to: yourMailAddr,
-        subject: "정서행동 검사 AI 상담 분석 결과입니다",
-        text: `${analyzeMsg}`,
-        // attachments : 'logo.png' // 이미지 첨부 속성
-      };
-
-      // 메일 전송 (비동기)
-      /* 메일 전송 봉인
-        transporter.sendMail(mailOptions, function (error, info) {
-          if (error) {
-            console.log("Mail Send Fail!");
-            res.json("Mail Send Fail!");
-          } else {
-            console.log("Mail Send Success!");
-            console.log(info.envelope);
-          }
-        });
-      */
 
       // 검사 결과가 갱신 되었기에 정서 결과 세션 삭제
       delete req.session.psy_testResult_promptArr_last;
@@ -589,112 +508,12 @@ const openAIController = {
           );
         }
       }
-
-      /* EBT Data DB 저장 */
-      // if (parsingType) {
-      //   /* DB 저장 */
-      //   const table = EBT_Table_Info[parsingType].table;
-      //   const attribute = EBT_Table_Info[parsingType].attribute;
-      //   // 오늘 날짜 변환
-      //   const dateObj = new Date();
-      //   const year = dateObj.getFullYear();
-      //   const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
-      //   const day = ("0" + dateObj.getDate()).slice(-2);
-      //   const date = `${year}-${month}-${day}`;
-
-      //   // soyes_ai_Ebt Table 삽입
-      //   // 1. SELECT TEST (row가 있는지 없는지 검사)
-      //   const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${parsepUid}'`;
-      //   const ebt_data = await fetchUserData(connection_AI, select_query);
-
-      //   // 2. UPDATE TEST (row값이 있는 경우 실행)
-      //   if (ebt_data[0]) {
-      //     const update_query = `UPDATE ${table} SET ${Object.values(attribute)
-      //       .filter((el) => el !== "uid")
-      //       .map((el) => {
-      //         return `${el} = ?`;
-      //       })
-      //       .join(", ")} WHERE ${attribute.pKey} = ?`;
-      //     // console.log(update_query);
-
-      //     const update_value = [
-      //       ...parsingScore,
-      //       JSON.stringify({ ...mailOptions, date }),
-      //       date,
-      //       parsepUid,
-      //     ];
-
-      //     // console.log(update_value);
-
-      //     connection_AI.query(
-      //       update_query,
-      //       update_value,
-      //       (err, rows, fields) => {
-      //         if (err) {
-      //           console.log("AI Analysis Data DB UPDATE Fail!");
-      //           console.log("Err sqlMessage: " + err.sqlMessage);
-      //         } else console.log("AI Analysis Data DB UPDATE Success!");
-      //       }
-      //     );
-      //   }
-      //   // 3. INSERT TEST (row값이 없는 경우 실행)
-      //   else {
-      //     const insert_query = `INSERT INTO ${table} (${Object.values(
-      //       attribute
-      //     ).join(", ")}) VALUES (${Object.values(attribute)
-      //       .map((el) => "?")
-      //       .join(", ")})`;
-      //     // console.log(insert_query);
-
-      //     const insert_value = [
-      //       parsepUid,
-      //       ...parsingScore,
-      //       JSON.stringify({ ...mailOptions, date }),
-      //       date,
-      //     ];
-      //     // console.log(insert_value);
-
-      //     connection_AI.query(
-      //       insert_query,
-      //       insert_value,
-      //       (err, rows, fields) => {
-      //         if (err) {
-      //           console.log("AI Analysis Data DB INSERT Fail!");
-      //           console.log("Err sqlMessage: " + err.sqlMessage);
-      //         } else console.log("AI Analysis Data DB INSERT Success!");
-      //       }
-      //     );
-      //   }
-
-      //   // soyes_ai_Ebt_Log Table 삽입
-      //   const table_log = EBT_Table_Info["Log"].table; // 해당 table은 soyes_ai_User table과 외래키로 연결된 상태
-      //   const attribute_log = EBT_Table_Info["Log"].attribute;
-
-      //   const log_insert_query = `INSERT INTO ${table_log} (${Object.values(
-      //     attribute_log
-      //   ).join(", ")}) VALUES (${Object.values(attribute_log)
-      //     .map((el) => "?")
-      //     .join(", ")})`;
-      //   // console.log(insert_query);
-
-      //   const log_insert_value = [
-      //     parsepUid,
-      //     date,
-      //     JSON.stringify({ ...mailOptions, date }),
-      //     type,
-      //   ];
-      //   // console.log(insert_value);
-
-      //   connection_AI.query(log_insert_query, log_insert_value, (err) => {
-      //     if (err) {
-      //       console.log("AI Analysis Data LOG DB INSERT Fail!");
-      //       console.log("Err sqlMessage: " + err.sqlMessage);
-      //     } else console.log("AI Analysis Data LOG DB INSERT Success!");
-      //   });
-      // }
     } catch (err) {
-      console.log(err);
-      res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
+      delete err.headers;
+      console.error(err);
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
+      });
     }
   },
   // PT 결과 분석 및 DB 저장 및 메일 전송 API
@@ -781,20 +600,6 @@ const openAIController = {
 
       // 보내는 사람 계정 로그인
       const myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
-      const myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
-
-      const transporter = nodemailer.createTransport({
-        service: "gmail", // 사용할 이메일 서비스
-        // host: "smtp.gmail.com",
-        // port: 587,
-        // secure: false,
-        auth: {
-          user: myMailAddr, // 보내는 이메일 주소
-          pass: myMailPwd, // 이메일 비밀번호
-        },
-      });
-
-      // 메일 관련 세팅 끝
 
       // AI 분석
       // const response = await openai.chat.completions.create({
@@ -817,26 +622,6 @@ const openAIController = {
         // attachments : 'logo.png' // 이미지 첨부 속성
       };
 
-      /* 메일 전송 봉인
-      // 메일 전송 (비동기)
-      transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-          console.log("Mail Send Fail!");
-          res.json("Mail Send Fail!");
-        } else {
-          console.log("Mail Send Success!");
-          console.log(info.envelope);
-        }
-      });
-      */
-
-      // client 전송
-      // res.status(200).json({ message: "PT Test DB Insert Success!" });
-
-      // /* PT Data DB 저장 */
-      // const pt_table = PT_Table_Info["Main"].table;
-      // const pt_attribute = PT_Table_Info["Main"].attribute;
-
       // 오늘 날짜 변환
       const dateObj = new Date();
       const year = dateObj.getFullYear();
@@ -844,103 +629,44 @@ const openAIController = {
       const day = ("0" + dateObj.getDate()).slice(-2);
       const date = `${year}-${month}-${day}`;
 
-      // // soyes_ai_Pt Table 삽입
-      // // 1. SELECT TEST (row가 있는지 없는지 검사)
-      // const select_query = `SELECT * FROM ${pt_table} WHERE ${pt_attribute.pKey}='${parsepUid}'`;
-      // const ebt_data = await fetchUserData(connection_AI, select_query);
-
-      // // 2. UPDATE TEST (row값이 있는 경우 실행)
-      // if (ebt_data[0]) {
-      //   const update_query = `UPDATE ${pt_table} SET ${Object.values(
-      //     pt_attribute
-      //   )
-      //     .filter((el) => el !== "uid")
-      //     .map((el) => {
-      //       return `${el} = ?`;
-      //     })
-      //     .join(", ")} WHERE ${pt_attribute.pKey} = ?`;
-      //   // console.log(update_query);
-
-      //   const update_value = [
-      //     date,
-      //     parsePTResult,
-      //     JSON.stringify({ ...mailOptions, date }),
-      //     parsepUid,
-      //   ];
-
-      //   // console.log(update_value);
-
-      //   connection_AI.query(
-      //     update_query,
-      //     update_value,
-      //     (error, rows, fields) => {
-      //       if (error) console.log(error);
-      //       else console.log("PT TEST Analysis Data DB UPDATE Success!");
-      //     }
-      //   );
-      // }
-      // // 3. INSERT TEST (row값이 없는 경우 실행)
-      // else {
-      //   const pt_insert_query = `INSERT INTO ${pt_table} (${Object.values(
-      //     pt_attribute
-      //   ).join(", ")}) VALUES (${Object.values(pt_attribute)
-      //     .map((el) => "?")
-      //     .join(", ")})`;
-      //   // console.log(insert_query);
-
-      //   const pt_insert_value = [
-      //     parsepUid,
-      //     date,
-      //     resultText,
-      //     JSON.stringify({ ...mailOptions, date }),
-      //   ];
-
-      //   connection_AI.query(
-      //     pt_insert_query,
-      //     pt_insert_value,
-      //     (error, rows, fields) => {
-      //       if (error) console.log(error);
-      //       else console.log("PT TEST Analysis Data DB INSERT Success!");
-      //     }
-      //   );
-      // }
-
       /* PT_Log DB 저장 */
-      if (true) {
-        const pt_log_table = PT_Table_Info["Log"].table;
-        const pt_log_attribute = PT_Table_Info["Log"].attribute;
-        // PT_Log DB 저장
-        const pt_insert_query = `INSERT INTO ${pt_log_table} (${Object.values(
-          pt_log_attribute
-        ).join(", ")}) VALUES (${Object.values(pt_log_attribute)
-          .map((el) => "?")
-          .join(", ")})`;
-        // console.log(insert_query);
 
-        const pt_insert_value = [
-          parsepUid,
-          date,
-          resultText,
-          JSON.stringify({ ...mailOptions, date }),
-        ];
-        // console.log(insert_value);
+      const pt_log_table = PT_Table_Info["Log"].table;
+      const pt_log_attribute = PT_Table_Info["Log"].attribute;
+      // PT_Log DB 저장
+      const pt_insert_query = `INSERT INTO ${pt_log_table} (${Object.values(
+        pt_log_attribute
+      ).join(", ")}) VALUES (${Object.values(pt_log_attribute)
+        .map((el) => "?")
+        .join(", ")})`;
+      // console.log(insert_query);
 
-        connection_AI.query(pt_insert_query, pt_insert_value, (err) => {
-          if (err) {
-            console.log("PT Analysis Data DB Save Fail!");
-            console.log("Err sqlMessage: " + err.sqlMessage);
-            res
-              .status(400)
-              .json({ message: "Err sqlMessage: " + err.sqlMessage });
-          } else {
-            console.log("AI Analysis Data LOG DB INSERT Success!");
-            res.status(200).json({ message: "PT Test DB Insert Success!" });
-          }
-        });
-      }
+      const pt_insert_value = [
+        parsepUid,
+        date,
+        resultText,
+        JSON.stringify({ ...mailOptions, date }),
+      ];
+      // console.log(insert_value);
+
+      connection_AI.query(pt_insert_query, pt_insert_value, (err) => {
+        if (err) {
+          console.log("PT Analysis Data DB Save Fail!");
+          console.log("Err sqlMessage: " + err.sqlMessage);
+          res
+            .status(400)
+            .json({ message: "Err sqlMessage: " + err.sqlMessage });
+        } else {
+          console.log("AI Analysis Data LOG DB INSERT Success!");
+          res.status(200).json({ message: "PT Test DB Insert Success!" });
+        }
+      });
     } catch (err) {
-      console.log(err);
-      res.json({ message: "Server Error - 500 Bad Gateway" });
+      delete err.headers;
+      console.error(err);
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
+      });
     }
   },
   // PT 결과 저장 API (GPT 분석 없이 성격검사 결과를 저장만 하는 API)
@@ -1012,8 +738,11 @@ const openAIController = {
           .json({ message: "AI Analysis Data LOG DB INSERT Success!" });
       });
     } catch (err) {
-      console.log(err);
-      res.json({ message: "Server Error - 500 Bad Gateway" });
+      delete err.headers;
+      console.error(err);
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
+      });
     }
   },
   // 공감친구 모델 - 푸푸
@@ -1270,10 +999,10 @@ const openAIController = {
       ]);
       res.status(200).json(message);
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.json({
-        message: "Server Error",
-        emotion: 0,
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -1442,10 +1171,10 @@ const openAIController = {
 
       res.status(200).json(message);
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.json({
-        message: "Server Error",
-        emotion: 0,
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -1521,10 +1250,10 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
       // ]);
       return res.status(200).json(message);
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
-        // emotion: 0,
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -1596,9 +1325,10 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
       // Client 반환
       return res.status(200).json(message);
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
         emotion: 0,
       });
     }
@@ -1717,9 +1447,10 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
         }),
       });
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.json({
-        data: "Server Error",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -1922,9 +1653,10 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
         north_data: JSON.parse(north_join_data[0].result),
       });
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -1951,9 +1683,12 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
 
       // JSON 형식이 아니기에 res.json 사용 X
       res.end(response.data);
-    } catch (error) {
-      console.error(error.message);
-      res.status(500).end("Internal Server Error");
+    } catch (err) {
+      delete err.headers;
+      console.error(err);
+      return res.status(500).end({
+        message: `Server Error : ${err.message}`,
+      });
     }
   },
   // 상담 로그 Save API
@@ -2050,10 +1785,11 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
         );
       }
     } catch (err) {
-      console.log(err);
-      res
-        .status(500)
-        .json({ message: "Consulting_Log DB Save Fail!" + err.message });
+      delete err.headers;
+      console.error(err);
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
+      });
     }
   },
   // 상담 로그 Load API
@@ -2100,9 +1836,10 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
         data: resultArr,
       });
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -2117,10 +1854,11 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
       // });
       next();
     } catch (err) {
-      console.log(err);
-      // res.json({
-      //   data: "Clear Cookies Fail!",
-      // });
+      delete err.headers;
+      console.error(err);
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
+      });
     }
   },
   // User 정서행동 검사 11종 결과 반환
@@ -2171,9 +1909,10 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
         data: resultArr.sort((a, b) => b.tScore - a.tScore),
       });
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -2198,9 +1937,12 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
       else {
         return res.status(404).send("Video not found");
       }
-    } catch (error) {
-      console.error("Error fetching video data:", error);
-      res.status(500).send("Internal Server Error");
+    } catch (err) {
+      delete err.headers;
+      console.error(err);
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
+      });
     }
   },
   // 상담 Solution 반환 API
@@ -2314,9 +2056,10 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
       // Default Solution - 추후 삭제 예정
       return res.status(200).json(message);
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -2381,9 +2124,12 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
         webContentLink: updatedFile.data.webContentLink,
         imageUrl: imageUrl,
       });
-    } catch (error) {
-      console.log(error);
-      res.status(500).send(error.message);
+    } catch (err) {
+      delete err.headers;
+      console.error(err);
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
+      });
     }
   },
 };
@@ -2559,9 +2305,10 @@ Todo List가 아니라고 판단되면 제외한다.
 
       return res.status(200).json(message);
     } catch (err) {
+      delete err.headers;
       console.error(err);
       return res.status(500).json({
-        message: "Server Error - 500 Bad Gateway" + err.message,
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -2887,9 +2634,10 @@ Todo List가 아니라고 판단되면 제외한다.
           break;
       }
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -2939,9 +2687,10 @@ Todo List가 아니라고 판단되면 제외한다.
       // dummy data (임시)
       // return res.json({ mood_round_idx: 0, mood_name: "" });
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -3084,9 +2833,10 @@ Todo List가 아니라고 판단되면 제외한다.
           });
       }
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -3283,9 +3033,10 @@ B와 C를 참고해 일관적으로 반응해야 한다. 사과나, 공감하는
 
       return res.status(200).json(message);
     } catch (err) {
+      delete err.headers;
       console.error(err);
       return res.status(500).json({
-        message: "Server Error - 500 Bad Gateway" + err.message,
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -3419,9 +3170,10 @@ B와 C를 참고해 일관적으로 반응해야 한다. 사과나, 공감하는
           break;
       }
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -3538,9 +3290,10 @@ B와 C를 참고해 일관적으로 반응해야 한다. 사과나, 공감하는
           });
       }
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -3708,9 +3461,10 @@ const ellaAnxietyController = {
 
       return res.status(200).json(message);
     } catch (err) {
+      delete err.headers;
       console.error(err);
       return res.status(500).json({
-        message: "Server Error - 500 Bad Gateway" + err.message,
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -4092,9 +3846,10 @@ const ellaAnxietyController = {
           break;
       }
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -4144,9 +3899,10 @@ const ellaAnxietyController = {
       // dummy data (임시)
       // return res.json({ mood_round_idx: 0, mood_name: "" });
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -4349,9 +4105,10 @@ const ellaAnxietyController = {
           });
       }
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -4457,9 +4214,10 @@ const ellaFamilyController = {
 
       return res.status(200).json(message);
     } catch (err) {
+      delete err.headers;
       console.error(err);
       return res.status(500).json({
-        message: "Server Error - 500 Bad Gateway" + err.message,
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -4619,9 +4377,10 @@ const ellaFamilyController = {
         return res.status(200).json({ message: "Family Data Save Success!" });
       });
     } catch (err) {
+      delete err.headers;
       console.error(err);
       return res.status(500).json({
-        message: "Server Error - 500",
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -4691,9 +4450,10 @@ const ellaFamilyController = {
         maxCount: limit,
       });
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -4784,9 +4544,10 @@ const ellaFamilyController = {
           });
       }
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -4842,9 +4603,10 @@ const ellaFamilyController = {
         }
       });
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -5652,10 +5414,10 @@ const NorthController = {
 
       // return res.status(200).json(message);
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
-        // emotion: 0,
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -5706,10 +5468,10 @@ const NorthController = {
         .status(200)
         .json({ message: "North Diary Load Success!", data: select_data });
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
-        // emotion: 0,
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -5768,9 +5530,10 @@ const NorthController = {
         }
       });
     } catch (err) {
+      delete err.headers;
       console.error(err);
-      res.status(500).json({
-        message: "Server Error - 500",
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -5910,9 +5673,10 @@ const ubiController = {
 
       return res.status(200).json(message);
     } catch (err) {
+      delete err.headers;
       console.error(err);
       return res.status(500).json({
-        message: "Server Error - 500 Bad Gateway" + err.message,
+        message: `Server Error : ${err.message}`,
       });
     }
   },
@@ -6301,14 +6065,15 @@ const reportController = {
 
       await transporter.sendMail(mailOptions);
       return res.status(200).json({ message: "PDF sent successfully" });
-    } catch (error) {
-      console.error("Error processing request:", error);
-      res.status(500).json({ message: `Error processing request: ${error}` });
+    } catch (err) {
+      delete err.headers;
+      console.error(err);
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
+      });
     }
   },
 };
-
-// console.log("jenkins 테스트용 주석22");
 
 module.exports = {
   openAIController,
