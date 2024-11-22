@@ -1459,6 +1459,7 @@ const loginController = {
     // console.log(subscription_auth);
     // 세션에 이용권한 존재
     if (subscription_auth) {
+      console.log("세션 이용권한 패스");
       next();
       return;
     }

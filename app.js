@@ -61,7 +61,7 @@ app.use(
       secure: process.env.DEV_OPS !== "local",
       // sameSite: "lax", // 또는 "strict", 로컬 개발 환경에 더 적합
       // secure: false, // 로컬 개발 환경에서는 false로 설정
-      maxAge: 3600000, // sid 쿠키 수명 1시간으로 설정
+      maxAge: 100 * 1000, // sid 쿠키 수명 100초로 설정
     },
   })
 );
