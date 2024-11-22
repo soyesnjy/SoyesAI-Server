@@ -84,7 +84,8 @@ const { postOpenAIUbiMeditationRecomend } = ubiController;
 const { postReportTest } = reportController;
 
 // 토큰 유효성 검사 미들웨어
-const { vaildateTokenConsulting, vaildatePlan } = loginController;
+const { vaildateTokenConsulting, vaildateUserSubscriptionAuth } =
+  loginController;
 
 router.get("/", (req, res) => {
   res.send("Welcome to the GPT API");
@@ -109,7 +110,7 @@ router.post(
 router.post(
   "/consulting_emotion_pupu",
   vaildateTokenConsulting,
-  // vaildatePlan,
+  vaildateUserSubscriptionAuth,
   postOpenAIConsultingPupu
 );
 

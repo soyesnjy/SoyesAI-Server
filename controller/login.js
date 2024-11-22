@@ -1452,87 +1452,104 @@ const loginController = {
   },
   // (Middle Ware) SoyesAI 유저 이용 권한 유효성 검사
   vaildateUserSubscriptionAuth: async (req, res, next) => {
+    const { data } = req.body;
     // const accessToken = req.session.accessToken;
-    const refreshToken = req.cookies.refreshToken;
-
-    const user_plan_table = Subscription_Table_Info["Subscription"].table;
-    const user_plan_attribute =
-      Subscription_Table_Info["Subscription"].attribute;
+    // const refreshToken = req.cookies.refreshToken;
+    const subscription_auth = req.session.subscription_auth;
+    // console.log(subscription_auth);
+    // 세션에 이용권한 존재
+    if (subscription_auth) {
+      next();
+      return;
+    }
 
     let parsepUid = "",
-      decoded;
+      parseData;
     try {
-      // 0. Token 값을 통한 uid 조회
-      // if (accessToken) decoded = verifyToken("access", accessToken);
-      if (refreshToken) decoded = verifyToken("refresh", refreshToken);
-      else
-        return res.status(401).json({ message: "Login Session Expire! - 401" });
+      // 파싱. Client JSON 데이터
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
 
-      // 토큰 만료
-      if (decoded === "expired")
-        return res.status(401).json({ message: "Token has expired - 401" });
+      const { pUid } = parseData;
 
-      parsepUid = decoded.id;
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
+      }
+
+      parsepUid = pUid;
       const today = moment().tz("Asia/Seoul").format("YYYY-MM-DD HH:mm:ss");
 
-      // 1. User Redis expiry 조회
-      let userExpiryDate = await redisStore.get(
-        `user:expiry:${parsepUid}`,
-        (err, data) => data
-      );
-      // console.log("userExpiryDate: " + userExpiryDate);
+      const sub_table = Subscription_Table_Info["Subscription"].table;
+      const sub_select_query = `SELECT
+      subscription_expiration_date,
+      subscription_status
+      FROM ${sub_table}
+      WHERE uid='${parsepUid}'`;
 
-      // 2. User Redis expiry 값이 있는 경우 - 오늘 날짜와 expiry 값 비교
-      if (userExpiryDate) {
-        // 2-1. 만료되지 않은 경우 - next();
-        if (new Date(userExpiryDate) >= new Date(today)) {
-          console.log(`Plan 유효성 검증 통과! - ${parsepUid}`);
+      const sub_select_data = await fetchUserData(
+        connection_AI,
+        sub_select_query
+      );
+      // console.log(sub_select_data[0]);
+
+      // 이용권한 체크
+      if (sub_select_data.length) {
+        const { subscription_expiration_date, subscription_status } =
+          sub_select_data[0];
+        // 이용 권한 존재
+        if (new Date(subscription_expiration_date) >= new Date(today)) {
+          if (!req.session.subscription_auth)
+            req.session.subscription_auth = true;
           next();
+          return;
         }
-        // 2-2. 만료된 경우 - 접근 제한 (만료된 유저)
+        // 이용권 만료
         else {
-          console.log(`Expired User 401 - ${parsepUid}`);
-          return res.status(401).json({ message: "Expired User - 401" });
+          console.log(
+            `이용 권한이 만료된 회원입니다 (Expired User) - ${parsepUid}`
+          );
+          // 이용권 상태 갱신
+          if (subscription_status === "active") {
+            const update_query = `UPDATE ${sub_table} SET
+            subscription_status = ?
+            WHERE uid = ?`;
+
+            const update_value = ["expired", parsepUid];
+
+            try {
+              await queryAsync(connection_AI, update_query, update_value);
+              console.log(
+                `User Subscription Status Update Success! - pUid: ${parsepUid}`
+              );
+            } catch (err) {
+              console.error("Error executing query:", err);
+              return res.status(500).json({
+                message: `Server Error: ${err.sqlMessage}`,
+              });
+            }
+          }
+
+          return res
+            .status(406)
+            .json({ message: "이용 권한이 만료된 회원입니다 (Expired User)" });
         }
       }
-      // 3. User Redis expiry 값이 없는 경우
+      // 미결제 유저
       else {
-        // 3-0. User_Plan 테이블에 해당 유저가 있는지 조회
-        const user_plan_data = await user_ai_select(
-          user_plan_table,
-          user_plan_attribute,
-          parsepUid
-        );
-        // console.log(user_plan_data[0]);
-        // 3-1. User Plan이 있는 경우 - Redis expiry 데이터 갱신 후 만료 여부 판단
-        if (user_plan_data[0]) {
-          const { expirationDate } = user_plan_data[0];
-          // Redis expiry 데이터 갱신
-          await redisStore.set(
-            `user:expiry:${parsepUid}`,
-            expirationDate,
-            (err, reply) => {
-              console.log(`User Plan Redis Update - ${parsepUid}`);
-            }
-          );
-          // 만료 여부 판단
-          if (new Date(expirationDate) >= new Date(today)) {
-            console.log(`Plan 유효성 검증 통과! - ${parsepUid}`);
-            next();
-          } else {
-            console.log(`Expired User 401 - ${parsepUid}`);
-            return res.status(401).json({ message: "Expired User - 401" });
-          }
-        }
-        // 3-2. User Plan이 없는 경우 - 접근 제한 (미결제 유저)
-        else {
-          console.log(`Unpaid User 401 - ${parsepUid}`);
-          return res.status(401).json({ message: "Unpaid User - 401" });
-        }
+        console.log(`이용 권한이 없는 회원입니다 (Unpaid User) - ${parsepUid}`);
+        return res
+          .status(406)
+          .json({ message: "이용 권한이 없는 회원입니다 (Unpaid User)" });
       }
     } catch (err) {
-      console.log(err.message);
-      res.status(500).json({ message: "Server Error - 500" });
+      delete err.headers;
+      console.error(err);
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
+      });
     }
   },
   // (App) AI RefreshToken 인증
