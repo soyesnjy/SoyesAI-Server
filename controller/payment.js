@@ -204,7 +204,9 @@ const PaymentController = {
           coupon_select_data[0]?.coupon_type === "subscription" &&
           (type || receipt)
         ) {
-          console.log(`Not Vaildation Coupon - pUid: ${pUid}`);
+          console.log(
+            `유효한 결제 방식이 아닙니다 (There are input values that are not required when using a subscription coupon) - pUid: ${pUid}`
+          );
           return res.status(400).json({
             message:
               "유효한 결제 방식이 아닙니다 (There are input values that are not required when using a subscription coupon)",
@@ -458,95 +460,6 @@ const PaymentController = {
           message: "이미 사용된 쿠폰입니다 (Already Used Coupon)",
         });
       }
-
-      // if (coupon_type === "subscription") {
-      //   // 이용권 만료일 확인
-      //   const sub_table = Subscription_Table_Info["Subscription"].table;
-
-      //   const sub_select_query = `SELECT * FROM ${sub_table} WHERE uid='${parsepUid}'`;
-      //   const sub_select_data = await fetchUserData(
-      //     connection_AI,
-      //     sub_select_query
-      //   );
-
-      //   const today = moment().tz("Asia/Seoul").format("YYYY-MM-DD HH:mm:ss");
-      //   // expirationDate 지났는지 여부 확인
-      //   let expirationDate_value = sub_select_data[0]
-      //     ?.subscription_expiration_date
-      //     ? new Date(sub_select_data[0]?.subscription_expiration_date) <
-      //       new Date(today)
-      //       ? addDays(coupon_subscription_period)
-      //           .toISOString()
-      //           .slice(0, 19)
-      //           .replace("T", " ")
-      //       : addDays(
-      //           coupon_subscription_period,
-      //           sub_select_data[0]?.subscription_expiration_date
-      //         )
-      //           .toISOString()
-      //           .slice(0, 19)
-      //           .replace("T", " ")
-      //     : addDays(coupon_subscription_period)
-      //         .toISOString()
-      //         .slice(0, 19)
-      //         .replace("T", " ");
-
-      //   // DB에 Row가 없을 경우 INSERT, 있으면 지정한 속성만 UPDATE
-      //   const duple_query = `INSERT INTO ${sub_table}
-      //   (uid,
-      //   subscription_expiration_date,
-      //   subscription_status)
-      //   VALUES (?, ?, ?)
-      //   ON DUPLICATE KEY UPDATE
-      //   subscription_expiration_date = VALUES(subscription_expiration_date),
-      //   subscription_status = VALUES(subscription_status);`;
-
-      //   const duple_value = [parsepUid, expirationDate_value, "active"];
-
-      //   try {
-      //     await queryAsync(connection_AI, duple_query, duple_value);
-      //     console.log(
-      //       `User Subscription Expiration Date Update Success! - pUid: ${parsepUid}`
-      //     );
-      //     res.status(200).json({
-      //       message:
-      //         "이용권 쿠폰 사용에 성공했습니다! (User Coupon validation Success)",
-      //       expirationDate: expirationDate_value,
-      //     });
-      //   } catch (err) {
-      //     console.error("Error executing query:", err);
-      //     return res.status(500).json({
-      //       message: `Server Error: ${err.sqlMessage}`,
-      //     });
-      //   }
-      //   // Log Insert 처리
-      //   if (true) {
-      //     const log_insert_query = `INSERT INTO ${log_table} (
-      //     uid,
-      //     subscription_log_type,
-      //     subscription_log_coupon_number,
-      //     subscription_log_coupon_id
-      //     ) VALUES (?, ?, ?, ?)`;
-      //     // console.log(plan_log_insert_query);
-      //     const log_insert_value = [
-      //       parsepUid,
-      //       "coupon",
-      //       couponNumber,
-      //       coupon_id,
-      //     ];
-      //     // console.log(plan_log_insert_value);
-      //     try {
-      //       await queryAsync(connection_AI, log_insert_query, log_insert_value);
-      //       console.log(`Subscription Log Insert Success! - pUid: ${pUid}`);
-      //       return;
-      //     } catch (err) {
-      //       console.error("Error executing query:", err);
-      //       return res.status(500).json({
-      //         message: `Server Error: ${err.sqlMessage}`,
-      //       });
-      //     }
-      //   }
-      // }
 
       // 이용권인 경우
       if (coupon_type === "subscription") {
