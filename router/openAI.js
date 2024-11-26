@@ -99,7 +99,16 @@ router.post(
   vaildateTokenConsulting,
   postOpenAIPsychologicalAnalysis
 );
-// PT 결과 분석
+
+// EBT 결과(11종) 데이터 반환
+router.post(
+  "/ebtresult",
+  vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
+  postOpenAIUserEBTResultData
+);
+
+// PT 결과 Save
 router.post(
   "/analysis_pt",
   vaildateTokenConsulting,
@@ -347,8 +356,6 @@ router.post(
 router.post("/calendar", vaildateTokenConsulting, postOpenAIMypageCalendarData);
 // 마이페이지 데이터 반환
 router.post("/mypage", vaildateTokenConsulting, postOpenAIMypageData);
-// User EBT 결과(11종) 데이터 반환
-router.post("/ebtresult", vaildateTokenConsulting, postOpenAIUserEBTResultData);
 
 // 상담 solution 반환
 router.post(
