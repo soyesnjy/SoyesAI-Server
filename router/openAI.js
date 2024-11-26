@@ -110,7 +110,7 @@ router.post(
 router.post(
   "/consulting_emotion_pupu",
   vaildateTokenConsulting,
-  vaildateUserSubscriptionAuth,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIConsultingPupu
 );
 
@@ -118,7 +118,7 @@ router.post(
 router.post(
   "/test/consulting_emotion_pupu",
   // vaildateTokenConsulting,
-  // vaildatePlan,
+  // vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIConsultingPupu
 );
 
@@ -132,7 +132,7 @@ router.post(
 // 명상추천 모델 - 우비
 router.post(
   "/meditation_recomend_ubi",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   postOpenAIUbiMeditationRecomend
 );
 
@@ -196,24 +196,28 @@ router.post(
 router.post(
   "/training_mood_ella",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIEllaMoodTraning
 );
 // 기분훈련 데이터 Save
 router.post(
   "/training_mood_ella/save",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIMoodDataSave
 );
 // 기분훈련 시작 데이터 Load
 router.post(
   "/training_mood_ella/load",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIMoodDataLoad
 );
 // 기분훈련 보고서 데이터 Load
 router.post(
   "/training_mood_ella/load/training",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIMoodTrainingDataLoad
 );
 
@@ -221,24 +225,28 @@ router.post(
 router.post(
   "/training_anxiety_ella",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIEllaAnxietyTraning
 );
 // 불안훈련 데이터 Save
 router.post(
   "/training_anxiety_ella/save",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIAnxietyDataSave
 );
 // 불안훈련 시작 데이터 Load
 router.post(
   "/training_anxiety_ella/load",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIAnxietyDataLoad
 );
 // 불안훈련 보고서 데이터 Load
 router.post(
   "/training_anxiety_ella/load/training",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIAnxietyTrainingDataLoad
 );
 
@@ -246,18 +254,21 @@ router.post(
 router.post(
   "/training_friend_ella",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIEllaFriendTraning
 );
 // 또래관계 훈련 데이터 Save
 router.post(
   "/training_friend_ella/save",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIFriendDataSave
 );
 // 또래관계 훈련 보고서 데이터 Load
 router.post(
   "/training_friend_ella/load/training",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIFriendTrainingDataLoad
 );
 
@@ -296,6 +307,7 @@ router.post(
 router.post(
   "/training_emotion_ella",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIEllaEmotionTraning
 );
 
@@ -303,6 +315,7 @@ router.post(
 router.post(
   "/training_emotion_ella/save",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIEmotionDataSave
 );
 
@@ -310,6 +323,7 @@ router.post(
 router.post(
   "/training_emotion_ella/load",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIEmotionDataLoad
 );
 
@@ -317,11 +331,17 @@ router.post(
 router.post(
   "/training_emotion_ella/load/training",
   vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIEmotionTrainingDataLoad
 );
 
 // 결과보고서 PDF 이메일 발송
-router.post("/report", vaildateTokenConsulting, postReportTest);
+router.post(
+  "/report",
+  vaildateTokenConsulting,
+  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
+  postReportTest
+);
 
 // 달력 데이터 반환
 router.post("/calendar", vaildateTokenConsulting, postOpenAIMypageCalendarData);
