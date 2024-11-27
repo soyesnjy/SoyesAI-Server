@@ -140,6 +140,15 @@ function isNum(val) {
   return !isNaN(val);
 }
 
+// 우비 반환값 형식 확인 메서드
+function isInvalidFormatOrder(str) {
+  // 정규식: 반드시 mind, music, yoga 순서로 값이 포함된 형식인지 확인
+  const regex = /^mind\/[^,]+, music\/[^,]+, yoga\/[^,]+$/;
+
+  // 정규식에 맞지 않으면 true 반환
+  return !regex.test(str);
+}
+
 // 심리 검사 관련
 const { ebt_Analysis } = require("../DB/psy_test");
 
@@ -158,6 +167,11 @@ const {
   persona_prompt_pupu_v7,
   persona_prompt_maru,
 } = require("../DB/test_prompt");
+
+const {
+  ubi_meditaion_recommand_prompt,
+  ubiPromptHandler,
+} = require("../DB/ubi_prompot");
 
 // 텍스트 감지 관련
 const { test_result_ment } = require("../DB/detect_ment_Array");
@@ -5669,6 +5683,78 @@ const ubiController = {
             index: tag3 === "music" ? [] : arrCreate(maxArr[tagObj[tag3]]),
           },
         ],
+      };
+
+      return res.status(200).json(message);
+    } catch (err) {
+      delete err.headers;
+      console.error(err);
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
+      });
+    }
+  },
+  // 우비 명상추천 친구 Renewl
+  postOpenAIUbiMeditationRecomendRenewl: async (req, res) => {
+    const { data } = req.body;
+    let parseData; // Parsing 변수
+    let promptArr = []; // 삽입 Prompt Array
+
+    try {
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { pUid } = parseData;
+
+      // maxArr = [음악 최대, 그림 최대, 요가 최대]
+
+      console.log(`우비 명상추천 API 호출 - pUid: ${pUid}`);
+      console.log(parseData);
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 400");
+        return res.status(400).json({ message: "No pUid input value - 400" });
+      }
+
+      // pUid default값 설정
+      parsepUid = pUid;
+
+      const ebt_result = await select_soyesAI_EbtResult_v2(
+        "",
+        false,
+        parsepUid
+      );
+
+      const ebt_scores = ebt_result
+        ?.map((el) => {
+          const { ebt_class, tScore } = el;
+          return `EBT-${ebt_class}: ${tScore}\n`;
+        })
+        .join("");
+
+      promptArr.push({ role: "system", content: ubiPromptHandler(ebt_scores) });
+
+      const response = await openai.chat.completions.create({
+        messages: [...promptArr],
+        model: "gpt-4o", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+        temperature: 0.5,
+      });
+
+      let value = response.choices[0].message.content;
+      // console.log(value);
+
+      // 반환값 형식 확인
+      if (isInvalidFormatOrder(value)) {
+        value = `mind/oBPUCd6LZZg, music/PjisWOWzwtg, yoga/UAYdJleEugw`;
+      }
+
+      const message = {
+        message: value.split(",").map((el) => {
+          const [tag, youtubeId] = el.split("/");
+          return { tag, youtubeId };
+        }),
       };
 
       return res.status(200).json(message);

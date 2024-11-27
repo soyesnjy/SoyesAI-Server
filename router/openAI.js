@@ -79,7 +79,10 @@ const {
   postOpenAIConsultingNorthDelete,
 } = NorthController;
 
-const { postOpenAIUbiMeditationRecomend } = ubiController;
+const {
+  postOpenAIUbiMeditationRecomend,
+  postOpenAIUbiMeditationRecomendRenewl,
+} = ubiController;
 
 const { postReportTest } = reportController;
 
@@ -143,6 +146,13 @@ router.post(
   "/meditation_recomend_ubi",
   vaildateTokenConsulting,
   postOpenAIUbiMeditationRecomend
+);
+
+// 명상추천 모델 - 우비 (renewl)
+router.post(
+  "/meditation_recomend_ubi/renewl",
+  vaildateTokenConsulting,
+  postOpenAIUbiMeditationRecomendRenewl
 );
 
 // 전문상담사 모델 - 소예

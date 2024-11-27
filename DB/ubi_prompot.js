@@ -1,0 +1,747 @@
+const ubi_meditaion_recommand_prompt = {
+  role: "system",
+  content: `다음은 유저의 심리검사 관련 정보이다.
+  '''
+  EBT-School: 10T
+  EBT-Friend : 60T
+  EBT-Family : 72T
+  EBT-Mood : 46T
+  EBT-Unrest : 82T
+  EBT-Sad: 47T
+  EBT-Health : 31T
+  EBT-Attention : 25T
+  EBT-Movement : 12T
+  EBT-Angry  : 17T
+  EBT-Self : 50T
+  '''
+  
+  유저의 심리검사 관련 정보를 기반으로 아래 조건에 따른 값을 반환한다.
+  '''
+  if(EBT-School >= 65T){
+    1순위
+    mind/oBPUCd6LZZg
+    
+    2순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/_21nNOp4nmc
+    yoga/yoaahW7LskU
+    yoga/vZi1CffWjXI
+    yoga/__kP22QXQfw
+    yoga/-h435xELWF0
+    yoga/wl2WQ0I3Yy8
+    yoga/B5zT-7IX-ig
+    yoga/AR4pjb5cj_Y
+    yoga/YYa7gs30aXE
+    yoga/CX4rtQXNHxs
+    yoga/dlR97xBRzJI
+    yoga/UAYdJleEugw
+    yoga/J4LKu2i-moY
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/-t5L4sPxukI
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    yoga/_mUl_sz9Ou4
+    yoga/RDszsniHWgk
+    music/PjisWOWzwtg
+    music/cMuBdl68UBI
+    music/-HET0QaTVbM
+    music/XDYhI7Pz7A4
+    music/Wteq_lAXlt0
+    music/V6Aj9Mzhoag
+    music/ZhCmAqDdplM
+    music/pasREM7CLjc
+    music/GxaUgHpHM0I
+    music/8rG93YtqkJw
+    music/m4PRV6hx-hs
+    music/N4BUL7PDPw8
+    mind/Nw89DEW3Tg8
+    mind/3UAQG8XcpD0
+    mind/fRMqTzJd9gk
+    mind/gs4LcCmsLwA
+    mind/GjdCeAj4MUU
+    mind/3CMWoE4qF0Q
+    mind/1ZgeqYRax3w
+    mind/altQ6L1NF64
+    mind/yEZlW0Kk8kA
+    mind/bI7vJ1jhGAQ
+  }
+  
+  if(EBT-Friend >= 65T){
+    2순위
+    mind/oBPUCd6LZZg
+    mind/altQ6L1NF64
+    mind/yEZlW0Kk8kA
+    mind/bI7vJ1jhGAQ
+  }
+  
+  if(EBT-Family >= 60T){
+    1순위
+    yoga/B5zT-7IX-ig
+    yoga/YYa7gs30aXE
+    yoga/UAYdJleEugw
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    
+    2순위
+    mind/oBPUCd6LZZg
+    mind/altQ6L1NF64
+    mind/ns5kDuZYNAg
+    mind/yEZlW0Kk8kA
+    mind/bI7vJ1jhGAQ
+  }
+  
+  if(EBT-Mood >= 60T){
+    1순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/-h435xELWF0
+    yoga/dlR97xBRzJI
+    yoga/J4LKu2i-moY
+    mind/altQ6L1NF64
+    mind/yEZlW0Kk8kA
+    
+    2순위
+    yoga/_21nNOp4nmc
+    yoga/yoaahW7LskU
+    yoga/vZi1CffWjXI
+    yoga/__kP22QXQfw
+    yoga/wl2WQ0I3Yy8
+    yoga/B5zT-7IX-ig
+    yoga/AR4pjb5cj_Y
+    yoga/YYa7gs30aXE
+    yoga/CX4rtQXNHxs
+    yoga/UAYdJleEugw
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    yoga/_mUl_sz9Ou4
+    yoga/RDszsniHWgk
+    music/CQ5JMW59nPc
+    music/PjisWOWzwtg
+    music/cMuBdl68UBI
+    music/-HET0QaTVbM
+    music/XDYhI7Pz7A4
+    music/Wteq_lAXlt0
+    music/V6Aj9Mzhoag
+    music/ZhCmAqDdplM
+    music/pasREM7CLjc
+    music/GxaUgHpHM0I
+    music/8rG93YtqkJw
+    music/m4PRV6hx-hs
+    music/N4BUL7PDPw8
+  }
+  
+  if(EBT-Unrest >= 60T){
+    1순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/B5zT-7IX-ig
+    yoga/YYa7gs30aXE
+    yoga/UAYdJleEugw
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    yoga/RDszsniHWgk
+    mind/altQ6L1NF64
+    mind/ns5kDuZYNAg
+    
+    2순위
+    yoga/_21nNOp4nmc
+    yoga/yoaahW7LskU
+    yoga/vZi1CffWjXI
+    yoga/__kP22QXQfw
+    yoga/-h435xELWF0
+    yoga/wl2WQ0I3Yy8
+    yoga/AR4pjb5cj_Y
+    yoga/CX4rtQXNHxs
+    yoga/dlR97xBRzJI
+    yoga/J4LKu2i-moY
+    yoga/-t5L4sPxukI
+    yoga/_mUl_sz9Ou4
+    music/CQ5JMW59nPc
+    music/PjisWOWzwtg
+    music/cMuBdl68UBI
+    music/-HET0QaTVbM
+    music/XDYhI7Pz7A4
+    music/Wteq_lAXlt0
+    music/V6Aj9Mzhoag
+    music/ZhCmAqDdplM
+    music/pasREM7CLjc
+    music/GxaUgHpHM0I
+    music/8rG93YtqkJw
+    music/m4PRV6hx-hs
+    music/N4BUL7PDPw8
+    mind/Nw89DEW3Tg8
+    mind/3UAQG8XcpD0
+    mind/fRMqTzJd9gk
+    mind/gs4LcCmsLwA
+    mind/GjdCeAj4MUU
+    mind/3CMWoE4qF0Q
+    mind/1ZgeqYRax3w
+    mind/GM_Ekdulzx4
+  }
+  
+  if(EBT-Sad >= 60T){
+    1순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/-h435xELWF0
+    yoga/dlR97xBRzJI
+    yoga/J4LKu2i-moY
+    yoga/-t5L4sPxukI
+    mind/altQ6L1NF64
+    mind/yEZlW0Kk8kA
+    
+    2순위
+    yoga/_21nNOp4nmc
+    yoga/yoaahW7LskU
+    yoga/vZi1CffWjXI
+    yoga/__kP22QXQfw
+    yoga/wl2WQ0I3Yy8
+    yoga/B5zT-7IX-ig
+    yoga/AR4pjb5cj_Y
+    yoga/YYa7gs30aXE
+    yoga/CX4rtQXNHxs
+    yoga/UAYdJleEugw
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    yoga/_mUl_sz9Ou4
+    yoga/RDszsniHWgk
+    music/CQ5JMW59nPc
+    music/V6Aj9Mzhoag
+    music/N4BUL7PDPw8
+  }
+  
+  if(EBT-Health >= 65T){
+    1순위
+    mind/GM_Ekdulzx4
+    
+    2순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/_21nNOp4nmc
+    yoga/yoaahW7LskU
+    yoga/vZi1CffWjXI
+    yoga/__kP22QXQfw
+    yoga/-h435xELWF0
+    yoga/wl2WQ0I3Yy8
+    yoga/B5zT-7IX-ig
+    yoga/AR4pjb5cj_Y
+    yoga/YYa7gs30aXE
+    yoga/CX4rtQXNHxs
+    yoga/dlR97xBRzJI
+    yoga/UAYdJleEugw
+    yoga/J4LKu2i-moY
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/-t5L4sPxukI
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    yoga/_mUl_sz9Ou4
+    yoga/RDszsniHWgk
+  }
+  
+  if(EBT-Attention >= 60T){
+    1순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/_21nNOp4nmc
+    yoga/yoaahW7LskU
+    yoga/vZi1CffWjXI
+    yoga/__kP22QXQfw
+    yoga/-h435xELWF0
+    yoga/wl2WQ0I3Yy8
+    yoga/B5zT-7IX-ig
+    yoga/AR4pjb5cj_Y
+    yoga/YYa7gs30aXE
+    yoga/CX4rtQXNHxs
+    yoga/dlR97xBRzJI
+    yoga/UAYdJleEugw
+    yoga/J4LKu2i-moY
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/-t5L4sPxukI
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    yoga/_mUl_sz9Ou4
+    yoga/RDszsniHWgk
+    
+    2순위
+    music/PjisWOWzwtg
+    music/cMuBdl68UBI
+    music/-HET0QaTVbM
+    music/XDYhI7Pz7A4
+    music/Wteq_lAXlt0
+    music/ZhCmAqDdplM
+    music/pasREM7CLjc
+    music/GxaUgHpHM0I
+    music/8rG93YtqkJw
+    music/m4PRV6hx-hs
+    mind/Nw89DEW3Tg8
+    mind/3UAQG8XcpD0
+    mind/fRMqTzJd9gk
+    mind/gs4LcCmsLwA
+    mind/GjdCeAj4MUU
+    mind/3CMWoE4qF0Q
+    mind/1ZgeqYRax3w
+  }
+  
+  if(EBT-Movement >= 65T){
+    1순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/_21nNOp4nmc
+    yoga/yoaahW7LskU
+    yoga/vZi1CffWjXI
+    yoga/__kP22QXQfw
+    yoga/-h435xELWF0
+    yoga/wl2WQ0I3Yy8
+    yoga/B5zT-7IX-ig
+    yoga/AR4pjb5cj_Y
+    yoga/YYa7gs30aXE
+    yoga/CX4rtQXNHxs
+    yoga/dlR97xBRzJI
+    yoga/UAYdJleEugw
+    yoga/J4LKu2i-moY
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/-t5L4sPxukI
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    yoga/_mUl_sz9Ou4
+    yoga/RDszsniHWgk
+    mind/oBPUCd6LZZg
+    
+    2순위
+    music/PjisWOWzwtg
+    music/cMuBdl68UBI
+    music/-HET0QaTVbM
+    music/XDYhI7Pz7A4
+    music/Wteq_lAXlt0
+    music/ZhCmAqDdplM
+    music/pasREM7CLjc
+    music/GxaUgHpHM0I
+    music/8rG93YtqkJw
+    music/m4PRV6hx-hs
+    mind/Nw89DEW3Tg8
+    mind/3UAQG8XcpD0
+    mind/fRMqTzJd9gk
+    mind/gs4LcCmsLwA
+    mind/GjdCeAj4MUU
+    mind/3CMWoE4qF0Q
+    mind/1ZgeqYRax3w
+  }
+  
+  if(EBT-Angry >= 65T){
+    1순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/_21nNOp4nmc
+    yoga/yoaahW7LskU
+    yoga/vZi1CffWjXI
+    yoga/__kP22QXQfw
+    yoga/-h435xELWF0
+    yoga/wl2WQ0I3Yy8
+    yoga/B5zT-7IX-ig
+    yoga/AR4pjb5cj_Y
+    yoga/YYa7gs30aXE
+    yoga/CX4rtQXNHxs
+    yoga/dlR97xBRzJI
+    yoga/UAYdJleEugw
+    yoga/J4LKu2i-moY
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/-t5L4sPxukI
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    yoga/_mUl_sz9Ou4
+    yoga/RDszsniHWgk
+    mind/altQ6L1NF64
+    mind/bI7vJ1jhGAQ
+    
+    2순위
+    music/PjisWOWzwtg
+    music/cMuBdl68UBI
+    music/-HET0QaTVbM
+    music/XDYhI7Pz7A4
+    music/Wteq_lAXlt0
+    music/ZhCmAqDdplM
+    music/pasREM7CLjc
+    music/GxaUgHpHM0I
+    music/8rG93YtqkJw
+    music/m4PRV6hx-hs
+    mind/Nw89DEW3Tg8
+    mind/3UAQG8XcpD0
+    mind/fRMqTzJd9gk
+    mind/gs4LcCmsLwA
+    mind/GjdCeAj4MUU
+    mind/3CMWoE4qF0Q
+    mind/1ZgeqYRax3w
+  }
+  
+  if(EBT-Self >= 55T){
+    1순위
+    mind/yEZlW0Kk8kA
+    
+    2순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/_21nNOp4nmc
+    yoga/yoaahW7LskU
+    yoga/vZi1CffWjXI
+    yoga/__kP22QXQfw
+    yoga/-h435xELWF0
+    yoga/wl2WQ0I3Yy8
+    yoga/B5zT-7IX-ig
+    yoga/AR4pjb5cj_Y
+    yoga/YYa7gs30aXE
+    yoga/CX4rtQXNHxs
+    yoga/dlR97xBRzJI
+    yoga/UAYdJleEugw
+    yoga/J4LKu2i-moY
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/-t5L4sPxukI
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    yoga/_mUl_sz9Ou4
+    yoga/RDszsniHWgk
+    music/CQ5JMW59nPc
+    music/PjisWOWzwtg
+    music/cMuBdl68UBI
+    music/-HET0QaTVbM
+    music/XDYhI7Pz7A4
+    music/Wteq_lAXlt0
+    music/V6Aj9Mzhoag
+    music/ZhCmAqDdplM
+    music/pasREM7CLjc
+    music/GxaUgHpHM0I
+    music/8rG93YtqkJw
+    music/m4PRV6hx-hs
+    music/N4BUL7PDPw8
+    mind/Nw89DEW3Tg8
+    mind/3UAQG8XcpD0
+    mind/fRMqTzJd9gk
+    mind/gs4LcCmsLwA
+    mind/GjdCeAj4MUU
+    mind/3CMWoE4qF0Q
+    mind/1ZgeqYRax3w
+    mind/ns5kDuZYNAg
+  }
+  
+  [ Return Form ]
+  mind/oBPUCd6LZZg, music/oBPUCd6LZZg, yoga/oBPUCd6LZZg
+  
+  '''
+  반드시 설명은 생략하고 반환값은 [Return Form] 형식대로 mind, music, yoga 순서로 각 1개씩 총 3개를 반환한다.
+  (조건이 여러개 해당되는 경우, 해당되는 값들 중 랜덤으로 반환한다)
+`,
+};
+
+const ubiPromptHandler = (ebt_scores) => {
+  return `다음은 유저의 심리검사 관련 정보이다.
+  '''
+  ${ebt_scores}
+  '''
+  
+  유저의 심리검사 관련 정보를 기반으로 아래 조건에 따른 값을 반환한다.
+  '''
+  if(EBT-School >= 65T){
+    1순위
+    mind/oBPUCd6LZZg
+  }
+  
+  if(EBT-Friend >= 65T){
+    1순위
+
+    2순위
+    mind/oBPUCd6LZZg
+    mind/altQ6L1NF64
+    mind/yEZlW0Kk8kA
+    mind/bI7vJ1jhGAQ
+  }
+  
+  if(EBT-Family >= 60T){
+    1순위
+    yoga/B5zT-7IX-ig
+    yoga/YYa7gs30aXE
+    yoga/UAYdJleEugw
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+  }
+  
+  if(EBT-Mood >= 60T){
+    1순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/-h435xELWF0
+    yoga/dlR97xBRzJI
+    yoga/J4LKu2i-moY
+    mind/altQ6L1NF64
+    mind/yEZlW0Kk8kA
+  }
+  
+  if(EBT-Unrest >= 60T){
+    1순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/B5zT-7IX-ig
+    yoga/YYa7gs30aXE
+    yoga/UAYdJleEugw
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    yoga/RDszsniHWgk
+    mind/altQ6L1NF64
+    mind/ns5kDuZYNAg
+  }
+  
+  if(EBT-Sad >= 60T){
+    1순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/-h435xELWF0
+    yoga/dlR97xBRzJI
+    yoga/J4LKu2i-moY
+    yoga/-t5L4sPxukI
+    mind/altQ6L1NF64
+    mind/yEZlW0Kk8kA
+  }
+  
+  if(EBT-Health >= 65T){
+    1순위
+    mind/GM_Ekdulzx4
+  }
+  
+  if(EBT-Attention >= 60T){
+    1순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/_21nNOp4nmc
+    yoga/yoaahW7LskU
+    yoga/vZi1CffWjXI
+    yoga/__kP22QXQfw
+    yoga/-h435xELWF0
+    yoga/wl2WQ0I3Yy8
+    yoga/B5zT-7IX-ig
+    yoga/AR4pjb5cj_Y
+    yoga/YYa7gs30aXE
+    yoga/CX4rtQXNHxs
+    yoga/dlR97xBRzJI
+    yoga/UAYdJleEugw
+    yoga/J4LKu2i-moY
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/-t5L4sPxukI
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    yoga/_mUl_sz9Ou4
+    yoga/RDszsniHWgk
+  }
+  
+  if(EBT-Movement >= 65T){
+    1순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/_21nNOp4nmc
+    yoga/yoaahW7LskU
+    yoga/vZi1CffWjXI
+    yoga/__kP22QXQfw
+    yoga/-h435xELWF0
+    yoga/wl2WQ0I3Yy8
+    yoga/B5zT-7IX-ig
+    yoga/AR4pjb5cj_Y
+    yoga/YYa7gs30aXE
+    yoga/CX4rtQXNHxs
+    yoga/dlR97xBRzJI
+    yoga/UAYdJleEugw
+    yoga/J4LKu2i-moY
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/-t5L4sPxukI
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    yoga/_mUl_sz9Ou4
+    yoga/RDszsniHWgk
+    mind/oBPUCd6LZZg
+  }
+  
+  if(EBT-Angry >= 65T){
+    1순위
+    yoga/oAhTxPd4bfM
+    yoga/tJHYqTtwUOQ
+    yoga/L4Alw0VXFZo
+    yoga/rVvLYpRUBSA
+    yoga/1AOwjrNpPgA
+    yoga/JqQPP8oB6-4
+    yoga/IXP_nnFlkFE
+    yoga/1HHUnZ-axpY
+    yoga/Vl75OvG1b4Y
+    yoga/NJVRI61cP7E
+    yoga/_21nNOp4nmc
+    yoga/yoaahW7LskU
+    yoga/vZi1CffWjXI
+    yoga/__kP22QXQfw
+    yoga/-h435xELWF0
+    yoga/wl2WQ0I3Yy8
+    yoga/B5zT-7IX-ig
+    yoga/AR4pjb5cj_Y
+    yoga/YYa7gs30aXE
+    yoga/CX4rtQXNHxs
+    yoga/dlR97xBRzJI
+    yoga/UAYdJleEugw
+    yoga/J4LKu2i-moY
+    yoga/qSqategfpsg
+    yoga/NIGFTuRoQmc
+    yoga/-t5L4sPxukI
+    yoga/W1KyrFZLU08
+    yoga/Pkdz-FC1nDs
+    yoga/_mUl_sz9Ou4
+    yoga/RDszsniHWgk
+    mind/altQ6L1NF64
+    mind/bI7vJ1jhGAQ
+  }
+  
+  if(EBT-Self >= 55T){
+    1순위
+    mind/yEZlW0Kk8kA
+  }
+  
+  [ Return Form ]
+  mind/oBPUCd6LZZg, music/oBPUCd6LZZg, yoga/oBPUCd6LZZg
+  
+  '''
+  반드시 설명은 생략하고 반환값은 [Return Form] 형식대로 mind, music, yoga 순서로 각 1개씩 총 3개를 반환한다.
+  (조건이 여러개 해당되는 경우, 해당되는 값들 중 랜덤으로 반환한다)
+`;
+};
+
+// 주석 처리~
+
+module.exports = {
+  ubi_meditaion_recommand_prompt,
+  ubiPromptHandler,
+};
