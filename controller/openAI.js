@@ -5750,7 +5750,7 @@ const ubiController = {
       const response = await openai.chat.completions.create({
         messages: [...promptArr],
         model: "gpt-4o", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-        temperature: 0.5,
+        temperature: 1,
       });
 
       let value = response.choices[0].message.content;
@@ -5758,6 +5758,7 @@ const ubiController = {
 
       // 반환값 형식 확인
       if (isInvalidFormatOrder(value)) {
+        console.log("형식 통과 실패");
         value = `mind/oBPUCd6LZZg, music/PjisWOWzwtg, yoga/UAYdJleEugw`;
       }
 
