@@ -5709,7 +5709,7 @@ const ubiController = {
 
       // maxArr = [음악 최대, 그림 최대, 요가 최대]
 
-      console.log(`우비 명상추천 API 호출 - pUid: ${pUid}`);
+      console.log(`우비 명상추천(Renewl) API 호출 - pUid: ${pUid}`);
       console.log(parseData);
 
       // No pUid => return
@@ -5726,6 +5726,12 @@ const ubiController = {
         false,
         parsepUid
       );
+
+      // 정서행동검사를 진행중이거나 하지 않은 경우
+      if (!ebt_result.length) {
+        console.log(`Non EBT Data Log - pUid:${pUid}`);
+        return res.status(400).json({ message: `Non EBT Data Log` });
+      }
 
       const ebt_scores = ebt_result
         ?.map((el) => {
@@ -5751,7 +5757,8 @@ const ubiController = {
       }
 
       const message = {
-        message: value.split(",").map((el) => {
+        message: "Ubi Meditaion Recomand Success!",
+        data: value.split(",").map((el) => {
           const [tag, youtubeId] = el.split("/");
           return { tag, youtubeId };
         }),
