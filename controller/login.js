@@ -752,7 +752,7 @@ const loginController = {
         });
 
         // Server Session accessToken 저장
-        req.session.accessToken = token.accessToken;
+        // req.session.accessToken = token.accessToken;
         // Client Cookie refreshToken 저장
         res.cookie("refreshToken", token.refreshToken, {
           maxAge: 24 * 60 * 60 * 1000, // 쿠키 유효기간 1일로 설정

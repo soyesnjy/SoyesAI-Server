@@ -104,7 +104,7 @@ router.post(
 router.post(
   "/ebtresult",
   vaildateTokenConsulting,
-  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
+  // vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIUserEBTResultData
 );
 
