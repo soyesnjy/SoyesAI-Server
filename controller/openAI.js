@@ -5699,6 +5699,11 @@ const ubiController = {
     const { data } = req.body;
     let parseData; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
+    const tagMap = {
+      music: "MUSIC",
+      yoga: "YOGA",
+      mind: "HEART",
+    };
 
     try {
       if (typeof data === "string") {
@@ -5758,9 +5763,9 @@ const ubiController = {
 
       const message = {
         message: "Ubi Meditaion Recomand Success!",
-        data: value.split(",").map((el) => {
+        data: value.split(", ").map((el) => {
           const [tag, youtubeId] = el.split("/");
-          return { tag, youtubeId };
+          return { tag: tagMap[tag], youtubeId };
         }),
       };
 
