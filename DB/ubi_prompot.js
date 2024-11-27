@@ -529,6 +529,7 @@ const ubiPromptHandler = (ebt_scores) => {
   if(EBT-School >= 65T){
     1순위
     mind/oBPUCd6LZZg
+    mind/CVK7264iCGQ
     
     2순위
     yoga/oAhTxPd4bfM
@@ -583,6 +584,9 @@ const ubiPromptHandler = (ebt_scores) => {
     mind/altQ6L1NF64
     mind/yEZlW0Kk8kA
     mind/bI7vJ1jhGAQ
+    mind/jAGMpkXAU4I
+    mind/ABUfCa8Vxv8
+    mind/L8v3AvCvVqo
   }
   
   if(EBT-Friend >= 65T){
@@ -591,6 +595,8 @@ const ubiPromptHandler = (ebt_scores) => {
     mind/altQ6L1NF64
     mind/yEZlW0Kk8kA
     mind/bI7vJ1jhGAQ
+    mind/jAGMpkXAU4I
+    mind/CVK7264iCGQ
   }
   
   if(EBT-Family >= 60T){
@@ -609,6 +615,8 @@ const ubiPromptHandler = (ebt_scores) => {
     mind/ns5kDuZYNAg
     mind/yEZlW0Kk8kA
     mind/bI7vJ1jhGAQ
+    mind/jAGMpkXAU4I
+    mind/CVK7264iCGQ
   }
   
   if(EBT-Mood >= 60T){
@@ -628,6 +636,8 @@ const ubiPromptHandler = (ebt_scores) => {
     yoga/J4LKu2i-moY
     mind/altQ6L1NF64
     mind/yEZlW0Kk8kA
+    mind/jAGMpkXAU4I
+    mind/CVK7264iCGQ
     
     2순위
     yoga/_21nNOp4nmc
@@ -683,6 +693,8 @@ const ubiPromptHandler = (ebt_scores) => {
     yoga/RDszsniHWgk
     mind/altQ6L1NF64
     mind/ns5kDuZYNAg
+    mind/jAGMpkXAU4I
+    mind/CVK7264iCGQ
     
     2순위
     yoga/_21nNOp4nmc
@@ -738,6 +750,8 @@ const ubiPromptHandler = (ebt_scores) => {
     yoga/-t5L4sPxukI
     mind/altQ6L1NF64
     mind/yEZlW0Kk8kA
+    mind/jAGMpkXAU4I
+    mind/CVK7264iCGQ
     
     2순위
     yoga/_21nNOp4nmc
@@ -830,6 +844,8 @@ const ubiPromptHandler = (ebt_scores) => {
     yoga/Pkdz-FC1nDs
     yoga/_mUl_sz9Ou4
     yoga/RDszsniHWgk
+    mind/ABUfCa8Vxv8
+    mind/L8v3AvCvVqo
     
     2순위
     music/PjisWOWzwtg
@@ -963,6 +979,8 @@ const ubiPromptHandler = (ebt_scores) => {
   if(EBT-Self >= 55T){
     1순위
     mind/yEZlW0Kk8kA
+    mind/CVK7264iCGQ
+    mind/r3vwBkM0dzM
     
     2순위
     yoga/oAhTxPd4bfM
