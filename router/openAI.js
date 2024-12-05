@@ -151,7 +151,7 @@ router.post(
 // 명상추천 모델 - 우비 (renewl)
 router.post(
   "/meditation_recomend_ubi/renewl",
-  vaildateTokenConsulting,
+  // vaildateTokenConsulting,
   postOpenAIUbiMeditationRecomendRenewl
 );
 
