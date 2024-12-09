@@ -107,6 +107,22 @@ app.get("/", (req, res) => {
   // res.end();
 });
 
+// App SoyesAI Server 버전 확인
+app.get("/version", (req, res) => {
+  try {
+    res.status(200).json({
+      message: "SoyesAI App Server Version Select Success!",
+      data: "1.0.0",
+    });
+  } catch (err) {
+    delete err.headers;
+    console.error(err);
+    return res.status(500).json({
+      message: `Server Error : ${err.message}`,
+    });
+  }
+});
+
 // Tips, AI 공통
 // path 경로 라우팅
 const pathRouter = require("./router/path");
