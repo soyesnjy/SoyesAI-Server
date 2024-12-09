@@ -107,11 +107,27 @@ app.get("/", (req, res) => {
   // res.end();
 });
 
-// App SoyesAI Server 버전 확인
-app.get("/version", (req, res) => {
+// App SoyesAI Server 버전 확인 (android)
+app.get("/version/android", (req, res) => {
   try {
     res.status(200).json({
-      message: "SoyesAI App Server Version Select Success!",
+      message: "SoyesAI App Server Version Select Success! (android)",
+      data: "1.0.0",
+    });
+  } catch (err) {
+    delete err.headers;
+    console.error(err);
+    return res.status(500).json({
+      message: `Server Error : ${err.message}`,
+    });
+  }
+});
+
+// App SoyesAI Server 버전 확인 (ios)
+app.get("/version/ios", (req, res) => {
+  try {
+    res.status(200).json({
+      message: "SoyesAI App Server Version Select Success! (ios)",
       data: "1.0.0",
     });
   } catch (err) {
