@@ -112,7 +112,7 @@ app.get("/version/android", (req, res) => {
   try {
     res.status(200).json({
       message: "SoyesAI App Server Version Select Success! (android)",
-      data: "1.0.0",
+      data: "1.1.0",
     });
   } catch (err) {
     delete err.headers;
@@ -128,7 +128,7 @@ app.get("/version/ios", (req, res) => {
   try {
     res.status(200).json({
       message: "SoyesAI App Server Version Select Success! (ios)",
-      data: "1.0.0",
+      data: "1.1.0",
     });
   } catch (err) {
     delete err.headers;
