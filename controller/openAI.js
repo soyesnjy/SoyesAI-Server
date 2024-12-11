@@ -1611,7 +1611,7 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
         parseData = JSON.parse(data);
       } else parseData = data;
 
-      const { messageArr, avartar, pUid } = parseData;
+      const { messageArr, avartar, pUid, en } = parseData;
       console.log(
         `상담 로그 저장 API /consulting_emotion_log Path 호출 - pUid: ${pUid}`
       );
@@ -1656,8 +1656,13 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
       });
 
       const message = { message: response.choices[0].message.content };
+
       // AI 분석 내용 보기좋게 정리
-      const analyzeMsg = message.message.split(". ").join(".\n");
+      let analyzeMsg = message.message.split(". ").join(".\n");
+      // 영어버전
+      if (en) {
+        analyzeMsg = await translateText(analyzeMsg);
+      }
 
       messageArr.push({ role: "user", content: analyzeMsg });
 
