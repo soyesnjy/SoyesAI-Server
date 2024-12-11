@@ -2772,7 +2772,7 @@ const ellaFriendController = {
         parseData = JSON.parse(data);
       } else parseData = data;
 
-      const { messageArr, pUid, code } = parseData;
+      const { messageArr, pUid, code, en } = parseData;
 
       console.log(`엘라 또래관계 훈련 API 호출 - pUid: ${pUid}`);
       console.log(parseData);
@@ -2934,8 +2934,14 @@ B와 C를 참고해 일관적으로 반응해야 한다. 사과나, 공감하는
         temperature,
       });
 
+      let ellaFriendMsg = response.choices[0].message.content;
+      // 영어 번역
+      if (en) {
+        ellaFriendMsg = await translateText(ellaFriendMsg);
+      }
+
       const message = {
-        message: response.choices[0].message.content,
+        message: ellaFriendMsg,
       };
 
       return res.status(200).json(message);
