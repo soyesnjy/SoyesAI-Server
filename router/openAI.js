@@ -121,8 +121,8 @@ router.post(
 // 공감친구 모델 - 푸푸
 router.post(
   "/consulting_emotion_pupu",
-  vaildateTokenConsulting,
-  vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
+  // vaildateTokenConsulting,
+  // vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIConsultingPupu
 );
 

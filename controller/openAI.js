@@ -68,6 +68,7 @@ const translate = google.translate({ version: "v2", auth: auth_translate });
 async function translateText(text) {
   const response = await translate.translations.list({
     q: text,
+    format: "text",
     target: "en",
   });
   return response.data.data.translations[0].translatedText;
@@ -826,7 +827,11 @@ const openAIController = {
 
       let pupuMsg = response.choices[0].message.content;
       // 영어 번역
-      if (en) pupuMsg = await translateText(pupuMsg);
+      if (en) {
+        console.log(pupuMsg);
+        pupuMsg = await translateText(pupuMsg);
+        console.log(pupuMsg);
+      }
 
       const message = {
         message: pupuMsg,
