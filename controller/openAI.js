@@ -3236,7 +3236,7 @@ const ellaAnxietyController = {
         parseData = JSON.parse(data);
       } else parseData = data;
 
-      const { messageArr, pUid, code } = parseData;
+      const { messageArr, pUid, code, en } = parseData;
 
       console.log(`엘라 불안 훈련 API 호출 - pUid: ${pUid}`);
       console.log(parseData);
@@ -3368,8 +3368,14 @@ const ellaAnxietyController = {
         model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
+      let ellaAnxietyMsg = response.choices[0].message.content;
+      // 영어 번역
+      if (en) {
+        ellaAnxietyMsg = await translateText(ellaAnxietyMsg);
+      }
+
       const message = {
-        message: response.choices[0].message.content,
+        message: ellaAnxietyMsg,
       };
 
       return res.status(200).json(message);
