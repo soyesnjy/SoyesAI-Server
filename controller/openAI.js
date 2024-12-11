@@ -54,6 +54,25 @@ const youtube = google.youtube({
 
 const drive = google.drive({ version: "v3", auth: auth_google_drive });
 
+// Google Translate API 인증
+const auth_translate = new google.auth.JWT({
+  email: serviceAccount.client_email,
+  key: serviceAccount.private_key,
+  scopes: ["https://www.googleapis.com/auth/cloud-translation"],
+});
+
+// Google Translate API 클라이언트 생성
+const translate = google.translate({ version: "v2", auth: auth_translate });
+
+// 영어 번역 함수
+async function translateText(text) {
+  const response = await translate.translations.list({
+    q: text,
+    target: "en",
+  });
+  return response.data.data.translations[0].translatedText;
+}
+
 // google drive 파일 전체 조회 메서드
 // async function listFiles() {
 //   try {
@@ -344,14 +363,10 @@ const openAIController = {
   postOpenAIPsychologicalAnalysis: async (req, res) => {
     const { data } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
 
-    let parseData,
-      parseMessageArr,
-      parsingScore,
-      parsingType,
-      parsepUid,
-      yourMailAddr = "",
-      myMailAddr = "",
-      myMailPwd = "";
+    let parseData, parseMessageArr, parsingScore, parsingType, parsepUid;
+    // yourMailAddr = "",
+    // myMailAddr = "",
+    // myMailPwd = "";
 
     // 테스트 타입 객체. 추후 검사를 늘림에 따라 추가 될 예정
     const testType = {
@@ -377,7 +392,7 @@ const openAIController = {
       } else parseData = data;
       // console.log(parseData);
 
-      const { messageArr, type, score, pUid } = parseData;
+      const { messageArr, type, score, pUid, en } = parseData;
       console.log(
         `EBT 테스트 결과 분석 및 메일 전송 API /analysis Path 호출 - pUid:${pUid}`
       );
@@ -426,9 +441,15 @@ const openAIController = {
       // 검사 결과
       const result =
         EBT_Table_Info[parsingType].danger_score <= scoreSum
-          ? "경고"
+          ? en
+            ? "Warning"
+            : "경고"
           : EBT_Table_Info[parsingType].caution_score <= scoreSum
-          ? "주의"
+          ? en
+            ? "Caution"
+            : "주의"
+          : en
+          ? "Good"
           : "양호";
       console.log("tScore: " + tScore);
       console.log("result: " + result);
@@ -463,7 +484,13 @@ const openAIController = {
 
       const message = { message: response.choices[0].message.content };
       // AI 분석 내용 보기좋게 정리
-      const analyzeMsg = message.message.split(". ").join(".\n");
+      let analyzeMsg = message.message.split(". ").join(".\n");
+      // 영어버전
+      if (en) {
+        analyzeMsg = await translateText(analyzeMsg);
+      }
+      // const transAnalyzeMsg = await translateText(analyzeMsg);
+      // console.log(analyzeMsg);
       // client 전송
       res.json({ message: analyzeMsg, result });
 
@@ -765,14 +792,13 @@ const openAIController = {
     const { data } = req.body;
     let parseData, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
-    // let prevChat_flag = true; // 이전 대화 내역 유무
-    // console.log(`accessAuth: ${req.session.accessAuth}`);
+
     try {
       if (typeof data === "string") {
         parseData = JSON.parse(data);
       } else parseData = data;
 
-      const { messageArr, pUid } = parseData;
+      const { messageArr, pUid, en } = parseData;
       console.log(
         `푸푸 상담 API /consulting_emotion_pupu Path 호출 - pUid: ${pUid}`
       );
@@ -792,114 +818,20 @@ const openAIController = {
 
       // 고정 삽입 프롬프트
       promptArr.push(persona_prompt_pupu_v7); // 2024.10.10 ~
-      // promptArr.push(info_prompt); // 유저 정보 프롬프트 삽입
-
-      // const lastUserContent =
-      //   parseMessageArr[parseMessageArr.length - 1].content; // 유저 마지막 멘트
-
-      // // NO REQ 질문 처리. 10초 이상 질문이 없을 경우 Client 측에서 'NO REQUEST' 메시지를 담은 요청을 보냄. 그에 대한 처리
-      // if (lastUserContent.includes("NO REQ")) {
-      //   console.log("NO REQUEST 전달");
-
-      //   parseMessageArr.push(no_req_prompt);
-      //   promptArr.push(sentence_division_prompt);
-
-      //   const response = await openai.chat.completions.create({
-      //     messages: [...promptArr, ...parseMessageArr],
-      //     model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-      //   });
-
-      //   res.json({
-      //     message: response.choices[0].message.content,
-      //     emotion: 0,
-      //   });
-
-      //   return;
-      // }
-
-      // // 유저 성격검사 결과 DB에서 가져오기
-      // const pt_result = await select_soyes_AI_Pt_Table(
-      //   PT_Table_Info["Main"].table,
-      //   PT_Table_Info["Main"].attribute,
-      //   parsepUid
-      // );
-      // console.log(`성격검사 결과: ${pt_result}`);
-      // // promptArr.push(persnal_result_prompt[pt_result]);
-      // promptArr.push({
-      //   role: "system",
-      //   content: `다음 문단은 'user'의 성격검사 결과입니다.
-      //   '''
-      //   ${
-      //     pt_result !== "default"
-      //       ? `'user'는 성격검사 결과 ${pt_result} 유형에 해당됩니다. ${pt_result} 유형은 ${persnal_short["IFPE"]}`
-      //       : "user는 성격검사를 진행하지 않았습니다."
-      //   }
-      //   '''
-      //   'assistant'는 'user'의 성격 유형을 알고있습니다.
-      //   `,
-      // });
-
-      // if (parseMessageArr.length === 1 && prevChat_flag) {
-      //   // 이전 대화 프롬프트 삽입
-      //   console.log("이전 대화 프롬프트 삽입");
-      //   promptArr.push(prevChat_prompt);
-      // }
-
-      // if (parseMessageArr.length) {
-      //   // 심리 검사 프롬프트 삽입
-      //   console.log("심리 검사 프롬프트 삽입");
-      //   promptArr.push(psy_testResult_prompt);
-      //   promptArr.push(psyResult_prompt);
-      //   promptArr.push(solution_prompt);
-      // }
-
-      // if (parseMessageArr.length === 17 || parseMessageArr.length === 19) {
-      //   // 솔루션 프롬프트 삽입
-      //   console.log("솔루션 프롬프트 삽입");
-      //   promptArr.push(solution_prompt);
-      // }
-
-      // 상시 삽입 프롬프트
-
-      // promptArr.push(solution_prompt2); // 음악 명상 + 그림 명상 관련 솔루션 프롬프트
-      // promptArr.push(common_prompt); // 공통 프롬프트 삽입
-      // promptArr.push(completions_emotion_prompt); // 답변 이모션 넘버 확인 프롬프트 삽입
-
-      // console.log(promptArr);
-
-      /* Regercy
-      // 심리팀 Test Prompt. {role: user} 상태로 삽입
-      parseMessageArr.unshift(test_prompt_20240402);
-    
-      const response = await openai.chat.completions.create({
-        messages: [...promptArr, ...parseMessageArr],
-        model: "gpt-4-0125-preview", // gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-      });
-
-      let emotion = "0";
-      const message = {
-        message: response.choices[0].message.content,
-        emotion,
-      };
-      */
 
       const response = await openai.chat.completions.create({
         messages: [...promptArr, ...parseMessageArr],
         model: "gpt-4o", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
-      // let emotion = parseInt(response.choices[0].message.content.slice(-1));
+      let pupuMsg = response.choices[0].message.content;
+      // 영어 번역
+      if (en) pupuMsg = await translateText(pupuMsg);
 
       const message = {
-        message: response.choices[0].message.content,
+        message: pupuMsg,
         emotion: 1,
       };
-
-      // Log 출력
-      // console.log([
-      //   ...parseMessageArr,
-      //   { role: "assistant", content: message.message },
-      // ]);
 
       // Client 반환
       res.status(200).json(message);
