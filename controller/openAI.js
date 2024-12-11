@@ -828,9 +828,7 @@ const openAIController = {
       let pupuMsg = response.choices[0].message.content;
       // 영어 번역
       if (en) {
-        console.log(pupuMsg);
         pupuMsg = await translateText(pupuMsg);
-        console.log(pupuMsg);
       }
 
       const message = {
