@@ -74,6 +74,31 @@ async function translateText(text) {
   return response.data.data.translations[0].translatedText;
 }
 
+// UTC -> KO 시간 변환
+function convertToKoreanDate(utcString) {
+  // 입력된 UTC 시간을 Date 객체로 변환
+  const date = new Date(utcString);
+
+  // 한국 시간대(KST, UTC+9)로 변환
+  const options = {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  };
+
+  // 한국 시간대로 변환된 날짜를 받아옴 (시간 정보는 제외)
+  const koreanDateString = date.toLocaleDateString("ko-KR", options);
+
+  // 'YYYY. M. D.' 형식을 'YYYY년 M월 D일' 형식으로 변환
+  const formattedDate = koreanDateString
+    .replace(". ", "-")
+    .replace(". ", "-")
+    .replace(".", "")
+    .trim();
+  return formattedDate;
+}
+
 // google drive 파일 전체 조회 메서드
 // async function listFiles() {
 //   try {
@@ -1141,7 +1166,7 @@ const openAIController = {
         parseData = JSON.parse(data);
       } else parseData = data;
 
-      const { messageArr, pUid, game } = parseData;
+      const { messageArr, pUid, game, en } = parseData;
       console.log(
         `마루 게임 API /consulting_emotion_maru Path 호출 - pUid: ${pUid}`
       );
@@ -1191,13 +1216,16 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
         temperature: 0.7,
       });
 
+      let maruMsg = response.choices[0].message.content;
+      // 영어 번역
+      if (en) {
+        maruMsg = await translateText(maruMsg);
+      }
+
       const message = {
-        message: response.choices[0].message.content,
+        message: maruMsg,
       };
-      // console.log([
-      //   ...parseMessageArr,
-      //   { role: "assistant", content: message.message },
-      // ]);
+
       return res.status(200).json(message);
     } catch (err) {
       delete err.headers;
@@ -1410,7 +1438,6 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
   // 마이페이지 데이터 반환 API
   postOpenAIMypageData: async (req, res) => {
     const { data } = req.body;
-    console.log(data);
     let parseData, parsepUid; // Parsing 변수
 
     try {
@@ -1432,7 +1459,6 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
       }
       // pUid default값 설정
       parsepUid = pUid;
-      // parseDate = date;
 
       // EBT Table Key
       const ebt_log_table = EBT_Table_Info["All"].table;
@@ -1505,75 +1531,6 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
         connection_AI,
         select_north_join_query
       );
-
-      // console.log(consult_join_data);
-
-      // 프론트 데이터값 참조
-      // const userInfoArr = [
-      //   {
-      //     title: '성격검사',
-      //     type: 'pt_data',
-      //     iconSrc: '/src/Content_IMG/Icon_IMG/Icon_요가명상.png',
-      //     playIconSrc: '/src/Content_IMG/Frame_재생버튼.png',
-      //   },
-      //   {
-      //     title: '정서행동검사',
-      //     type: 'ebt_data',
-      //     iconSrc: '/src/Content_IMG/Icon_IMG/Icon_요가명상.png',
-      //     playIconSrc: '/src/Content_IMG/Frame_재생버튼.png',
-      //   },
-      //   {
-      //     title: '심리상담',
-      //     type: 'consult_data',
-      //     iconSrc: '/src/Content_IMG/Icon_IMG/Icon_요가명상.png',
-      //     playIconSrc: '/src/Content_IMG/Frame_재생버튼.png',
-      //   },
-      //   {
-      //     title: '콘텐츠',
-      //     type: 'content_data',
-      //     iconSrc: '/src/Content_IMG/Icon_IMG/Icon_요가명상.png',
-      //     playIconSrc: '/src/Content_IMG/Frame_재생버튼.png',
-      //   },
-      //   {
-      //     title: '엘라상담',
-      //     type: 'ella_data',
-      //     iconSrc: '/src/Content_IMG/Icon_IMG/Icon_요가명상.png',
-      //     playIconSrc: '/src/Content_IMG/Frame_재생버튼.png',
-      //   },
-      //   {
-      //     title: '명상',
-      //     type: 'meditation_data',
-      //     iconSrc: '/src/Content_IMG/Icon_IMG/Icon_요가명상.png',
-      //     playIconSrc: '/src/Content_IMG/Frame_재생버튼.png',
-      //   },
-      // ];
-
-      // console.log(pt_join_data);
-
-      function convertToKoreanDate(utcString) {
-        // 입력된 UTC 시간을 Date 객체로 변환
-        const date = new Date(utcString);
-
-        // 한국 시간대(KST, UTC+9)로 변환
-        const options = {
-          timeZone: "Asia/Seoul",
-          year: "numeric",
-          month: "numeric",
-          day: "numeric",
-        };
-
-        // 한국 시간대로 변환된 날짜를 받아옴 (시간 정보는 제외)
-        const koreanDateString = date.toLocaleDateString("ko-KR", options);
-
-        // 'YYYY. M. D.' 형식을 'YYYY년 M월 D일' 형식으로 변환
-        const formattedDate = koreanDateString
-          .replace(".", "년")
-          .replace(".", "월")
-          .replace(".", "일")
-          .trim();
-
-        return formattedDate;
-      }
 
       return res.status(200).json({
         message: "MyPage Data Access Success! - 200 OK",
