@@ -4551,7 +4551,7 @@ const ellaEmotionController = {
         parseData = JSON.parse(data);
       } else parseData = data;
 
-      const { messageArr, pUid } = parseData;
+      const { messageArr, pUid, en } = parseData;
 
       console.log(`엘라 정서인식 훈련 API 호출 - pUid: ${pUid}`);
       console.log(parseData);
@@ -4598,8 +4598,14 @@ const ellaEmotionController = {
         model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
+      let ellaEmotionMsg = response.choices[0].message.content;
+      // 영어 번역
+      if (en) {
+        ellaEmotionMsg = await translateText(ellaEmotionMsg);
+      }
+
       const message = {
-        message: response.choices[0].message.content,
+        message: ellaEmotionMsg,
       };
 
       return res.status(200).json(message);
