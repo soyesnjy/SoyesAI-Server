@@ -2067,10 +2067,11 @@ const ellaMoodController = {
         messageArr,
         pUid,
         code,
-        mood_situation,
-        mood_thought,
+        // mood_situation,
+        // mood_thought,
         mood_todo_list,
         mood_talk_list,
+        en,
       } = parseData;
 
       console.log(`엘라 기분 훈련 API 호출 - pUid: ${pUid}`);
@@ -2094,20 +2095,6 @@ const ellaMoodController = {
           .json({ message: "No messageArr input value - 400" });
       }
 
-      // // code - situation 관련 필수값 예외처리
-      // if (code === "situation" && !mood_situation) {
-      //   console.log("No Required input value - 400");
-      //   return res.status(400).json({
-      //     message: `No Required input value: code:${code}, mood_situation:${mood_situation} - 400`,
-      //   });
-      // }
-      // // code - thought 관련 필수값 예외처리
-      // if (code === "thought" && !mood_thought) {
-      //   console.log("No Required input value - 400");
-      //   return res.status(400).json({
-      //     message: `No Required input value: code:${code}, mood_thought:${mood_thought} - 400`,
-      //   });
-      // }
       // code - listing 관련 필수값 예외처리
       if (code === "listing" && !mood_todo_list) {
         console.log("No Required input value - 400");
@@ -2214,8 +2201,13 @@ Todo List가 아니라고 판단되면 제외한다.
         model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
+      let ellaMoodMsg = response.choices[0].message.content;
+      // 영어 번역
+      if (en) {
+        ellaMoodMsg = await translateText(ellaMoodMsg);
+      }
       const message = {
-        message: response.choices[0].message.content,
+        message: ellaMoodMsg,
       };
 
       return res.status(200).json(message);
