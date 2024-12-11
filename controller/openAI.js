@@ -4048,7 +4048,7 @@ const ellaFamilyController = {
         parseData = JSON.parse(data);
       } else parseData = data;
 
-      const { messageArr, pUid, code } = parseData;
+      const { messageArr, pUid, code, en } = parseData;
 
       console.log(`엘라 가족관계 훈련 API 호출 - pUid: ${pUid}`);
       console.log(parseData);
@@ -4127,8 +4127,14 @@ const ellaFamilyController = {
         temperature,
       });
 
+      let ellaFamilyMsg = response.choices[0].message.content;
+      // 영어 번역
+      if (en) {
+        ellaFamilyMsg = await translateText(ellaFamilyMsg);
+      }
+
       const message = {
-        message: response.choices[0].message.content,
+        message: ellaFamilyMsg,
       };
 
       return res.status(200).json(message);
