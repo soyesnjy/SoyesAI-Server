@@ -842,55 +842,15 @@ const openAIController = {
 
       parsepUid = pUid;
 
-      // // 고정 삽입 프롬프트
-      // promptArr.push(persona_prompt_pupu_v7); // 2024.10.10 ~
+      // 고정 삽입 프롬프트
+      promptArr.push(persona_prompt_pupu_v7); // 2024.10.10 ~
 
-      // const response = await openai.chat.completions.create({
-      //   messages: [...promptArr, ...parseMessageArr],
-      //   model: "gpt-4o", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-      // });
-
-      // let pupuMsg = response.choices[0].message.content;
-      // // 영어 번역
-      // if (en) {
-      //   pupuMsg = await translateText(pupuMsg);
-      // }
-
-      // const message = {
-      //   message: pupuMsg,
-      //   emotion: 1,
-      // };
-
-      // Gemini 사용
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const lastMsg = messageArr.pop();
-
-      const chat = model.startChat({
-        history: [
-          // pupu 프롬프트 삽입
-          {
-            role: "user",
-            parts: [{ text: persona_prompt_pupu_v7.content }],
-          },
-          ...messageArr.map((el) => {
-            if (el.role === "assistant") el.role = "model";
-            el.parts = [{ text: el.content }];
-            delete el.content;
-            return el;
-          }),
-        ],
-        generationConfig: {
-          maxOutputTokens: 100,
-        },
+      const response = await openai.chat.completions.create({
+        messages: [...promptArr, ...parseMessageArr],
+        model: "gpt-4o", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
       });
 
-      const msg = lastMsg.content;
-
-      const result = await chat.sendMessage(msg);
-      const response = await result.response;
-      const text = response.text();
-
-      let pupuMsg = text;
+      let pupuMsg = response.choices[0].message.content;
       // 영어 번역
       if (en) {
         pupuMsg = await translateText(pupuMsg);
@@ -900,6 +860,46 @@ const openAIController = {
         message: pupuMsg,
         emotion: 1,
       };
+
+      // Gemini 사용
+      // const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      // const lastMsg = messageArr.pop();
+
+      // const chat = model.startChat({
+      //   history: [
+      //     // pupu 프롬프트 삽입
+      //     {
+      //       role: "user",
+      //       parts: [{ text: persona_prompt_pupu_v7.content }],
+      //     },
+      //     ...messageArr.map((el) => {
+      //       if (el.role === "assistant") el.role = "model";
+      //       el.parts = [{ text: el.content }];
+      //       delete el.content;
+      //       return el;
+      //     }),
+      //   ],
+      //   generationConfig: {
+      //     maxOutputTokens: 100,
+      //   },
+      // });
+
+      // const msg = lastMsg.content;
+
+      // const result = await chat.sendMessage(msg);
+      // const response = await result.response;
+      // const text = response.text();
+
+      // let pupuMsg = text;
+      // // 영어 번역
+      // if (en) {
+      //   pupuMsg = await translateText(pupuMsg);
+      // }
+
+      // const message = {
+      //   message: pupuMsg,
+      //   emotion: 1,
+      // };
 
       // Client 반환
       res.status(200).json(message);
