@@ -5428,7 +5428,7 @@ const NorthController = {
       north_id AS id,
       north_diary_content AS content,
       north_diary_tag AS tag,
-      DATE_FORMAT(created_at, '%Y년 %m월 %d일') AS date
+      DATE_FORMAT(created_at, '%Y-%m-%d') AS date
       FROM ${table}
       WHERE uid = '${parsepUid}'
       AND created_at LIKE '%${year}%'
