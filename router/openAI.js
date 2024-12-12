@@ -13,6 +13,7 @@ const {
   NorthController,
   ubiController,
   reportController,
+  googleAIController,
 } = require("../controller/openAI");
 
 const { loginController } = require("../controller/login");
@@ -86,6 +87,8 @@ const {
 
 const { postReportTest } = reportController;
 
+const { postGoogleAIConsultingPupu } = googleAIController;
+
 // 토큰 유효성 검사 미들웨어
 const { vaildateTokenConsulting, vaildateUserSubscriptionAuth } =
   loginController;
@@ -93,6 +96,10 @@ const { vaildateTokenConsulting, vaildateUserSubscriptionAuth } =
 router.get("/", (req, res) => {
   res.send("Welcome to the GPT API");
 });
+
+// GoogleAI Test
+router.post("/googleAI/pupu", postGoogleAIConsultingPupu);
+
 // 감정 분석
 router.post("/emotion", postOpenAIEmotionAnalyze);
 

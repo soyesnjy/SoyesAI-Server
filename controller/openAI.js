@@ -842,15 +842,55 @@ const openAIController = {
 
       parsepUid = pUid;
 
-      // 고정 삽입 프롬프트
-      promptArr.push(persona_prompt_pupu_v7); // 2024.10.10 ~
+      // // 고정 삽입 프롬프트
+      // promptArr.push(persona_prompt_pupu_v7); // 2024.10.10 ~
 
-      const response = await openai.chat.completions.create({
-        messages: [...promptArr, ...parseMessageArr],
-        model: "gpt-4o", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      // const response = await openai.chat.completions.create({
+      //   messages: [...promptArr, ...parseMessageArr],
+      //   model: "gpt-4o", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      // });
+
+      // let pupuMsg = response.choices[0].message.content;
+      // // 영어 번역
+      // if (en) {
+      //   pupuMsg = await translateText(pupuMsg);
+      // }
+
+      // const message = {
+      //   message: pupuMsg,
+      //   emotion: 1,
+      // };
+
+      // Gemini 사용
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const lastMsg = messageArr.pop();
+
+      const chat = model.startChat({
+        history: [
+          // pupu 프롬프트 삽입
+          {
+            role: "user",
+            parts: [{ text: persona_prompt_pupu_v7.content }],
+          },
+          ...messageArr.map((el) => {
+            if (el.role === "assistant") el.role = "model";
+            el.parts = [{ text: el.content }];
+            delete el.content;
+            return el;
+          }),
+        ],
+        generationConfig: {
+          maxOutputTokens: 100,
+        },
       });
 
-      let pupuMsg = response.choices[0].message.content;
+      const msg = lastMsg.content;
+
+      const result = await chat.sendMessage(msg);
+      const response = await result.response;
+      const text = response.text();
+
+      let pupuMsg = text;
       // 영어 번역
       if (en) {
         pupuMsg = await translateText(pupuMsg);
@@ -6091,6 +6131,93 @@ const reportController = {
   },
 };
 
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+
+const googleAIController = {
+  // 공감친구 모델 - 푸푸
+  postGoogleAIConsultingPupu: async (req, res) => {
+    const { data } = req.body;
+    let parseData, parseMessageArr, parsepUid; // Parsing 변수
+    let promptArr = []; // 삽입 Prompt Array
+
+    try {
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { messageArr, pUid, en } = parseData;
+      console.log(
+        `푸푸 상담 API /consulting_emotion_pupu Path 호출 - pUid: ${pUid}`
+      );
+      console.log(parseData);
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 404");
+        return res.status(404).json({ message: "No pUid input value - 404" });
+      }
+
+      parsepUid = pUid;
+
+      // The Gemini 1.5 models are versatile and work with multi-turn conversations (like chat)
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const lastMsg = messageArr.pop();
+
+      const chat = model.startChat({
+        history: [
+          // pupu 프롬프트 삽입
+          {
+            role: "user",
+            parts: [{ text: persona_prompt_pupu_v7.content }],
+          },
+          ...messageArr.map((el) => {
+            if (el.role === "assistant") el.role = "model";
+            el.parts = [{ text: el.content }];
+            delete el.content;
+            return el;
+          }),
+        ],
+        generationConfig: {
+          maxOutputTokens: 100,
+        },
+      });
+
+      const msg = lastMsg.content;
+
+      const result = await chat.sendMessage(msg);
+      const response = await result.response;
+      const text = response.text();
+
+      let pupuMsg = text;
+      // 영어 번역
+      if (en) {
+        pupuMsg = await translateText(pupuMsg);
+      }
+
+      const message = {
+        message: pupuMsg,
+        emotion: 1,
+      };
+
+      // Client 반환
+      res.status(200).json(message);
+    } catch (err) {
+      delete err.headers;
+      console.error(err);
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
+        emotion: 0,
+      });
+    }
+  },
+};
+
 module.exports = {
   openAIController,
   ellaMoodController,
@@ -6101,4 +6228,5 @@ module.exports = {
   NorthController,
   ubiController,
   reportController,
+  googleAIController,
 };
