@@ -232,7 +232,6 @@ const springEllaMoodController = {
                 .json({ message: "Mood First Data Save Success!" });
             }
           );
-
           break;
         case "second":
           // INSERT || UPDATE
@@ -294,13 +293,12 @@ const springEllaMoodController = {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("Mood First Insert Success!");
+              console.log("Mood Second Insert Success!");
               return res
                 .status(200)
                 .json({ message: "Mood Second Data Save Success!" });
             }
           );
-
           break;
         case "third":
           if (select_data.length > 0) {
@@ -361,7 +359,7 @@ const springEllaMoodController = {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("Mood First Insert Success!");
+              console.log("Mood Third Insert Success!");
               return res
                 .status(200)
                 .json({ message: "Mood Third Data Save Success!" });
@@ -427,7 +425,7 @@ const springEllaMoodController = {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("Mood First Insert Success!");
+              console.log("Mood Fourth Insert Success!");
               return res
                 .status(200)
                 .json({ message: "Mood Fourth Data Save Success!" });
@@ -449,7 +447,7 @@ const springEllaMoodController = {
 
     let parseData,
       parsepUid,
-      mood_name = ""; // Parsing 변수
+      mood_name = "까망이"; // Parsing 변수
 
     try {
       // json 파싱
