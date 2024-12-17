@@ -160,6 +160,8 @@ app.use("/review", reviewRouter);
 const paymentRouter = require("./router/payment");
 app.use("/payment", paymentRouter);
 
+const springRouter = require("./router/spring");
+app.use("/spring", springRouter);
 // const kakaoPayRouter = require("./router/kakaoPay");
 // app.use("/kakaopay", kakaoPayRouter);
 
