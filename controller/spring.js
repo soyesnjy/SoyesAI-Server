@@ -1,14 +1,15 @@
 // stream 데이터 처리
-const stream = require("stream");
 // MySQL 접근
 const mysql = require("mysql");
 const { dbconfig_ai } = require("../DB/database");
 
 // 결과보고서 관련
-const puppeteer = require("puppeteer");
-const ejs = require("ejs");
-const path = require("path");
-const { PDFDocument } = require("pdf-lib");
+// const stream = require("stream");
+// const puppeteer = require("puppeteer");
+// const ejs = require("ejs");
+// const path = require("path");
+// const { PDFDocument } = require("pdf-lib");
+// const nodemailer = require("nodemailer");
 
 // Redis 연결
 // const redisStore = require("../DB/redisClient");
@@ -17,14 +18,10 @@ const { PDFDocument } = require("pdf-lib");
 const connection_AI = mysql.createConnection(dbconfig_ai);
 connection_AI.connect();
 
-const axios = require("axios");
-
 const OpenAI = require("openai");
 const openai = new OpenAI({
   apiKey: process.env.API_TOKEN,
 });
-
-const nodemailer = require("nodemailer");
 
 function queryAsync(connection, query, parameters) {
   return new Promise((resolve, reject) => {
@@ -47,9 +44,6 @@ async function fetchUserData(connection, query) {
     console.error(error);
   }
 }
-
-// 프롬프트 관련
-const { persona_prompt_lala_v6 } = require("../DB/test_prompt");
 
 // Database Table Info
 const {
@@ -160,22 +154,21 @@ const springEllaMoodController = {
       const select_query = `SELECT mood_idx FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
       const select_data = await fetchUserData(connection_AI, select_query);
 
-      // 타입별 query, value 삽입
+      // 2. INSERT || UPDATE : 타입별 query, value 삽입
       switch (parseType) {
         case "first":
-          // INSERT || UPDATE
           if (select_data.length > 0) {
             // 이미 존재하는 경우 (UPDATE)
             duple_query = `
             UPDATE ${table}
             SET 
-              mood_name = ?,
-              mood_score = ?,
-              mood_situation_first = ?,
-              mood_thought_first = ?,
-              mood_solution_first = ?,
-              mood_different_thought_first = ?,
-              mood_rating_first = ?
+            mood_name = ?,
+            mood_score = ?,
+            mood_situation_first = ?,
+            mood_thought_first = ?,
+            mood_solution_first = ?,
+            mood_different_thought_first = ?,
+            mood_rating_first = ?
             WHERE mood_idx = ?;
           `;
             duple_value = [
@@ -457,7 +450,9 @@ const springEllaMoodController = {
 
       const { pUid } = parseData;
 
-      console.log(`엘라 기분 훈련 Start Data Load API 호출 - pUid: ${pUid}`);
+      console.log(
+        `[늘봄]엘라 기분 훈련 Start Data Load API 호출 - pUid: ${pUid}`
+      );
       console.log(parseData);
 
       // No pUid => return
@@ -494,180 +489,6 @@ const springEllaMoodController = {
 };
 
 const springEllaAnxietyController = {
-  // 불안훈련 트레이너 - 엘라 (New)
-  postOpenAIEllaAnxietyTraning: async (req, res) => {
-    const { data } = req.body;
-    let parseData,
-      parseMessageArr = [],
-      parsepUid; // Parsing 변수
-    let promptArr = []; // 삽입 Prompt Array
-    // 불안훈련 code 식별값
-    const codeArr = [
-      "situation",
-      "emotion",
-      "consolation",
-      "solution",
-      "box_end",
-      "challenge_start",
-      "challenge_recommend",
-      "challenge_end",
-    ];
-    try {
-      if (typeof data === "string") {
-        parseData = JSON.parse(data);
-      } else parseData = data;
-
-      const { messageArr, pUid, code, en } = parseData;
-
-      console.log(`엘라 불안 훈련 API 호출 - pUid: ${pUid}`);
-      console.log(parseData);
-
-      // No pUid => return
-      if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.status(400).json({ message: "No pUid input value - 400" });
-      }
-      // No type => return
-      if (!code) {
-        console.log("No code input value - 400");
-        return res.status(400).json({ message: "No type input value - 400" });
-      }
-      // No type => return
-      if (!messageArr) {
-        console.log("No messageArr input value - 400");
-        return res
-          .status(400)
-          .json({ message: "No messageArr input value - 400" });
-      }
-      // No Matching codeArr => return
-      if (!codeArr.includes(code)) {
-        console.log("No matching code value - 400");
-        return res
-          .status(400)
-          .json({ message: "No matching code value - 400" });
-      }
-
-      // pUid default값 설정
-      parsepUid = pUid;
-      // parseMessageArr = [...messageArr];
-      promptArr.push(persona_prompt_lala_v6); // 엘라 페르소나
-
-      // code 매칭 프롬프트 삽입
-      switch (code) {
-        case "situation":
-          parseMessageArr = [...messageArr];
-          promptArr.push({
-            role: "system",
-            content: `user가 불안하다고 말한 상황에 반응한다.`,
-          });
-          break;
-        case "emotion":
-          parseMessageArr = [...messageArr];
-          promptArr.push({
-            role: "system",
-            content: `불안할 때 유저가 하는 생각에 초등학생의 눈높이에 맞춰 한 문장으로 유저의 감정을 반영하며 공감한다. 질문은 하지 않는다.`,
-          });
-          break;
-        case "consolation":
-          parseMessageArr = [messageArr[messageArr.length - 1]];
-          promptArr.push({
-            role: "system",
-            content: `유저가 불안해하고 걱정하는 내용에 초등학생의 눈높이에 맞춰 한 문장으로 유저의 감정을 반영하며 공감한다. 질문은 하지 않는다.`,
-          });
-          break;
-        case "solution":
-          parseMessageArr = [messageArr[messageArr.length - 1]];
-          promptArr.push({
-            role: "system",
-            content: `유저가 불안해하고 걱정하는 상황에 대해 초등학생이 시도해볼 수 있는 해결책을 70자 이내로 한 가지 제시한다. 예) ~해보면 어때?`,
-          });
-          break;
-        case "box_end":
-          parseMessageArr = [...messageArr];
-          promptArr.push({
-            role: "system",
-            content: `유저의 마지막 말을 듣고 감정을 반영하며 한 문장으로 공감한다. 이후 이번 상담은 여기서 마치려고 한다고 이야기한 후 종료한다.`,
-          });
-          break;
-        case "challenge_start":
-          parseMessageArr = [...messageArr];
-          promptArr.push({
-            role: "system",
-            // 2024.10.11 이전 프롬프트
-            // content: `assistant의 이름은 '엘라' 이며 반말을 사용한다.
-            // user가 두렵고 떨리지만 도전하고 싶은 목표를 말하면, 엘라는 '이렇게 차근차근 도전해보자'라고 하며 점진적으로 연습할 수 있는 5단계 활동을 300자 이내로 제시하고 '어떤 것 같아?'라는 말로 마친다.
-            // 5단계 활동은 초등학생이 할 수 있는 활동이어야 한다.
-            // 유저가 새 활동을 추천해달라고 하는 경우, 새로운 5단계 활동을 300자 이내로 제시한다.
-
-            // form
-            // '''
-            // 1단계: 매일 아침에 가볍게 스트레칭하기.
-            // 2단계: 집 앞 공원에서 가벼운 산책해보기.
-            // 3단계: 집에서 할 수 있는 줄넘기 도전해보기.
-            // 4단계: 친구랑 같이 자전거나 인라인스케이트 타기.
-            // 5단계: 가족과 함께 주말마다 등산 가기!
-            // '''
-            // `,
-            // 2024.10.11 프롬프트 교체
-            content: `assistant의 이름은 '엘라' 이며 반말을 사용한다.
-            user는 직전에 자신이 도전하고 싶은 목표를 이야기했다. 그리고 assistant가 그 목표 행동을 수행할 수 있도록 돕는 점진적인 5단계 활동을 제시했지만, 특정 부분을 보완해달라고 요청했다. 이 모든 내용을 고려해, '이렇게 차근차근 도전해보자'라고 하며 점진적으로 연습할 수 있는 5단계 활동을 300자 이내로 제시하고 '어떤 것 같아?'라는 말로 마친다.
-            5단계 활동은 초등학생이 할 수 있는 활동이어야 한다. 
-            유저가 새 활동을 추천해달라고 하는 경우, 새로운 5단계 활동을 300자 이내로 제시한다.
-
-            form
-            '''
-            1단계: 매일 아침에 가볍게 스트레칭하기.
-            2단계: 집 앞 공원에서 가벼운 산책해보기.
-            3단계: 집에서 할 수 있는 줄넘기 도전해보기.
-            4단계: 친구랑 같이 자전거나 인라인스케이트 타기.
-            5단계: 가족과 함께 주말마다 등산 가기!
-            '''
-`,
-          });
-          break;
-        case "challenge_recommend":
-          parseMessageArr = [...messageArr];
-          promptArr.push({
-            role: "system",
-            content: `유저가 활동을 언제, 어디에서 실천할지 입력한 경우, 계획을 잘 세웠다고 격려한다. 유저가 활동을 실천할 수 있는 시간이나 장소를 말하지 못한 경우, ‘~는 어떨까?’라는 말로 대안을 제시한다.`,
-          });
-          break;
-        case "challenge_end":
-          parseMessageArr = [...messageArr];
-          promptArr.push({
-            role: "system",
-            content: `user 응답에 반응한다. '차근차근 도전해보고 두려운 마음이 어떻게 변하는지 북극이 일기에도 써보자'라고 한다.`,
-          });
-          break;
-      }
-
-      // console.log(promptArr);
-      // console.log(parseMessageArr);
-
-      const response = await openai.chat.completions.create({
-        messages: [...promptArr, ...parseMessageArr],
-        model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-      });
-
-      let ellaAnxietyMsg = response.choices[0].message.content;
-      // 영어 번역
-      if (en) {
-        ellaAnxietyMsg = await translateText(ellaAnxietyMsg);
-      }
-
-      const message = {
-        message: ellaAnxietyMsg,
-      };
-
-      return res.status(200).json(message);
-    } catch (err) {
-      delete err.headers;
-      console.error(err);
-      return res.status(500).json({
-        message: `Server Error : ${err.message}`,
-      });
-    }
-  },
   // 불안훈련 저장 API
   postOpenAIAnxietyDataSave: async (req, res) => {
     const { data } = req.body;
@@ -698,11 +519,11 @@ const springEllaAnxietyController = {
       } = parseData;
 
       console.log(
-        `불안 훈련 저장 API /openAI/training_mood_ella/save Path 호출 - pUid: ${pUid}`
+        `[늘봄]불안 훈련 저장 API /openAI/training_mood_ella/save Path 호출 - pUid: ${pUid}`
       );
       console.log(parseData);
 
-      // No Required Mood Data => return
+      // No Required Anxiety Data => return
       if (
         !pUid ||
         !type ||
@@ -737,7 +558,6 @@ const springEllaAnxietyController = {
           message: "There are no input values suitable for the type",
         });
       }
-
       if (
         (parseType === "first" ||
           parseType === "second" ||
@@ -773,119 +593,71 @@ const springEllaAnxietyController = {
         });
       }
 
-      // pUid default값 설정
       parsepUid = pUid;
+      let duple_query, duple_value;
 
       const table = Ella_Training_Table_Info["Anxiety"].table;
-      // const attribute = Ella_Training_Table_Info["Mood"].attribute;
 
-      let update_query, update_value;
-
-      // 1. SELECT User Mood Table Data
+      // 1. SELECT User Table Data
       const select_query = `SELECT * FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
       const select_data = await fetchUserData(connection_AI, select_query);
 
       // console.log(select_data[0]);
 
-      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
-      if (
-        parseType === "first" &&
-        select_data.length &&
-        select_data[0].anxiety_round_idx !== 5
-      ) {
-        console.log(
-          `The type value does not match the current episode (first) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "The type value does not match the current episode",
-        });
-      }
-
-      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
-      if (
-        parseType === "second" &&
-        select_data.length &&
-        select_data[0].anxiety_round_idx !== 1
-      ) {
-        console.log(
-          `The type value does not match the current episode (second) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "The type value does not match the current episode",
-        });
-      }
-
-      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
-      if (
-        parseType === "third" &&
-        select_data.length &&
-        select_data[0].anxiety_round_idx !== 2
-      ) {
-        console.log(
-          `The type value does not match the current episode (third)- pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "The type value does not match the current episode",
-        });
-      }
-
-      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 4가 아닐 경우 Not Matching 에러
-      if (
-        parseType === "fourth" &&
-        select_data.length &&
-        select_data[0].anxiety_round_idx !== 3
-      ) {
-        console.log(
-          `The type value does not match the current episode (fourth) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "The type value does not match the current episode",
-        });
-      }
-
-      // 기분 훈련 데이터가 있을 경우, mood_round_idx가 5가 아닐 경우 Not Matching 에러
-      if (
-        parseType === "fifth" &&
-        select_data.length &&
-        select_data[0].anxiety_round_idx !== 4
-      ) {
-        console.log(
-          `The type value does not match the current episode (fifth) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "The type value does not match the current episode",
-        });
-      }
-
       // 타입별 query, value 삽입
       switch (parseType) {
         case "first":
-          const insert_query = `INSERT INTO ${table} 
-          (uid,
-          anxiety_round_idx,
-          anxiety_name,
-          anxiety_situation_first,
-          anxiety_physical_first,
-          anxiety_thought_first,
-          anxiety_worrys_first,
-          anxiety_rating_first)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?);`;
-          // console.log(insert_query);
-          const insert_value = [
-            parsepUid,
-            1,
-            anxiety_name,
-            anxiety_situation,
-            anxiety_physical,
-            anxiety_thought,
-            JSON.stringify(anxiety_worrys),
-            anxiety_rating,
-          ];
-          // console.log(insert_value);
+          if (select_data.length > 0) {
+            // 이미 존재하는 경우 (UPDATE)
+            duple_query = `
+            UPDATE ${table} 
+            SET
+            anxiety_situation_first = ?,
+            anxiety_physical_first = ?,
+            anxiety_thought_first = ?,
+            anxiety_rating_first = ?,
+            anxiety_worrys_first = ?,
+            anxiety_name = ?
+            WHERE anxiety_idx = ?`;
+
+            duple_value = [
+              anxiety_situation,
+              anxiety_physical,
+              anxiety_thought,
+              anxiety_rating,
+              JSON.stringify(anxiety_worrys),
+              anxiety_name, // 1회기
+              select_data[0].anxiety_idx,
+            ];
+          } else {
+            // 존재하지 않는 경우 (INSERT)
+            duple_query = `
+            INSERT INTO ${table} 
+            (uid,
+            anxiety_round_idx,
+            anxiety_situation_first,
+            anxiety_physical_first,
+            anxiety_thought_first,
+            anxiety_rating_first,
+            anxiety_worrys_first,
+            anxiety_name)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?);`;
+
+            duple_value = [
+              parsepUid,
+              -1,
+              anxiety_situation,
+              anxiety_physical,
+              anxiety_thought,
+              anxiety_rating,
+              JSON.stringify(anxiety_worrys), // 1 ~ 3회기
+              anxiety_name, // 1회기
+            ];
+          }
 
           connection_AI.query(
-            insert_query,
-            insert_value,
+            duple_query,
+            duple_value,
             (error, rows, fields) => {
               if (error) {
                 console.log(error);
@@ -897,38 +669,61 @@ const springEllaAnxietyController = {
                 .json({ message: "Anxiety First Data Save Success!" });
             }
           );
-
           break;
         case "second":
-          update_query = `UPDATE ${table} SET
-          anxiety_round_idx = ?,
-          anxiety_situation_second = ?,
-          anxiety_physical_second = ?,
-          anxiety_thought_second = ?,
-          anxiety_worrys_second = ?,
-          anxiety_rating_second = ?
-          WHERE anxiety_idx = ?`;
+          if (select_data.length > 0) {
+            // 이미 존재하는 경우 (UPDATE)
+            duple_query = `
+            UPDATE ${table}
+            SET
+            anxiety_situation_second = ?,
+            anxiety_physical_second = ?,
+            anxiety_thought_second = ?,
+            anxiety_rating_second = ?,
+            anxiety_worrys_second = ?
+            WHERE anxiety_idx = ?`;
 
-          // console.log(update_query);
-          update_value = [
-            2,
-            anxiety_situation,
-            anxiety_physical,
-            anxiety_thought,
-            JSON.stringify(anxiety_worrys),
-            anxiety_rating,
-            select_data[0].anxiety_idx,
-          ];
-          // console.log(update_value);
+            duple_value = [
+              anxiety_situation,
+              anxiety_physical,
+              anxiety_thought,
+              anxiety_rating,
+              JSON.stringify(anxiety_worrys), // 1 ~ 3회기
+              select_data[0].anxiety_idx,
+            ];
+          } else {
+            // 존재하지 않는 경우 (INSERT)
+            duple_query = `
+            INSERT INTO ${table}
+            (uid,
+            anxiety_round_idx,
+            anxiety_situation_second,
+            anxiety_physical_second,
+            anxiety_thought_second,
+            anxiety_rating_second,
+            anxiety_worrys_second)
+            VALUES (?, ?, ?, ?, ?, ?, ?);`;
+
+            duple_value = [
+              parsepUid,
+              -1,
+              anxiety_situation,
+              anxiety_physical,
+              anxiety_thought,
+              anxiety_rating,
+              JSON.stringify(anxiety_worrys), // 1 ~ 3회기
+            ];
+          }
+
           connection_AI.query(
-            update_query,
-            update_value,
+            duple_query,
+            duple_value,
             (error, rows, fields) => {
               if (error) {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("Anxiety Second Update Success!");
+              console.log("Anxiety Second Insert Success!");
               return res
                 .status(200)
                 .json({ message: "Anxiety Second Data Save Success!" });
@@ -936,35 +731,59 @@ const springEllaAnxietyController = {
           );
           break;
         case "third":
-          update_query = `UPDATE ${table} SET
-          anxiety_round_idx = ?,
-          anxiety_situation_third = ?,
-          anxiety_physical_third = ?,
-          anxiety_thought_third = ?,
-          anxiety_worrys_third = ?,
-          anxiety_rating_third = ?
-          WHERE anxiety_idx = ?`;
+          if (select_data.length > 0) {
+            // 이미 존재하는 경우 (UPDATE)
+            duple_query = `
+            UPDATE ${table}
+            SET
+            anxiety_situation_third = ?,
+            anxiety_physical_third = ?,
+            anxiety_thought_third = ?,
+            anxiety_rating_third = ?,
+            anxiety_worrys_third = ?
+            WHERE anxiety_idx = ?`;
 
-          // console.log(update_query);
-          update_value = [
-            3,
-            anxiety_situation,
-            anxiety_physical,
-            anxiety_thought,
-            JSON.stringify(anxiety_worrys),
-            anxiety_rating,
-            select_data[0].anxiety_idx,
-          ];
-          // console.log(update_value);
+            duple_value = [
+              anxiety_situation,
+              anxiety_physical,
+              anxiety_thought,
+              anxiety_rating,
+              JSON.stringify(anxiety_worrys), // 1 ~ 3회기
+              select_data[0].anxiety_idx,
+            ];
+          } else {
+            // 존재하지 않는 경우 (INSERT)
+            duple_query = `
+            INSERT INTO ${table}
+            (uid,
+            anxiety_round_idx,
+            anxiety_situation_third,
+            anxiety_physical_third,
+            anxiety_thought_third,
+            anxiety_rating_third,
+            anxiety_worrys_third)
+            VALUES (?, ?, ?, ?, ?, ?, ?);`;
+
+            duple_value = [
+              parsepUid,
+              -1,
+              anxiety_situation,
+              anxiety_physical,
+              anxiety_thought,
+              anxiety_rating,
+              JSON.stringify(anxiety_worrys), // 1 ~ 3회기
+            ];
+          }
+
           connection_AI.query(
-            update_query,
-            update_value,
+            duple_query,
+            duple_value,
             (error, rows, fields) => {
               if (error) {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("Anxiety Third Update Success!");
+              console.log("Anxiety Third Insert Success!");
               return res
                 .status(200)
                 .json({ message: "Anxiety Third Data Save Success!" });
@@ -972,34 +791,59 @@ const springEllaAnxietyController = {
           );
           break;
         case "fourth":
-          update_query = `UPDATE ${table} SET
-          anxiety_round_idx = ?,
-          anxiety_cognitive_score = ?,
-          anxiety_situation_fourth = ?,
-          anxiety_physical_fourth = ?,
-          anxiety_thought_fourth = ?,
-          anxiety_rating_fourth = ?
-          WHERE anxiety_idx = ?`;
-          // console.log(update_query);
-          update_value = [
-            4,
-            anxiety_cognitive_score,
-            anxiety_situation,
-            anxiety_physical,
-            anxiety_thought,
-            anxiety_rating,
-            select_data[0].anxiety_idx,
-          ];
-          // console.log(update_value);
+          if (select_data.length > 0) {
+            // 이미 존재하는 경우 (UPDATE)
+            duple_query = `
+            UPDATE ${table}
+            SET
+            anxiety_situation_fourth = ?,
+            anxiety_physical_fourth = ?,
+            anxiety_thought_fourth = ?,
+            anxiety_rating_fourth = ?,
+            anxiety_cognitive_score = ?
+            WHERE anxiety_idx = ?`;
+
+            duple_value = [
+              anxiety_situation,
+              anxiety_physical,
+              anxiety_thought,
+              anxiety_rating,
+              anxiety_cognitive_score, // 4회기
+              select_data[0].anxiety_idx,
+            ];
+          } else {
+            // 존재하지 않는 경우 (INSERT)
+            duple_query = `
+            INSERT INTO ${table}
+            (uid,
+            anxiety_round_idx,
+            anxiety_situation_fourth,
+            anxiety_physical_fourth,
+            anxiety_thought_fourth,
+            anxiety_rating_fourth,
+            anxiety_cognitive_score)
+            VALUES (?, ?, ?, ?, ?, ?, ?);`;
+
+            duple_value = [
+              parsepUid,
+              -1,
+              anxiety_situation,
+              anxiety_physical,
+              anxiety_thought,
+              anxiety_rating,
+              anxiety_cognitive_score, // 4회기
+            ];
+          }
+
           connection_AI.query(
-            update_query,
-            update_value,
+            duple_query,
+            duple_value,
             (error, rows, fields) => {
               if (error) {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("Anxiety Fourth Update Success!");
+              console.log("Anxiety Fourth Insert Success!");
               return res
                 .status(200)
                 .json({ message: "Anxiety Fourth Data Save Success!" });
@@ -1007,37 +851,63 @@ const springEllaAnxietyController = {
           );
           break;
         case "fifth":
-          update_query = `UPDATE ${table} SET
-          anxiety_round_idx = ?,
-          anxiety_challenge_steps = ?,
-          anxiety_challenge_score = ?,
-          anxiety_situation_fifth = ?,
-          anxiety_physical_fifth = ?,
-          anxiety_thought_fifth = ?,
-          anxiety_rating_fifth = ?
-          WHERE anxiety_idx = ?`;
+          if (select_data.length > 0) {
+            // 이미 존재하는 경우 (UPDATE)
+            duple_query = `
+            UPDATE ${table}
+            SET
+            anxiety_situation_fifth = ?,
+            anxiety_physical_fifth = ?,
+            anxiety_thought_fifth = ?,
+            anxiety_rating_fifth = ?,
+            anxiety_challenge_steps = ?,
+            anxiety_challenge_score = ?
+            WHERE anxiety_idx = ?`;
 
-          // console.log(update_query);
-          update_value = [
-            5,
+            duple_value = [
+              anxiety_situation,
+              anxiety_physical,
+              anxiety_thought,
+              anxiety_rating,
+              anxiety_challenge_steps, // 5회기
+              anxiety_challenge_score.join("/"), // 5회기
+              select_data[0].anxiety_idx,
+            ];
+          } else {
+            // 존재하지 않는 경우 (INSERT)
+            duple_query = `
+            INSERT INTO ${table}
+            (uid,
+            anxiety_round_idx,
+            anxiety_situation_fifth,
+            anxiety_physical_fifth,
+            anxiety_thought_fifth,
+            anxiety_rating_fifth,
             anxiety_challenge_steps,
-            anxiety_challenge_score.join("/"),
-            anxiety_situation,
-            anxiety_physical,
-            anxiety_thought,
-            anxiety_rating,
-            select_data[0].anxiety_idx,
-          ];
-          // console.log(update_value);
+            anxiety_challenge_score)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?);`;
+
+            duple_value = [
+              parsepUid,
+              -1,
+              anxiety_situation,
+              anxiety_physical,
+              anxiety_thought,
+              anxiety_rating,
+              anxiety_challenge_steps, // 5회기
+              anxiety_challenge_score.join("/"), // 5회기
+            ];
+          }
+
           connection_AI.query(
-            update_query,
-            update_value,
+            duple_query,
+            duple_value,
             (error, rows, fields) => {
               if (error) {
                 console.log(error);
                 return res.status(400).json({ message: error.sqlMessage });
               }
-              console.log("Anxiety Fifth Update Success!");
+              console.log("Anxiety Fifth Insert Success!");
               return res
                 .status(200)
                 .json({ message: "Anxiety Fifth Data Save Success!" });
@@ -1056,7 +926,9 @@ const springEllaAnxietyController = {
   // 불안훈련 시작 데이터 Load API
   postOpenAIAnxietyDataLoad: async (req, res) => {
     const { data } = req.body;
-    let parseData, parsepUid; // Parsing 변수
+    let parseData,
+      parsepUid,
+      anxiety_name = "쿵쾅이"; // Parsing 변수
 
     try {
       // json 파싱
@@ -1066,7 +938,7 @@ const springEllaAnxietyController = {
 
       const { pUid } = parseData;
 
-      console.log(`불안 훈련 Start Data Load API 호출 - pUid: ${pUid}`);
+      console.log(`[늘봄]불안 훈련 Start Data Load API 호출 - pUid: ${pUid}`);
       console.log(parseData);
 
       // No pUid => return
@@ -1080,230 +952,17 @@ const springEllaAnxietyController = {
 
       // Table 명시
       const table = Ella_Training_Table_Info["Anxiety"].table;
-      // const attribute = Ella_Training_Table_Info["Anxiety"].attribute;
 
       // Table User 조회
       const select_query = `SELECT * FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
       const select_data = await fetchUserData(connection_AI, select_query);
-      // case.1 - Row가 없거나 anxiety_round_idx값이 5일 경우
-      if (!select_data[0] || select_data[0].anxiety_round_idx === 5)
-        return res.json({ anxiety_round_idx: 0, anxiety_name: "" });
-      // case.2 - Row가 있을 경우
-      else {
-        return res.status(200).json({
-          anxiety_round_idx: select_data[0].anxiety_round_idx,
-          anxiety_name: select_data[0].anxiety_name,
-        });
-      }
 
-      // dummy data (임시)
-      // return res.json({ mood_round_idx: 0, mood_name: "" });
-    } catch (err) {
-      delete err.headers;
-      console.error(err);
-      return res.status(500).json({
-        message: `Server Error : ${err.message}`,
+      if (select_data.length && select_data[0]?.anxiety_name)
+        anxiety_name = select_data[0].anxiety_name;
+
+      return res.status(200).json({
+        anxiety_name,
       });
-    }
-  },
-  // 불안훈련 보고서 데이터 Load API
-  postOpenAIAnxietyTrainingDataLoad: async (req, res) => {
-    const { data } = req.body;
-
-    let parseData, parsepUid; // Parsing 변수
-    const typeArr = [1, 2, 3, 4, 5];
-    try {
-      // json 파싱
-      if (typeof data === "string") {
-        parseData = JSON.parse(data);
-      } else parseData = data;
-
-      const { pUid, type } = parseData;
-
-      console.log(`불안 훈련 보고서 Data Load API 호출 - pUid: ${pUid}`);
-      console.log(parseData);
-
-      // No pUid => return
-      if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.status(400).json({ message: "No pUid input value - 400" });
-      }
-
-      // No type => return
-      if (!type) {
-        console.log("No type input value - 400");
-        return res.status(400).json({ message: "No type input value - 400" });
-      }
-
-      // No Matching Type Value => return
-      if (!typeArr.includes(type)) {
-        console.log("No matching Type value - 400");
-        return res
-          .status(400)
-          .json({ message: "No matching Type value - 400" });
-      }
-
-      // pUid default값 설정
-      parsepUid = pUid;
-
-      // Table 명시
-      const table = Ella_Training_Table_Info["Anxiety"].table;
-
-      // Table User 조회
-      let select_query;
-      let select_data;
-
-      switch (type) {
-        case 1:
-          select_query = `SELECT 
-          anxiety_name,
-          anxiety_situation_first,
-          anxiety_physical_first,
-          anxiety_thought_first,
-          anxiety_worrys_first
-          FROM ${table}
-          WHERE uid = '${parsepUid}'
-          ORDER BY created_at DESC LIMIT 1;`;
-
-          select_data = await fetchUserData(connection_AI, select_query);
-
-          // 회기를 실시하지 않은 경우
-          if (!select_data[0]?.anxiety_situation_first)
-            return res
-              .status(200)
-              .json({ message: "Non Anxiety Training First Data" });
-
-          return res.status(200).json({
-            message: "Anxiety Training First Data Load Success!",
-            data: {
-              anxiety_name: select_data[0]?.anxiety_name,
-              anxiety_situation: select_data[0]?.anxiety_situation_first,
-              anxiety_physical: select_data[0]?.anxiety_physical_first,
-              anxiety_thought: select_data[0]?.anxiety_thought_first,
-              anxiety_worrys: JSON.parse(select_data[0]?.anxiety_worrys_first),
-            },
-          });
-        case 2:
-          select_query = `SELECT 
-          anxiety_name,
-          anxiety_situation_second,
-          anxiety_physical_second,
-          anxiety_thought_second,
-          anxiety_worrys_second
-          FROM ${table}
-          WHERE uid = '${parsepUid}'
-          ORDER BY created_at DESC LIMIT 1;`;
-
-          select_data = await fetchUserData(connection_AI, select_query);
-
-          // 회기를 실시하지 않은 경우
-          if (!select_data[0]?.anxiety_situation_second)
-            return res
-              .status(200)
-              .json({ message: "Non Anxiety Training Second Data" });
-
-          return res.status(200).json({
-            message: "Anxiety Training Second Data Load Success!",
-            data: {
-              anxiety_name: select_data[0]?.anxiety_name,
-              anxiety_situation: select_data[0]?.anxiety_situation_second,
-              anxiety_physical: select_data[0]?.anxiety_physical_second,
-              anxiety_thought: select_data[0]?.anxiety_thought_second,
-              anxiety_worrys: JSON.parse(select_data[0]?.anxiety_worrys_second),
-            },
-          });
-        case 3:
-          select_query = `SELECT 
-          anxiety_name,
-          anxiety_situation_third,
-          anxiety_physical_third,
-          anxiety_thought_third,
-          anxiety_worrys_third
-          FROM ${table}
-          WHERE uid = '${parsepUid}'
-          ORDER BY created_at DESC LIMIT 1;`;
-
-          select_data = await fetchUserData(connection_AI, select_query);
-
-          // 회기를 실시하지 않은 경우
-          if (!select_data[0]?.anxiety_situation_third)
-            return res
-              .status(200)
-              .json({ message: "Non Anxiety Training Third Data" });
-
-          return res.status(200).json({
-            message: "Anxiety Training Third Data Load Success!",
-            data: {
-              anxiety_name: select_data[0]?.anxiety_name,
-              anxiety_situation: select_data[0]?.anxiety_situation_third,
-              anxiety_physical: select_data[0]?.anxiety_physical_third,
-              anxiety_thought: select_data[0]?.anxiety_thought_third,
-              anxiety_worrys: JSON.parse(select_data[0]?.anxiety_worrys_third),
-            },
-          });
-        case 4:
-          select_query = `SELECT 
-          anxiety_name,
-          anxiety_situation_fourth,
-          anxiety_physical_fourth,
-          anxiety_thought_fourth,
-          anxiety_cognitive_score
-          FROM ${table}
-          WHERE uid = '${parsepUid}'
-          ORDER BY created_at DESC LIMIT 1;`;
-
-          select_data = await fetchUserData(connection_AI, select_query);
-
-          // 회기를 실시하지 않은 경우
-          if (!select_data[0]?.anxiety_situation_fourth)
-            return res
-              .status(200)
-              .json({ message: "Non Anxiety Training fourth Data" });
-
-          return res.status(200).json({
-            message: "Anxiety Training fourth Data Load Success!",
-            data: {
-              anxiety_name: select_data[0]?.anxiety_name,
-              anxiety_situation: select_data[0]?.anxiety_situation_fourth,
-              anxiety_physical: select_data[0]?.anxiety_physical_fourth,
-              anxiety_thought: select_data[0]?.anxiety_thought_fourth,
-              anxiety_cognitive_score: select_data[0]?.anxiety_cognitive_score,
-            },
-          });
-        case 5:
-          select_query = `SELECT 
-          anxiety_name,
-          anxiety_situation_fifth,
-          anxiety_physical_fifth,
-          anxiety_thought_fifth,
-          anxiety_challenge_steps,
-          anxiety_challenge_score
-          FROM ${table}
-          WHERE uid = '${parsepUid}'
-          ORDER BY created_at DESC LIMIT 1;`;
-
-          select_data = await fetchUserData(connection_AI, select_query);
-
-          // 회기를 실시하지 않은 경우
-          if (!select_data[0]?.anxiety_situation_fifth)
-            return res
-              .status(200)
-              .json({ message: "Non Anxiety Training Fifth Data" });
-
-          return res.status(200).json({
-            message: "Anxiety Training Fifth Data Load Success!",
-            data: {
-              anxiety_name: select_data[0]?.anxiety_name,
-              anxiety_situation: select_data[0]?.anxiety_situation_fifth,
-              anxiety_physical: select_data[0]?.anxiety_physical_fifth,
-              anxiety_thought: select_data[0]?.anxiety_thought_fifth,
-              anxiety_challenge_steps: select_data[0]?.anxiety_challenge_steps,
-              anxiety_challenge_score: select_data[0]?.anxiety_challenge_score
-                .split("/")
-                .map((el) => Number(el)),
-            },
-          });
-      }
     } catch (err) {
       delete err.headers;
       console.error(err);
@@ -1315,85 +974,6 @@ const springEllaAnxietyController = {
 };
 
 const springEllaEmotionController = {
-  // 정서인식 트레이너 - 엘라 (New)
-  postOpenAIEllaEmotionTraning: async (req, res) => {
-    const { data } = req.body;
-    let parseData,
-      parseMessageArr = [];
-    let promptArr = []; // 삽입 Prompt Array
-    // 불안훈련 code 식별값
-    // const codeArr = ["emotion"];
-    try {
-      if (typeof data === "string") {
-        parseData = JSON.parse(data);
-      } else parseData = data;
-
-      const { messageArr, pUid, en } = parseData;
-
-      console.log(`엘라 정서인식 훈련 API 호출 - pUid: ${pUid}`);
-      console.log(parseData);
-
-      // No pUid => return
-      if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.status(400).json({ message: "No pUid input value - 400" });
-      }
-      // No type => return
-      // if (!code) {
-      //   console.log("No code input value - 400");
-      //   return res.status(400).json({ message: "No type input value - 400" });
-      // }
-
-      // No type => return
-      if (!messageArr) {
-        console.log("No messageArr input value - 400");
-        return res
-          .status(400)
-          .json({ message: "No messageArr input value - 400" });
-      }
-
-      // No Matching codeArr => return
-      // if (!codeArr.includes(code)) {
-      //   console.log("No matching code value - 400");
-      //   return res
-      //     .status(400)
-      //     .json({ message: "No matching code value - 400" });
-      // }
-
-      // pUid default값 설정
-      parsepUid = pUid;
-
-      parseMessageArr = [...messageArr];
-      // promptArr.push(persona_prompt_lala_v6); // 엘라 페르소나
-      promptArr.push({
-        role: "system",
-        content: `user의 마지막 말에 30자로 공감하고 '오늘은 감정의 역할과 불편한 감정들도 나름대로 쓸모가 있다는 걸 배웠어! 다음 시간에 또 만나'라고 하고 마친다`,
-      });
-
-      const response = await openai.chat.completions.create({
-        messages: [...promptArr, ...parseMessageArr],
-        model: "gpt-4o", // gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
-      });
-
-      let ellaEmotionMsg = response.choices[0].message.content;
-      // 영어 번역
-      if (en) {
-        ellaEmotionMsg = await translateText(ellaEmotionMsg);
-      }
-
-      const message = {
-        message: ellaEmotionMsg,
-      };
-
-      return res.status(200).json(message);
-    } catch (err) {
-      delete err.headers;
-      console.error(err);
-      return res.status(500).json({
-        message: `Server Error : ${err.message}`,
-      });
-    }
-  },
   // 정서인식 Save API
   postOpenAIEmotionDataSave: async (req, res) => {
     const { data } = req.body;
@@ -1764,197 +1344,6 @@ const springEllaEmotionController = {
         return res.status(200).json({
           emotion_round_idx: select_data[0].emotion_round_idx,
         });
-      }
-    } catch (err) {
-      delete err.headers;
-      console.error(err);
-      return res.status(500).json({
-        message: `Server Error : ${err.message}`,
-      });
-    }
-  },
-  // 정서인식 보고서 데이터 Load API
-  postOpenAIEmotionTrainingDataLoad: async (req, res) => {
-    const { data } = req.body;
-
-    let parseData, parsepUid; // Parsing 변수
-    const typeArr = [1, 2, 3, 4];
-    try {
-      // json 파싱
-      if (typeof data === "string") {
-        parseData = JSON.parse(data);
-      } else parseData = data;
-
-      const { pUid, type } = parseData;
-
-      console.log(`정서인식 훈련 보고서 Data Load API 호출 - pUid: ${pUid}`);
-      console.log(parseData);
-
-      // No pUid => return
-      if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.status(400).json({ message: "No pUid input value - 400" });
-      }
-
-      // No type => return
-      if (!type) {
-        console.log("No type input value - 400");
-        return res.status(400).json({ message: "No type input value - 400" });
-      }
-
-      // No Matching Type Value => return
-      if (!typeArr.includes(type)) {
-        console.log("No matching Type value [1 ~ 4] - 400");
-        return res
-          .status(400)
-          .json({ message: "No matching Type value [1 ~ 4] - 400" });
-      }
-
-      // pUid default값 설정
-      parsepUid = pUid;
-
-      // Table 명시
-      const table = Ella_Training_Table_Info["Emotion"].table;
-
-      // Table User 조회
-      let select_query;
-      let select_data;
-
-      switch (type) {
-        case 1:
-          select_query = `SELECT
-          emotion_round_idx,
-          emotion_face_correct,
-          emotion_face_wrong
-          FROM ${table}
-          WHERE uid = '${parsepUid}'
-          ORDER BY created_at DESC LIMIT 1;`;
-
-          select_data = await fetchUserData(connection_AI, select_query);
-
-          // 1회기를 실시하지 않은 경우
-          if (!select_data.length || select_data[0]?.emotion_round_idx < 1) {
-            console.log(
-              `Emotion Training Data Load Fail! (First) - pUid: ${parsepUid}`
-            );
-            return res.status(200).json({
-              message: `Emotion Training Data Load Fail! (First)`,
-            });
-          }
-
-          return res.status(200).json({
-            message: "Emotion Training Data Load Success! (First)",
-            data: {
-              emotion_face_correct: select_data[0]?.emotion_face_correct
-                ? select_data[0]?.emotion_face_correct.split("/")
-                : [], // Array
-              emotion_face_wrong: select_data[0]?.emotion_face_wrong
-                ? select_data[0]?.emotion_face_wrong.split("/")
-                : [], // Array
-            },
-          });
-        case 2:
-          select_query = `SELECT
-          emotion_round_idx,
-          emotion_body_correct,
-          emotion_body_wrong,
-          emotion_expression
-          FROM ${table}
-          WHERE uid = '${parsepUid}'
-          ORDER BY created_at DESC LIMIT 1;`;
-
-          select_data = await fetchUserData(connection_AI, select_query);
-
-          // 2회기를 실시하지 않은 경우
-          if (!select_data.length || select_data[0]?.emotion_round_idx < 2) {
-            console.log(
-              `Emotion Training Data Load Fail! (Second) - pUid: ${parsepUid}`
-            );
-            return res.status(200).json({
-              message: `Emotion Training Data Load Fail! (Second)`,
-            });
-          }
-
-          return res.status(200).json({
-            message: "Emotion Training Data Load Success! (Second)",
-            data: {
-              emotion_body_correct: select_data[0]?.emotion_body_correct
-                ? select_data[0]?.emotion_body_correct.split("/")
-                : [], // Array
-              emotion_body_wrong: select_data[0]?.emotion_body_wrong
-                ? select_data[0]?.emotion_body_wrong.split("/")
-                : [], // Array
-              emotion_expression: JSON.parse(
-                select_data[0]?.emotion_expression
-              ), // Array[String]
-            },
-          });
-        case 3:
-          select_query = `SELECT
-          emotion_round_idx,
-          emotion_role_correct,
-          emotion_role_wrong,
-          emotion_role_feedback
-          FROM ${table}
-          WHERE uid = '${parsepUid}'
-          ORDER BY created_at DESC LIMIT 1;`;
-
-          select_data = await fetchUserData(connection_AI, select_query);
-
-          // 3회기를 실시하지 않은 경우
-          if (!select_data.length || select_data[0]?.emotion_round_idx < 3) {
-            console.log(
-              `Emotion Training Data Load Fail! (Third) - pUid: ${parsepUid}`
-            );
-            return res.status(200).json({
-              message: `Emotion Training Data Load Fail! (Third)`,
-            });
-          }
-
-          return res.status(200).json({
-            message: "Emotion Training Data Load Success! (Third)",
-            data: {
-              emotion_role_correct: select_data[0]?.emotion_role_correct
-                ? select_data[0]?.emotion_role_correct.split("/")
-                : [], // Array
-              emotion_role_wrong: select_data[0]?.emotion_role_wrong
-                ? select_data[0]?.emotion_role_wrong.split("/")
-                : [], // Array
-              emotion_role_feedback: select_data[0]?.emotion_role_feedback, // String
-            },
-          });
-        case 4:
-          select_query = `SELECT
-          emotion_round_idx,
-          emotion_self_awareness,
-          emotion_score_situation,
-          emotion_day_flow
-          FROM ${table}
-          WHERE uid = '${parsepUid}'
-          ORDER BY created_at DESC LIMIT 1;`;
-
-          select_data = await fetchUserData(connection_AI, select_query);
-
-          // 4회기를 실시하지 않은 경우
-          if (!select_data.length || select_data[0]?.emotion_round_idx < 4) {
-            console.log(
-              `Emotion Training Data Load Fail! (Fourth) - pUid: ${parsepUid}`
-            );
-            return res.status(200).json({
-              message: `Emotion Training Data Load Fail! (Fourth)`,
-            });
-          }
-
-          return res.status(200).json({
-            message: "Emotion Training Data Load Success! (Fourth)",
-            data: {
-              emotion_self_awareness: select_data[0]?.emotion_self_awareness, // String
-              emotion_score_situation: select_data[0]?.emotion_score_situation, // Int
-              emotion_day_flow: select_data[0]?.emotion_day_flow
-                ? select_data[0]?.emotion_day_flow.split("/")
-                : [], // Array
-            },
-          });
       }
     } catch (err) {
       delete err.headers;
