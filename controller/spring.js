@@ -18,10 +18,10 @@ const { dbconfig_ai } = require("../DB/database");
 const connection_AI = mysql.createConnection(dbconfig_ai);
 connection_AI.connect();
 
-const OpenAI = require("openai");
-const openai = new OpenAI({
-  apiKey: process.env.API_TOKEN,
-});
+// const OpenAI = require("openai");
+// const openai = new OpenAI({
+//   apiKey: process.env.API_TOKEN,
+// });
 
 function queryAsync(connection, query, parameters) {
   return new Promise((resolve, reject) => {

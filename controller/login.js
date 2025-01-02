@@ -1,5 +1,6 @@
 // Redis 연결
 const redisStore = require("../DB/redisClient");
+
 // MySQL 접근
 const mysql = require("mysql");
 const { dbconfig, dbconfig_ai } = require("../DB/database");
@@ -1196,6 +1197,90 @@ const loginController = {
       return res
         .status(500)
         .json({ message: "Server Error - 500 Bad Gateway" });
+    }
+  },
+  // [늘봄] 로그인
+  postSpringLoginHandler: async (req, res) => {
+    const { data } = req.body;
+    let parseLoginData, parsepUid;
+    try {
+      // 입력값 파싱
+      if (typeof data === "string") {
+        parseLoginData = JSON.parse(data);
+      } else parseLoginData = data;
+
+      const { userName, userGender, userSchool, userGrade, userClass } =
+        parseLoginData;
+
+      // No Required Login Data => return
+      if (!userName || !userGender || !userSchool || !userGrade || !userClass) {
+        console.log(
+          "Spring Login Err: No Required Login Data input value - 400"
+        );
+        return res
+          .status(400)
+          .json({ message: "No Required Login Data input value - 400" });
+      }
+
+      parsepUid = `${userSchool}_${userGrade}_${userClass}_${userGender}_${userName}`;
+      console.log(`[늘봄] Login API 호출! - pUid: ${parsepUid}`);
+
+      // 오늘 날짜 변환
+      const dateObj = new Date();
+      const year = dateObj.getFullYear();
+      const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+      const day = ("0" + dateObj.getDate()).slice(-2);
+      const date = `${year}-${month}-${day}`;
+
+      const table = User_Table_Info.table;
+
+      // DB에 Row가 없을 경우 INSERT, 있으면 지정한 속성만 UPDATE
+      const duple_query = `
+        INSERT INTO ${table}
+        (uid, oauth_type, creation_date, lastLogin_date)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+        lastLogin_date = VALUES(lastLogin_date);`;
+      // console.log(insert_query);
+
+      const duple_value = [parsepUid, "spring", date, date];
+      // console.log(insert_value);
+
+      connection_AI.query(
+        duple_query,
+        duple_value,
+        (error, results, fields) => {
+          if (error) {
+            console.log(error.sqlMessage);
+            return res.status(400).json({ message: error.sqlMessage });
+          }
+          // JWT 생성
+          const token = generateToken({
+            id: parsepUid,
+          });
+
+          // Client Cookie refreshToken 저장
+          res.cookie("refreshToken", token.refreshToken, {
+            maxAge: 24 * 60 * 60 * 1000, // 쿠키 유효기간 1일로 설정
+            httpOnly: true,
+            sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+            secure: process.env.DEV_OPS !== "local",
+          });
+
+          // client 전송
+          return res.status(200).json({
+            message: "User Login Success! - 200 OK",
+            pUid: parsepUid,
+            refreshToken: token.refreshToken,
+          });
+        }
+      );
+    } catch (err) {
+      delete err.headers;
+      console.error(err);
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
+      });
     }
   },
   // (Middle Ware) SoyesAI JWT 토큰 유효성 검사
