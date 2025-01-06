@@ -62,7 +62,6 @@ router.post(
 router.post(
   "/training_anxiety_ella/save",
   vaildateTokenConsulting,
-  // vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIAnxietyDataSave
 );
 // 불안훈련 시작 데이터 Load
