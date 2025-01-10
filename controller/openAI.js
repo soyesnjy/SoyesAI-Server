@@ -4393,11 +4393,11 @@ const ellaFamilyController = {
         });
       }
 
-      // Mood Table 명시
+      // Table 명시
       const table = Ella_Training_Table_Info["Family"].table;
-      const limit = member < 4 ? 1 : 3; // 부모라인 1개,  q형제라인 3개uery limit
+      const limit = member < 4 ? 1 : 3; // 부모라인 1개,  형제라인 3개 (query limit)
 
-      // Mood Table User 조회
+      // Table User 조회
       const select_query = `SELECT family_id FROM ${table}
       WHERE uid='${parsepUid}'
       AND family_diary_member=${member}

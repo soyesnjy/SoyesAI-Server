@@ -9,16 +9,37 @@ const {
   springEllaEmotionController,
 } = require("../controller/spring");
 
+const {
+  ellaMoodController,
+  ellaAnxietyController,
+  ellaEmotionController,
+  ellaFriendController,
+  ellaFamilyController,
+} = require("../controller/openAI");
+
 const { loginController } = require("../controller/login");
 
 const { postOpenAIMoodDataSave, postOpenAIMoodDataLoad } =
   springEllaMoodController;
+const { postOpenAIEllaMoodTraning } = ellaMoodController;
 
 const { postOpenAIAnxietyDataSave, postOpenAIAnxietyDataLoad } =
   springEllaAnxietyController;
+const { postOpenAIEllaAnxietyTraning } = ellaAnxietyController;
 
-const { postOpenAIEmotionDataSave, postOpenAIEmotionDataLoad } =
-  springEllaEmotionController;
+const { postOpenAIEmotionDataSave } = springEllaEmotionController;
+const { postOpenAIEllaEmotionTraning } = ellaEmotionController;
+
+const { postOpenAIEllaFriendTraning, postOpenAIFriendDataSave } =
+  ellaFriendController;
+
+const {
+  postOpenAIEllaFamilyTraning,
+  postOpenAIFamilyDataSave,
+  postOpenAIFamilyDataLoad,
+  postOpenAIFamilyTrainingDataLoad,
+  postOpenAIFamilyDiaryDataDelete,
+} = ellaFamilyController;
 
 // 토큰 유효성 검사 미들웨어
 const {
@@ -43,6 +64,13 @@ const loginRateLimiter = rateLimit({
 
 router.post("/login", loginRateLimiter, postSpringLoginHandler);
 
+// 기분훈련 모델 - 엘라
+router.post(
+  "/training_mood_ella",
+  vaildateTokenConsulting,
+  // vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
+  postOpenAIEllaMoodTraning
+);
 // 기분훈련 데이터 Save
 router.post(
   "/training_mood_ella/save",
@@ -58,10 +86,18 @@ router.post(
   postOpenAIMoodDataLoad
 );
 
+// 불안훈련 모델 - 엘라
+router.post(
+  "/training_anxiety_ella",
+  vaildateTokenConsulting,
+  // vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
+  postOpenAIEllaAnxietyTraning
+);
 // 불안훈련 데이터 Save
 router.post(
   "/training_anxiety_ella/save",
   vaildateTokenConsulting,
+  // vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIAnxietyDataSave
 );
 // 불안훈련 시작 데이터 Load
@@ -72,19 +108,65 @@ router.post(
   postOpenAIAnxietyDataLoad
 );
 
+// 정서인식 훈련 모델 - 엘라
+router.post(
+  "/training_emotion_ella",
+  vaildateTokenConsulting,
+  // vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
+  postOpenAIEllaEmotionTraning
+);
 // 정서인식 훈련 데이터 Save
 router.post(
   "/training_emotion_ella/save",
-  // vaildateTokenConsulting,
+  vaildateTokenConsulting,
   // vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIEmotionDataSave
 );
-// 정서인식 훈련 시작 데이터 Load
+
+// 또래관계 훈련 모델 - 엘라
 router.post(
-  "/training_emotion_ella/load",
-  // vaildateTokenConsulting,
+  "/training_friend_ella",
+  vaildateTokenConsulting,
   // vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
-  postOpenAIEmotionDataLoad
+  postOpenAIEllaFriendTraning
+);
+// 또래관계 훈련 데이터 Save
+router.post(
+  "/training_friend_ella/save",
+  vaildateTokenConsulting,
+  // vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
+  postOpenAIFriendDataSave
+);
+
+// 가족관계 훈련 모델 - 엘라
+router.post(
+  "/training_family_ella",
+  vaildateTokenConsulting,
+  postOpenAIEllaFamilyTraning
+);
+// 가족관계 훈련 데이터 Save
+router.post(
+  "/training_family_ella/save",
+  vaildateTokenConsulting,
+  postOpenAIFamilyDataSave
+);
+// 가족관계 사전만들기 데이터 Load
+router.post(
+  "/training_family_ella/load",
+  vaildateTokenConsulting,
+  postOpenAIFamilyDataLoad
+);
+// 가족관계 훈련 보고서 데이터 Load
+router.post(
+  "/training_family_ella/load/training",
+  vaildateTokenConsulting,
+  postOpenAIFamilyTrainingDataLoad
+);
+// 가족관계 사전 데이터 Delete
+router.post(
+  "/training_family_ella/delete/diary",
+  vaildateTokenConsulting,
+  postOpenAIFamilyDiaryDataDelete
 );
 
 // 에러 메세지 처리

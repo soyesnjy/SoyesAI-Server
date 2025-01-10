@@ -80,7 +80,7 @@ const springEllaMoodController = {
       } = parseData;
 
       console.log(
-        `[늘봄] 엘라 기분 훈련 저장 API /openAI/training_mood_ella/save Path 호출 - pUid: ${pUid}`
+        `[늘봄] 엘라 기분 훈련 저장 API /spring/training_mood_ella/save Path 호출 - pUid: ${pUid}`
       );
       console.log(parseData);
 
@@ -519,7 +519,7 @@ const springEllaAnxietyController = {
       } = parseData;
 
       console.log(
-        `[늘봄]불안 훈련 저장 API /openAI/training_mood_ella/save Path 호출 - pUid: ${pUid}`
+        `[늘봄]불안 훈련 저장 API /spring/training_anxiety_ella/save Path 호출 - pUid: ${pUid}`
       );
       console.log(parseData);
 
@@ -1010,7 +1010,7 @@ const springEllaEmotionController = {
       } = parseData;
 
       console.log(
-        `정서인식 훈련 저장 API /openAI/training_emotion_ella/save Path 호출 - pUid: ${pUid}`
+        `[늘봄]정서인식 훈련 저장 API /spring/training_emotion_ella/save Path 호출 - pUid: ${pUid}`
       );
       console.log(parseData);
 
@@ -1035,7 +1035,7 @@ const springEllaEmotionController = {
       parseType = typeArr[type - 1];
       console.log(`parseType : ${parseType}`);
 
-      // 1회기 필수 입력값 체크
+      // 회기별 필수 입력값 체크
       if (
         parseType === "first" &&
         (!emotion_face_correct || !emotion_face_wrong)
@@ -1048,7 +1048,6 @@ const springEllaEmotionController = {
         });
       }
 
-      // 2회기 필수 입력값 체크
       if (
         parseType === "second" &&
         (!emotion_body_correct || !emotion_body_wrong || !emotion_expression)
@@ -1061,7 +1060,6 @@ const springEllaEmotionController = {
         });
       }
 
-      // 3회기 필수 입력값 체크
       if (
         parseType === "third" &&
         (!emotion_role_correct || !emotion_role_wrong || !emotion_role_feedback)
@@ -1074,9 +1072,7 @@ const springEllaEmotionController = {
         });
       }
 
-      // 4회기
       if (parseType === "fourth") {
-        // 필수 입력값 체크
         if (
           !emotion_self_awareness ||
           emotion_score_situation < 0 ||
@@ -1101,9 +1097,8 @@ const springEllaEmotionController = {
         }
       }
 
+      let duple_query, duple_value;
       const table = Ella_Training_Table_Info["Emotion"].table;
-
-      let update_query, update_value;
 
       // 1. SELECT User Emotion Table Data
       const select_query = `SELECT * FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
@@ -1111,77 +1106,44 @@ const springEllaEmotionController = {
 
       // console.log(select_data[0]);
 
-      // emotion_round_idx + parseType 체크. 일치하지 않을 경우 (not match - 400 반환)
-      if (
-        parseType === "first" &&
-        select_data.length &&
-        select_data[0]?.emotion_round_idx !== 4
-      ) {
-        console.log(
-          `The type value does not match the current episode (first) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "The type value does not match the current episode (first)",
-        });
-      }
-
-      if (
-        parseType === "second" &&
-        (!select_data.length || select_data[0]?.emotion_round_idx !== 1)
-      ) {
-        console.log(
-          `The type value does not match the current episode (second) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "The type value does not match the current episode (second)",
-        });
-      }
-
-      if (
-        parseType === "third" &&
-        (!select_data.length || select_data[0]?.emotion_round_idx !== 2)
-      ) {
-        console.log(
-          `The type value does not match the current episode (third)- pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "The type value does not match the current episode (third)",
-        });
-      }
-
-      if (
-        parseType === "fourth" &&
-        (!select_data.length || select_data[0]?.emotion_round_idx !== 3)
-      ) {
-        console.log(
-          `The type value does not match the current episode (fourth) - pUid: ${parsepUid}`
-        );
-        return res.status(400).json({
-          message: "The type value does not match the current episode (fourth)",
-        });
-      }
-
       // 타입별 query, value 삽입
       switch (parseType) {
         case "first":
-          const insert_query = `INSERT INTO ${table} 
-          (uid,
-          emotion_round_idx,
-          emotion_face_correct,
-          emotion_face_wrong)
-          VALUES (?, ?, ?, ?);`;
-          // console.log(insert_query);
-          const insert_value = [
-            parsepUid,
-            1,
-            emotion_face_correct.join("/"),
-            emotion_face_wrong.join("/"),
-          ];
-          // console.log(insert_value);
+          if (select_data.length > 0) {
+            // 이미 존재하는 경우 (UPDATE)
+            duple_query = `
+            UPDATE ${table}
+            SET
+            emotion_face_correct = ?,
+            emotion_face_wrong = ?
+            WHERE emotion_idx = ?`;
+
+            duple_value = [
+              emotion_face_correct.join("/"),
+              emotion_face_wrong.join("/"),
+              select_data[0].emotion_idx,
+            ];
+          } else {
+            // 존재하지 않는 경우 (INSERT)
+            duple_query = `
+            INSERT INTO ${table} 
+            (uid,
+            emotion_round_idx,
+            emotion_face_correct,
+            emotion_face_wrong)
+            VALUES (?, ?, ?, ?);`;
+
+            duple_value = [
+              parsepUid,
+              -1,
+              emotion_face_correct.join("/"),
+              emotion_face_wrong.join("/"),
+            ];
+          }
 
           connection_AI.query(
-            insert_query,
-            insert_value,
+            duple_query,
+            duple_value,
             (error, rows, fields) => {
               if (error) {
                 console.log(error);
@@ -1193,28 +1155,47 @@ const springEllaEmotionController = {
                 .json({ message: "Emotion First Data Save Success!" });
             }
           );
-
           break;
         case "second":
-          update_query = `UPDATE ${table} SET
-          emotion_round_idx = ?,
-          emotion_body_correct = ?,
-          emotion_body_wrong = ?,
-          emotion_expression = ?
-          WHERE emotion_idx = ?`;
+          if (select_data.length > 0) {
+            // 이미 존재하는 경우 (UPDATE)
+            duple_query = `
+            UPDATE ${table}
+            SET
+            emotion_body_correct = ?,
+            emotion_body_wrong = ?,
+            emotion_expression = ?
+            WHERE emotion_idx = ?`;
 
-          // console.log(update_query);
-          update_value = [
-            2,
-            emotion_body_correct.join("/"),
-            emotion_body_wrong.join("/"),
-            JSON.stringify(emotion_expression),
-            select_data[0].emotion_idx,
-          ];
-          // console.log(update_value);
+            duple_value = [
+              emotion_body_correct.join("/"),
+              emotion_body_wrong.join("/"),
+              JSON.stringify(emotion_expression),
+              select_data[0].emotion_idx,
+            ];
+          } else {
+            // 존재하지 않는 경우 (INSERT)
+            duple_query = `
+            INSERT INTO ${table} 
+            (uid,
+            emotion_round_idx,
+            emotion_body_correct,
+            emotion_body_wrong,
+            emotion_expression)
+            VALUES (?, ?, ?, ?, ?);`;
+
+            duple_value = [
+              parsepUid,
+              -1,
+              emotion_body_correct.join("/"),
+              emotion_body_wrong.join("/"),
+              JSON.stringify(emotion_expression),
+            ];
+          }
+
           connection_AI.query(
-            update_query,
-            update_value,
+            duple_query,
+            duple_value,
             (error, rows, fields) => {
               if (error) {
                 console.log(error);
@@ -1230,25 +1211,45 @@ const springEllaEmotionController = {
           );
           break;
         case "third":
-          update_query = `UPDATE ${table} SET
-          emotion_round_idx = ?,
-          emotion_role_correct = ?,
-          emotion_role_wrong = ?,
-          emotion_role_feedback = ?
-          WHERE emotion_idx = ?`;
+          if (select_data.length > 0) {
+            // 이미 존재하는 경우 (UPDATE)
+            duple_query = `
+            UPDATE ${table}
+            SET
+            emotion_role_correct = ?,
+            emotion_role_wrong = ?,
+            emotion_role_feedback = ?
+            WHERE emotion_idx = ?`;
 
-          // console.log(update_query);
-          update_value = [
-            3,
-            emotion_role_correct.join("/"),
-            emotion_role_wrong.join("/"),
-            emotion_role_feedback,
-            select_data[0].emotion_idx,
-          ];
-          // console.log(update_value);
+            duple_value = [
+              emotion_role_correct.join("/"),
+              emotion_role_wrong.join("/"),
+              emotion_role_feedback,
+              select_data[0].emotion_idx,
+            ];
+          } else {
+            // 존재하지 않는 경우 (INSERT)
+            duple_query = `
+            INSERT INTO ${table} 
+            (uid,
+            emotion_round_idx,
+            emotion_role_correct,
+            emotion_role_wrong,
+            emotion_role_feedback)
+            VALUES (?, ?, ?, ?, ?);`;
+
+            duple_value = [
+              parsepUid,
+              -1,
+              emotion_role_correct.join("/"),
+              emotion_role_wrong.join("/"),
+              emotion_role_feedback,
+            ];
+          }
+
           connection_AI.query(
-            update_query,
-            update_value,
+            duple_query,
+            duple_value,
             (error, rows, fields) => {
               if (error) {
                 console.log(error);
@@ -1262,25 +1263,45 @@ const springEllaEmotionController = {
           );
           break;
         case "fourth":
-          update_query = `UPDATE ${table} SET
-          emotion_round_idx = ?,
-          emotion_self_awareness = ?,
-          emotion_score_situation = ?,
-          emotion_day_flow = ?
-          WHERE emotion_idx = ?`;
+          if (select_data.length > 0) {
+            // 이미 존재하는 경우 (UPDATE)
+            duple_query = `
+            UPDATE ${table}
+            SET
+            emotion_self_awareness = ?,
+            emotion_score_situation = ?,
+            emotion_day_flow = ?
+            WHERE emotion_idx = ?`;
 
-          // console.log(update_query);
-          update_value = [
-            4,
+            duple_value = [
+              emotion_self_awareness,
+              emotion_score_situation,
+              emotion_day_flow.join("/"),
+              select_data[0].emotion_idx,
+            ];
+          } else {
+            // 존재하지 않는 경우 (INSERT)
+            duple_query = `
+            INSERT INTO ${table} 
+            (uid,
+            emotion_round_idx,
             emotion_self_awareness,
             emotion_score_situation,
-            emotion_day_flow.join("/"),
-            select_data[0].emotion_idx,
-          ];
-          // console.log(update_value);
+            emotion_day_flow)
+            VALUES (?, ?, ?, ?, ?);`;
+
+            duple_value = [
+              parsepUid,
+              -1,
+              emotion_self_awareness,
+              emotion_score_situation,
+              emotion_day_flow.join("/"),
+            ];
+          }
+
           connection_AI.query(
-            update_query,
-            update_value,
+            duple_query,
+            duple_value,
             (error, rows, fields) => {
               if (error) {
                 console.log(error);
@@ -1295,55 +1316,6 @@ const springEllaEmotionController = {
             }
           );
           break;
-      }
-    } catch (err) {
-      delete err.headers;
-      console.error(err);
-      return res.status(500).json({
-        message: `Server Error : ${err.message}`,
-      });
-    }
-  },
-  // 정서인식 시작 데이터 Load API
-  postOpenAIEmotionDataLoad: async (req, res) => {
-    const { data } = req.body;
-    let parseData, parsepUid; // Parsing 변수
-
-    try {
-      // json 파싱
-      if (typeof data === "string") {
-        parseData = JSON.parse(data);
-      } else parseData = data;
-
-      const { pUid } = parseData;
-
-      console.log(`정서인식 훈련 Start Data Load API 호출 - pUid: ${pUid}`);
-      console.log(parseData);
-
-      // No pUid => return
-      if (!pUid) {
-        console.log("No pUid input value - 400");
-        return res.status(400).json({ message: "No pUid input value - 400" });
-      }
-
-      // pUid default값 설정
-      parsepUid = pUid;
-
-      // Table 명시
-      const table = Ella_Training_Table_Info["Emotion"].table;
-
-      // Table User 조회
-      const select_query = `SELECT emotion_round_idx FROM ${table} WHERE uid = '${parsepUid}' ORDER BY created_at DESC LIMIT 1;`;
-      const select_data = await fetchUserData(connection_AI, select_query);
-
-      // case.1 - Row가 없거나 emotion_round_idx === 4
-      if (!select_data.length || select_data[0].emotion_round_idx === 4)
-        return res.json({ emotion_round_idx: 0 });
-      // case.2 - Row가 있을 경우
-      else {
-        return res.status(200).json({
-          emotion_round_idx: select_data[0].emotion_round_idx,
-        });
       }
     } catch (err) {
       delete err.headers;

@@ -336,7 +336,6 @@ router.post(
   vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIEllaEmotionTraning
 );
-
 // 정서인식 훈련 데이터 Save
 router.post(
   "/training_emotion_ella/save",
@@ -344,7 +343,6 @@ router.post(
   vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIEmotionDataSave
 );
-
 // 정서인식 훈련 시작 데이터 Load
 router.post(
   "/training_emotion_ella/load",
@@ -352,7 +350,6 @@ router.post(
   vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
   postOpenAIEmotionDataLoad
 );
-
 // 정서인식 훈련 보고서 데이터 Load
 router.post(
   "/training_emotion_ella/load/training",
