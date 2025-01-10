@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { errController } = require("../controller/index");
 
+// 컨트롤러 Importing
 const {
   springEllaMoodController,
   springEllaAnxietyController,
@@ -19,6 +20,7 @@ const {
 
 const { loginController } = require("../controller/login");
 
+// Method Importing
 const { postOpenAIMoodDataSave, postOpenAIMoodDataLoad } =
   springEllaMoodController;
 const { postOpenAIEllaMoodTraning } = ellaMoodController;
