@@ -152,24 +152,6 @@ router.post(
   vaildateTokenConsulting,
   postOpenAIFamilyDataSave
 );
-// 가족관계 사전만들기 데이터 Load
-router.post(
-  "/training_family_ella/load",
-  vaildateTokenConsulting,
-  postOpenAIFamilyDataLoad
-);
-// 가족관계 훈련 보고서 데이터 Load
-router.post(
-  "/training_family_ella/load/training",
-  vaildateTokenConsulting,
-  postOpenAIFamilyTrainingDataLoad
-);
-// 가족관계 사전 데이터 Delete
-router.post(
-  "/training_family_ella/delete/diary",
-  vaildateTokenConsulting,
-  postOpenAIFamilyDiaryDataDelete
-);
 
 // 에러 메세지 처리
 router.use(errController.errMessageHandler);
