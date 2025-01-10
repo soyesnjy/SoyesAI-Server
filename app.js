@@ -94,6 +94,29 @@ app.use(compression());
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "/views"));
 
+// API 호출 로그 기록
+const morgan = require("morgan");
+
+// Morgan 커스텀 토큰 정의
+morgan.token("req-body", (req) => {
+  return req.body && Object.keys(req.body).length > 0
+    ? JSON.stringify(req.body)
+    : "-"; // Body가 없으면 "-" 반환
+});
+// app.use(morgan(":method :url :status :response-time ms - Req Body: :req-body"));
+// GET 요청을 제외한 조건부 로깅 미들웨어
+app.use((req, res, next) => {
+  if (req.method !== "GET") {
+    morgan(":method :url :status :response-time ms - Req Body: :req-body")(
+      req,
+      res,
+      next
+    );
+  } else {
+    next(); // GET 요청은 morgan 실행 없이 다음 미들웨어로 이동
+  }
+});
+
 app.get("/", (req, res) => {
   // Jenkins Test용 주석
   // Jenkins Test용 주석2
