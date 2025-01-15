@@ -1612,17 +1612,51 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
   },
   // Clova Voice API 사용
   postClovaVoiceTTS: async (req, res) => {
-    console.log("ClovaVoiceTTS API /openAI/tts Path 호출");
-    const api_url = "https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts";
+    const { data } = req.body;
+    let parseData;
     try {
-      const response = await axios.post(api_url, req.body, {
-        responseType: "arraybuffer", // Clova 음성 데이터를 arraybuffer로 받음
-        headers: {
-          "X-NCP-APIGW-API-KEY-ID": process.env.CLOVA_CLIENT_ID,
-          "X-NCP-APIGW-API-KEY": process.env.CLOVA_CLIENT_SECRET,
-          "Content-Type": "application/x-www-form-urlencoded",
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const {
+        speaker, // 필수
+        text, // 필수
+        volume,
+        speed,
+        pitch,
+        emotion,
+        alpha,
+        format,
+        emotionStrength,
+        samplingRate,
+        endPitch,
+      } = parseData;
+
+      const response = await axios.post(
+        api_url,
+        {
+          speaker,
+          volume,
+          speed,
+          pitch,
+          text,
+          emotion,
+          alpha,
+          format,
+          "emotion-strength": emotionStrength,
+          "sampling-rate": samplingRate,
+          "end-pitch": endPitch,
         },
-      });
+        {
+          responseType: "arraybuffer", // Clova 음성 데이터를 arraybuffer로 받음
+          headers: {
+            "X-NCP-APIGW-API-KEY-ID": process.env.CLOVA_CLIENT_ID,
+            "X-NCP-APIGW-API-KEY": process.env.CLOVA_CLIENT_SECRET,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
 
       // console.log(response.data);
       // 음성 데이터를 클라이언트로 전송
@@ -1636,7 +1670,7 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
     } catch (err) {
       delete err.headers;
       console.error(err);
-      return res.status(500).end({
+      return res.status(500).json({
         message: `Server Error : ${err.message}`,
       });
     }
