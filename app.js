@@ -28,6 +28,7 @@ app.use(
       "https://www.soyeskids.store",
       "http://localhost:3000",
       "http://localhost",
+      "https://html-classic.itch.zone",
       // "http://localhost/soye/model/index.php",
       // "http://127.0.0.1:53298",
       // "http://d1rq5xi9hzhyrc.cloudfront.net",
