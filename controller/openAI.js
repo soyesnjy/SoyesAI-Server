@@ -1281,7 +1281,7 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
     let parseData, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
 
-    const modelArr = ["soyes", "pupu", "ubi", "ella", "north"];
+    const modelArr = ["soyes", "pupu", "ubi", "ella", "north", "maru"];
     try {
       if (typeof data === "string") {
         parseData = JSON.parse(data);
@@ -1326,7 +1326,7 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
         case "ubi":
           promptArr.push(persona_prompt_ubi);
           break;
-        case "ella":
+        case "maru":
           promptArr.push(persona_prompt_lala_v6);
           break;
         case "north":
