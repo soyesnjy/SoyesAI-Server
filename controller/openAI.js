@@ -212,6 +212,8 @@ const {
   persona_prompt_pupu_v7,
   persona_prompt_maru,
   persona_prompt_north,
+  persona_prompt_maru_custom,
+  persona_prompt_nella,
 } = require("../DB/test_prompt");
 
 const {
@@ -1281,7 +1283,7 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
     let parseData, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
 
-    const modelArr = ["soyes", "pupu", "ubi", "ella", "north", "maru"];
+    const modelArr = ["soyes", "pupu", "ubi", "ella", "north", "maru", "nella"];
     try {
       if (typeof data === "string") {
         parseData = JSON.parse(data);
@@ -1291,7 +1293,6 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
       console.log(
         `커스텀 상담 API /consulting_emotion_custom Path 호출 - pUid: ${pUid}`
       );
-      console.log(parseData);
       // messageArr가 문자열일 경우 json 파싱
       if (typeof messageArr === "string") {
         parseMessageArr = JSON.parse(messageArr);
@@ -1327,7 +1328,10 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
           promptArr.push(persona_prompt_ubi);
           break;
         case "maru":
-          promptArr.push(persona_prompt_lala_v6);
+          promptArr.push(persona_prompt_maru_custom);
+          break;
+        case "nella":
+          promptArr.push(persona_prompt_nella);
           break;
         case "north":
           promptArr.push(persona_prompt_north);
