@@ -1612,6 +1612,7 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
   },
   // Clova Voice API 사용
   postClovaVoiceTTS: async (req, res) => {
+    const api_url = "https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts";
     const { data } = req.body;
     let parseData;
     try {
