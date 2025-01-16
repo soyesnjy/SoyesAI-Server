@@ -1634,14 +1634,16 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
         endPitch,
       } = parseData;
 
+      console.log(parseData);
+
       const response = await axios.post(
         api_url,
         {
           speaker,
+          text,
           volume,
           speed,
           pitch,
-          text,
           emotion,
           alpha,
           format,
@@ -1669,8 +1671,15 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
       // JSON 형식이 아니기에 res.json 사용 X
       res.end(response.data);
     } catch (err) {
-      delete err.headers;
-      console.error(err);
+      if (err.response) {
+        // HTTP 응답 상태 및 데이터를 확인
+        console.log("Error Status:", err.response.status);
+        console.log("Error Data:", err.response.data.toString("utf8"));
+      } else {
+        // 응답 자체가 없을 경우
+        console.log("Error:", err.message);
+      }
+
       return res.status(500).json({
         message: `Server Error : ${err.message}`,
       });
