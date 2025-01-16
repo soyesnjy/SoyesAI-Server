@@ -1634,7 +1634,7 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
         endPitch,
       } = parseData;
 
-      console.log(parseData);
+      // console.log(parseData);
 
       const response = await axios.post(
         api_url,
