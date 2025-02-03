@@ -189,6 +189,7 @@ const PaymentController = {
 
         coupon_select_data = await fetchUserData(connection_AI, select_query);
 
+        // 비유효 쿠폰 체크
         if (
           !coupon_select_data.length || // 없는 쿠폰
           coupon_select_data[0]?.coupon_number !== coupon_number // 쿠폰 번호와 일치하지 않음
@@ -454,6 +455,7 @@ const PaymentController = {
         log_select_query
       );
 
+      // 해당 계정에서 이미 사용된 이용권인 경우
       if (log_select_data.length) {
         console.log(`Already Used Coupon - pUid: ${pUid}`);
         return res.status(203).json({

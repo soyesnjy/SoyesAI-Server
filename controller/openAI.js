@@ -1331,7 +1331,7 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
           promptArr.push(persona_prompt_maru_custom);
           break;
         case "nella":
-          promptArr.push(persona_prompt_nella);
+          promptArr.push(persona_prompt_nella); // 넬라인데 내용은 우비
           break;
         case "north":
           promptArr.push(persona_prompt_north);
@@ -2136,7 +2136,7 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
     }
   },
 };
-
+// 엘라 - 기분
 const ellaMoodController = {
   // 기분 훈련 트레이너 - 엘라 (New)
   postOpenAIEllaMoodTraning: async (req, res) => {
@@ -2836,7 +2836,7 @@ Todo List가 아니라고 판단되면 제외한다.
     }
   },
 };
-
+// 엘라 - 또래관계
 const ellaFriendController = {
   // 또래관계 훈련 - 엘라
   postOpenAIEllaFriendTraning: async (req, res) => {
@@ -3299,7 +3299,7 @@ B와 C를 참고해 일관적으로 반응해야 한다. 사과나, 공감하는
     }
   },
 };
-
+// 엘라 - 불안
 const ellaAnxietyController = {
   // 불안훈련 트레이너 - 엘라 (New)
   postOpenAIEllaAnxietyTraning: async (req, res) => {
@@ -4120,7 +4120,7 @@ const ellaAnxietyController = {
     }
   },
 };
-
+// 엘라 - 가족관계
 const ellaFamilyController = {
   // 가족관계 훈련 API
   postOpenAIEllaFamilyTraning: async (req, res) => {
@@ -4624,7 +4624,7 @@ const ellaFamilyController = {
     }
   },
 };
-
+// 엘라 - 정서인식
 const ellaEmotionController = {
   // 정서인식 트레이너 - 엘라 (New)
   postOpenAIEllaEmotionTraning: async (req, res) => {
@@ -5276,7 +5276,7 @@ const ellaEmotionController = {
     }
   },
 };
-
+// 북극이이
 const NorthController = {
   // 일기친구 모델 - 북극이 Save API
   postOpenAIConsultingNorthSave: async (req, res) => {
@@ -5557,7 +5557,7 @@ const NorthController = {
     }
   },
 };
-
+// 우비
 const ubiController = {
   // 우비 명상추천 친구
   postOpenAIUbiMeditationRecomend: async (req, res) => {
