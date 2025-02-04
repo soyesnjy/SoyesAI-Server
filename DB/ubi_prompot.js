@@ -1036,7 +1036,7 @@ const ubiPromptHandler = (ebt_scores) => {
     mind/ns5kDuZYNAg
   }
   
-  [ Return Form ]
+  [Return Form]
   mind/oBPUCd6LZZg, music/PjisWOWzwtg, yoga/oBPUCd6LZZg
   
   '''
@@ -1047,8 +1047,6 @@ const ubiPromptHandler = (ebt_scores) => {
   (yoga에 해당되는 값이 없는 경우 yoga/ 로 시작하는 값들 중 랜덤으로 반환한다)
 `;
 };
-
-// 주석 처리~
 
 module.exports = {
   ubi_meditaion_recommand_prompt,

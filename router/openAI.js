@@ -22,6 +22,7 @@ const {
   postOpenAIEmotionAnalyze,
   postOpenAIPsychologicalAnalysis,
   postOpenAIConsultingPupu,
+  postOpenAIConsultingPupuWebGl,
   postOpenAIConsultingUbi,
   postOpenAIConsultingSoyes,
   postOpenAIConsultingMaru,
@@ -138,7 +139,7 @@ router.post(
   "/test/consulting_emotion_pupu",
   // vaildateTokenConsulting,
   // vaildateUserSubscriptionAuth, // 이용권한 검증 미들웨어
-  postOpenAIConsultingPupu
+  postOpenAIConsultingPupuWebGl
 );
 
 // 공부친구 모델 - 우비

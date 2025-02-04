@@ -217,7 +217,7 @@ const {
 } = require("../DB/test_prompt");
 
 const {
-  ubi_meditaion_recommand_prompt,
+  // ubi_meditaion_recommand_prompt,
   ubiPromptHandler,
 } = require("../DB/ubi_prompot");
 
@@ -905,6 +905,104 @@ const openAIController = {
 
       // Client 반환
       res.status(200).json(message);
+    } catch (err) {
+      delete err.headers;
+      console.error(err);
+      return res.status(500).json({
+        message: `Server Error : ${err.message}`,
+        emotion: 0,
+      });
+    }
+  },
+  // 공감친구 모델 - 푸푸 (WebGl 용)
+  postOpenAIConsultingPupuWebGl: async (req, res) => {
+    const { data } = req.body;
+    let parseData, parseMessageArr, parsepUid; // Parsing 변수
+    let promptArr = [],
+      emotion = "Humming"; // 삽입 Prompt Array
+
+    const emotionArray = [
+      "Hand Gesture",
+      "Raise Hand",
+      "Shake Head",
+      "Surprised",
+      "Clap",
+      "ThumbsUp",
+      "Worry",
+      "Humming",
+    ];
+
+    // 배열의 값을 정규표현식으로 변환
+    const regex = new RegExp(`^(${emotionArray.join("|")})$`);
+
+    try {
+      if (typeof data === "string") {
+        parseData = JSON.parse(data);
+      } else parseData = data;
+
+      const { messageArr, pUid, en } = parseData;
+      // messageArr가 문자열일 경우 json 파싱
+      if (typeof messageArr === "string") {
+        parseMessageArr = JSON.parse(messageArr);
+      } else parseMessageArr = [...messageArr];
+
+      // No pUid => return
+      if (!pUid) {
+        console.log("No pUid input value - 404");
+        return res.status(404).json({ message: "No pUid input value - 404" });
+      }
+
+      parsepUid = pUid;
+
+      // 고정 삽입 프롬프트
+      promptArr.push(persona_prompt_pupu_v7); // 2024.10.10 ~
+
+      const response = await openai.chat.completions.create({
+        messages: [...promptArr, ...parseMessageArr],
+        model: "gpt-4o", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
+      });
+
+      let pupuMsg = response.choices[0].message.content;
+      // 영어 번역
+      if (en) {
+        pupuMsg = await translateText(pupuMsg);
+      }
+
+      const emotionResponse = await openai.chat.completions.create({
+        messages: [
+          {
+            role: "system",
+            content: `다음 텍스트의 감정을 분석하세요.
+            감정 분류는 다음 규칙에 따릅니다.
+            '''
+            Hand Gesture - unclear, ambiguous, hard to understand
+            Raise Hand - advice, suggestion, recommendation
+            Shake Head - disapproval, rejection, distrust, fear
+            Surprised - shock, astonishment
+            Clap - celebration, joy, happiness
+            ThumbsUp - praise, positive feedback
+            Worry - concern, anxiety, worry
+            Humming - neutral, indifferent, calm
+            '''
+            텍스트: """${pupuMsg}"""
+            답변은 위의 좌측값만 출력해주세요. (해당되는 값이 없다면 Humming을 출력해주세요)
+            `,
+          },
+        ],
+        model: "gpt-4o", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3ㅐ1
+      });
+
+      let emotionMsg = emotionResponse.choices[0].message.content;
+      // emotionArray 요소 반환 체크
+      if (!regex.test(emotionMsg)) emotionMsg = "Humming";
+
+      const message = {
+        message: pupuMsg,
+        emotion: emotionMsg,
+      };
+
+      // Client 반환
+      return res.status(200).json(message);
     } catch (err) {
       delete err.headers;
       console.error(err);
@@ -5752,6 +5850,8 @@ const ubiController = {
 
       promptArr.push({ role: "system", content: ubiPromptHandler(ebt_scores) });
 
+      // console.log(promptArr[0]);
+
       const response = await openai.chat.completions.create({
         messages: [...promptArr],
         model: "gpt-4o", // gpt-4o, gpt-4-turbo, gpt-4-0125-preview, gpt-3.5-turbo-0125, ft:gpt-3.5-turbo-1106:personal::8fIksWK3
@@ -5759,7 +5859,7 @@ const ubiController = {
       });
 
       let value = response.choices[0].message.content;
-      // console.log(value);
+      console.log(value);
 
       // 반환값 형식 확인
       if (isInvalidFormatOrder(value)) {
