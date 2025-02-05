@@ -918,9 +918,9 @@ const openAIController = {
   postOpenAIConsultingPupuWebGl: async (req, res) => {
     const { data } = req.body;
     let parseData, parseMessageArr, parsepUid; // Parsing 변수
-    let promptArr = [],
-      emotion = "Humming"; // 삽입 Prompt Array
+    let promptArr = []; // 삽입 Prompt Array
 
+    // 감정 분류 배열
     const emotionArray = [
       "Hand Gesture",
       "Raise Hand",
@@ -979,7 +979,7 @@ const openAIController = {
             Raise Hand - advice, suggestion, recommendation
             Shake Head - disapproval, rejection, distrust, fear
             Surprised - shock, astonishment
-            Clap - celebration, joy, happiness
+            Clap - joy, happiness
             ThumbsUp - praise, positive feedback
             Worry - concern, anxiety, worry
             Humming - neutral, indifferent, calm
