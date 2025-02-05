@@ -980,7 +980,7 @@ const openAIController = {
             Shake Head - disapproval, rejection, distrust, fear
             Surprised - shock, astonishment
             Clap - joy, happiness
-            ThumbsUp - praise, positive feedback
+            ThumbsUp - celebration, praise, positive feedback
             Worry - concern, anxiety, worry
             Humming - neutral, indifferent, calm
             '''
