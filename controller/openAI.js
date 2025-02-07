@@ -968,6 +968,7 @@ const openAIController = {
         pupuMsg = await translateText(pupuMsg);
       }
 
+      // 푸푸 답변 감정 분석 요청
       const emotionResponse = await openai.chat.completions.create({
         messages: [
           {
@@ -5374,7 +5375,7 @@ const ellaEmotionController = {
     }
   },
 };
-// 북극이이
+// 북극이
 const NorthController = {
   // 일기친구 모델 - 북극이 Save API
   postOpenAIConsultingNorthSave: async (req, res) => {

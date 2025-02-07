@@ -111,6 +111,13 @@ router.post(
   postOpenAIPsychologicalAnalysis
 );
 
+// EBT 결과 분석 (WebGL용 - 미들웨어 제거)
+router.post(
+  "/test/analysis",
+  // vaildateTokenConsulting,
+  postOpenAIPsychologicalAnalysis
+);
+
 // EBT 결과(11종) 데이터 반환
 router.post(
   "/ebtresult",
@@ -134,7 +141,7 @@ router.post(
   postOpenAIConsultingPupu
 );
 
-// 공감친구 모델 - 푸푸 (테스트용 미들웨어 제거)
+// 공감친구 모델 - 푸푸 ((WebGL용 - 미들웨어 제거))
 router.post(
   "/test/consulting_emotion_pupu",
   // vaildateTokenConsulting,
