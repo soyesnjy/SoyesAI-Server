@@ -214,6 +214,7 @@ const {
   persona_prompt_north,
   persona_prompt_maru_custom,
   persona_prompt_nella,
+  persona_prompt_kids_custom,
 } = require("../DB/test_prompt");
 
 const {
@@ -1382,7 +1383,16 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
     let parseData, parseMessageArr, parsepUid; // Parsing 변수
     let promptArr = []; // 삽입 Prompt Array
 
-    const modelArr = ["soyes", "pupu", "ubi", "ella", "north", "maru", "nella"];
+    const modelArr = [
+      "soyes",
+      "pupu",
+      "ubi",
+      "ella",
+      "north",
+      "maru",
+      "nella",
+      "kids",
+    ];
     try {
       if (typeof data === "string") {
         parseData = JSON.parse(data);
@@ -1434,6 +1444,9 @@ assistant는 user의 응답에 반응하지 않고 반드시 밸런스게임 문
           break;
         case "north":
           promptArr.push(persona_prompt_north);
+          break;
+        case "kids":
+          promptArr.push(persona_prompt_kids_custom);
           break;
       }
 
