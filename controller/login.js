@@ -191,10 +191,180 @@ const loginController = {
     //   secure: true,
     //   sameSite: "none",
     // });
-
     res.json("Token LogOut Success");
   },
-  // Google OAuth URL 발급
+  // AI RefreshToken 인증
+  postAIRefreshTokenCertHandler: async (req, res) => {
+    const { data } = req.body;
+    // console.log(data);
+    let parseLoginData;
+    try {
+      // 입력값 파싱
+      if (typeof data === "string") {
+        parseLoginData = JSON.parse(data);
+      } else parseLoginData = data;
+
+      const { refreshToken } = parseLoginData;
+      // const sessionId = req.sessionID;
+
+      // Non refreshToken
+      if (!refreshToken) {
+        return res
+          .status(400)
+          .json({ message: "Non refreshToken Value - 400 Bad Request" });
+      }
+
+      // let parsepUid = pUid;
+      let parseRefreshToken = refreshToken;
+
+      // refreshToken 복호화
+      const decoded = verifyToken("refresh", parseRefreshToken);
+
+      // 토큰 만료
+      if (decoded === "expired")
+        return res.status(401).json({
+          // message: "Token has expired - 401 UNAUTHORIZED",
+          message: "로그인 세션이 만료되었습니다. 재로그인 바랍니다!",
+        });
+
+      console.log(`RefreshToken 인증 API 호출 - pUid: ${decoded.id}`);
+
+      const user_table = User_Table_Info.table;
+      const user_attribute = User_Table_Info.attribute;
+
+      // 1. SELECT (row가 있는지 없는지 검사)
+      // User 계정 DB SELECT Method. uid를 입력값으로 받음
+      const ebt_data = await user_ai_select(
+        user_table,
+        user_attribute,
+        decoded.id
+      );
+
+      // DB 회원 정보 조회
+      if (!ebt_data[0]) {
+        console.log("Non User - 401 UNAUTHORIZED");
+        return res.status(401).json({
+          message: "Non User - 401 UNAUTHORIZED",
+        });
+      }
+
+      // 유효하지 않은 refreshToken 양식일 경우
+      if (!decoded) {
+        console.log("Invalid token format - 401 UNAUTHORIZED");
+        return res.status(401).json({
+          // message: "Invalid token format - 401 UNAUTHORIZED",
+          message: "유효하지 않은 인증 방식입니다. 재로그인 바랍니다.",
+        });
+      }
+
+      // decoded 값이 있는 경우
+      if (decoded.id) {
+        // JWT Token 재발급 후 세션 저장
+        const token = generateToken({
+          id: decoded.id,
+          // email: decoded.email,
+        });
+
+        // Session 내부에 accessToken 저장
+        // req.session.accessToken = token.accessToken;
+
+        // cookie refreshToken 갱신
+        res.cookie("refreshToken", token.refreshToken, {
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 쿠키 갱신 (7일)
+          httpOnly: true,
+          sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
+          secure: process.env.DEV_OPS !== "local",
+        });
+
+        console.log(`User RefreshToken Update Success! - pUid: ${decoded.id}`);
+
+        // Redis에서 기존 세션 ID 확인
+        // redisStore.get(`user_session:${decoded.id}`, (err, oldSessionId) => {
+        //   if (oldSessionId) {
+        //     // 기존 세션 무효화
+        //     redisStore.destroy(`user_session:${decoded.id}`, (err, reply) => {
+        //       // console.log("Previous session invalidated");
+        //     });
+        //   }
+
+        //   // 새 세션 ID를 사용자 ID와 연결
+        //   redisStore.set(
+        //     `user_session:${decoded.id}`,
+        //     sessionId,
+        //     (err, reply) => {
+        //       // 로그인 처리 로직
+        //       // console.log(`SessionID Update - ${sessionId}`);
+        //     }
+        //   );
+        // });
+
+        // User Table 로그인 날짜 갱신
+        const dateObj = new Date();
+        const year = dateObj.getFullYear();
+        const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+        const day = ("0" + dateObj.getDate()).slice(-2);
+        const date = `${year}-${month}-${day}`;
+
+        const table = User_Table_Info.table;
+        const attribute = User_Table_Info.attribute;
+
+        const update_query = `UPDATE ${table} SET ${attribute.attr7} = ? WHERE ${attribute.pKey} = ?`;
+        // console.log(update_query);
+
+        const update_value = [date, decoded.id];
+        // console.log(update_value);
+
+        connection_AI.query(
+          update_query,
+          update_value,
+          (error, rows, fields) => {
+            if (error) {
+              console.log(error.sqlMessage);
+              return res.status(404).json({ message: error.sqlMessage });
+            }
+            // console.log("User Last Login Log Update Success!");
+          }
+        );
+
+        // 이용권 만료일 확인
+        const sub_table = Subscription_Table_Info["Subscription"].table;
+
+        const sub_select_query = `SELECT 
+        subscription_expiration_date
+        FROM ${sub_table}
+        WHERE uid='${decoded.id}'`;
+        const sub_select_data = await fetchUserData(
+          connection_AI,
+          sub_select_query
+        );
+
+        // 토큰 인증
+        return res.status(200).json({
+          message: `User RefreshToken Certification Success! - pUid: ${decoded.id}`,
+          pUid: decoded.id,
+          refreshToken: token.refreshToken,
+          expirationDate: sub_select_data.length
+            ? sub_select_data[0]?.subscription_expiration_date
+            : "",
+        });
+      }
+      // 만료된 RefreshToken 복호화 ID와 입력 ID가 다를 경우
+      else {
+        console.log(
+          "Uid Does Not Match RefreshToekn Decoding Payload ID - 401 UNAUTHORIZED"
+        );
+        // client 전송
+        res.status(401).json({
+          message:
+            "Uid Does Not Match RefreshToekn Decoding Payload ID - 401 UNAUTHORIZED",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
+    }
+  },
+  // (SoyesAI Mobile) Google OAuth URL 발급
   oauthUrlHandler: (req, res) => {
     console.log("Google OAuth URL 발급 API 호출");
     try {
@@ -215,7 +385,7 @@ const loginController = {
       res.status(500).json({ url: "Non" });
     }
   },
-  // Google OAuth Redirect Url
+  // (SoyesAI Mobile) Google OAuth Redirect Url
   oauthGoogleRedirectUrlHandler: async (req, res) => {
     const query = req.query;
     const { code } = query;
@@ -365,7 +535,7 @@ const loginController = {
       res.status(500).json({ data: "Server Error!" });
     }
   },
-  // Kakao OAuth URL 발급
+  // (SoyesAI Mobile) Kakao OAuth URL 발급
   oauthKakaoUrlHandler: (req, res) => {
     console.log("Kakao OAuth URL 발급 API 호출");
     try {
@@ -380,7 +550,7 @@ const loginController = {
       res.json({ url: "Server Error" });
     }
   },
-  // Kakao OAuth Redirect Url
+  // (SoyesAI Mobile) Kakao OAuth Redirect Url
   oauthKakaoRedirectUrlHandler: async (req, res) => {
     const query = req.query;
     const { code } = query;
@@ -531,6 +701,8 @@ const loginController = {
       // res.json({ data: response.data });
 
       // ejs 파일을 활용한 서버 html 렌더링 후 클라이언트 전송
+
+      // render
       res.render("userInfo", {
         data: JSON.stringify({
           data: response.data,
@@ -542,7 +714,7 @@ const loginController = {
       res.status(500).json({ data: "Server Error!" });
     }
   },
-  // AI 애플 로그인
+  // (SoyesAI Mobile) AI 애플 로그인
   postAIAppleLoginHandler: async (req, res) => {
     const { data } = req.body;
     let parseLoginData;
@@ -674,19 +846,19 @@ const loginController = {
       // const expire = String(dateObj.setHours(dateObj.getHours() + 1));
 
       // Redis에서 기존 세션 ID 확인
-      redisStore.get(`user_session:${parsepUid}`, (err, oldSessionId) => {
-        if (oldSessionId) {
-          // 기존 세션 무효화
-          redisStore.destroy(`user_session:${parsepUid}`, (err, reply) => {
-            // console.log("Previous session invalidated");
-          });
-        }
-        // 새 세션 ID를 사용자 ID와 연결
-        redisStore.set(`user_session:${parsepUid}`, sessionId, (err, reply) => {
-          // 로그인 처리 로직
-          // console.log(`[${parsepUid}] SessionID Update - ${sessionId}`);
-        });
-      });
+      // redisStore.get(`user_session:${parsepUid}`, (err, oldSessionId) => {
+      //   if (oldSessionId) {
+      //     // 기존 세션 무효화
+      //     redisStore.destroy(`user_session:${parsepUid}`, (err, reply) => {
+      //       // console.log("Previous session invalidated");
+      //     });
+      //   }
+      //   // 새 세션 ID를 사용자 ID와 연결
+      //   redisStore.set(`user_session:${parsepUid}`, sessionId, (err, reply) => {
+      //     // 로그인 처리 로직
+      //     // console.log(`[${parsepUid}] SessionID Update - ${sessionId}`);
+      //   });
+      // });
 
       // client 전송
       return res.status(200).json({
@@ -702,7 +874,7 @@ const loginController = {
         .json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
-  // AI Guest 로그인
+  // (SoyesAI Mobile) AI Guest 로그인
   postAIGuestLoginHandler: async (req, res) => {
     const query = req.query;
     const { tag } = query;
@@ -949,7 +1121,7 @@ const loginController = {
       res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
-  // AI Kakao OAuth 로그인 (App)
+  // (구) AI Kakao OAuth 로그인
   postSocialAppLoginHandler: async (req, res) => {
     const { data, code } = req.body;
     console.log("Kakao OAuth App Login API 호출");
@@ -1124,7 +1296,7 @@ const loginController = {
       res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
-  // AI 회원탈퇴
+  // (SoyesAI Mobile) AI 회원탈퇴
   deleteAIUserDeleteHandler: async (req, res) => {
     console.log("AI 회원탈퇴 API 호출");
     const { data } = req.body;
@@ -1197,6 +1369,150 @@ const loginController = {
       return res
         .status(500)
         .json({ message: "Server Error - 500 Bad Gateway" });
+    }
+  },
+  // (WebGL) Kakao OAuth URL 발급
+  oauthWebGLKakaoUrlHandler: (req, res) => {
+    console.log("WebGL Kakao OAuth URL 발급 API 호출");
+    try {
+      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${
+        process.env.KAKAO_REST_API_KEY
+      }&redirect_uri=${process.env.WEBGL_REDIRECT_URL}&state=${Math.random()
+        .toString(36)
+        .substring(7)}`;
+      return res.status(200).json({ url: kakaoAuthUrl });
+    } catch (err) {
+      console.error(err);
+      res.json({ url: "Server Error" });
+    }
+  },
+  // (WebGL) Kakao OAuth Redirect Url
+  oauthWebGLKakaoRedirectUrlHandler: async (req, res) => {
+    const query = req.query;
+    const { code } = query;
+    console.log("WebGL Kakao OAuth Redirect Url API 호출");
+    // console.log(code);
+    let parseUid = "";
+
+    try {
+      if (!code) return res.status(200).json({ text: "code가 없음!" });
+      // POST 요청으로 액세스 토큰 요청
+      const tokenResponse = await axios.post(
+        "https://kauth.kakao.com/oauth/token",
+        null,
+        {
+          params: {
+            grant_type: "authorization_code",
+            client_id: process.env.KAKAO_REST_API_KEY, // 카카오 개발자 콘솔에서 발급받은 REST API 키
+            redirect_uri: `${process.env.WEBGL_REDIRECT_URL}`, // 카카오 개발자 콘솔에 등록한 리디렉션 URI
+            code: code, // 클라이언트로부터 받은 권한 코드
+          },
+          headers: {
+            "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+          },
+        }
+      );
+
+      // console.log(tokenResponse);
+
+      const response = await axios.get("https://kapi.kakao.com/v2/user/me", {
+        headers: {
+          Authorization: `Bearer ${tokenResponse.data.access_token}`,
+          "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+        },
+      });
+
+      // DB 계정 생성 파트
+      const { id } = response.data;
+      // const { email } = response.data.kakao_account;
+
+      const table = User_Table_Info.table;
+      const attribute = User_Table_Info.attribute;
+      // 오늘 날짜 변환
+      const dateObj = new Date();
+      const year = dateObj.getFullYear();
+      const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+      const day = ("0" + dateObj.getDate()).slice(-2);
+      const date = `${year}-${month}-${day}`;
+
+      // DB 계정 생성
+
+      // 1. SELECT USER (row가 있는지 없는지 검사)
+      const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${response.data.id}'`;
+      const ebt_data = await fetchUserData(connection_AI, select_query);
+
+      // console.log(ebt_data);
+
+      // 2. INSERT USER (row값이 없는 경우 실행)
+      if (!ebt_data[0]) {
+        parseUid = id;
+
+        const insert_query = `INSERT INTO ${table} (${Object.values(
+          attribute
+        ).join(", ")}) VALUES (${Object.values(attribute)
+          .map((el) => "?")
+          .join(", ")})`;
+        // console.log(insert_query);
+
+        const insert_value = [id, null, null, null, null, "kakao", date, date];
+        // console.log(insert_value);
+
+        // 계정 생성 쿼리 임시 주석
+        connection_AI.query(
+          insert_query,
+          insert_value,
+          (error, rows, fields) => {
+            if (error)
+              console.log(
+                "Kakao OAuth User Row DB INSERT: " + error.sqlMessage
+              );
+            else console.log("Kakao OAuth User Row DB INSERT Success!");
+          }
+        );
+      } else {
+        parseUid = ebt_data[0].uid;
+        parseEmail = ebt_data[0].Email;
+        // Update LastLoginDate
+        const update_query = `UPDATE ${table} SET ${Object.values(attribute)
+          .filter((el) => el === "lastLogin_date")
+          .map((el) => {
+            return `${el} = ?`;
+          })
+          .join(", ")} WHERE ${attribute.pKey} = ?`;
+        // console.log(update_query);
+
+        const update_value = [date, id];
+        // console.log(update_value);
+
+        connection_AI.query(
+          update_query,
+          update_value,
+          (error, rows, fields) => {
+            if (error)
+              console.log(
+                "KaKao OAuth User Data UPDATE Fail: " + error.sqlMessage
+              );
+            else console.log("KaKao OAuth User Data UPDATE Success!");
+          }
+        );
+      }
+
+      // JWT Token 발급 후 세션 저장
+      const token = generateToken({
+        id: parseUid,
+        // email: parseEmail,
+      });
+
+      // View Template Render
+      res.render("userInfoWebGL", {
+        data: JSON.stringify({
+          data: response.data,
+          refreshToken: token.refreshToken,
+        }),
+      });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ data: "Server Error!" });
     }
   },
   // [늘봄] 로그인
@@ -1636,177 +1952,6 @@ const loginController = {
       return res.status(500).json({
         message: `Server Error : ${err.message}`,
       });
-    }
-  },
-  // (App) AI RefreshToken 인증
-  postAIRefreshTokenCertHandler: async (req, res) => {
-    const { data } = req.body;
-    // console.log(data);
-    let parseLoginData;
-    try {
-      // 입력값 파싱
-      if (typeof data === "string") {
-        parseLoginData = JSON.parse(data);
-      } else parseLoginData = data;
-
-      const { refreshToken } = parseLoginData;
-      // const sessionId = req.sessionID;
-
-      // Non refreshToken
-      if (!refreshToken) {
-        return res
-          .status(400)
-          .json({ message: "Non refreshToken Value - 400 Bad Request" });
-      }
-
-      // let parsepUid = pUid;
-      let parseRefreshToken = refreshToken;
-
-      // refreshToken 복호화
-      const decoded = verifyToken("refresh", parseRefreshToken);
-
-      // 토큰 만료
-      if (decoded === "expired")
-        return res.status(401).json({
-          // message: "Token has expired - 401 UNAUTHORIZED",
-          message: "로그인 세션이 만료되었습니다. 재로그인 바랍니다!",
-        });
-
-      console.log(`RefreshToken 인증 API 호출 - pUid: ${decoded.id}`);
-
-      const user_table = User_Table_Info.table;
-      const user_attribute = User_Table_Info.attribute;
-
-      // 1. SELECT (row가 있는지 없는지 검사)
-      // User 계정 DB SELECT Method. uid를 입력값으로 받음
-      const ebt_data = await user_ai_select(
-        user_table,
-        user_attribute,
-        decoded.id
-      );
-
-      // DB 회원 정보 조회
-      if (!ebt_data[0]) {
-        console.log("Non User - 401 UNAUTHORIZED");
-        return res.status(401).json({
-          message: "Non User - 401 UNAUTHORIZED",
-        });
-      }
-
-      // 유효하지 않은 refreshToken 양식일 경우
-      if (!decoded) {
-        console.log("Invalid token format - 401 UNAUTHORIZED");
-        return res.status(401).json({
-          // message: "Invalid token format - 401 UNAUTHORIZED",
-          message: "유효하지 않은 인증 방식입니다. 재로그인 바랍니다.",
-        });
-      }
-
-      // decoded 값이 있는 경우
-      if (decoded.id) {
-        // JWT Token 재발급 후 세션 저장
-        const token = generateToken({
-          id: decoded.id,
-          // email: decoded.email,
-        });
-
-        // Session 내부에 accessToken 저장
-        // req.session.accessToken = token.accessToken;
-
-        // cookie refreshToken 갱신
-        res.cookie("refreshToken", token.refreshToken, {
-          maxAge: 7 * 24 * 60 * 60 * 1000, // 쿠키 갱신 (7일)
-          httpOnly: true,
-          sameSite: process.env.DEV_OPS === "local" ? "strict" : "none",
-          secure: process.env.DEV_OPS !== "local",
-        });
-
-        console.log(`User RefreshToken Update Success! - pUid: ${decoded.id}`);
-
-        // Redis에서 기존 세션 ID 확인
-        // redisStore.get(`user_session:${decoded.id}`, (err, oldSessionId) => {
-        //   if (oldSessionId) {
-        //     // 기존 세션 무효화
-        //     redisStore.destroy(`user_session:${decoded.id}`, (err, reply) => {
-        //       // console.log("Previous session invalidated");
-        //     });
-        //   }
-
-        //   // 새 세션 ID를 사용자 ID와 연결
-        //   redisStore.set(
-        //     `user_session:${decoded.id}`,
-        //     sessionId,
-        //     (err, reply) => {
-        //       // 로그인 처리 로직
-        //       // console.log(`SessionID Update - ${sessionId}`);
-        //     }
-        //   );
-        // });
-
-        // User Table 로그인 날짜 갱신
-        const dateObj = new Date();
-        const year = dateObj.getFullYear();
-        const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
-        const day = ("0" + dateObj.getDate()).slice(-2);
-        const date = `${year}-${month}-${day}`;
-
-        const table = User_Table_Info.table;
-        const attribute = User_Table_Info.attribute;
-
-        const update_query = `UPDATE ${table} SET ${attribute.attr7} = ? WHERE ${attribute.pKey} = ?`;
-        // console.log(update_query);
-
-        const update_value = [date, decoded.id];
-        // console.log(update_value);
-
-        connection_AI.query(
-          update_query,
-          update_value,
-          (error, rows, fields) => {
-            if (error) {
-              console.log(error.sqlMessage);
-              return res.status(404).json({ message: error.sqlMessage });
-            }
-            // console.log("User Last Login Log Update Success!");
-          }
-        );
-
-        // 이용권 만료일 확인
-        const sub_table = Subscription_Table_Info["Subscription"].table;
-
-        const sub_select_query = `SELECT 
-        subscription_expiration_date
-        FROM ${sub_table}
-        WHERE uid='${decoded.id}'`;
-        const sub_select_data = await fetchUserData(
-          connection_AI,
-          sub_select_query
-        );
-
-        // 토큰 인증
-        return res.status(200).json({
-          message: `User RefreshToken Certification Success! - pUid: ${decoded.id}`,
-          pUid: decoded.id,
-          refreshToken: token.refreshToken,
-          expirationDate: sub_select_data.length
-            ? sub_select_data[0]?.subscription_expiration_date
-            : "",
-        });
-      }
-      // 만료된 RefreshToken 복호화 ID와 입력 ID가 다를 경우
-      else {
-        console.log(
-          "Uid Does Not Match RefreshToekn Decoding Payload ID - 401 UNAUTHORIZED"
-        );
-        // client 전송
-        res.status(401).json({
-          message:
-            "Uid Does Not Match RefreshToekn Decoding Payload ID - 401 UNAUTHORIZED",
-        });
-      }
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server Error - 500 Bad Gateway" });
     }
   },
 };

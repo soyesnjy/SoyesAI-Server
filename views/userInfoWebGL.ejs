@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      .user-info {
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <pre class="user-info"><%= data %></pre>
+  </body>
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <style>
+        .user-info {
+          color: white;
+        }
+      </style>
+    </head>
+    <body>
+      <pre id="user-data" class="user-info"><%= data %></pre>
+    </body>
+    <script>
+      window.onload = function () {
+        // <pre> 요소에서 데이터 가져오기
+        const preElement = document.getElementById("user-data");
+        const rawData = preElement.textContent.trim(); // 공백 제거
+        // console.log(rawData);
+
+        try {
+          const userData = JSON.parse(rawData); // JSON 문자열을 객체로 변환
+          const id = userData?.data?.id;
+          const refreshToken = userData?.refreshToken;
+
+          if (id && refreshToken) {
+            // 부모창에 메세지 전달
+            window.opener.postMessage(
+              {
+                type: "oauth_result",
+                id: id,
+                refreshToken: refreshToken,
+              },
+              window.location.origin
+            );
+          }
+        } catch (error) {
+          console.error("JSON 파싱 오류:", error);
+        }
+
+        window.close();
+      };
+    </script>
+  </html>
+</html>
