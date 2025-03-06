@@ -54,13 +54,13 @@
                 id: id,
                 refreshToken: refreshToken,
               },
-              window.location.origin
+              "*"
             );
           }
         } catch (error) {
           console.error("JSON 파싱 오류:", error);
         }
-
+        console.log("Message sent!");
         // window.close();
       };
     </script>
