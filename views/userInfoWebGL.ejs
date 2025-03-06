@@ -31,7 +31,15 @@
         // <pre> 요소에서 데이터 가져오기
         const preElement = document.getElementById("user-data");
         const rawData = preElement.textContent.trim(); // 공백 제거
-        // console.log(rawData);
+
+        console.log(rawData);
+
+        console.log("window.opener:", window.opener);
+
+        if (!window.opener) {
+          console.error("window.opener is null! Cannot send message.");
+          return;
+        }
 
         try {
           const userData = JSON.parse(rawData); // JSON 문자열을 객체로 변환
@@ -53,7 +61,7 @@
           console.error("JSON 파싱 오류:", error);
         }
 
-        window.close();
+        // window.close();
       };
     </script>
   </html>
