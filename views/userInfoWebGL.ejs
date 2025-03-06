@@ -32,9 +32,8 @@
         const preElement = document.getElementById("user-data");
         const rawData = preElement.textContent.trim(); // 공백 제거
 
-        console.log(rawData);
-
-        console.log("window.opener:", window.opener);
+        // console.log(rawData);
+        // console.log("window.opener:", window.opener);
 
         if (!window.opener) {
           console.error("window.opener is null! Cannot send message.");
@@ -60,7 +59,7 @@
         } catch (error) {
           console.error("JSON 파싱 오류:", error);
         }
-        console.log("Message sent!");
+        // console.log("Message sent!");
         window.close();
       };
     </script>
