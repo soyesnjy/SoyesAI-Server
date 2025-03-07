@@ -1524,7 +1524,7 @@ const loginController = {
   },
   // (WebGL) Google OAuth URL 발급
   oauthWebGLUrlHandler: (req, res) => {
-    console.log("Google OAuth URL 발급 API 호출");
+    console.log("WebGL Google OAuth URL 발급 API 호출");
     try {
       const SCOPES = [
         "https://www.googleapis.com/auth/userinfo.profile", // 기본 프로필
@@ -1545,7 +1545,7 @@ const loginController = {
   },
   // (WebGL) Google OAuth Redirect Url
   oauthWebGLGoogleRedirectUrlHandler: async (req, res) => {
-    console.log("Google OAuth AccessToken 발급 API 호출");
+    console.log("WebGL Google OAuth AccessToken 발급 API 호출");
     const query = req.query;
     const { code } = query;
     let parseUid = "";
@@ -1611,7 +1611,7 @@ const loginController = {
               insert_value,
               (error, rows, fields) => {
                 if (error) console.log(error);
-                else console.log("OAuth User Row DB INSERT Success!");
+                else console.log("WebGL OAuth User Row DB INSERT Success!");
               }
             );
           }
@@ -1636,7 +1636,8 @@ const loginController = {
               update_value,
               (error, rows, fields) => {
                 if (error) console.log(error);
-                else console.log("Google OAuth User Data UPDATE Success!");
+                else
+                  console.log("WebGL Google OAuth User Data UPDATE Success!");
               }
             );
           }
