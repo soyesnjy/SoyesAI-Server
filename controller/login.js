@@ -65,13 +65,20 @@ const verifyToken = (type, token) => {
   return decoded;
 };
 
-// google OAuth2Client 설정
 const { OAuth2Client } = require("google-auth-library");
+// google OAuth2Client 설정 (App 전용)
 const oAuth2Client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.APP_REDIRECT_URL_GOOGLE
 );
+// google OAuth2Client 설정 (WebGL 전용)
+const oAuth2ClientWebGL = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.WEBGL_REDIRECT_URL_GOOGLE
+);
+
 const { google } = require("googleapis");
 
 // kakao OAuth 관련
@@ -1509,6 +1516,145 @@ const loginController = {
           data: response.data,
           refreshToken: token.refreshToken,
         }),
+      });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ data: "Server Error!" });
+    }
+  },
+  // (WebGL) Google OAuth URL 발급
+  oauthWebGLUrlHandler: (req, res) => {
+    console.log("Google OAuth URL 발급 API 호출");
+    try {
+      const SCOPES = [
+        "https://www.googleapis.com/auth/userinfo.profile", // 기본 프로필
+        // "https://www.googleapis.com/auth/userinfo.email", // 이메일 권한 잠금
+      ];
+
+      const authUrl = oAuth2ClientWebGL.generateAuthUrl({
+        access_type: "offline", // 필요한 경우
+        scope: SCOPES,
+      });
+
+      // console.log(authUrl);
+      res.status(200).json({ url: authUrl });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ url: "Non" });
+    }
+  },
+  // (WebGL) Google OAuth Redirect Url
+  oauthWebGLGoogleRedirectUrlHandler: async (req, res) => {
+    console.log("Google OAuth AccessToken 발급 API 호출");
+    const query = req.query;
+    const { code } = query;
+    let parseUid = "";
+
+    try {
+      oAuth2ClientWebGL.getToken(code, (err, token) => {
+        if (err) return console.error("Error retrieving access token", err);
+        oAuth2ClientWebGL.setCredentials(token);
+
+        // 액세스 토큰을 사용하여 API를 호출할 수 있습니다.
+        const oauth2 = google.oauth2({
+          auth: oAuth2ClientWebGL,
+          version: "v2",
+        });
+
+        // 유저 정보 GET
+        oauth2.userinfo.get(async (err, response) => {
+          if (err) return console.error(err);
+          // console.log(response.data);
+
+          const { id } = response.data;
+
+          const table = User_Table_Info.table;
+          const attribute = User_Table_Info.attribute;
+          // 오늘 날짜 변환
+          const dateObj = new Date();
+          const year = dateObj.getFullYear();
+          const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+          const day = ("0" + dateObj.getDate()).slice(-2);
+          const date = `${year}-${month}-${day}`;
+
+          // DB 계정 생성
+          // 1. SELECT USER (row가 있는지 없는지 검사)
+          const select_query = `SELECT * FROM ${table} WHERE ${attribute.pKey}='${response.data.id}'`;
+          const ebt_data = await fetchUserData(connection_AI, select_query);
+
+          // 2. INSERT USER (row값이 없는 경우 실행)
+          if (!ebt_data[0]) {
+            parseUid = id;
+            // parseEmail = email;
+            const insert_query = `INSERT INTO ${table} (${Object.values(
+              attribute
+            ).join(", ")}) VALUES (${Object.values(attribute)
+              .map((el) => "?")
+              .join(", ")})`;
+            // console.log(insert_query);
+
+            const insert_value = [
+              id,
+              null,
+              null,
+              null,
+              null,
+              "google",
+              date,
+              date,
+            ];
+            // console.log(insert_value);
+
+            // 계정 생성 쿼리 임시 주석
+            connection_AI.query(
+              insert_query,
+              insert_value,
+              (error, rows, fields) => {
+                if (error) console.log(error);
+                else console.log("OAuth User Row DB INSERT Success!");
+              }
+            );
+          }
+          // 3. UPDATE USER (row값이 있는 경우 실행)
+          else {
+            parseUid = ebt_data[0].uid;
+            parseEmail = ebt_data[0].Email;
+            // Update LastLoginDate
+            const update_query = `UPDATE ${table} SET ${Object.values(attribute)
+              .filter((el) => el === "lastLogin_date")
+              .map((el) => {
+                return `${el} = ?`;
+              })
+              .join(", ")} WHERE ${attribute.pKey} = ?`;
+            // console.log(update_query);
+
+            const update_value = [date, id];
+            // console.log(update_value);
+
+            connection_AI.query(
+              update_query,
+              update_value,
+              (error, rows, fields) => {
+                if (error) console.log(error);
+                else console.log("Google OAuth User Data UPDATE Success!");
+              }
+            );
+          }
+
+          // JWT Token 발급 후 세션 저장
+          const token = generateToken({
+            id: parseUid,
+            // email: parseEmail,
+          });
+
+          // View Template Render
+          res.render("userInfoWebGL", {
+            data: JSON.stringify({
+              data: response.data,
+              refreshToken: token.refreshToken,
+            }),
+          });
+        });
       });
     } catch (err) {
       console.error(err.message);

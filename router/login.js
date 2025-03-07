@@ -9,17 +9,16 @@ const {
 } = require("../controller/login");
 
 const {
-  // 토큰
-  // vaildateToken,
-  // tokenLoginHandler,
-  // tokenLogoutHandler,
-  // OAuth 소셜 로그인
-  oauthUrlHandler,
+  // OAuth 소셜 로그인 (App)
   oauthKakaoUrlHandler,
   oauthKakaoRedirectUrlHandler,
+  oauthUrlHandler,
   oauthGoogleRedirectUrlHandler,
+  // OAuth 소셜 로그인 (WebGL)
   oauthWebGLKakaoUrlHandler,
   oauthWebGLKakaoRedirectUrlHandler,
+  oauthWebGLUrlHandler,
+  oauthWebGLGoogleRedirectUrlHandler,
   // AI 일반 로그인
   postAIAppleLoginHandler,
   getAILogoutHandler,
@@ -97,6 +96,14 @@ router.get("/oauth_rediret_url/kakao", oauthKakaoRedirectUrlHandler);
 router.get("/oauth_url/kakao/webgl", oauthWebGLKakaoUrlHandler);
 // WebGL Kakao OAuth Redirect Url
 router.get("/oauth_rediret_url/kakao/webgl", oauthWebGLKakaoRedirectUrlHandler);
+
+// WebGL OAuth_url 발급
+router.get("/oauth_url/google/webgl", oauthWebGLUrlHandler);
+// WebGL OAuth Redirect Url
+router.get(
+  "/oauth_rediret_url/google/webgl",
+  oauthWebGLGoogleRedirectUrlHandler
+);
 
 // Apple 계정 로그인
 router.post("/ai/apple", postAIAppleLoginHandler);
