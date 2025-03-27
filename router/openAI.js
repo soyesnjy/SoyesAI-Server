@@ -29,7 +29,8 @@ const {
   postOpenAIConsultingCustom,
   postOpenAIMypageCalendarData,
   postClovaVoiceTTS,
-  postOpenAIPernalTestAnalysis,
+  // postOpenAIPernalTestAnalysis,
+  postOpenAIPernalTestSave,
   getClearCookies,
   postOpenAIConsultingLogSave,
   postOpenAIConsultingLogLoad,
@@ -114,7 +115,7 @@ router.post(
 // EBT 결과 분석 (WebGL용 - 미들웨어 제거)
 router.post(
   "/test/analysis",
-  // vaildateTokenConsulting,
+  // vaildateTokenConsulting, // WebGL 버전은 로그인X. 권한 관련 미들웨어 제거
   postOpenAIPsychologicalAnalysis
 );
 
@@ -127,11 +128,7 @@ router.post(
 );
 
 // PT 결과 Save
-router.post(
-  "/analysis_pt",
-  vaildateTokenConsulting,
-  postOpenAIPernalTestAnalysis
-);
+router.post("/analysis_pt", vaildateTokenConsulting, postOpenAIPernalTestSave);
 
 // 공감친구 모델 - 푸푸
 router.post(

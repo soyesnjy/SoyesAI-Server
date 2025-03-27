@@ -622,53 +622,6 @@ const openAIController = {
       parsepUid = pUid;
       parsePTResult = resultText;
 
-      // const analysisPrompt = [];
-      // const userPrompt = [];
-
-      // 성격 검사용 프롬프트 구분
-      // analysisPrompt.push(pt_analysis_prompt);
-      // userPrompt.push({
-      //   role: "user",
-      //   content: `다음 문단은 아동의 성격검사 결과야.
-      //     '''
-      //     아동의 성격 검사 유형은 ${parsePTResult}입니다.
-      //     ${parsePTResult} 유형은 ${persnal_short[parsePTResult]}
-      //     '''
-      //     아동의 성격검사 결과를 바탕으로 아동의 성격을 장점과 단점으로 나눠서 분석해줘. 분석이 끝나면 단점에 대한 해결 방안을 제시해줘
-      //     `,
-      // });
-
-      /*
-      const user_table = "soyes_ai_User";
-      const user_attr = {
-        pKey: "uid",
-        attr1: "email",
-      };
-
-      const select_query = `SELECT * FROM ${user_table} WHERE ${user_attr.pKey}='${pUid}'`;
-      await fetchUserData(connection_AI, select_query);
-      console.log("받는사람: " + yourMailAddr);
-
-      yourMailAddr = "soyesnjy@gmail.com"; // dummy email. 받는사람
-      
-      // 보내는 사람 계정 로그인
-      myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
-      myMailPwd = process.env.ADDR_PWD; // 구글 계정 2단계 인증 비밀번호
-
-      const transporter = nodemailer.createTransport({
-        service: "gmail", // 사용할 이메일 서비스
-        // host: "smtp.gmail.com",
-        // port: 587,
-        // secure: false,
-        auth: {
-          user: myMailAddr, // 보내는 이메일 주소
-          pass: myMailPwd, // 이메일 비밀번호
-        },
-      });
-      
-      yourMailAddr = "soyesnjy@gmail.com"; // dummy email. 받는사람
-      */
-
       // 보내는 사람 계정 로그인
       const myMailAddr = process.env.ADDR_MAIL; // 보내는 사람 메일 주소
 
@@ -744,7 +697,7 @@ const openAIController = {
   postOpenAIPernalTestSave: async (req, res) => {
     const { data } = req.body; // 클라이언트 한계로 데이터 묶음으로 받기.
 
-    let parseData, parsePTResult;
+    let parseData;
     try {
       // 파싱. Client JSON 데이터
       if (typeof data === "string") {
@@ -769,7 +722,6 @@ const openAIController = {
       }
 
       parsepUid = pUid;
-      parsePTResult = resultText;
 
       // 오늘 날짜 변환
       const dateObj = new Date();
@@ -780,21 +732,12 @@ const openAIController = {
 
       /* PT_Log DB 저장 */
       const pt_log_table = PT_Table_Info["Log"].table;
-      const pt_log_attribute = PT_Table_Info["Log"].attribute;
-      // PT_Log DB 저장
-      const pt_insert_query = `INSERT INTO ${pt_log_table} (${Object.values(
-        pt_log_attribute
-      ).join(", ")}) VALUES (${Object.values(pt_log_attribute)
-        .map((el) => "?")
-        .join(", ")})`;
-      // console.log(insert_query);
 
-      const pt_insert_value = [
-        parsepUid,
-        date,
-        resultText,
-        JSON.stringify({ ...mailOptions, date }),
-      ];
+      const pt_insert_query = `INSERT INTO ${pt_log_table}
+      (uid, date, persanl_result)
+      VALUES (?, ?, ?)`;
+
+      const pt_insert_value = [parsepUid, date, resultText];
       // console.log(insert_value);
 
       connection_AI.query(pt_insert_query, pt_insert_value, (err) => {
@@ -5699,13 +5642,11 @@ const ubiController = {
         console.log("No code input value - 400");
         return res.status(400).json({ message: "No type input value - 400" });
       }
-
       // No type => return
       if (!maxArr) {
         console.log("No maxArr input value - 400");
         return res.status(400).json({ message: "No maxArr input value - 400" });
       }
-
       // No Matching code Value => return
       if (!typeArr.includes(type)) {
         console.log("No matching type value - 400");
